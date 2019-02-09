@@ -35,5 +35,7 @@ Plug 'https://github.com/editorconfig/editorconfig-vim'
 " Unix Commands
 Plug 'https://github.com/tpope/vim-eunuch'
 
+" Sensible Vim
+Plug 'tpope/vim-sensible'
 
 call plug#end()
