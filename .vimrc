@@ -1,16 +1,33 @@
-set number " line numberings
 " set mouse=a " Mouse functionality
-syntax on " Syntax highlighting
-set whichwrap+=<,>,[,]
+" Changing line with the arrow keys
+" set whichwrap+=<,>,[,]
 " https://superuser.com/questions/35389/in-vim-how-do-i-make-the-left-and-right-arrow-keys-change-line
+
+" Indenting
 set tabstop=2 expandtab shiftwidth=2
+
+
+
+
+"" Visual Changes
+syntax on " Syntax highlighting
+set number " line numberings
+set hls ic " highlighting when using find
+
+" Showing non-printing characters
 set list
 set showbreak=↪
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 set backspace=indent,eol,start
-set virtualedit=onemore
 
-set hls ic
+" Split panes more obvious
+augroup BgHighlight
+    autocmd!
+    autocmd WinEnter * set cul
+    autocmd WinLeave * set nocul
+augroup END
+
+
 
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
