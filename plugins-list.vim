@@ -19,14 +19,19 @@ Plug 'https://github.com/editorconfig/editorconfig-vim'
 " Multiple Cursors
 Plug 'https://github.com/terryma/vim-multiple-cursors'
 
-" Unix Commands
-Plug 'https://github.com/tpope/vim-eunuch'
-
 " Swapping windows
 Plug 'https://github.com/wesQ3/vim-windowswap'
 
+"" Tim Pope Plugins <3
+
+" Unix Commands
+Plug 'https://github.com/tpope/vim-eunuch'
+
 " Sensible Vim
 Plug 'https://github.com/tpope/vim-sensible'
+
+" Asynchronous Dispatch
+Plug 'https://github.com/tpope/vim-dispatch'
 
 call plug#end()
 
