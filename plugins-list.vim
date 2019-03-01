@@ -7,17 +7,23 @@ endif
 
 call plug#begin('~/.vim/plugged')
 
+" Markdown highlighting
+Plug 'https://github.com/plasticboy/vim-markdown'
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
+
 " git diff gutter to show changes
 Plug 'https://github.com/airblade/vim-gitgutter'
 
 " Linting
 Plug 'https://github.com/w0rp/ale'
+let g:ale_enabled = 0
 
 " Editor Config
 Plug 'https://github.com/editorconfig/editorconfig-vim'
 
-" Multiple Cursors
-Plug 'https://github.com/terryma/vim-multiple-cursors'
+" " Multiple Cursors
+" Plug 'https://github.com/terryma/vim-multiple-cursors'
 
 " Swapping windows
 Plug 'https://github.com/wesQ3/vim-windowswap'
