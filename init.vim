@@ -8,7 +8,20 @@ runtime plugins-list.vim
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
-autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown set tabstop=3 shiftwidth=3
+function! MarkdownJekyllSettings()
+  let l:begin=getline(1)
+  if l:begin == "---"
+    set tabstop=3 shiftwidth=3
+  endif
+endfunction
+
+augroup KramdownHighlighting
+  autocmd!
+  autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown
+    \ call MarkdownJekyllSettings()
+augroup END
+
+
 
 
 "" Commands
