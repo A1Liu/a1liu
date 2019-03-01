@@ -8,6 +8,7 @@ endif
 call plug#begin('~/.vim/plugged')
 
 " Markdown highlighting
+Plug 'https://github.com/godlygeek/tabular'
 Plug 'https://github.com/plasticboy/vim-markdown'
 let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1

@@ -8,6 +8,8 @@ runtime plugins-list.vim
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
+autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown set tabstop=3 shiftwidth=3
+
 
 "" Commands
 " TODO Make a toggle for showing column on left hand side
