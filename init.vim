@@ -8,6 +8,8 @@ runtime plugins-list.vim
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
+set foldlevelstart=4
+
 function! MarkdownJekyllSettings()
   let l:begin=getline(1)
   if l:begin == "---"
@@ -20,9 +22,6 @@ augroup KramdownHighlighting
   autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown
     \ call MarkdownJekyllSettings()
 augroup END
-
-
-
 
 "" Commands
 " TODO Make a toggle for showing column on left hand side
