@@ -28,6 +28,7 @@ augroup END
 
 "" Keybindings
 let mapleader=","
+tnoremap <Esc> <C-\><C-n>
 
 "" Visual Changes
 set number " line numberings
