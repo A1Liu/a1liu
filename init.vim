@@ -25,10 +25,19 @@ augroup END
 
 "" Commands
 " TODO Make a toggle for showing column on left hand side
+" TODO Make a command to create a window to the left and/or update the one to
+" the left; do the same for right. The idea is to have a workflow with a left
+" and right pane
 
 "" Keybindings
 let mapleader=","
 tnoremap <Esc> <C-\><C-n>
+
+" Window switching
+" map <C-j> <C-W>j
+" map <C-k> <C-W>k
+" map <C-h> <C-W>h
+" map <C-l> <C-W>l
 
 "" Visual Changes
 set number " line numberings
