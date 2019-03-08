@@ -21,6 +21,8 @@ augroup KramdownHighlighting
   autocmd!
   autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown
     \ call MarkdownJekyllSettings()
+  autocmd BufLeave *.md,*.markdown
+    \ set tabstop=2 | set shiftwidth=2
 augroup END
 
 "" Commands
@@ -46,6 +48,24 @@ set hlsearch incsearch " highlighting when using find
 set cc=80
 :hi ColorColumn ctermbg=DarkGreen guibg=DarkGreen
 set cul
+
+"" netrw
+" Folders n stuff
+let g:netrw_sort_sequence='[\/]$,\<core\%(\.\d\+\)\=\>,'
+" Docs
+let g:netrw_sort_sequence.= 'README,LICENSE,*.md$,*.markdown$,'
+" C and C++ Files
+let g:netrw_sort_sequence.= '\.h$,\.c$,\.cpp$,'
+" Java files
+let g:netrw_sort_sequence.= '\.java$,'
+" The vast majority of files
+let g:netrw_sort_sequence.= '\~\=\*$,*,'
+" Files that begin with the '.' character, and other mildly hidden files
+let g:netrw_sort_sequence.= '^\..*$,'
+" Compiled files
+let g:netrw_sort_sequence.= '\.o$,\.obj$,\.class$,'
+" Vim files? Text editor info files and dumb files
+let g:netrw_sort_sequence.= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
 
 " Showing non-printing characters
 set list
