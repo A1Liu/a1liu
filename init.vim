@@ -3,8 +3,13 @@
 " set whichwrap+=<,>,[,]
 " https://superuser.com/questions/35389/in-vim-how-do-i-make-the-left-and-right-arrow-keys-change-line
 
-" Plugins
+"" Plugins
 runtime plugins-list.vim
+
+"" Saving my ass
+set undofile
+let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+execute 'set undodir=' . s:path . '/undohist'
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
@@ -89,6 +94,7 @@ syntax enable " Syntax highlighting
 "     "" Define certain regions
 "     " Block math. Look for "$$[anything]$$"
 "     syn region math start=/\$\$/ end=/\$\$/
+
 "     " inline math. Look for "$[not $][anything]$"
 "     syn match math_block '\$[^$].\{-}\$'
 " 
