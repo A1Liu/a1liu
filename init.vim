@@ -23,8 +23,10 @@ set cul
 set termguicolors
 if strftime('%H') >= 10 && strftime('%H') < 17
   set background=light
+  let g:airline_theme='cosmic_latte_light'
 else
   set background=dark
+  let g:airline_theme='cosmic_latte_dark'
 endif
 colorscheme cosmic_latte
 

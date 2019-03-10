@@ -12,6 +12,9 @@ call plug#begin(g:vim_home_path . '/plugged')
 " Color Scheme
 Plug 'https://github.com/nightsense/cosmic_latte'
 
+" Airline
+Plug 'https://github.com/vim-airline/vim-airline'
+
 " Markdown highlighting
 Plug 'https://github.com/godlygeek/tabular'
 Plug 'https://github.com/plasticboy/vim-markdown'
