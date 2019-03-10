@@ -47,7 +47,7 @@ tnoremap <Esc> <C-\><C-n>
 " map <C-l> <C-W>l
 
 "" Visual Changes
-set number " line numberings
+set number relativenumber " line numberings
 set background=dark
 set hlsearch incsearch " highlighting when using find
 set cc=80
@@ -81,8 +81,8 @@ set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 " Split panes more obvious
 augroup BgHighlight
     autocmd!
-    autocmd WinEnter * set cul | set cc=80 " Set color column
-    autocmd WinLeave * set nocul | set cc=
+    autocmd WinEnter * set cul | set cc=80 | set relativenumber " Set color column
+    autocmd WinLeave * set nocul | set cc= | set norelativenumber
 augroup END
 
 " Syntax Highlighting

@@ -22,6 +22,7 @@ let g:vim_markdown_auto_insert_bullets = 0
 
 " git diff gutter to show changes
 Plug 'https://github.com/airblade/vim-gitgutter'
+let g:gitgutter_enabled = 0
 
 " Linting
 Plug 'https://github.com/w0rp/ale'
