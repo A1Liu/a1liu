@@ -9,6 +9,15 @@ let g:vim_home_path = fnamemodify($MYVIMRC, ':h')
 "" Plugins
 runtime plugins-list.vim
 
+"" Color Theme
+echo strftime('%H')
+if strftime('%H') >= 10 && strftime('%H') < 17
+  set background=light
+else
+  set background=dark
+endif
+colorscheme cosmic_latte
+
 "" Saving my ass
 set undofile
 execute 'set undodir=' . g:vim_home_path . '/undohist'

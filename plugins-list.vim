@@ -7,7 +7,10 @@ if empty(glob(s:plug_path))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-call plug#begin('~/.vim/plugged')
+call plug#begin(g:vim_home_path . '/plugged')
+
+" Color Scheme
+Plug 'https://github.com/nightsense/cosmic_latte'
 
 " Markdown highlighting
 Plug 'https://github.com/godlygeek/tabular'
