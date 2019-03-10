@@ -2,4 +2,5 @@ plugged/**/
 .netrwhist
 undohist/*
 !undohist/.gitkeep
+*.jar
 

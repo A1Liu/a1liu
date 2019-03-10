@@ -1,7 +1,9 @@
 "" Plugins
-if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+let s:plug_path = g:vim_home_path . '/autoload/plug.vim'
+if empty(glob(s:plug_path))
+  execute "silent !curl -fLo" s:plug_path "--create-dirs"
+    \ "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
@@ -50,4 +52,7 @@ Plug 'https://github.com/tpope/vim-sensible'
 
 call plug#end()
 
+call glaive#Install()
+execute "Glaive codefmt google_java_executable=\"java -jar"
+      \ g:vim_home_path . "/format/google-java-format-1.7-all-deps.jar\""
 
