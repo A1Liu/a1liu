@@ -6,11 +6,21 @@
 "" Initialize global variables
 let g:vim_home_path = fnamemodify($MYVIMRC, ':h')
 
+
+
 "" Plugins
 runtime plugins-list.vim
 
-"" Color Theme
-echo strftime('%H')
+
+
+"" Visual Changes
+set number relativenumber " line numberings
+set hlsearch incsearch " highlighting when using find
+set cc=80
+set cul
+
+" Color Theme
+set termguicolors
 if strftime('%H') >= 10 && strftime('%H') < 17
   set background=light
 else
@@ -18,14 +28,39 @@ else
 endif
 colorscheme cosmic_latte
 
-"" Saving my ass
-set undofile
-execute 'set undodir=' . g:vim_home_path . '/undohist'
+
+" Showing non-printing characters
+set list
+set showbreak=↪
+set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
+
+
+" Split panes more obvious
+augroup BgHighlight
+    autocmd!
+    autocmd WinEnter * set cul | set cc=80 | set relativenumber " Set color column
+    autocmd WinLeave * set nocul | set cc= | set norelativenumber
+augroup END
+
+
+" Syntax Highlighting
+syntax enable " Syntax highlighting
+
+
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
 set foldlevelstart=4
 
+
+
+"" Saving my ass
+set undofile
+execute 'set undodir=' . g:vim_home_path . '/undohist'
+
+
+
+"" Markdown and Jekyll Settings
 function! MarkdownJekyllSettings()
   let l:begin=getline(1)
   if l:begin == "---"
@@ -41,11 +76,15 @@ augroup KramdownHighlighting
     \ set tabstop=2 | set shiftwidth=2
 augroup END
 
+
+
 "" Commands
 " TODO Make a toggle for showing column on left hand side
 " TODO Make a command to create a window to the left and/or update the one to
 " the left; do the same for right. The idea is to have a workflow with a left
 " and right pane
+
+
 
 "" Keybindings
 let mapleader=","
@@ -57,13 +96,7 @@ tnoremap <Esc> <C-\><C-n>
 " map <C-h> <C-W>h
 " map <C-l> <C-W>l
 
-"" Visual Changes
-set number relativenumber " line numberings
-set background=dark
-set hlsearch incsearch " highlighting when using find
-set cc=80
-:hi ColorColumn ctermbg=DarkGreen guibg=DarkGreen
-set cul
+
 
 "" netrw
 " Folders n stuff
@@ -83,47 +116,3 @@ let g:netrw_sort_sequence.= '\.o$,\.obj$,\.class$,'
 " Vim files? Text editor info files and dumb files
 let g:netrw_sort_sequence.= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
 
-" Showing non-printing characters
-set list
-set showbreak=↪
-set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
-" set backspace=indent,eol,start
-
-" Split panes more obvious
-augroup BgHighlight
-    autocmd!
-    autocmd WinEnter * set cul | set cc=80 | set relativenumber " Set color column
-    autocmd WinLeave * set nocul | set cc= | set norelativenumber
-augroup END
-
-" Syntax Highlighting
-syntax enable " Syntax highlighting
-
-" " Liquid and LaTeX highlighting for Markdown
-" " https://stsievert.com/blog/2016/01/06/vim-jekyll-mathjax/
-" function! MathAndLiquid()
-"     "" Define certain regions
-"     " Block math. Look for "$$[anything]$$"
-"     syn region math start=/\$\$/ end=/\$\$/
-
-"     " inline math. Look for "$[not $][anything]$"
-"     syn match math_block '\$[^$].\{-}\$'
-" 
-"     " Liquid single line. Look for "{%[anything]%}"
-"     syn match liquid '{%.*%}'
-"     " Liquid multiline. Look for "{%[anything]%}[anything]{%[anything]%}"
-"     syn region highlight_block start='{% highlight .*%}' end='{%.*%}'
-"     " Fenced code blocks, used in GitHub Flavored Markdown (GFM)
-"     syn region highlight_block start='\n\s*```.*?\n' end='\n```\s*?\n'
-" 
-"     "" Actually highlight those regions.
-"     hi link math Type
-"     hi link liquid PreProc
-"     hi link highlight_block Function
-"     hi link math_block Function
-" endfunction
-" 
-" " Call everytime we open a Markdown file
-" autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown
-"       \ set filetype=markdown |
-"       \ call MathAndLiquid()
