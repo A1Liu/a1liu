@@ -3,13 +3,15 @@
 " set whichwrap+=<,>,[,]
 " https://superuser.com/questions/35389/in-vim-how-do-i-make-the-left-and-right-arrow-keys-change-line
 
+"" Initialize global variables
+let g:vim_home_path = fnamemodify($MYVIMRC, ':h')
+
 "" Plugins
 runtime plugins-list.vim
 
 "" Saving my ass
 set undofile
-let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-execute 'set undodir=' . s:path . '/undohist'
+execute 'set undodir=' . g:vim_home_path . '/undohist'
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
