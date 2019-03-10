@@ -16,9 +16,9 @@ let g:vim_markdown_new_list_item_indent = 0
 let g:vim_markdown_auto_insert_bullets = 0
 
 " Google's Formatter
-" Plug 'https://github.com/google/vim-maktaba'
-" Plug 'https://github.com/google/vim-codefmt'
-" Plug 'https://github.com/google/vim-glaive'
+Plug 'https://github.com/google/vim-maktaba'
+Plug 'https://github.com/google/vim-codefmt'
+Plug 'https://github.com/google/vim-glaive'
 
 " git diff gutter to show changes
 Plug 'https://github.com/airblade/vim-gitgutter'
