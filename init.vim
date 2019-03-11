@@ -16,6 +16,7 @@ runtime plugins-list.vim
 "" Visual Changes
 set number relativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
+set ignorecase smartcase " Ignore case except when including capital letters
 set cc=80
 set cul
 
@@ -94,6 +95,12 @@ augroup END
 "" Keybindings
 let mapleader=","
 tnoremap <Esc> <C-\><C-n>
+
+" Pressing j and k go up and down the sections of a soft-wrapped line
+" https://statico.github.io/vim.html
+" https://statico.github.io/vim2.html
+nmap j gj
+nmap k gk
 
 " Window switching
 " map <C-j> <C-W>j
