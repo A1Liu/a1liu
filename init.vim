@@ -19,16 +19,23 @@ set hlsearch incsearch " highlighting when using find
 set cc=80
 set cul
 
+" Folding
+" https://vim.fandom.com/wiki/Keep_folds_closed_while_inserting_text
+autocmd InsertEnter * if !exists('w:last_fdm') | let w:last_fdm=&foldmethod | setlocal foldmethod=manual | endif
+autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:last_fdm | unlet w:last_fdm | endif
+
 " Color Theme
+syntax enable " Syntax highlighting
 set termguicolors
 if strftime('%H') >= 10 && strftime('%H') < 17
   set background=light
-  let g:airline_theme='cosmic_latte_light'
+  let g:airline_theme='solarized'
 else
   set background=dark
-  let g:airline_theme='cosmic_latte_dark'
+  let g:airline_theme='solarized'
+  let g:airline_solarized_bg='dark'
 endif
-colorscheme cosmic_latte
+colorscheme solarized8_high
 
 
 " Showing non-printing characters
@@ -43,10 +50,6 @@ augroup BgHighlight
     autocmd WinEnter * set cul | set cc=80 | set relativenumber " Set color column
     autocmd WinLeave * set nocul | set cc= | set norelativenumber
 augroup END
-
-
-" Syntax Highlighting
-syntax enable " Syntax highlighting
 
 
 

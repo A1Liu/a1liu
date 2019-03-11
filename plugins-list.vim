@@ -9,11 +9,17 @@ endif
 
 call plug#begin(g:vim_home_path . '/plugged')
 
-" Color Scheme
+" Color Schemes
 Plug 'https://github.com/nightsense/cosmic_latte'
+Plug 'https://github.com/NLKNguyen/papercolor-theme'
+Plug 'https://github.com/altercation/vim-colors-solarized'
+Plug 'https://github.com/lifepillar/vim-solarized8'
 
 " Airline
 Plug 'https://github.com/vim-airline/vim-airline'
+Plug 'https://github.com/vim-airline/vim-airline-themes'
+Plug 'https://github.com/powerline/fonts'
+let g:airline_powerline_fonts = 1
 
 " Markdown highlighting
 Plug 'https://github.com/godlygeek/tabular'
@@ -46,6 +52,9 @@ Plug 'https://github.com/editorconfig/editorconfig-vim'
 " Plug 'https://github.com/wesQ3/vim-windowswap'
 
 "" Tim Pope Plugins <3
+
+" Git stuff
+Plug 'https://github.com/tpope/vim-fugitive'
 
 " Asynchronous Dispatch
 Plug 'https://github.com/tpope/vim-dispatch'
