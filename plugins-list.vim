@@ -42,8 +42,14 @@ let g:gitgutter_enabled = 0
 Plug 'https://github.com/w0rp/ale'
 let g:ale_enabled = 0
 
+" CSS Syntax Highlighting
+" Plug 'https://github.com/ap/vim-css-color'
+
 " Editor Config
 Plug 'https://github.com/editorconfig/editorconfig-vim'
+
+" Fuzzy Finder
+" Plug 'https://github.com/ctrlpvim/ctrlp.vim'
 
 " " Multiple Cursors
 " Plug 'https://github.com/terryma/vim-multiple-cursors'
