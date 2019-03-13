@@ -10,9 +10,9 @@ endif
 call plug#begin(g:vim_home_path . '/plugged')
 
 " Color Schemes
-Plug 'https://github.com/nightsense/cosmic_latte'
-Plug 'https://github.com/NLKNguyen/papercolor-theme'
-Plug 'https://github.com/altercation/vim-colors-solarized'
+" Plug 'https://github.com/nightsense/cosmic_latte'
+" Plug 'https://github.com/NLKNguyen/papercolor-theme'
+" Plug 'https://github.com/altercation/vim-colors-solarized'
 Plug 'https://github.com/lifepillar/vim-solarized8'
 
 " Airline
@@ -35,8 +35,8 @@ Plug 'https://github.com/google/vim-codefmt'
 Plug 'https://github.com/google/vim-glaive'
 
 " git diff gutter to show changes
-Plug 'https://github.com/airblade/vim-gitgutter'
-let g:gitgutter_enabled = 0
+" Plug 'https://github.com/airblade/vim-gitgutter'
+" let g:gitgutter_enabled = 0
 
 " Linting
 Plug 'https://github.com/w0rp/ale'
