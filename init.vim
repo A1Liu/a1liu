@@ -95,6 +95,7 @@ augroup END
 "" Keybindings
 let mapleader=","
 tnoremap <Esc> <C-\><C-n>
+nnoremap gn :tabnew<Enter>
 
 " Pressing j and k go up and down the sections of a soft-wrapped line
 " https://statico.github.io/vim.html
