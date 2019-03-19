@@ -30,6 +30,9 @@ let g:vim_markdown_frontmatter = 1
 let g:vim_markdown_new_list_item_indent = 0
 let g:vim_markdown_auto_insert_bullets = 0
 
+" JS Highlighting
+Plug 'https://github.com/isRuslan/vim-es6'
+
 " Google's Formatter
 Plug 'https://github.com/google/vim-maktaba'
 Plug 'https://github.com/google/vim-codefmt'
@@ -42,6 +45,9 @@ Plug 'https://github.com/google/vim-glaive'
 " Linting
 Plug 'https://github.com/w0rp/ale'
 let g:ale_enabled = 0
+" Eclim
+let g:EclimJavascriptValidate = 0
+let g:EclimJavascriptLintEnabled = 0
 
 " CSS Syntax Highlighting
 " Plug 'https://github.com/ap/vim-css-color'
