@@ -28,7 +28,7 @@ autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:las
 " Color Theme
 syntax enable " Syntax highlighting
 set termguicolors
-if strftime('%H') >= 10 && strftime('%H') < 17
+if strftime('%H') >= 10 && strftime('%H') < 19 " 10am to 7pm
   set background=light
   let g:airline_theme='solarized'
 else
@@ -38,12 +38,10 @@ else
 endif
 colorscheme solarized8_high
 
-
 " Showing non-printing characters
 set list
 set showbreak=↪
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
-
 
 " Split panes more obvious
 augroup BgHighlight
