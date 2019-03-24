@@ -19,7 +19,7 @@ Plug 'https://github.com/lifepillar/vim-solarized8'
 Plug 'https://github.com/vim-airline/vim-airline'
 Plug 'https://github.com/vim-airline/vim-airline-themes'
 Plug 'https://github.com/powerline/fonts'
-let g:airline_powerline_fonts = 1
+let g:airline_powerline_fonts = 0
 let g:airline#extensions#whitespace#enabled = 0
 
 " Markdown highlighting

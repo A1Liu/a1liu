@@ -5,6 +5,8 @@
 
 "" Initialize global variables
 let g:vim_home_path = fnamemodify($MYVIMRC, ':h')
+set guicursor= " don't want unknown characters in linux
+set t_Co=256
 
 
 
@@ -26,14 +28,13 @@ autocmd InsertEnter * if !exists('w:last_fdm') | let w:last_fdm=&foldmethod | se
 autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:last_fdm | unlet w:last_fdm | endif
 
 " Color Theme
+filetype plugin indent on
 syntax enable " Syntax highlighting
-set termguicolors
+let g:airline_theme='base16_solarized'
 if strftime('%H') >= 10 && strftime('%H') < 19 " 10am to 7pm
   set background=light
-  let g:airline_theme='solarized'
 else
   set background=dark
-  let g:airline_theme='solarized'
   let g:airline_solarized_bg='dark'
 endif
 colorscheme solarized8_high
