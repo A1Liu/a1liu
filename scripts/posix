@@ -1,0 +1,4 @@
+#!/usr/bash
+PROJECT="$(dirname $0)"
+export PROJECT="$(dirname PROJECT)"
+ln -s "${PROJECT}/neovim" "~/.config/nvim"
