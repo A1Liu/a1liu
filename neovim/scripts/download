@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Google's java formatter
+# https://github.com/google/google-java-format/releases/download/google-java-format-1.7/google-java-format-1.7-all-deps.jar
