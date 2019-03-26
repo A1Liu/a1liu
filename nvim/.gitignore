@@ -1,6 +1,6 @@
-plugged/**/
+/plugged
 .netrwhist
-undohist/*
+/undohist
 !undohist/.gitkeep
 *.jar
 
