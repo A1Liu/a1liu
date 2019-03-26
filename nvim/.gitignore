@@ -1,7 +1,0 @@
-/autoload/plug.vim
-/plugged
-.netrwhist
-/undohist
-!undohist/.gitkeep
-*.jar
-
