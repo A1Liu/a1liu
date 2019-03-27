@@ -4,14 +4,15 @@
 " https://superuser.com/questions/35389/in-vim-how-do-i-make-the-left-and-right-arrow-keys-change-line
 
 "" Initialize global variables
-let g:vim_home_path = fnamemodify($MYVIMRC, ':h')
+" https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
+let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 set guicursor= " don't want unknown characters in linux
 set t_Co=256
 
 
 
 "" Plugins
-runtime plugins-list.vim
+execute "source " . g:vim_home_path . "/plugins-list.vim"
 
 
 
