@@ -97,6 +97,9 @@ let mapleader=","
 tnoremap <Esc> <C-\><C-n>
 nnoremap gn :tabnew<Enter>
 
+" Taken shamelessly verbatim from vim-sensible
+nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+
 " Pressing j and k go up and down the sections of a soft-wrapped line
 " https://statico.github.io/vim.html
 " https://statico.github.io/vim2.html
