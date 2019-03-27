@@ -1,0 +1,124 @@
+#!/bin/zsh
+
+export ZSH="/Users/aliu/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+
+skip_global_compinit=1
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+plugins=(
+  git
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# Vim Commands
+alias :q!=exit
+export ECLIM_SERVER_SCRIPT="/Applications/Eclipse.app/Contents/Eclipse/eclimd"
+
+# Git
+function branch() {
+    >&2 echo "Getting current branch..."
+    current="$("git" branch | grep \* | cut -d " " -f2)"
+
+    if [ "$current" = "" ]
+    then
+        return 1
+    fi
+
+    >&2 echo "Current branch is ${current}"
+    if (( $# != 0 ))
+    then
+        current="$1"
+        >&2 "git" checkout "$current"
+    fi
+    echo "${current}"
+}
+
+# https://stackoverflow.com/questions/6759791/how-do-i-move-forward-and-backward-between-commits-in-git
+function git_gofwd() {
+  git checkout $(git rev-list --topo-order HEAD.."$*" | tail -1)
+}
+
+# PYTHON
+
+# export PATH="/anaconda3/bin:$PATH"
+alias python="python3"
+alias pip="pip3"
+
+# Default python development environment to fuck around in
+export PYDEVENV="~/.pydenv/bin/activate"
+function pydev() {
+    deactivate 2>/dev/null || deactivate_conda_env
+    if [ $# = 0 ]
+    then
+        echo "Entering default python development environment..."
+        source "$PYDEVENV"
+    else
+        echo "executing `source $1/bin/activate`"
+        source "$1/bin/activate"
+    fi
+    echo "Created alias 'deactivate' to exit environment."
+}
+
+# # ANACONDA
+# export CONDA_SETUP=0
+# function deactivate_conda_env() {
+#     conda deactivate 2>/dev/null &&
+#     conda deactivate 2>/dev/null
+#     unalias deactivate 2>/dev/null &&
+#     echo "Exited from conda environment."
+# }
+# function condadev() {
+#     deactivate 2>/dev/null || deactivate_conda_env
+#     if (( "$CONDA_SETUP" == 0 ))
+#     then
+#         # Setup script to add conda to path
+#         source /anaconda3/etc/profile.d/conda.sh
+#         export CONDA_SETUP=1
+#     fi
+#
+#     if [ $# = 0 ]
+#     then
+#         echo "No args => Entering default conda environment..."
+#         conda activate conda-default-env
+#     else
+#         echo "Input was '$1' => executing `conda activate $1`"
+#         conda activate $1
+#     fi
+#     alias deactivate="deactivate_conda_env"
+#     echo "Created alias 'deactivate' to exit environment."
+# }
+
+# RUBY
+eval "$(rbenv init -)"
+
+declare -A EMOJI_LIST
+EMOJI_LIST[rainbow]="🌈"
+EMOJI_LIST[panda]="🐼"
+EMOJI_NUMBERS=(0️⃣  1️⃣  2️⃣  3️⃣  4️⃣  5️⃣  6️⃣  7️⃣  8️⃣  9️⃣ )
+choose_emoji() {
+  printf "%s" "${EMOJI_LIST[panda]}"
+}
+
+# Node
+alias gulp="npm run gulp"
+
+alias load_nvm='export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
+alias node='unalias node npm && load_nvm && node'
+alias npm='unalias node npm && load_nvm && npm'
+
+# prompt_context() {
+#   if [[ -n "$SSH_CLIENT" ]]; then
+#     prompt_segment black default "%(!.%{%F{yellow}%}.)$USER"
+#   elif [[ "$USER" == "aliu" ]]; then
+#     prompt_segment black default $(choose_emoji)
+#   else
+#     prompt_segment black default "$USER"
+#   fi
+# }
+# 
+# # Commands for prompt stuff
+# alias terse="prompt_dir() {; prompt_segment blue black '%c'; }"
+# alias verbose="prompt_dir() {; prompt_segment blue black '%~'; }"
+# terse

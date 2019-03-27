@@ -1,4 +1,4 @@
-#!/usr/bash
+#!/bin/bash
 project="$(dirname $0)"
 export project="$(dirname project)"
 
@@ -7,6 +7,9 @@ apt update
 apt install software-properties-common
 add-apt-repository ppa:neovim-ppa/stable
 apt install neovim
-
 ln -s "${project}/neovim" "~/.config/nvim"
+
+# Z Shell
+ln -s "${project}/shell/zshrc" "~/.zshrc"
+ln -s "${project}/shell/zshenv" "~/.zshenv"
 
