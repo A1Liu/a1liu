@@ -1,16 +1,15 @@
 #!/bin/zsh
 
 export ZSH="/Users/aliu/.oh-my-zsh"
-ZSH_THEME="robbyrussell"
+# ZSH_THEME="robbyrussell"
 
 skip_global_compinit=1
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-plugins=(
-  git
-)
+plugins=( git )
 
 source $ZSH/oh-my-zsh.sh
+source "$(dirname $0)/theme"
 
 # Vim Commands
 alias :q!=exit
@@ -91,34 +90,11 @@ function pydev() {
 # }
 
 # RUBY
-eval "$(rbenv init -)"
-
-declare -A EMOJI_LIST
-EMOJI_LIST[rainbow]="🌈"
-EMOJI_LIST[panda]="🐼"
-EMOJI_NUMBERS=(0️⃣  1️⃣  2️⃣  3️⃣  4️⃣  5️⃣  6️⃣  7️⃣  8️⃣  9️⃣ )
-choose_emoji() {
-  printf "%s" "${EMOJI_LIST[panda]}"
-}
+alias ruby_setup="eval \"\$(rbenv init -)\""
 
 # Node
 alias gulp="npm run gulp"
-
 alias load_nvm='export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
 alias node='unalias node npm && load_nvm && node'
 alias npm='unalias node npm && load_nvm && npm'
 
-# prompt_context() {
-#   if [[ -n "$SSH_CLIENT" ]]; then
-#     prompt_segment black default "%(!.%{%F{yellow}%}.)$USER"
-#   elif [[ "$USER" == "aliu" ]]; then
-#     prompt_segment black default $(choose_emoji)
-#   else
-#     prompt_segment black default "$USER"
-#   fi
-# }
-# 
-# # Commands for prompt stuff
-# alias terse="prompt_dir() {; prompt_segment blue black '%c'; }"
-# alias verbose="prompt_dir() {; prompt_segment blue black '%~'; }"
-# terse
