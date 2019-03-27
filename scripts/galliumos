@@ -1,15 +1,30 @@
-#!/bin/bash
+#!/bin/sh
 project="$(dirname $0)"
 export project="$(dirname project)"
 
-# https://github.com/neovim/neovim/wiki/Installing-Neovim#ubuntu
+# Updating, upgrading
+apt dist-upgrade
 apt update
-apt install software-properties-common
+apt upgrade
+
+# Pretty useful software
+apt install \
+software-properties-common \
+git snapd \
+exfat-utils exfat-fuse ntfs-3g \
+default-jre default-jdk \
+python3.6 python 2.7
+
+
+# https://github.com/neovim/neovim/wiki/Installing-Neovim#ubuntu
 add-apt-repository ppa:neovim-ppa/stable
 apt install neovim
 ln -s "${project}/neovim" "~/.config/nvim"
 
 # Z Shell
+apt install zsh
+chsh -s /bin/zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 ln -s "${project}/shell/zshrc" "~/.zshrc"
 ln -s "${project}/shell/zshenv" "~/.zshenv"
 
