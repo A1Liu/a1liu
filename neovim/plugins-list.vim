@@ -75,8 +75,8 @@ Plug 'https://github.com/tpope/vim-dispatch'
 " Unix Commands
 Plug 'https://github.com/tpope/vim-eunuch'
 
-" Sensible Vim
-Plug 'https://github.com/tpope/vim-sensible'
+" " Sensible Vim
+" Plug 'https://github.com/tpope/vim-sensible'
 
 call plug#end()
 
