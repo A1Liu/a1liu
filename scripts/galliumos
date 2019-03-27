@@ -26,11 +26,14 @@ ln -s "${project}/neovim" "~/.config/nvim"
 apt install zsh
 chsh -s /bin/zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-ln -s "${project}/shell/zshrc" "~/.zshrc"
-ln -s "${project}/shell/zshenv" "~/.zshenv"
+touch ~/.zshrc
+print "#\!/bin/zsh\n\nsource \"$project/shell/zshrc\"" > ~/.zshrc
+touch ~/.zshenv
+print "#\!/bin/zsh\n\nsource \"$project/shell/zshenv\"" > ~/.zshenv
 
 # TODO
 # -  Add GNOME stuff and change GNOME software names
 # -  Add keyboard shortcut stuff/keybinding stuff
 
+zsh
 
