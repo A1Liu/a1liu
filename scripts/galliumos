@@ -1,0 +1,12 @@
+#!/usr/bash
+project="$(dirname $0)"
+export project="$(dirname project)"
+
+# https://github.com/neovim/neovim/wiki/Installing-Neovim#ubuntu
+apt update
+apt install software-properties-common
+add-apt-repository ppa:neovim-ppa/stable
+apt install neovim
+
+ln -s "${project}/neovim" "~/.config/nvim"
+
