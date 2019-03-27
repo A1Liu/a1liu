@@ -28,3 +28,8 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/mas
 ln -s "${project}/shell/zshrc" "~/.zshrc"
 ln -s "${project}/shell/zshenv" "~/.zshenv"
 
+# TODO
+# -  Add GNOME stuff and change GNOME software names
+# -  Add keyboard shortcut stuff/keybinding stuff
+
+
