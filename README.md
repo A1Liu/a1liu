@@ -3,6 +3,6 @@ My configurations! This repo represents the things that I like to keep constant 
 application settings, file organizations, etc.
 
 ### TODO
-*  Scripts to move stuff around w/ symbolic links
-*  More cross-platform compatibility
-*  Zsh settings
+* [ ] Scripts to move stuff around w/ symbolic links
+* [ ] More cross-platform compatibility
+* [x]  Zsh settings
