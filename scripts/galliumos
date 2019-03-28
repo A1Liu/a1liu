@@ -15,6 +15,9 @@ exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
 python3.6 python2.7
 
+# Git
+ln -s "${project}/shell/gitconfig" ~/.gitconfig
+ln -s "${project}/shell/gitignore_global" ~/.gitignore_global
 
 # NeoVim
 # https://github.com/neovim/neovim/wiki/Installing-Neovim#ubuntu

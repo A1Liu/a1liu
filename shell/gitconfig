@@ -1,0 +1,22 @@
+[user]
+	email = albertymliu@gmail.com
+	name = Albert Liu
+[color]
+	ui = true
+[core]
+	excludesfile = ~/.gitignore_global
+[pager]
+	branch = false
+	tag = false
+[log]
+	graph = true
+	oneline = true
+[alias]
+	l = log --graph --oneline
+	co = commit -m
+  fwd =  "!f() { \
+            git checkout $(git rev-list --topo-order HEAD..\"$*\" | tail -1); \
+          }; f"
+  back = checkout HEAD~1
+[push]
+	default = simple
