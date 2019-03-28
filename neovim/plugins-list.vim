@@ -81,6 +81,9 @@ Plug 'https://github.com/tpope/vim-eunuch'
 call plug#end()
 
 call glaive#Install()
+
+" TODO Get stuff to download this file from internet
+" https://github.com/google/google-java-format/releases/download/google-java-format-1.7/google-java-format-1.7-all-deps.jar
 execute "Glaive codefmt google_java_executable=\"java -jar"
       \ g:vim_home_path . "/format/google-java-format-1.7-all-deps.jar\""
 
