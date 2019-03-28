@@ -21,15 +21,17 @@ python3.6 python2.7
 add-apt-repository ppa:neovim-ppa/stable
 apt install neovim
 ln -s "${project}/neovim" "~/.config/nvim"
+touch ~/.vimrc
+echo "runtime ${project}/neovim/init.vim" > ~/.vimrc
 
 # Z Shell
 apt install zsh
 chsh -s /bin/zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 touch ~/.zshrc
-print "#\!/bin/zsh\n\nsource \"$project/shell/zshrc\"" > ~/.zshrc
+echo "#\!/bin/zsh\n\nsource \"$project/shell/zshrc\"" > ~/.zshrc
 touch ~/.zshenv
-print "#\!/bin/zsh\n\nsource \"$project/shell/zshenv\"" > ~/.zshenv
+echo "#\!/bin/zsh\n\nsource \"$project/shell/zshenv\"" > ~/.zshenv
 
 # TODO
 # -  Add GNOME stuff and change GNOME software names
