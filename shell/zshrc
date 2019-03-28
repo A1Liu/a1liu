@@ -46,9 +46,10 @@ alias python="python3"
 alias pip="pip3"
 
 # Default python development environment to fuck around in
-export PYDEVENV="~/.pydenv/bin/activate"
+export PYDEVENV=~/.pydenv/bin/activate
 function pydev() {
-    deactivate 2>/dev/null || deactivate_conda_env
+    deactivate 2>/dev/null
+    # || deactivate_conda_env
     if [ $# = 0 ]
     then
         echo "Entering default python development environment..."
