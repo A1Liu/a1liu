@@ -22,6 +22,7 @@ set hlsearch incsearch " highlighting when using find
 set ignorecase smartcase " Ignore case except when including capital letters
 set cc=80
 set cul
+" https://shapeshed.com/vim-statuslines/
 
 " Folding
 " https://vim.fandom.com/wiki/Keep_folds_closed_while_inserting_text
@@ -32,7 +33,7 @@ autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:las
 filetype plugin indent on
 syntax enable " Syntax highlighting
 let g:airline_theme='base16_solarized'
-if strftime('%H') >= 8 && strftime('%H') < 19 " 10am to 7pm
+if strftime('%H') >= 8 && strftime('%H') < 10 " 10am to 10pm
   set background=light
 else
   set background=dark
