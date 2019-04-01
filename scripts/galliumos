@@ -1,14 +1,16 @@
 #!/bin/sh
+# TODO Make this work better with cloning and stuff; i.e. make it
+# so that this works without needing to first install git and clone
 project="$(dirname $0)"
 export project="$(dirname project)"
 
 # Updating, upgrading
-apt dist-upgrade
-apt update
-apt upgrade
+apt dist-upgrade -y
+apt update -y
+apt upgrade -y
 
 # Pretty useful software
-apt install \
+apt install -y \
 software-properties-common \
 git snapd \
 exfat-utils exfat-fuse ntfs-3g \
@@ -22,7 +24,7 @@ ln -s "${project}/shell/gitignore_global" ~/.gitignore_global
 # NeoVim
 # https://github.com/neovim/neovim/wiki/Installing-Neovim#ubuntu
 add-apt-repository ppa:neovim-ppa/stable
-apt install neovim
+apt install -y neovim
 ln -s "${project}/neovim" "~/.config/nvim"
 touch ~/.vimrc
 echo "runtime ${project}/neovim/init.vim" > ~/.vimrc
