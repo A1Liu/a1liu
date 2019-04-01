@@ -5,11 +5,12 @@ PROMPT='%{$fg[cyan]%}%c%{$reset_color%} \
 $(git_prompt_info)${ret_status}%{$reset_color%}'
 
 # https://gist.github.com/vergenzt/33a45a9a9218b38bd4bf
-local git_status_prefix="%{$fg[yellow]%}("
+local git_status_prefix="("
+local git_status_suffix="%{$fg[yellow]%})"
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[yellow]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%} "
-ZSH_THEME_GIT_PROMPT_DIRTY="$git_status_prefix%{$fg[red]%}✗"
-ZSH_THEME_GIT_PROMPT_CLEAN="$git_status_prefix%{$fg[green]%}✔"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY="${git_status_prefix}%{$fg[red]%}✗${git_status_suffix}"
+ZSH_THEME_GIT_PROMPT_CLEAN=""
 # ZSH_THEME_GIT_PROMPT_MODIFIED="mod"
 
 # declare -A EMOJI_LIST
