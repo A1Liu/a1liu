@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 local ret_status="%(?:%{$fg[green]%}➜ :%{$fg[red]%}➜ )"
-PROMPT='%{$fg[cyan]%}%c%{$reset_color%} \
+PROMPT=' %{$fg[cyan]%}%c%{$reset_color%} \
 $(git_prompt_info)${ret_status}%{$reset_color%}'
 
 # https://gist.github.com/vergenzt/33a45a9a9218b38bd4bf
