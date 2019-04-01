@@ -33,7 +33,7 @@ autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:las
 filetype plugin indent on
 syntax enable " Syntax highlighting
 let g:airline_theme='base16_solarized'
-if strftime('%H') >= 8 && strftime('%H') < 10 " 10am to 10pm
+if strftime('%H') >= 8 && strftime('%H') < 22 " 10am to 10pm
   set background=light
 else
   set background=dark
