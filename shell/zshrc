@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-export ZSH="/Users/aliu/.oh-my-zsh"
+export ZSH=~/.oh-my-zsh
 # ZSH_THEME="robbyrussell"
 
 skip_global_compinit=1
