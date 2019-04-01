@@ -71,8 +71,8 @@ set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 " Split panes more obvious
 augroup BgHighlight
     autocmd!
-    autocmd WinEnter * set cul | set cc=80 | set relativenumber " Set color column
-    autocmd WinLeave * set nocul | set cc= | set norelativenumber
+    autocmd WinEnter * if &ft != 'netrw' | set cul | set cc=80 | set relativenumber | endif " Set color column
+    autocmd WinLeave * if &ft != 'netrw' | set nocul | set cc= | set norelativenumber | endif
 augroup END
 
 
