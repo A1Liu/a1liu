@@ -35,10 +35,16 @@ function! ToggleHiddenAll()
         set noruler
         set laststatus=0
         set noshowcmd
+        set nocul
+        set cc=
     else
         let s:hidden_all = 0
         set showmode
-        set ruler
+        if &ft != 'netrw'
+          set ruler
+          set cul
+          set cc=80
+        endif
         set laststatus=2
         set showcmd
     endif
@@ -71,7 +77,12 @@ set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 " Split panes more obvious
 augroup BgHighlight
     autocmd!
-    autocmd WinEnter * if &ft != 'netrw' | set cul | set cc=80 | set relativenumber | endif " Set color column
+    autocmd WinEnter * if &ft != 'netrw' |
+          \ set cul | set cc=80 |
+          \ set relativenumber |
+          \ let s:hidden_all = 1 | ToggleHiddenAll() |
+          \ endif " Set color column
+    autocmd WinEnter * if &ft == 'netrw' | set cc= | endif
     autocmd WinLeave * if &ft != 'netrw' | set nocul | set cc= | set norelativenumber | endif
 augroup END
 
