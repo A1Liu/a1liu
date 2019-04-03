@@ -5,7 +5,6 @@ export PYTHONPATH="/Users/aliu/code/python/utils:${PYTHONPATH}"
 # Setting PATH for Python 3.7
 # The original version is saved in .zprofile.pysave
 export PATH="/Library/Frameworks/Python.framework/Versions/3.7/bin:${PATH}"
-
 # Setting PATH for Python 3.6
 # The original version is saved in .zprofile.pysave
 export PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
@@ -14,3 +13,6 @@ export PATH=$PATH:/Users/aliu/.nvm
 
 # RUBY
 export PATH="$HOME/.rbenv/bin:$PATH"
+
+# Rust
+source $HOME/.cargo/env
