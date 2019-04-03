@@ -80,7 +80,7 @@ augroup BgHighlight
     autocmd WinEnter * if &ft != 'netrw' |
           \ set cul | set cc=80 |
           \ set relativenumber |
-          \ let s:hidden_all = 1 | ToggleHiddenAll() |
+          \ let s:hidden_all = 1 | call ToggleHiddenAll() |
           \ endif " Set color column
     autocmd WinEnter * if &ft == 'netrw' | set cc= | endif
     autocmd WinLeave * if &ft != 'netrw' | set nocul | set cc= | set norelativenumber | endif
