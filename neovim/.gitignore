@@ -1,9 +1,13 @@
+.netrwhist
+
 /autoload/plug.vim
 /plugged
-.netrwhist
-/undohist
-!undohist/.gitkeep
-eclimd
-*.jar
+
+/eclimd
 /eclim
+/plugin/eclim.vim
+*.jar
+
+/undohist/*
+!/undohist/.gitkeep
 
