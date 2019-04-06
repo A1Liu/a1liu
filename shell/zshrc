@@ -1,8 +1,10 @@
 #!/bin/zsh
 
 export ZSH=~/.oh-my-zsh
-shell_dir = "$(dirname "$0")"
-project = "$(dirname "$shell_dir")"
+export EDITOR='vim'
+export VISUAL='vim'
+shell_dir="$(dirname "$0")"
+project="$(dirname "$shell_dir")"
 # ZSH_THEME="robbyrussell"
 
 skip_global_compinit=1
