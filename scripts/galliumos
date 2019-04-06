@@ -17,6 +17,11 @@ exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
 python3.6 python2.7
 
+# Install jdk
+# https://stackoverflow.com/questions/14788345/how-to-install-the-jdk-on-ubuntu-linux
+# Install Eclipse
+# https://askubuntu.com/questions/26632/how-to-install-eclipse
+
 # Git
 ln -s "${project}/shell/gitconfig" ~/.gitconfig
 ln -s "${project}/shell/gitignore_global" ~/.gitignore_global
@@ -28,6 +33,9 @@ apt install -y neovim
 ln -s "${project}/neovim" "~/.config/nvim"
 touch ~/.vimrc
 echo "runtime ${project}/neovim/init.vim" > ~/.vimrc
+
+# Eclim
+ln -s /opt/eclipse/ "${project}/neovim/eclimd"
 
 # Z Shell
 apt install zsh

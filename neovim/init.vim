@@ -74,16 +74,18 @@ set list
 set showbreak=↪
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 
-" Split panes more obvious
+" Split panes more obvious, terminal prettier
 augroup BgHighlight
     autocmd!
-    autocmd WinEnter * if &ft != 'netrw' |
+    autocmd BufWinEnter,WinEnter,BufEnter * if &ft != 'netrw' |
           \ set cul | set cc=80 |
           \ set relativenumber |
           \ let s:hidden_all = 1 | call ToggleHiddenAll() |
           \ endif " Set color column
-    autocmd WinEnter * if &ft == 'netrw' | set cc= | endif
-    autocmd WinLeave * if &ft != 'netrw' | set nocul | set cc= | set norelativenumber | endif
+    autocmd TermOpen * set nonumber | set norelativenumber | set cc=
+    autocmd TermClose * set number | set relativenumber
+    autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | set cc= | endif
+    autocmd BufWinLeave,WinLeave * if &ft != 'netrw' | set nocul | set cc= | set norelativenumber | endif
 augroup END
 
 

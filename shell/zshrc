@@ -1,6 +1,8 @@
 #!/bin/zsh
 
 export ZSH=~/.oh-my-zsh
+shell_dir = "$(dirname "$0")"
+project = "$(dirname "$shell_dir")"
 # ZSH_THEME="robbyrussell"
 
 skip_global_compinit=1
@@ -11,11 +13,12 @@ plugins=( git )
 # TODO Replace OMZ and theme with programs in C
 # http://enki-tech.blogspot.com/2012/09/customizing-zsh-part-1-hooks-and-rprompt.html
 source $ZSH/oh-my-zsh.sh
-source "$(dirname $0)/theme"
+source "${shell_dir}/theme"
 
 # Vim Commands
 alias :q!=exit
-export ECLIM_SERVER_SCRIPT="/Applications/Eclipse.app/Contents/Eclipse/eclimd"
+#"/Applications/Eclipse.app/Contents/Eclipse/eclimd"
+export ECLIM_SERVER_SCRIPT="${project}/neovim/eclimd"
 
 # Git
 function branch() {
