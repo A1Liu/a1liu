@@ -21,6 +21,8 @@ python3.6 python2.7
 # https://stackoverflow.com/questions/14788345/how-to-install-the-jdk-on-ubuntu-linux
 # Install Eclipse
 # https://askubuntu.com/questions/26632/how-to-install-eclipse
+# Change permissions
+# https://www.eclipse.org/forums/index.php/t/206634/
 
 # Git
 ln -s "${project}/shell/gitconfig" ~/.gitconfig
