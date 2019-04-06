@@ -5,4 +5,5 @@
 !undohist/.gitkeep
 eclimd
 *.jar
+/eclim
 
