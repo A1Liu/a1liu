@@ -23,6 +23,10 @@ python3.6 python2.7
 # https://askubuntu.com/questions/26632/how-to-install-eclipse
 # Change permissions
 # https://www.eclipse.org/forums/index.php/t/206634/
+# Eclim
+# https://github.com/ervandew/eclim/releases/download/2.8.0/eclim_2.8.0.bin
+# chmod +x ~/Downloads/eclim_2.8.0.bin
+# ~/Downloads/eclim_2.8.0.bin
 
 # Git
 ln -s "${project}/shell/gitconfig" ~/.gitconfig
