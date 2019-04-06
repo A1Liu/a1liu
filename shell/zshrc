@@ -19,7 +19,6 @@ source "${shell_dir}/theme"
 
 # Vim Commands
 alias :q!=exit
-#"/Applications/Eclipse.app/Contents/Eclipse/eclimd"
 export ECLIM_SERVER_SCRIPT="${project}/neovim/eclimd"
 
 # Git

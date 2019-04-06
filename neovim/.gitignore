@@ -3,5 +3,6 @@
 .netrwhist
 /undohist
 !undohist/.gitkeep
+eclimd
 *.jar
 
