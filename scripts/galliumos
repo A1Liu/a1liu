@@ -15,6 +15,7 @@ software-properties-common \
 git snapd \
 exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
+build-essential \
 python3.6 python2.7
 
 # Install jdk
