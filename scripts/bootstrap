@@ -1,0 +1,7 @@
+# Run this command
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/scripts/bootstrap)"
+
+which git || echo "Must have git installed\!" && exit 1
+git clone git@github.com:A1Liu/config.git || git clone https://github.com/A1Liu/config.git
+
+source config/scripts/${1}

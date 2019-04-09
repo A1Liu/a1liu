@@ -63,5 +63,9 @@ echo "source \"${project}/shell/profile\"" > ~/.profile
 # -  Add GNOME stuff and change GNOME software names
 # -  Add keyboard shortcut stuff/keybinding stuff
 
+# TODO
+# Ruby
+# https://www.digitalocean.com/community/tutorials/how-to-install-ruby-on-rails-with-rbenv-on-ubuntu-16-04
+
 zsh
 
