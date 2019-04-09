@@ -44,8 +44,7 @@ ${execpi 300 \
   --calendar "Contacts" \
   --calendar "Club Meetings and Events" \
   --calendar "NYU Theory Seminar" \
-  agenda | sed 's/^ *//;s/ *$//' | sed '/^$/d' | \
-  cut -c 1-85
+  agenda | cut -c 1-85
 }
 ]];
 
