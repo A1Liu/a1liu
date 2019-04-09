@@ -54,6 +54,11 @@ echo "#\!/bin/zsh\n\nsource \"$project/shell/zshrc\"" > ~/.zshrc
 touch ~/.zshenv
 echo "#\!/bin/zsh\n\nsource \"$project/shell/zshenv\"" > ~/.zshenv
 
+# Use VC Profile
+mv ~/.profile ~/.profile_old
+touch ~/.profile
+echo "source \"${project}/shell/profile\"" > ~/.profile
+
 # TODO
 # -  Add GNOME stuff and change GNOME software names
 # -  Add keyboard shortcut stuff/keybinding stuff
