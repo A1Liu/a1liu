@@ -18,8 +18,8 @@ conky.config = {
     border_outer_margin = 0,
     xinerama_head = 1,
     alignment = 'top_right',
-    gap_x = 90,
-    gap_y = 90,
+    gap_x = 45,
+    gap_y = 45,
     draw_shades = true,
     draw_outline = false,
     draw_borders = false,
@@ -35,14 +35,9 @@ conky.config = {
 
 conky.text = [[
 ${execpi 300 \
-  gcalcli --conky --nolineart \
-  --calendar albertymliu@gmail.com \
-  --calendar "NYU Events" \
-  --calendar "NYU Misc" \
-  --calendar "NYU Classes" \
-  --calendar "Contacts" \
-  --calendar "Club Meetings and Events" \
-  --calendar "NYU Theory Seminar" \
-  calw 1
+  gcalcli --military \
+  --conky --nolineart \
+  --width 13 \
+  calw 1 | sed '/^$/d'
 }
 ]];

@@ -21,4 +21,4 @@ PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 export PATH="$HOME/.cargo/bin:$PATH"
 
-conky -c ~/code/config/shell/conky_gcalcli_calw
+conky -c $(dirname $0)/conky_gcalcli_calw
