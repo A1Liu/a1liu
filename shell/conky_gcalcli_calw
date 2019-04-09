@@ -38,6 +38,13 @@ ${execpi 300 \
   gcalcli --military \
   --conky --nolineart \
   --width 13 \
+  --calendar albertymliu@gmail.com \
+  --calendar "NYU Events" \
+  --calendar "NYU Misc" \
+  --calendar "NYU Classes" \
+  --calendar "Contacts" \
+  --calendar "Club Meetings and Events" \
+  --calendar "NYU Theory Seminar" \
   calw 1 | sed '/^$/d'
 }
 ]];
