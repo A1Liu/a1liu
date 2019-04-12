@@ -78,15 +78,15 @@ set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 " Split panes more obvious, terminal prettier
 augroup BgHighlight
     autocmd!
-    autocmd BufWinEnter,WinEnter,BufEnter * if &ft != 'netrw' |
-          \ set cul | set cc=80 |
-          \ set relativenumber |
+    autocmd BufWinEnter,WinEnter,BufEnter * if &ft != 'netrw' && &buftype !='terminal' |
+          \ setlocal cul cc=80 |
+          \ setlocal relativenumber |
           \ let s:hidden_all = 1 | call ToggleHiddenAll() |
           \ endif " Set color column
-    autocmd TermOpen * set nonumber | set norelativenumber | set cc=
-    autocmd TermClose * set number | set relativenumber
-    autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | set cc= | endif
-    autocmd BufWinLeave,WinLeave * if &ft != 'netrw' | set nocul | set cc= | set norelativenumber | endif
+    autocmd TermOpen * setlocal nonumber norelativenumber cc=
+    autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | setlocal cc= | endif
+    autocmd BufWinLeave,WinLeave * if &ft != 'netrw' && &buftype != 'terminal' | 
+          \ setlocal nocul | setlocal cc= | setlocal norelativenumber | endif
 augroup END
 
 
