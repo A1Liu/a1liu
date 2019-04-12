@@ -22,6 +22,7 @@ set hlsearch incsearch " highlighting when using find
 set ignorecase smartcase " Ignore case except when including capital letters
 set cc=80
 set cul
+set splitright splitbelow
 " https://shapeshed.com/vim-statuslines/
 
 
