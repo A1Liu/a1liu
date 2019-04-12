@@ -22,6 +22,9 @@ Plug 'powerline/fonts'
 let g:airline_powerline_fonts = 0
 let g:airline#extensions#whitespace#enabled = 0
 
+" Lightline
+" Plug 'itchyny/lightline.vim'
+
 " Markdown highlighting
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
@@ -49,6 +52,14 @@ Plug 'google/vim-glaive'
 " Linting
 Plug 'w0rp/ale'
 let g:ale_enabled = 0
+
+" Fuzzy finder
+"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'ctrlpvim/ctrlp.vim'
+
+" Cd to git root
+" Plug 'airblade/vim-rooter'
+
 " Eclim
 let g:EclimJavascriptValidate = 0
 let g:EclimJavascriptLintEnabled = 0
@@ -58,9 +69,6 @@ let g:EclimJavascriptLintEnabled = 0
 
 " Editor Config
 Plug 'editorconfig/editorconfig-vim'
-
-" Fuzzy Finder
-" Plug 'ctrlpvim/ctrlp.vim'
 
 " " Multiple Cursors
 " Plug 'terryma/vim-multiple-cursors'
