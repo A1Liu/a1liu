@@ -35,6 +35,7 @@ Plug 'isRuslan/vim-es6'
 
 " Rust Highlighting, Linting, Etc.
 Plug 'rust-lang/rust.vim'
+let g:rustfmt_autosave = 1
 
 " Google's Formatter
 Plug 'google/vim-maktaba'
