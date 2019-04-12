@@ -1,6 +1,6 @@
 .netrwhist
 
-/autoload/plug.vim
+/autoload/*
 /plugged
 
 /eclimd
