@@ -133,6 +133,8 @@ augroup END
 let mapleader=","
 tnoremap <Esc> <C-\><C-n>
 nnoremap gn :tabnew<Enter>
+noremap <C-J> <Esc>
+noremap! <C-J> <Esc>
 
 " Taken shamelessly verbatim from vim-sensible
 nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
