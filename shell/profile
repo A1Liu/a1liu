@@ -1,3 +1,4 @@
+#!/bin/zsh
 # ~/.profile: executed by the command interpreter for login shells.
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
@@ -23,3 +24,4 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 conky -c $(dirname $0)/conky_gcalcli_calw
 conky -c $(dirname $0)/conky_gcalcli_agenda
+setxkbmap -option caps:ctr_modifier
