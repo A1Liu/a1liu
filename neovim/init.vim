@@ -131,8 +131,8 @@ augroup END
 
 "" Keybindings
 let mapleader=","
-tnoremap <Esc> <C-\><C-n>
 nnoremap gn :tabnew<Enter>
+tnoremap <C-J> <C-\><C-n>
 noremap <C-J> <Esc>
 noremap! <C-J> <Esc>
 
