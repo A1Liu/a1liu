@@ -19,22 +19,22 @@ xkb_symbols "pc105" {
     key  <TAB> {	[ Tab,	ISO_Left_Tab	]	};
     key <RTRN> {	[ Return		]	};
 
-    key <CAPS> {	[ Control_M ]	};
+    key <CAPS> {	[ Control_L ]	};
     key <NMLK> {	[ Num_Lock 		]	};
 
     key <LFSH> {	[ Shift_L		]	};
-    key <LCTL> {	[ Control_L		]	};
+    key <LCTL> {	[ Control_R		]	};
     key <LWIN> {	[ Super_L		]	};
 
     key <RTSH> {	[ Shift_R		]	};
-    key <RCTL> {	[ Control_R		]	};
+    key <RCTL> {	[ Escape		]	};
     key <RWIN> {	[ Super_R		]	};
     key <MENU> {	[ Menu			]	};
 
     // Beginning of modifier mappings.
     modifier_map Shift  { Shift_L, Shift_R };
-    modifier_map Lock   { Caps_Lock };
-    modifier_map Control{ Control_L, Control_R, Control_M };
+    // modifier_map Lock   { Caps_Lock };
+    modifier_map Control{ Control_L, Control_R };
     modifier_map Mod2   { Num_Lock };
     modifier_map Mod4   { Super_L, Super_R };
 
