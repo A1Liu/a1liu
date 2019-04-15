@@ -132,9 +132,9 @@ augroup END
 "" Keybindings
 let mapleader=","
 nnoremap gn :tabnew<Enter>
-tnoremap <C-J> <C-\><C-n>
-noremap <C-J> <Esc>
-noremap! <C-J> <Esc>
+tnoremap <C-H> <C-\><C-n>
+noremap <C-H> <Esc>
+noremap! <C-H> <Esc>
 
 " Taken shamelessly verbatim from vim-sensible
 nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
