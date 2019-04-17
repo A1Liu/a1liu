@@ -1,19 +1,17 @@
-" set mouse=a " Mouse functionality
-" Changing line with the arrow keys
-" set whichwrap+=<,>,[,]
-" https://superuser.com/questions/35389/in-vim-how-do-i-make-the-left-and-right-arrow-keys-change-line
-
 "" Initialize global variables
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let g:placeholder = '<++>'
 set guicursor= " don't want unknown characters in linux
 set t_Co=256
 
 
 
 "" Plugins
-execute "source " . g:vim_home_path . "/plugins-list.vim"
+execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 
+"" Keybindings
+execute 'source ' . g:vim_home_path . '/keybindings.vim'
 
 
 "" Visual Changes
@@ -126,30 +124,6 @@ augroup END
 " TODO Make a command to create a window to the left and/or update the one to
 " the left; do the same for right. The idea is to have a workflow with a left
 " and right pane
-
-
-
-"" Keybindings
-let mapleader=","
-nnoremap gn :tabnew<Enter>
-tnoremap <C-H> <C-\><C-n>
-noremap <C-H> <Esc>
-noremap! <C-H> <Esc>
-
-" Taken shamelessly verbatim from vim-sensible
-nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
-
-" Pressing j and k go up and down the sections of a soft-wrapped line
-" https://statico.github.io/vim.html
-" https://statico.github.io/vim2.html
-nmap j gj
-nmap k gk
-
-" Window switching
-" map <C-j> <C-W>j
-" map <C-k> <C-W>k
-" map <C-h> <C-W>h
-" map <C-l> <C-W>l
 
 
 
