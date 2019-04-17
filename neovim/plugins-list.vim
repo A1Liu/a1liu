@@ -54,11 +54,14 @@ Plug 'w0rp/ale'
 let g:ale_enabled = 0
 
 " Fuzzy finder
-"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 " Plug 'ctrlpvim/ctrlp.vim'
 
 " Cd to git root
 " Plug 'airblade/vim-rooter'
+
+" Rename files with Vim
+" Plug 'qpkorr/vim-renamer'
 
 " Eclim
 let g:EclimJavascriptValidate = 0
