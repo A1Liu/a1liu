@@ -54,7 +54,8 @@ Plug 'w0rp/ale'
 let g:ale_enabled = 0
 
 " Fuzzy finder
-" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 " Plug 'ctrlpvim/ctrlp.vim'
 
 " Cd to git root

@@ -1,4 +1,8 @@
 #!/bin/zsh
+# export ZSHENV_EXPORT=1
+# CFG=$(dirname $0)
+# export CFG=$(dirname $CFG)
+
 # Adding stuff to python path
 export PYTHONPATH="/Users/aliu/code/python/utils:${PYTHONPATH}"
 
@@ -16,3 +20,4 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 
 # Rust
 source $HOME/.cargo/env
+export PATH="$HOME/.cargo/bin:$PATH"

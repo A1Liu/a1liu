@@ -7,6 +7,10 @@ shell_dir="$(dirname "$0")"
 project="$(dirname "$shell_dir")"
 # ZSH_THEME="robbyrussell"
 
+# if [[ $ZSHENV_EXPORT != 1 ]] then
+#   source "${shell_dir}/zshenv"
+# fi
+
 skip_global_compinit=1
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 
