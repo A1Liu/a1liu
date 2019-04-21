@@ -121,9 +121,8 @@ augroup END
 
 "" Commands
 " TODO Make a toggle for showing column on left hand side
-" TODO Make a command to create a window to the left and/or update the one to
-" the left; do the same for right. The idea is to have a workflow with a left
-" and right pane
+command! AL aboveleft
+command! RunInit so $MYVIMRC
 
 
 

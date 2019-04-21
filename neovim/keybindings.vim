@@ -29,6 +29,9 @@ nnoremap <S-Tab> gT
 " Taken shamelessly verbatim from vim-sensible
 nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 
+" New buffer in window to the right
+nnoremap <C-W>v <C-W>v:enew<CR>
+
 " Pressing j and k go up and down the sections of a soft-wrapped line
 " https://statico.github.io/vim.html
 " https://statico.github.io/vim2.html
