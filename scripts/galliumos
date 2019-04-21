@@ -2,7 +2,7 @@
 # TODO Make this work better with cloning and stuff; i.e. make it
 # so that this works without needing to first install git and clone
 project="$(dirname $0)"
-export project="$(dirname project)"
+export project="$(dirname "$project")"
 
 # Updating, upgrading
 apt dist-upgrade -y

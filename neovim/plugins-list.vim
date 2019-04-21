@@ -59,7 +59,7 @@ Plug 'junegunn/fzf.vim'
 " Plug 'ctrlpvim/ctrlp.vim'
 
 " Cd to git root
-" Plug 'airblade/vim-rooter'
+Plug 'airblade/vim-rooter'
 
 " Rename files with Vim
 " Plug 'qpkorr/vim-renamer'
