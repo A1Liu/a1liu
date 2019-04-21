@@ -3,8 +3,6 @@
 export ZSH=~/.oh-my-zsh
 export EDITOR='vim'
 export VISUAL='vim'
-shell_dir="$(dirname "$0")"
-project="$(dirname "$shell_dir")"
 # ZSH_THEME="robbyrussell"
 
 # if [[ $ZSHENV_EXPORT != 1 ]] then
@@ -19,11 +17,11 @@ plugins=( git )
 # TODO Replace OMZ and theme with programs in C
 # http://enki-tech.blogspot.com/2012/09/customizing-zsh-part-1-hooks-and-rprompt.html
 source $ZSH/oh-my-zsh.sh
-source "${shell_dir}/theme"
+source "${SHELL_DIR}/theme"
 
 # Vim Commands
 alias :q!=exit
-export ECLIM_SERVER_SCRIPT="${project}/neovim/eclimd"
+export ECLIM_SERVER_SCRIPT="${CFG}/neovim/eclimd"
 
 # Git
 function branch() {

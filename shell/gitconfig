@@ -19,5 +19,6 @@
           }; f"
   back = checkout HEAD~1
 	ca = commit
+	ca = commit
 [push]
 	default = simple
