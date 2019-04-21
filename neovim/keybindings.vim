@@ -25,7 +25,7 @@ nnoremap gn :tabnew<Enter>:term<Enter>
 nnoremap <Tab> gt
 nnoremap <S-Tab> gT
 
-" <C-L> removes the highlighted stuff while also clearning the screen
+" Better Screen Repaint
 " Taken shamelessly verbatim from vim-sensible
 nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 
