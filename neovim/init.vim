@@ -88,7 +88,9 @@ augroup BgHighlight
       \ setlocal relativenumber |
       \ let s:hidden_all = 1 | call ToggleHiddenAll() |
     \ endif " Set color column
-  autocmd TermOpen * setlocal nonumber norelativenumber cc=
+  if has('nvim')
+    autocmd TermOpen * setlocal nonumber norelativenumber cc=
+  endif
   autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | setlocal cc= | endif
   autocmd BufWinLeave,WinLeave *
     \ if &ft != 'netrw' && &buftype != 'terminal' |
@@ -130,7 +132,7 @@ execute 'set undodir=' . g:vim_home_path . '/undohist'
 
 "" Commands
 " TODO Make a toggle for showing column on left hand side
-command! AL aboveleft
+command! -nargs=* AL aboveleft
 command! BR belowright
 command! RunInit so $MYVIMRC
 
