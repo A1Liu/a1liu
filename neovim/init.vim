@@ -132,9 +132,17 @@ execute 'set undodir=' . g:vim_home_path . '/undohist'
 
 "" Commands
 " TODO Make a toggle for showing column on left hand side
-command! -nargs=* AL aboveleft
+
+" TODO Fix this command
+" command! -nargs=* AL aboveleft
+
 command! BR belowright
 command! RunInit so $MYVIMRC
+
+" " https://github.com/junegunn/fzf.vim/issues/251
+" command! -nargs=* -complete=dir FCD call fzf#run(fzf#wrap(
+"   \ {'source': 'find '.(empty(<f-args>) ? '.' : <f-args>).' -type d',
+"   \  'sink': 'cd'}))
 
 
 
