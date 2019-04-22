@@ -1,8 +1,8 @@
 "" Keybindings
 let mapleader=" "
 nnoremap <SPACE> <Nop>
-tnoremap! <C-\><C-\> <C-\><C-n>
-tnoremap <C-H> <Esc><C-\><C-n>
+tnoremap <C-\><C-\> <C-\><C-n>
+tnoremap <C-H> <C-\><C-n>
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cunmap <C-H>

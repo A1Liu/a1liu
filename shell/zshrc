@@ -3,8 +3,8 @@
 export ZSH=~/.oh-my-zsh
 export EDITOR='vim'
 export VISUAL='vim'
-# export SHELL_DIR="$(dirname "$0")"
-# export CFG="$(dirname "$SHELL_DIR")"
+export SHELL_DIR="$(dirname "$0")"
+export CFG="$(dirname "$SHELL_DIR")"
 # ZSH_THEME="robbyrussell"
 
 if [[ $ZSHENV_EXPORT != 1 ]] then
