@@ -1,12 +1,17 @@
 "" Keybindings
+
+" Change Leader key
 let mapleader=" "
 nnoremap <SPACE> <Nop>
-tnoremap <C-\><C-\> <C-\><C-n>
-tnoremap <C-H> <C-\><C-n>
+
+" Mapping <C-H> to escape
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
-cunmap <C-H>
 cnoremap <C-H> <C-c>
+
+" Terminal keybindings
+tnoremap <C-\><C-\> <C-\><C-n>
+tnoremap <C-H> <C-\><C-n>
 
 " Placeholder
 " function! NextPlaceholder()
@@ -22,9 +27,10 @@ nnoremap <Leader><S-Tab> ?<++><CR>cf>
 " New tab in terminal using gn
 nnoremap gn :tabnew<Enter>:term<Enter>
 
-" Chrome-like tab changing
+" Chrome-like tab handling
 nnoremap <Tab> gt
 nnoremap <S-Tab> gT
+nnoremap <C-N> :tabnew<Enter>:term<Enter>
 
 " Better Screen Repaint
 " Taken shamelessly verbatim from vim-sensible
