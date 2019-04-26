@@ -9,6 +9,9 @@ noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cnoremap <C-H> <C-c>
 
+" Saving with <C-S>
+nnoremap <C-S> :w<CR>
+
 " Terminal keybindings
 tnoremap <C-\><C-\> <C-\><C-n>
 tnoremap <C-H> <C-\><C-n>
@@ -31,6 +34,9 @@ nnoremap gn :tabnew<Enter>:term<Enter>
 nnoremap <Tab> gt
 nnoremap <S-Tab> gT
 nnoremap <C-N> :tabnew<Enter>:term<Enter>
+
+" Getting back jump list functionality
+nnoremap <C-P> <C-I>
 
 " Better Screen Repaint
 " Taken shamelessly verbatim from vim-sensible
