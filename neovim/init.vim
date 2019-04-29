@@ -135,17 +135,22 @@ execute 'set undodir=' . g:vim_home_path . '/undohist'
 
 " TODO Fix this command
 " command! -nargs=* AL aboveleft
-command! BR belowright
+" command! BR belowright
 command! RunInit so $MYVIMRC
 
-" http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
-" TODO Command to change directory for tab
-" command! Cd
+command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
+command! Root exe "Rooter" | let t:wd=getcwd()
+augroup TabContext
+  " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
+  au TabEnter * if exists("t:wd") | exe "cd" t:wd | endif
+augroup END
 
-" " https://github.com/junegunn/fzf.vim/issues/251
-" command! -nargs=* -complete=dir FCD call fzf#run(fzf#wrap(
-"   \ {'source': 'find '.(empty(<f-args>) ? '.' : <f-args>).' -type d',
-"   \  'sink': 'cd'}))
+" https://github.com/junegunn/fzf.vim/issues/251
+command! -nargs=? -complete=dir FCD call fzf#run(fzf#wrap(
+  \ {'source': 'find '
+  \ .(<q-args> == '' ? fnamemodify('.', ':p:h') : fnamemodify(<q-args>, ':p:h'))
+  \ .' -type d',
+  \  'sink': 'Cd'}))
 
 
 
