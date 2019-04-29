@@ -135,9 +135,12 @@ execute 'set undodir=' . g:vim_home_path . '/undohist'
 
 " TODO Fix this command
 " command! -nargs=* AL aboveleft
-
 command! BR belowright
 command! RunInit so $MYVIMRC
+
+" http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
+" TODO Command to change directory for tab
+" command! Cd
 
 " " https://github.com/junegunn/fzf.vim/issues/251
 " command! -nargs=* -complete=dir FCD call fzf#run(fzf#wrap(
