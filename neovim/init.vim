@@ -146,10 +146,10 @@ augroup TabContext
 augroup END
 
 " https://github.com/junegunn/fzf.vim/issues/251
-command! -nargs=? -complete=dir FCD call fzf#run(fzf#wrap(
+command! -nargs=? -complete=dir FD call fzf#run(fzf#wrap(
   \ {'source': 'find '
-  \ .(<q-args> == '' ? fnamemodify('.', ':p:h') : fnamemodify(<q-args>, ':p:h'))
-  \ .' -type d',
+  \ . (<q-args> == '' ? fnamemodify('.', ':p:h') : fnamemodify(<q-args>, ':p:h'))
+  \ . ' -type d',
   \  'sink': 'Cd'}))
 
 
