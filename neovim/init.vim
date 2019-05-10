@@ -1,5 +1,6 @@
 "" Initialize global variables
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
+" https://github.com/tonsky/FiraCode
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:placeholder = '<++>'
 set guicursor= " don't want unknown characters in linux
@@ -12,6 +13,7 @@ execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 
 "" Keybindings
 execute 'source ' . g:vim_home_path . '/keybindings.vim'
+
 
 
 "" Visual Changes

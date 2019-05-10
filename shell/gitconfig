@@ -19,5 +19,6 @@
           }; f"
   back = checkout HEAD~1
 	ca = commit --amend
+	ca = commit --amend -m
 [push]
 	default = simple
