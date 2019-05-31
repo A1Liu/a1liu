@@ -91,7 +91,7 @@ augroup BgHighlight
       \ let s:hidden_all = 1 | call ToggleHiddenAll() |
     \ endif " Set color column
   if has('nvim')
-    autocmd TermOpen * setlocal nonumber norelativenumber cc=
+    autocmd TermOpen * setlocal nonumber norelativenumber cc= wrap
   endif
   autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | setlocal cc= | endif
   autocmd BufWinLeave,WinLeave *
