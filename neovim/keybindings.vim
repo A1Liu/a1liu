@@ -12,6 +12,9 @@ cnoremap <C-H> <C-c>
 " Saving with <C-S>
 nnoremap <C-S> :w<CR>
 
+" Formatting with <Leader><S>
+nnoremap <Leader><C-S> :FormatCode<CR>
+
 " Terminal keybindings
 tnoremap <C-\><C-\> <C-\><C-n>
 tnoremap <C-H> <C-\><C-n>
