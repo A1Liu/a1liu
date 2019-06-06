@@ -16,6 +16,10 @@ export PATH=$PATH:/Users/aliu/.nvm
 # RUBY
 export PATH="$HOME/.rbenv/bin:$PATH"
 
+# Haskell
+source $HOME/.ghcup/env
+export PATH="$HOME/.ghcup/env:$PATH"
+
 # Rust
 source $HOME/.cargo/env
 export PATH="$HOME/.cargo/bin:$PATH"
