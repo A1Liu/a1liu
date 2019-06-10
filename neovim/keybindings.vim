@@ -36,7 +36,7 @@ nnoremap gn :tabnew<Enter>:term<Enter>
 " Chrome-like tab handling
 nnoremap <Tab> gt
 nnoremap <S-Tab> gT
-nnoremap <C-N> :tabnew<Enter>:term<Enter>
+nnoremap <C-N> :tabnew<CR>
 
 " Getting back jump list functionality
 nnoremap <C-P> <C-I>
