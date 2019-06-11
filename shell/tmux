@@ -1,0 +1,21 @@
+set -g default-terminal "xterm-256color"
+
+# Taken from https://gist.github.com/andreyvit/2921703
+# remap prefix to Control + a
+set -g prefix C-a
+# bind 'C-a C-a' to type 'C-a'
+bind C-a send-prefix
+unbind C-b
+
+setw -g mode-keys vi
+
+# Taken, with modification, from
+# https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/
+# switch panes using Alt-arrow without prefix
+bind v split-window -h
+bind n split-window -v
+
+bind h select-pane -L
+bind l select-pane -R
+bind k select-pane -U
+bind j select-pane -D
