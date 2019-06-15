@@ -3,10 +3,13 @@
 " https://github.com/tonsky/FiraCode
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:placeholder = '<++>'
+
+"" Security
+set nomodeline modelines=0
+
+"" Compatibility
 set guicursor= " don't want unknown characters in linux
 set t_Co=256
-
-
 
 "" Plugins
 execute 'source ' . g:vim_home_path . '/plugins-list.vim'
