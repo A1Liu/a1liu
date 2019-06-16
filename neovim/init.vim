@@ -71,12 +71,12 @@ autocmd InsertLeave,WinLeave *
 filetype plugin indent on
 syntax enable " Syntax highlighting
 let g:airline_theme='base16_solarized'
-if strftime('%H') >= 8 && strftime('%H') < 22 " 10am to 10pm
-  set background=light
-else
-  set background=dark
-  let g:airline_solarized_bg='dark'
-endif
+" if strftime('%H') >= 8 && strftime('%H') < 22 " 10am to 10pm
+"   set background=light
+" else
+set background=dark
+let g:airline_solarized_bg='dark'
+" endif
 colorscheme solarized8_high
 
 " Showing non-printing characters
