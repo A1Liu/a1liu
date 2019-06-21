@@ -25,13 +25,14 @@ conky.config = {
     draw_borders = false,
     draw_graph_borders = false,
     use_xft = true,
-    font = 'Ubuntu Mono:size=12',
-    xftalpha = 0.8,
+    font = 'Courier:size=10',
+    xftalpha = .8,
     uppercase = false,
     default_color = '#FFFFFF',
     own_window_colour = '#000000',
-    minimum_width = 0, minimum_height = 0,
-};
+    minimum_width = 400, minimum_height = 300,
+    max_text_width = 0,
+}
 
 conky.text = [[
 ${execpi 300 \
@@ -44,7 +45,6 @@ ${execpi 300 \
   --calendar "Contacts" \
   --calendar "Club Meetings and Events" \
   --calendar "NYU Theory Seminar" \
-  agenda --military | cut -c 1-85
+  agenda --military --width 10
 }
-]];
-
+]]
