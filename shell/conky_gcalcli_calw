@@ -26,7 +26,7 @@ conky.config = {
     draw_graph_borders = false,
     use_xft = true,
     font = 'Ubuntu Mono:size=12',
-    xftalpha = 0.8,
+    xftalpha = 1,
     uppercase = false,
     default_color = '#FFFFFF',
     own_window_colour = '#000000',
@@ -35,9 +35,8 @@ conky.config = {
 
 conky.text = [[
 ${execpi 300 \
-  gcalcli --military \
-  --conky --nolineart \
-  --width 13 \
+  gcalcli \
+  --conky --lineart=ascii \
   --calendar "Default" \
   --calendar "NYU Events" \
   --calendar "NYU Misc" \
@@ -45,6 +44,6 @@ ${execpi 300 \
   --calendar "Contacts" \
   --calendar "Club Meetings and Events" \
   --calendar "NYU Theory Seminar" \
-  calw 1 | sed '/^$/d'
+  calw --width 13 --military 1 | sed '/^$/d'
 }
 ]];

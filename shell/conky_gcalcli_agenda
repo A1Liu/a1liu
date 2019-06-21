@@ -35,8 +35,8 @@ conky.config = {
 
 conky.text = [[
 ${execpi 300 \
-  gcalcli --military \
-  --conky --nolineart \
+  gcalcli \
+  --conky --lineart=ascii \
   --calendar "Default" \
   --calendar "NYU Events" \
   --calendar "NYU Misc" \
@@ -44,7 +44,7 @@ ${execpi 300 \
   --calendar "Contacts" \
   --calendar "Club Meetings and Events" \
   --calendar "NYU Theory Seminar" \
-  agenda | cut -c 1-85
+  agenda --military | cut -c 1-85
 }
 ]];
 
