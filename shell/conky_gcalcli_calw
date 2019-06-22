@@ -30,7 +30,7 @@ conky.config = {
     uppercase = false,
     default_color = '#FFFFFF',
     own_window_colour = '#000000',
-    minimum_width = 800, minimum_height = 300,
+    minimum_width = 910, minimum_height = 300,
     max_text_width = 0,
 }
 
@@ -45,6 +45,6 @@ ${execpi 300 \
   --calendar "Contacts" \
   --calendar "Club Meetings and Events" \
   --calendar "NYU Theory Seminar" \
-  calw --width 13 --military 1 | sed '/^$/d'
+  calw --width 15 --military 1 | sed '/^$/d'
 }
 ]]
