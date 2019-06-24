@@ -21,6 +21,8 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'powerline/fonts'
 let g:airline_powerline_fonts = 0
 let g:airline#extensions#whitespace#enabled = 0
+let g:airline#extensions#wordcount#enabled = 0 " Causes a really dumb glitch
+                                               " when creating visual blocks
 
 " Lightline
 " Plug 'itchyny/lightline.vim'
