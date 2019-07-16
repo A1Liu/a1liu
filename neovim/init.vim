@@ -129,6 +129,22 @@ augroup END
 
 
 
+"" Formatting
+augroup autoformat_settings
+  autocmd FileType bzl AutoFormatBuffer buildifier
+  autocmd FileType c,cpp,proto,java AutoFormatBuffer clang-format
+  autocmd FileType javascript AutoFormatBuffer prettier
+  autocmd FileType dart AutoFormatBuffer dartfmt
+  autocmd FileType go AutoFormatBuffer gofmt
+  autocmd FileType gn AutoFormatBuffer gn
+  autocmd FileType html,css,sass,scss,less,json AutoFormatBuffer js-beautify
+  autocmd FileType python AutoFormatBuffer yapf
+  " Alternative: autocmd FileType python AutoFormatBuffer autopep8
+  autocmd FileType vue AutoFormatBuffer prettier
+augroup END
+
+
+
 "" Saving my ass
 set undofile
 execute 'set undodir=' . g:vim_home_path . '/undohist'

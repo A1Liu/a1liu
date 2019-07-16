@@ -106,8 +106,10 @@ function pydev() {
 alias ruby_setup="eval \"\$(rbenv init -)\""
 
 # Node
+
 alias gulp="npm run gulp"
-alias load_nvm='export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
-alias node='unalias node npm && load_nvm && node'
-alias npm='unalias node npm && load_nvm && npm'
+alias prettier='unalias prettier && load_nvm && prettier'
+alias load_nvm='export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && alias load_nvm=true'
+alias node='unalias node && load_nvm && node'
+alias npm='unalias npm && load_nvm && node'
 
