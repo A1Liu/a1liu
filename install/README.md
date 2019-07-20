@@ -7,27 +7,28 @@ script, which does the following:
 
 Then, each of the scripts does the following:
 
-1. Set up basic workflow
+1. Set up simple workflow
+  - Soft-link config files for NeoVim/Vim, Git
+  - Set defaults for text editor, terminal, and shell
+2. Install applications
   - Chrome & FireFox
   - Alacritty
   - Zsh
   - NeoVim
+3. Programming Languages
   - Python
   - Java
-  - Soft-link config files for alacritty, NeoVim, Git
-  - Set defaults for text editor, terminal, and shell
-2. Convenience
-  - Clang Format
-  - Eclim
-  - Conky
-  - GCalClI
-  - Soft-link startup/on-login files
-3. Programming Languages
-  - GCC & Clang
+  - C/C++ (Clang)
   - Rust
   - Haskell
   - Ruby
   - Node.js
+4. Convenience
+  - rustfmt
+  - Clang Format
+  - Eclim
+  - Prettier.js
+  - Soft-link startup/on-login files
 
 Depending on the tasks, some of the above functionality may be done through existing
 scripts, found in the `reuse` folder.

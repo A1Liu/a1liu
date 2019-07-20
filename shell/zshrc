@@ -4,7 +4,7 @@ export ZSH=~/.oh-my-zsh
 export EDITOR='vim'
 export VISUAL='vim'
 export SHELL_DIR="$(dirname "$0")"
-export CFG="$(dirname "$SHELL_DIR")"
+export CFG_DIR="$(dirname "$SHELL_DIR")"
 
 if [[ $ZSHENV_EXPORT != 1 ]] then
   source "${SHELL_DIR}/zshenv"
@@ -25,7 +25,7 @@ source "${SHELL_DIR}/theme"
 
 # Vim Commands
 alias :q!=exit
-export ECLIM_SERVER_SCRIPT="${CFG}/neovim/eclimd"
+export ECLIM_SERVER_SCRIPT="${CFG_DIR}/neovim/eclimd"
 
 # Git
 function branch() {

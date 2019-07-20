@@ -2,6 +2,16 @@
 My configurations! This repo represents the things that I like to keep constant between systems; things like
 application settings, file organizations, etc.
 
+### Structure
+
+```
+.
+├── install ---- Scripts to install this configuration on a new machine
+├── neovim ----- Vim configuration settings
+├── shell ------ Configurations used by shell sessions
+└── startup ---- Scripts that are run at startup
+```
+
 ### TODO
 * [ ] Better method of checking for configuration than `-e ~/.aliu_config_installed`
 * [ ] Scripts to move stuff around w/ symbolic links
