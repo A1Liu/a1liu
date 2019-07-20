@@ -22,3 +22,8 @@
   s = status
 [push]
 	default = simple
+[color "status"]
+	added = green
+	changed = red
+	nobranch = red
+	untracked = yellow
