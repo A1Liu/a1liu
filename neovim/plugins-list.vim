@@ -23,7 +23,7 @@ Plug 'lifepillar/vim-solarized8'
 " Airline
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'powerline/fonts'
+" Plug 'powerline/fonts'
 let g:airline_powerline_fonts = 0
 let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#wordcount#enabled = 0 " Causes a really dumb glitch
@@ -57,7 +57,7 @@ Plug 'google/vim-glaive'
 " let g:gitgutter_enabled = 0
 
 " Linting
-Plug 'w0rp/ale'
+" Plug 'w0rp/ale'
 let g:ale_enabled = 0
 
 " Fuzzy finder
@@ -81,7 +81,7 @@ let g:EclimJavascriptLintEnabled = 0
 " Plug 'ap/vim-css-color'
 
 " Editor Config
-Plug 'editorconfig/editorconfig-vim'
+" Plug 'editorconfig/editorconfig-vim'
 
 " " Multiple Cursors
 " Plug 'terryma/vim-multiple-cursors'
@@ -92,7 +92,7 @@ Plug 'editorconfig/editorconfig-vim'
 "" Tim Pope Plugins <3
 
 " Git stuff
-Plug 'tpope/vim-fugitive'
+" Plug 'tpope/vim-fugitive'
 
 " Asynchronous Dispatch
 Plug 'tpope/vim-dispatch'
