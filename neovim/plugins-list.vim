@@ -6,6 +6,11 @@ if empty(glob(s:plug_path))
     \ "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
+if empty(glob(s:plug_path))
+  execute "silent !mkdir -p" . s:plug_path
+  execute "silent !curl -fLo " . s:plug_path . 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall
+endif
 
 call plug#begin(g:vim_home_path . '/plugged')
 
