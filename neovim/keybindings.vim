@@ -16,8 +16,10 @@ nnoremap <C-S> :w<CR>
 nnoremap <Leader><C-S> :FormatCode<CR>
 
 " Terminal keybindings
-tnoremap <C-\><C-\> <C-\><C-n>
-tnoremap <C-H> <C-\><C-n>
+if has('nvim')
+  tnoremap <C-\><C-\> <C-\><C-n>
+  tnoremap <C-H> <C-\><C-n>
+endif
 
 " Placeholder
 " function! NextPlaceholder()
