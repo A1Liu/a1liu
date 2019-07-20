@@ -48,6 +48,8 @@ nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR
 
 " New buffer in window to the right
 nnoremap <C-W>v <C-W>v:enew<CR>
+nnoremap <C-W><S-V> :aboveleft :vsplit<CR>:enew<CR>
+nnoremap <C-W><S-N> :aboveleft :split<CR>:enew<CR>
 
 " Pressing j and k go up and down the sections of a soft-wrapped line
 " https://statico.github.io/vim.html
