@@ -1,0 +1,11 @@
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)" || exit 1
+
+
+cd config/
+CFG_DIR=`pwd`
+# echo "config dir is ${CFG_DIR}"
+cd ..
+ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
+ln -s "${CFG_DIR}/neovim" ~/.vim
+ln -s "${CFG_DIR}/shell/gitconfig" ~/.gitconfig
+ln -s "${CFG_DIR}/shell/gitignore_global" ~/.gitignore_global

@@ -3,6 +3,26 @@ My configurations! This repo represents the things that I like to keep constant 
 application settings, file organizations, etc.
 
 ### TODO
+* [ ] Better method of checking for configuration than `-e ~/.aliu_config_installed`
 * [ ] Scripts to move stuff around w/ symbolic links
 * [ ] More cross-platform compatibility
 * [x] Zsh settings
+
+### Installation Scripts
+The following scripts are usable:
+
+- `bootstrap` - Installs the repository, checking whether or not you've already
+  installed it. Install with
+
+  ```
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)"
+  ```
+
+- `shell` - Installs editor configurations for a working shell. Install with
+
+  ```
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/shell)"
+  ```
+
+
+

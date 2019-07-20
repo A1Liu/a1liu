@@ -1,7 +1,11 @@
-# Run this command
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/scripts/bootstrap)"
+command -v git >/dev/null 2>&1 \
+  || { echo >&2 "Script requires git to install config folder, but git is not installed. Aborting."; exit 1; }
 
-which git || echo "Must have git installed\!" && exit 1
-git clone git@github.com:A1Liu/config.git || git clone https://github.com/A1Liu/config.git
-
-source config/scripts/${1}
+if [ -e ~/.aliu_config_installed ]
+then
+  echo "You've already installed this config somewhere."
+  exit 1
+else
+  git clone https://github.com/A1Liu/config.git
+  touch ~/.aliu_config_successful
+fi
