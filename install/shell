@@ -1,5 +1,6 @@
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)" || exit 1
+#!/bin/sh
 
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)" || exit 1
 
 cd config/
 CFG_DIR=`pwd`
