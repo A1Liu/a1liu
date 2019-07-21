@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Contains common functions, and also handles dispatch to shell-specific setup code.
+
+export SHELL_DIR="$CFG_DIR/shells"
+
+# Set environment variables that should exist for all calls of a shell
+source "$SHELL_DIR/env"
+
+shell_path="$SHELL_DIR/${CUR_SHELL}"
+
+# Dispatch to common files based on properties of the shell, like IS_LOGIN_SHELL
+# or IS_INTERACTIVE_SHELL
+if [ $IS_INTERACTIVE_SHELL = true ]
+then
+  source "$SHELL_DIR/common-interact"
+  shell_path="${shell_path}-interact"
+fi
+
+if [ -e $shell_path ]
+then
+  source $shell_path
+fi
+

@@ -2,10 +2,25 @@
 
 CFG_DIR=`pwd`
 
-touch "$CFG_DIR/custom/login_shell_init"
-printf '#!/bin/sh\n\nexport CFG_DIR="%s"\nexport CUR_SHELL="${0}"\nexport SHELL_TYPE="login"\nsource "%s"\n' "$CFG_DIR" "$CFG_DIR/shells/init" > "$CFG_DIR/custom/login_shell_init"
+read -r -d '' PRINT_TEMPLATE <<- EOF
+#!/bin/sh
+
+export CFG_DIR="$CFG_DIR"
+CUR_SHELL="\${0:1}"
+IS_INTERACTIVE_SHELL=%s
+
+source "$CFG_DIR/shells/dispatch"
+EOF
+
+touch "$CFG_DIR/custom/shell_init"
+printf "${PRINT_TEMPLATE}\n" 'false' > "$CFG_DIR/custom/shell_init"
+
+
+touch "$CFG_DIR/custom/shell_interact_init"
+printf "${PRINT_TEMPLATE}\n" 'true' > "$CFG_DIR/custom/shell_interact_init"
 
 # ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 # ln -s "${CFG_DIR}/neovim" ~/.vim
 # ln -s "${CFG_DIR}/shell/gitconfig" ~/.gitconfig
 # ln -s "${CFG_DIR}/shell/gitignore_global" ~/.gitignore_global
+
