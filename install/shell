@@ -2,23 +2,10 @@
 
 CFG_DIR=`pwd`
 
+touch "$CFG_DIR/custom/login_shell_init"
+printf '#!/bin/sh\n\nexport CFG_DIR="%s"\nexport CUR_SHELL="${0}"\nexport SHELL_TYPE="login"\nsource "%s"\n' "$CFG_DIR" "$CFG_DIR/shell/init" > "$CFG_DIR/custom/login_shell_init"
+
 # ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 # ln -s "${CFG_DIR}/neovim" ~/.vim
 # ln -s "${CFG_DIR}/shell/gitconfig" ~/.gitconfig
 # ln -s "${CFG_DIR}/shell/gitignore_global" ~/.gitignore_global
-
-create_zsh_file() {
-  touch "$HOME/.zsh$1" && printf '#!/bin/zsh\n\nCFG_DIR="%s"\nCUR_SHELL="$0"\nsource %s\n' "$CFG_DIR" "'${CFG_DIR}/shell/zsh$1'" > "$HOME/.zsh$1"
-}
-
-create_zsh_file rc
-create_zsh_file env
-touch "$HOME/.zshenv" \
-  && printf '#!/bin/zsh\n\nexport CFG_DIR="%s"\nexport CUR_SHELL="$0"\nsource %s\n' \
-    "$CFG_DIR" \
-    "'${CFG_DIR}/shell/zshenv'" > "$HOME/.zshenv"
-
-# Use VC Profile
-# mv ~/.profile ~/.profile_old
-touch ~/.profile
-echo "source \"${CFG_DIR}/shell/profile\"" > ~/.profile

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Contains common functions, and also handles dispatch to shell specific functions.
+
+export SHELL_DIR="$CFG_DIR/shell"
+source "$SHELL_DIR/env"
+
+if [[ $SHELL_TYPE = "login" ]]
+then
+  source "$SHELL_DIR/login/common"
+  shell_path="$SHELL_DIR/login/${CUR_SHELL:1}"
+  if [ -e $shell_path ]
+  then
+    source $shell_path
+  fi
+fi
+

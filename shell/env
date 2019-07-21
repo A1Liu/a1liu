@@ -1,9 +1,13 @@
 #!/bin/zsh
 
-if [[ $CFG_EXEC = 1 ]]; then
-  # Do nothing
-else
-  export CFG_EXEC=1
+# Contains environment variables that should be present in all executions of
+# a shell.
+#
+# Guard prevents this from being sourced in environments that already have it
+if [[ $CFG_ENV != 1 ]]; then
+  export CFG_ENV=1
+  export EDITOR='vim'
+  export VISUAL='vim'
 
   # Takes as arguments:
   # 1. path to source
