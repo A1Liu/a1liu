@@ -4,7 +4,6 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/instal
 
 cd config/
 CFG_DIR=`pwd`
-# echo "config dir is ${CFG_DIR}"
 cd ..
 
 ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
@@ -21,4 +20,4 @@ echo "#\!/bin/zsh\n\nsource \"${CFG_DIR}/shell/zshenv\"" > ~/.zshenv
 # Use VC Profile
 mv ~/.profile ~/.profile_old
 touch ~/.profile
-echo "source \"${project}/shell/profile\"" > ~/.profile
+echo "source \"${CFG_DIR}/shell/profile\"" > ~/.profile
