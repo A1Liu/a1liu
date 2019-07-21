@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 local ret_status="%(?:%{$fg[green]%}➜ :%{$fg[red]%}➜ )"
-PROMPT=' %{$fg[cyan]%}%c%{$reset_color%} \
+PROMPT='%{$fg[green]%}$(prompt_context)%{$fg[cyan]%}%c%{$reset_color%} \
 $(git_prompt_info)${ret_status}%{$reset_color%}'
 
 # https://gist.github.com/vergenzt/33a45a9a9218b38bd4bf
@@ -16,20 +16,19 @@ ZSH_THEME_GIT_PROMPT_CLEAN=""
 # declare -A EMOJI_LIST
 # EMOJI_LIST[rainbow]="🌈"
 # EMOJI_LIST[panda]="🐼"
-# EMOJI_NUMBERS=(0️⃣  1️⃣  2️⃣  3️⃣  4️⃣  5️⃣  6️⃣  7️⃣  8️⃣  9️⃣ )
+
 # choose_emoji() {
 #   printf "%s" "${EMOJI_LIST[panda]}"
 # }
 
-# prompt_context() {
-#   if [[ -n "$SSH_CLIENT" ]]; then
-#     prompt_segment black default "%(!.%{%F{yellow}%}.)$USER"
-#   elif [[ "$USER" == "aliu" ]]; then
-#     prompt_segment black default $(choose_emoji)
-#   else
-#     prompt_segment black default "$USER"
-#   fi
-# }
+prompt_context() {
+  if [[ -n "$SSH_CLIENT" ]]; then
+    "$USER "
+  elif [[ "$USER" == "aliu" ]]; then
+  else
+    "$USER "
+  fi
+}
 #
 # # Commands for prompt stuff
 # alias terse="prompt_dir() {; prompt_segment blue black '%c'; }"
