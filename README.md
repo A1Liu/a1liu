@@ -7,6 +7,7 @@ application settings, file organizations, etc.
 ```
 .
 ├── install ---- Scripts to install this configuration on a new machine
+    └── undo ---- Scripts that are run at startup
 ├── neovim ----- Vim configuration settings
 ├── shell ------ Configurations used by shell sessions
 └── startup ---- Scripts that are run at startup
@@ -14,6 +15,7 @@ application settings, file organizations, etc.
 
 ### TODO
 * [ ] Better method of checking for configuration than `-e ~/.aliu_config_installed`
+* [ ] Check for pre-existing files, stuff like that
 * [ ] Scripts to move stuff around w/ symbolic links
 * [ ] More cross-platform compatibility
 * [x] Zsh settings
@@ -33,8 +35,10 @@ The following scripts are usable:
 - `shell` - Installs editor configurations for a working shell. Install with
 
   ```
-  source install/shell
+  sh install/shell
   ```
+
+  in the root of the repository.
 
 
 

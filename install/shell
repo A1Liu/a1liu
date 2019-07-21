@@ -1,11 +1,6 @@
 #!/bin/sh
 
-# Eventually want to not have to connect to the server twice for a single file
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)" || exit 1
-
-cd config/
 CFG_DIR=`pwd`
-cd ..
 
 ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 ln -s "${CFG_DIR}/neovim" ~/.vim
