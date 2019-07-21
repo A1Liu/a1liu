@@ -6,8 +6,9 @@ application settings, file organizations, etc.
 
 ```
 .
+├── custom ----- Machine-specific configuration settings
 ├── install ---- Scripts to install this configuration on a new machine
-    └── undo --- Scripts that undo their counterpart in `install`
+│   └── undo --- Scripts that undo their counterpart in `install`
 ├── neovim ----- Vim configuration settings
 ├── shell ------ Configurations used by shell sessions
 └── startup ---- Scripts that are run at startup
