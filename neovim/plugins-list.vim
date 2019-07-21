@@ -2,7 +2,7 @@
 
 let s:plug_path = g:vim_home_path . '/autoload/plug.vim'
 if empty(glob(s:plug_path))
-  execute "silent !curl -fLo --create-dirs" . s:plug_path . ' "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
+  execute "silent !curl -fLo --create-dirs " . s:plug_path . ' "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
   autocmd VimEnter * PlugInstall
 endif
 
