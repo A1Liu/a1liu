@@ -6,7 +6,19 @@ cd config/
 CFG_DIR=`pwd`
 # echo "config dir is ${CFG_DIR}"
 cd ..
+
 ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 ln -s "${CFG_DIR}/neovim" ~/.vim
+ln -s "${CFG_DIR}/neovim" "~/.config/nvim"
 ln -s "${CFG_DIR}/shell/gitconfig" ~/.gitconfig
 ln -s "${CFG_DIR}/shell/gitignore_global" ~/.gitignore_global
+
+touch ~/.zshrc
+echo "#\!/bin/zsh\n\nsource \"${CFG_DIR}/shell/zshrc\"" > ~/.zshrc
+touch ~/.zshenv
+echo "#\!/bin/zsh\n\nsource \"${CFG_DIR}/shell/zshenv\"" > ~/.zshenv
+
+# Use VC Profile
+mv ~/.profile ~/.profile_old
+touch ~/.profile
+echo "source \"${project}/shell/profile\"" > ~/.profile
