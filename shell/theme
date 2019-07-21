@@ -23,10 +23,11 @@ ZSH_THEME_GIT_PROMPT_CLEAN=""
 
 prompt_context() {
   if [[ -n "$SSH_CLIENT" ]]; then
-    "$USER "
+    echo -n "%n@%m "
   elif [[ "$USER" == "aliu" ]]; then
+    echo -n ""
   else
-    "$USER "
+    echo -n "%n "
   fi
 }
 #
