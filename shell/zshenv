@@ -15,15 +15,13 @@ export PATH=$PATH:/Users/aliu/.nvm
 export PATH="$HOME/.rbenv/bin:$PATH"
 
 # Haskell
-if [ -e $HOME/.ghcup/env ]
-then
+if [ -e $HOME/.ghcup/env ]; then
   source $HOME/.ghcup/env
   export PATH="$HOME/.ghcup/env:$PATH"
 fi
 
 # Rust
-if [ -e $HOME/.cargo/env ]
-then
+if [ -e $HOME/.cargo/env ]; then
   source $HOME/.cargo/env
   export PATH="$HOME/.cargo/bin:$PATH"
 fi

@@ -9,7 +9,6 @@ cd ..
 
 ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 ln -s "${CFG_DIR}/neovim" ~/.vim
-ln -s "${CFG_DIR}/neovim" "~/.config/nvim"
 ln -s "${CFG_DIR}/shell/gitconfig" ~/.gitconfig
 ln -s "${CFG_DIR}/shell/gitignore_global" ~/.gitignore_global
 
