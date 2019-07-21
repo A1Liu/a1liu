@@ -1,27 +1,24 @@
 #!/bin/zsh
-export SHELL_DIR="$(dirname "$0")"
-export CFG_DIR="$(dirname "$SHELL_DIR")"
-export ZSHENV_EXPORT=1
 
-# Adding stuff to python path
-export PYTHONPATH="/Users/aliu/code/python/utils:${PYTHONPATH}"
+if [[ $ZSHENV_EXPORT != 1 ]]; then
+  export SHELL_DIR="$(dirname "$0")"
+  export CFG_DIR="$(dirname "$SHELL_DIR")"
+  export ZSHENV_EXPORT=1
 
-# Setting PATH for Python 3.7
-export PATH="/Library/Frameworks/Python.framework/Versions/3.7/bin:${PATH}"
+  # Takes as arguments:
+  # 1. path to source
+  # 2. command that should be available after source
+  source_if_necessary() {
+    if [ -e $2 ] && !command -v $1 >/dev/null 2>&1
+    then
+      source $1
+    else
+    fi
+  }
 
-export PATH=$PATH:/Users/aliu/.nvm
+  # Haskell
+  source_if_necessary $HOME/.ghcup/env cabal
 
-# RUBY
-export PATH="$HOME/.rbenv/bin:$PATH"
-
-# Haskell
-if [ -e $HOME/.ghcup/env ]; then
-  source $HOME/.ghcup/env
-  export PATH="$HOME/.ghcup/env:$PATH"
-fi
-
-# Rust
-if [ -e $HOME/.cargo/env ]; then
-  source $HOME/.cargo/env
-  export PATH="$HOME/.cargo/bin:$PATH"
+  # Rust
+  source_if_necessary $HOME/.cargo/env cargo
 fi

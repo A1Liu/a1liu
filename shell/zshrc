@@ -3,12 +3,13 @@
 export ZSH=~/.oh-my-zsh
 export EDITOR='vim'
 export VISUAL='vim'
+
+# Ensure that certain variables are set
 export SHELL_DIR="$(dirname "$0")"
 export CFG_DIR="$(dirname "$SHELL_DIR")"
 
-if [[ $ZSHENV_EXPORT != 1 ]]; then
-  source "${SHELL_DIR}/zshenv"
-fi
+# Source the environment file
+source "$SHELL_DIR/zshenv"
 
 skip_global_compinit=1
 DISABLE_UNTRACKED_FILES_DIRTY="true"
@@ -41,7 +42,7 @@ function branch() {
     if (( $# != 0 ))
     then
         current="$1"
-        >&2 "git" checkout "$current"
+        >&2 "git" checkout "${current}"
     fi
     echo "${current}"
 }
@@ -67,7 +68,7 @@ function pydev() {
         echo "Entering default python development environment..."
         source "$PYDEVENV"
     else
-        echo "executing `source $1/bin/activate`"
+        echo "executing \`source ${1}/bin/activate\`"
         source "$1/bin/activate"
     fi
     echo "Created alias 'deactivate' to exit environment."
@@ -103,13 +104,13 @@ function pydev() {
 # }
 
 # RUBY
-alias ruby_setup="eval \"\$(rbenv init -)\""
+alias ruby_setup="export PATH=\"\$HOME/.rbenv/bin:\$PATH\" && eval \"\$(rbenv init -)\" && unalias ruby_setup"
 
 # Node
 
 alias gulp="npm run gulp"
 alias prettier='unalias prettier && load_nvm && prettier'
-alias load_nvm='export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && alias load_nvm=true'
+alias load_nvm='export PATH=$PATH:/Users/aliu/.nvm && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && alias load_nvm=true'
 alias node='unalias node && load_nvm && node'
 alias npm='unalias npm && load_nvm && node'
 
