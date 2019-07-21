@@ -28,10 +28,12 @@ The following scripts are usable:
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)"
   ```
 
+  This script must be installed before all others.
+
 - `shell` - Installs editor configurations for a working shell. Install with
 
   ```
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/shell)"
+  source install/shell
   ```
 
 
