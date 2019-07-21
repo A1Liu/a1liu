@@ -1,12 +1,16 @@
-#!/bin/zsh
+#!/bin/sh
 
-export ZSH=~/.oh-my-zsh
 export EDITOR='vim'
 export VISUAL='vim'
 
-# Ensure that certain variables are set
-export SHELL_DIR="$(dirname "$0")"
-export CFG_DIR="$(dirname "$SHELL_DIR")"
+export SHELL_DIR="$CFG_DIR/shell"
+echo $CFG_DIR
+
+# TODO Replace OMZ and theme with programs in C
+# http://enki-tech.blogspot.com/2012/09/customizing-zsh-part-1-hooks-and-rprompt.html
+export ZSH=~/.oh-my-zsh
+source $ZSH/oh-my-zsh.sh
+source "${SHELL_DIR}/theme"
 
 # Source the environment file
 source "$SHELL_DIR/zshenv"
@@ -18,11 +22,6 @@ plugins=( git )
 
 # Tmux
 alias tmux="tmux -2"
-
-# TODO Replace OMZ and theme with programs in C
-# http://enki-tech.blogspot.com/2012/09/customizing-zsh-part-1-hooks-and-rprompt.html
-source $ZSH/oh-my-zsh.sh
-source "${SHELL_DIR}/theme"
 
 # Vim Commands
 alias :q!=exit
