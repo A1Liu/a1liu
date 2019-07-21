@@ -3,7 +3,7 @@
 CFG_DIR=`pwd`
 
 touch "$CFG_DIR/custom/login_shell_init"
-printf '#!/bin/sh\n\nexport CFG_DIR="%s"\nexport CUR_SHELL="${0}"\nexport SHELL_TYPE="login"\nsource "%s"\n' "$CFG_DIR" "$CFG_DIR/shell/init" > "$CFG_DIR/custom/login_shell_init"
+printf '#!/bin/sh\n\nexport CFG_DIR="%s"\nexport CUR_SHELL="${0}"\nexport SHELL_TYPE="login"\nsource "%s"\n' "$CFG_DIR" "$CFG_DIR/shells/init" > "$CFG_DIR/custom/login_shell_init"
 
 # ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 # ln -s "${CFG_DIR}/neovim" ~/.vim
