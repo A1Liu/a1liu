@@ -7,7 +7,10 @@ nnoremap <SPACE> <Nop>
 " Mapping <C-H> to escape
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
-cnoremap <C-H> <C-c>
+cnoremap <C-H> <C-C>
+
+" Unmapping <C-Q>
+nnoremap <C-Q> <Nop>
 
 " Saving with <C-S>
 nnoremap <C-S> :w<CR>
@@ -17,8 +20,8 @@ nnoremap <Leader><C-S> :FormatCode<CR>
 
 " Terminal keybindings
 if has('nvim')
-  tnoremap <C-\><C-\> <C-\><C-n>
-  tnoremap <C-H> <C-\><C-n>
+  tnoremap <C-\><C-\> <C-\><C-N>
+  tnoremap <C-H> <C-\><C-N>
 endif
 
 " Placeholder
