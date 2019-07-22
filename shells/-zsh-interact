@@ -1,7 +1,5 @@
 #!/bin/zsh
 
-# TODO Replace OMZ and theme with programs in C
-# http://enki-tech.blogspot.com/2012/09/customizing-zsh-part-1-hooks-and-rprompt.html
 export ZSH=~/.oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 

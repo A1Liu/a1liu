@@ -9,16 +9,15 @@ source "$SHELL_DIR/env"
 
 shell_path="$SHELL_DIR/${CUR_SHELL}"
 
-# Dispatch to common files based on properties of the shell, like IS_LOGIN_SHELL
-# or IS_INTERACTIVE_SHELL
-if [ $IS_INTERACTIVE_SHELL = true ]
-then
+# If we're interactive, dispatch to shells/bash-interact or something like it, instead
+# of shells/bash
+if [ $IS_INTERACTIVE_SHELL = true ]; then
   source "$SHELL_DIR/common-interact"
   shell_path="${shell_path}-interact"
 fi
 
-if [ -e $shell_path ]
-then
+# Source shell-specific stuff
+if [ -e $shell_path ]; then
   source $shell_path
 fi
 
