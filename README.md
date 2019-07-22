@@ -10,7 +10,8 @@ application settings, file organizations, etc.
 ├── install ---- Scripts to install this configuration on a new machine
 │   └── undo --- Scripts that undo their counterpart in `install`
 ├── neovim ----- Vim configuration settings
-├── shell ------ Configurations used by shell sessions
+├── shells ----- Configurations used by shell sessions
+├── programs --- Configurations used by programs that I use
 └── startup ---- Scripts that are run at startup
 ```
 

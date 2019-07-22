@@ -23,11 +23,8 @@ let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#wordcount#enabled = 0 " Causes a really dumb glitch
                                                " when creating visual blocks
 
-" Lightline
-" Plug 'itchyny/lightline.vim'
-
 " Markdown highlighting
-Plug 'godlygeek/tabular'
+" Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
@@ -52,17 +49,18 @@ Plug 'google/vim-glaive'
 
 " Linting
 " Plug 'w0rp/ale'
-let g:ale_enabled = 0
+" let g:ale_enabled = 0
 
 " Fuzzy finder
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'junegunn/fzf.vim' " Potentially unnecessary for what I do, really only
+" need fzf
 " Plug 'ctrlpvim/ctrlp.vim'
 
 " Cd to git root
-Plug 'airblade/vim-rooter'
-let g:rooter_manual_only = 1
-let g:rooter_use_lcd = 1
+" Plug 'airblade/vim-rooter'
+" let g:rooter_manual_only = 1
+" let g:rooter_use_lcd = 1
 
 " Rename files with Vim
 " Plug 'qpkorr/vim-renamer'
@@ -89,10 +87,10 @@ let g:EclimJavascriptLintEnabled = 0
 " Plug 'tpope/vim-fugitive'
 
 " Asynchronous Dispatch
-Plug 'tpope/vim-dispatch'
+" Plug 'tpope/vim-dispatch'
 
 " Unix Commands
-Plug 'tpope/vim-eunuch'
+" Plug 'tpope/vim-eunuch'
 
 " " Sensible Vim
 " Plug 'tpope/vim-sensible'
@@ -100,9 +98,3 @@ Plug 'tpope/vim-eunuch'
 call plug#end()
 
 call glaive#Install()
-
-" " TODO Get stuff to download this file from internet
-" " https://github.com/google/google-java-format/releases/download/google-java-format-1.7/google-java-format-1.7-all-deps.jar
-" execute "Glaive codefmt google_java_executable=\"java -jar"
-"       \ g:vim_home_path . "/format/google-java-format-1.7-all-deps.jar\""
-
