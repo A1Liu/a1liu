@@ -1,7 +1,9 @@
 #!/bin/sh
 
 CFG_DIR=`pwd`
+LOCAL_DIR="$LOCAL_DIR"
 
+# Template for machine-local shell endpoints
 read -r -d '' PRINT_TEMPLATE <<- EOF
 #!/bin/sh
 
@@ -12,19 +14,28 @@ IS_INTERACTIVE_SHELL=%s
 source "$CFG_DIR/shells/dispatch"
 EOF
 
-touch "$CFG_DIR/custom/shell_init"
-printf "${PRINT_TEMPLATE}\n" 'false' > "$CFG_DIR/custom/shell_init"
+# Sets up machine-local endpoints that can be soft-linked to while still
+# maintaining flexibility
+touch "$LOCAL_DIR/shell_init"
+printf "${PRINT_TEMPLATE}\n" 'false' > "$LOCAL_DIR/shell_init"
+touch "$LOCAL_DIR/shell_interact_init"
+printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
 
+# Function to check for existing configs, and move them if necessary
+check_move() {
+  if [ -e "~/$1" ]; then
+    mv "~/$1" "$LOCAL_DIR/$1"
+  fi
+  ln -s "`readlink -m ${CFG_DIR}/$2`" ~/$1
+}
 
-touch "$CFG_DIR/custom/shell_interact_init"
-printf "${PRINT_TEMPLATE}\n" 'true' > "$CFG_DIR/custom/shell_interact_init"
-
+# Create all the soft links
 ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
 ln -s "${CFG_DIR}/neovim" ~/.vim
 ln -s "${CFG_DIR}/programs/gitconfig" ~/.gitconfig
 ln -s "${CFG_DIR}/programs/gitignore_global" ~/.gitignore_global
-
-ln -s "${CFG_DIR}/custom/shell_interact_init" ~/.bashrc
-ln -s "${CFG_DIR}/custom/shell_interact_init" ~/.profile
-ln -s "${CFG_DIR}/custom/shell_interact_init" ~/.zshrc
+.
+ln -s "$LOCAL_DIR/shell_interact_init" ~/.bashrc
+ln -s "$LOCAL_DIR/shell_interact_init" ~/.profile
+ln -s "$LOCAL_DIR/shell_interact_init" ~/.zshrc
 
