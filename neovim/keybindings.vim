@@ -9,6 +9,10 @@ noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cnoremap <C-H> <C-C>
 
+" Using <C-J> and <C-K> for navigating the pop-up menu
+inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"
+inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
+
 " Unmapping <C-Q>
 nnoremap <C-Q> <Nop>
 

@@ -90,7 +90,7 @@ let g:EclimJavascriptLintEnabled = 0
 " Plug 'tpope/vim-dispatch'
 
 " Unix Commands
-" Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-eunuch'
 
 " " Sensible Vim
 " Plug 'tpope/vim-sensible'
