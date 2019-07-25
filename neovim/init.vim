@@ -17,15 +17,16 @@ execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 "" Keybindings
 execute 'source ' . g:vim_home_path . '/keybindings.vim'
 
+set wildignorecase wildmenu
+set splitright splitbelow
+set ignorecase smartcase " Ignore case except when including capital letters
 
 
 "" Visual Changes
 set number relativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
-set ignorecase smartcase " Ignore case except when including capital letters
 set cc=80
 set cul
-set splitright splitbelow
 " https://shapeshed.com/vim-statuslines/
 
 " Hiding the UI
