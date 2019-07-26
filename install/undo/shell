@@ -15,6 +15,7 @@ restore_move() {
 }
 
 # Remove my configs
+# Could probably be done a little bit cleaner with a for loop
 rm -f ~/.vimrc ~/.vim ~/.bashrc ~/.bash_profile ~/.profile ~/.zshrc
 
 restore_move .vimrc
