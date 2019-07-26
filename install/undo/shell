@@ -23,6 +23,3 @@ restore_move .bashrc
 restore_move .bash_profile
 restore_move .zshrc
 
-rm -f "$CFG_DIR/local/*"
-touch "$CFG_DIR/local/.gitkeep"
-
