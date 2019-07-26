@@ -9,7 +9,8 @@ export SHELL_DIR="$CFG_DIR/shells"
 # Set environment variables that should exist for all calls of a shell
 source "$SHELL_DIR/env"
 
-shell_path="$SHELL_DIR/${CUR_SHELL}"
+# Get rid of the "login shell" dash prefix because it doesn't help me
+shell_path="$(echo "$SHELL_DIR/${CUR_SHELL}"| tr -d "-")"
 
 # If we're interactive, dispatch to shells/bash-interact or something like it,
 # instead of shells/bash
