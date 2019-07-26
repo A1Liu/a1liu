@@ -1,6 +1,5 @@
 /*
 
-!/local/.gitkeep
 !/neovim
 !/shells
 !/programs
@@ -8,3 +7,10 @@
 !/LICENSE
 !/install
 !/startup
+
+!/local
+/local/*
+!/local/.gitkeep
+!/local/preconf
+/local/preconf/*
+!/local/preconf/.gitkeep
