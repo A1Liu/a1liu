@@ -1,7 +1,9 @@
 #!/bin/sh
 
-CFG_DIR=`pwd`
-LOCAL_DIR="$LOCAL_DIR"
+INSTALL_DIR="$(dirname "$(realpath "$0")")"
+CFG_DIR="$(dirname "$INSTALL_DIR")"
+LOCAL_DIR="${CFG_DIR}/local"
+MOVE_DIR="${LOCAL_DIR}/preconf"
 
 # Template for machine-local shell endpoints
 read -r -d '' PRINT_TEMPLATE <<- EOF
@@ -21,21 +23,20 @@ printf "${PRINT_TEMPLATE}\n" 'false' > "$LOCAL_DIR/shell_init"
 touch "$LOCAL_DIR/shell_interact_init"
 printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
 
+
 # Function to check for existing configs, and move them if necessary
 check_move() {
   if [ -e "~/$1" ]; then
-    mv "~/$1" "$LOCAL_DIR/$1"
+    mv "~/$1" "${MOVE_DIR}/$1"
   fi
-  ln -s "`readlink -m ${CFG_DIR}/$2`" ~/$1
+
+  ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" ~/$1
 }
 
 # Create all the soft links
-ln -s "${CFG_DIR}/neovim/init.vim" ~/.vimrc
-ln -s "${CFG_DIR}/neovim" ~/.vim
-ln -s "${CFG_DIR}/programs/gitconfig" ~/.gitconfig
-ln -s "${CFG_DIR}/programs/gitignore_global" ~/.gitignore_global
-.
-ln -s "$LOCAL_DIR/shell_interact_init" ~/.bashrc
-ln -s "$LOCAL_DIR/shell_interact_init" ~/.profile
-ln -s "$LOCAL_DIR/shell_interact_init" ~/.zshrc
+check_move .vimrc "neovim/init.vim"
+check_move .vim "neovim"
+check_move .bashrc "/local/shell_interact_init"
+check_move .bash_profile "/local/shell_interact_init"
+check_move .zshrc "/local/shell_interact_init"
 

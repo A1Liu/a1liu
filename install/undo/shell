@@ -1,0 +1,25 @@
+#!/bin/sh
+
+UNDO_DIR="$(dirname "$(realpath "$0")")"
+INSTALL_DIR="$(dirname "$UNDO_DIR")"
+CFG_DIR="$(dirname "$INSTALL_DIR")"
+
+LOCAL_DIR="${CFG_DIR}/local"
+MOVE_DIR="${LOCAL_DIR}/preconf"
+
+restore_move() {
+  LINK="$(echo "${CFG_DIR}/$1" | tr -s "/")"
+  if [ -e "$LINK" ]; then
+    mv "$LINK" "$(echo "~/$1" | tr -s "/")"
+  fi
+}
+
+# Remove my configs
+rm -f ~/.vimrc ~/.vim ~/.bashrc ~/.bash_profile ~/.profile ~/.zshrc
+
+restore_move .vimrc
+restore_move .vim
+restore_move .bashrc
+restore_move .bash_profile
+restore_move .zshrc
+
