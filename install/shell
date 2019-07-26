@@ -6,15 +6,12 @@ LOCAL_DIR="${CFG_DIR}/local"
 MOVE_DIR="${LOCAL_DIR}/preconf"
 
 # Template for machine-local shell endpoints
-read -r -d '' PRINT_TEMPLATE <<- EOF
-#!/bin/sh
-
-export CFG_DIR="$CFG_DIR"
-CUR_SHELL="\$0"
-IS_INTERACTIVE_SHELL=%s
-
-source "$CFG_DIR/shells/dispatch"
-EOF
+PRINT_TEMPLATE="#!/bin/sh\n\
+\n\
+export CFG_DIR=\"$CFG_DIR\"\nCUR_SHELL=\"\$0\"\n\
+IS_INTERACTIVE_SHELL=%s\n\
+\n\
+source \"$CFG_DIR/shells/dispatch\"\n"
 
 # Sets up machine-local endpoints that can be soft-linked to while still
 # maintaining flexibility
