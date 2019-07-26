@@ -5,6 +5,13 @@ CFG_DIR="$(dirname "$INSTALL_DIR")"
 LOCAL_DIR="${CFG_DIR}/local"
 MOVE_DIR="${LOCAL_DIR}/preconf"
 
+if [ "$DEBUG" = "true" ]; then
+  echo "Config directory is:         $CFG_DIR"
+  echo "Installation directory is:   $INSTALL_DIR"
+  echo "Machine-local directory is:  $LOCAL_DIR"
+  echo "Preconfig directory is:      $MOVE_DIR"
+fi
+
 # Template for machine-local shell endpoints
 PRINT_TEMPLATE="#!/bin/sh\n\
 \n\
@@ -12,6 +19,10 @@ export CFG_DIR=\"$CFG_DIR\"\nCUR_SHELL=\"\$0\"\n\
 IS_INTERACTIVE_SHELL=%s\n\
 \n\
 source \"$CFG_DIR/shells/dispatch\"\n"
+
+if [ "$DEBUG" = "true" ]; then
+  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF"
+fi
 
 # Sets up machine-local endpoints that can be soft-linked to while still
 # maintaining flexibility
@@ -23,16 +34,33 @@ printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
 
 # Function to check for existing configs, and move them if necessary
 check_move() {
-  file_path="$(realpath "~/$1")"
+  file_path="$(realpath ~)/$1"
+  if [ "$DEBUG" = "true" ]; then
+    echo "check_move'ing file path $file_path"
+  fi
+
   if test -f "$file_path"; then
+    if [ "$DEBUG" = "true" ]; then
+      echo "Detected existing file, moving to ${MOVE_DIR}/$1"
+    fi
     mv "$file_path" "${MOVE_DIR}/$1"
+  elif test -d "$file_path"; then
+    if [ "$DEBUG" = "true" ]; then
+      echo "Detected existing directory, moving to ${MOVE_DIR}/$1"
+    fi
+
+    mv "$file_path" "${MOVE_DIR}"
+  fi
+
+  if [ "$DEBUG" = "true" ]; then
+    echo "Creating softink to $(echo "${CFG_DIR}/$2"| tr -s "/")\n"
   fi
   ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" "$file_path"
 }
 
 # Create all the soft links
-check_move .vimrc "neovim/init.vim"
-check_move .vim "neovim"
+check_move .vimrc "/neovim/init.vim"
+check_move .vim "/neovim"
 check_move .bashrc "/local/shell_interact_init"
 check_move .bash_profile "/local/shell_interact_init"
 check_move .zshrc "/local/shell_interact_init"

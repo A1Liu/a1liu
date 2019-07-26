@@ -7,8 +7,21 @@ CFG_DIR="$(dirname "$INSTALL_DIR")"
 LOCAL_DIR="${CFG_DIR}/local"
 MOVE_DIR="${LOCAL_DIR}/preconf"
 
+if [ "$DEBUG" = "true" ]; then
+  echo "Config directory is:         $CFG_DIR"
+  echo "Installation directory is:   $INSTALL_DIR"
+  echo "Undo directory is:           $UNDO_DIR"
+  echo "Machine-local directory is:  $LOCAL_DIR"
+  echo "Preconfig directory is:      $MOVE_DIR"
+fi
+
 restore_move() {
   LINK="$(echo "${CFG_DIR}/$1" | tr -s "/")"
+
+  if [ "$DEBUG" = "true" ]; then
+    echo "restore_move'ing file path $LINK"
+  fi
+
   if [ -e "$LINK" ]; then
     mv "$LINK" "$(echo "~/$1" | tr -s "/")"
   fi

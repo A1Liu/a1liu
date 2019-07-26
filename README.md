@@ -18,9 +18,6 @@ application settings, file organizations, etc.
 ### TODO
 * [ ] Better method of checking for configuration than `-e ~/.aliu_config_installed`
 * [ ] Check for pre-existing files, stuff like that
-* [ ] Scripts to move stuff around w/ symbolic links
-* [ ] More cross-platform compatibility
-* [x] Zsh settings
 
 ### Installation Scripts
 The following scripts are usable:
