@@ -23,11 +23,11 @@ printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
 
 # Function to check for existing configs, and move them if necessary
 check_move() {
-  if [ -e "~/$1" ]; then
-    mv "~/$1" "${MOVE_DIR}/$1"
+  file_path="$(realpath "~/$1")"
+  if test -f "$file_path"; then
+    mv "$file_path" "${MOVE_DIR}/$1"
   fi
-
-  ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" ~/$1
+  ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" "$file_path"
 }
 
 # Create all the soft links
