@@ -5,6 +5,7 @@ E="\[\033["
 branch() {
   git branch 2>/dev/null | grep '^*' | colrm 1 2 | sed 's/$/ /g'
 }
+
 dirty() {
   ([[ $(git status --porcelain 2>/dev/null | tail -n1) != "" ]] && printf "\b\033[0;31m~")
 }
