@@ -6,24 +6,20 @@ application settings, file organizations, etc.
 
 ```
 .
-├── custom ----- Machine-specific configuration settings
-├── install ---- Scripts to install this configuration on a new machine
-│   └── undo --- Scripts that undo their counterpart in `install`
-├── neovim ----- Vim configuration settings
-├── shells ----- Configurations used by shell sessions
-├── programs --- Configurations used by programs that I use
-└── startup ---- Scripts that are run at startup
+├── local -------- Machine-specific configuration settings
+│   └── preconf -- Files that my configurations replaced
+├── install ------ Scripts to install this configuration on a new machine
+│   └── undo ----- Scripts that undo their counterpart in `install`
+├── neovim ------- Vim configuration settings
+├── shells ------- Configurations used by shell sessions
+├── programs ----- Configurations used by programs that I use
+└── startup ------ Scripts that are run at startup
 ```
-
-### TODO
-* [ ] Better method of checking for configuration than `-e ~/.aliu_config_installed`
-* [ ] Check for pre-existing files, stuff like that
 
 ### Installation Scripts
 The following scripts are usable:
 
-- `bootstrap` - Installs the repository, checking whether or not you've already
-  installed it. Install with
+- `bootstrap` - Installs the repository to the current directory. Install with
 
   ```
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)"
@@ -36,8 +32,5 @@ The following scripts are usable:
   ```
   sh install/shell
   ```
-
-  in the root of the repository.
-
 
 

@@ -1,9 +1,8 @@
 "" Plugins
 
-let s:plug_path = g:vim_home_path . '/autoload/plug.vim'
-if empty(glob(s:plug_path))
-  execute "silent !curl -fLo " . s:plug_path . ' --create-dirs  "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
-  autocmd VimEnter * PlugInstall
+if g:first_install
+  execute "silent !curl -fLo " . g:plug_path . ' --create-dirs  "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
+  autocmd VimEnter * PlugInstall --sync | so $MYVIMRC
 endif
 
 call plug#begin(g:vim_home_path . '/plugged')
@@ -97,4 +96,6 @@ Plug 'tpope/vim-eunuch'
 
 call plug#end()
 
-call glaive#Install()
+if !g:first_install
+  call glaive#Install()
+endif

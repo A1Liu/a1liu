@@ -3,6 +3,8 @@
 " https://github.com/tonsky/FiraCode
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:placeholder = '<++>'
+let g:plug_path = g:vim_home_path . '/autoload/plug.vim'
+let g:first_install = empty(glob(g:plug_path))
 
 "" Security
 set nomodeline modelines=0
@@ -78,7 +80,9 @@ let g:airline_theme='base16_solarized'
 set background=dark
 let g:airline_solarized_bg='dark'
 " endif
-colorscheme solarized8_high
+if !g:first_install
+  colorscheme solarized8_high
+endif
 
 " Showing non-printing characters
 set list
