@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Tmux
-alias tmux="tmux -2"
-
 # Vim Commands
 alias :q!=exit
 export ECLIM_SERVER_SCRIPT="${CFG_DIR}/neovim/eclimd"

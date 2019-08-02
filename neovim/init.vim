@@ -11,7 +11,12 @@ set nomodeline modelines=0
 
 "" Compatibility
 set guicursor= " don't want unknown characters in linux
-set t_Co=256
+
+" Getting terminal colors to work
+" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
+let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+set termguicolors
 
 "" Plugins
 execute 'source ' . g:vim_home_path . '/plugins-list.vim'
