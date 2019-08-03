@@ -2,6 +2,7 @@
 
 # Vim Commands
 alias :q!=exit
+alias :q=exit
 export ECLIM_SERVER_SCRIPT="${CFG_DIR}/neovim/eclimd"
 
 # Git
