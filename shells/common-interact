@@ -81,7 +81,8 @@ function pydev() {
 # }
 
 # RUBY
-alias ruby_setup="export PATH=\"\$HOME/.rbenv/bin:\$PATH\" && eval \"\$(rbenv init -)\" && unalias ruby_setup"
+alias ruby_setup="export PATH=\"\$HOME/.rbenv/bin:\$PATH\" && eval \"\$(rbenv init -)\" && alias ruby_setup=true"
+alias jekyll="ruby_setup && unalias jekyll && jekyll"
 
 # Node
 alias gulp="npm run gulp"
