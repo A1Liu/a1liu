@@ -20,6 +20,9 @@ if [[ $CFG_SHELL_ENV != 1 ]]; then
     fi
   }
 
+  # Adding stuff to python path
+  export PYTHONPATH="/Users/aliu/code/python/utils:${PYTHONPATH}"
+
   # Haskell
   source_if_necessary $HOME/.ghcup/env cabal
 
