@@ -5,6 +5,9 @@ alias :q!=exit
 alias :q=exit
 export ECLIM_SERVER_SCRIPT="${CFG_DIR}/neovim/eclimd"
 
+# SSH
+alias ssh='TERM=xterm-256color ssh'
+
 # Git
 function branch() {
     >&2 echo "Getting current branch..."
