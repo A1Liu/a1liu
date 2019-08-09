@@ -16,8 +16,9 @@ inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
 " Unmapping <C-Q>
 nnoremap <C-Q> <Nop>
 
-" Saving with <C-S>
-nnoremap <C-S> :w<CR>
+" Not portable
+" " Saving with <C-S>
+" nnoremap <C-S> :w<CR>
 
 " Formatting with <Leader><S>
 nnoremap <Leader><C-S> :FormatCode<CR>
