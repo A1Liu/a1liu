@@ -5,6 +5,8 @@ let mapleader=" "
 nnoremap <SPACE> <Nop>
 
 " Mapping <C-H> to escape
+noremap <C-C> <Esc>
+noremap! <C-C> <Esc>
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cnoremap <C-H> <C-C>
