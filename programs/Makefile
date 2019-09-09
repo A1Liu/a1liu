@@ -53,14 +53,34 @@ endif
 # or something like that
 .PHONY: debug release clean all check makefile_debug directories test
 .SUFFIXES:
-ifneq ($(DEBUG), 1)
+ifeq ($(DEBUG), )
 else
 define dbg
 $(info $(shell printf "\033[1mDEBUG\033[0m:") $(1))
 endef
-$(call dbg,Debug mode active for Makefile)
-endif
 
+# Maybe make this use the value of DEBUG
+define dbg_var
+$(info $(shell printf "\033[1mDEBUG\033[0m:") Variable `$(1)` defined as "$($(1))")
+endef
+$(call dbg,Debug mode active for Makefile)
+
+$(call dbg_var,CC)
+$(call dbg_var,CXX)
+$(call dbg_var,OUT)
+$(call dbg_var,CFLAGS)
+$(call dbg_var,CXXFLAGS)
+$(call dbg_var,CPPFLAGS)
+$(call dbg_var,LDFLAGS)
+$(call dbg_var,DEPFLAGS)
+$(call dbg_var,SRC)
+
+# ------- WRITER DEFINED VARIABLES -------
+
+ARTDIR = target
+DEPDIR = deps
+MKR = .dirstamp
+endif
 
 DONE = \033[1;32mDone\033[0m!
 ERROR = \033[1;31mFailed\033[0m
@@ -69,8 +89,11 @@ NAMES := $(addprefix $(SRC),$(NAMES))
 OBJS = $(patsubst %,$(ARTDIR)/$(1)/%.o,$(basename $(SRCS)))
 DEPS = $(patsubst %,$(DEPDIR)/$(1)/%.o,$(basename $(SRCS)))
 
-# -------- TARGET DEFINITIONS --------
+$(call dbg_var,NAMES)
+$(call dbg_var,OBJS)
+$(call dbg_var,DEPS)
 
+# -------- TARGET DEFINITIONS --------
 
 debug: $(ARTDIR)/debug/$(MKR) $(DEPDIR)/$(MKR) $(call OBJS,$@) $(call DEPS,$@)
 
