@@ -1,7 +1,7 @@
 # Dear reader,
 #
-# I had a lot of fun writing this Makefile (i.e. everything after writer defined
-# variables). Please feel free to copy it, but if possible preserve this comment
+# I had a lot of fun writing this Makefile (i.e. everything after "writer defined
+# variables"). Please feel free to copy it, but if possible preserve this comment
 # block when you do (lines 1 - 11).
 #
 # Best,
@@ -11,27 +11,30 @@
 # P.S. I'm pretty sure if you include whitespace in your filenames, this will break.
 
 # -------- USER DEFINED VARIABLES --------
-CXX = clang++
-FLAGS = --std=c++11 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wunused -pedantic -fcolor-diagnostics
+
+NAMES := main argparse output argread maze path genetic
+
+CC = clang -fcolor-diagnostics
+CXX = clang++ -fcolor-diagnostics
 OUT = lab
 
-# -MF -MD to auto generate make files
-# use include to copy those files into make
+# C++ Flags
+CFLAGS :=
+# C++ Flags
+CXXFLAGS := -Wnon-virtual-dtor
+# C/C++ Flags
+CPPFLAGS := -Wall -Wextra -Wshadow -Wunused -pedantic
+# Linking Flags
+LDFLAGS :=
+DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$(1)/$*.d
 
-SRC = src
-NAMES = main.cc argparse.cc output.cc argread.cc maze.cc path.cc genetic.cc
-TEMPLATE_HEADERS = thread_pool threadsafe_stack bench
-HEADERS = path output argparse argread maze genetic $(TEMPLATE_HEADERS)
-
-# Uncomment this to make this file print out the commands it's calling. You can
-# also call make using VERBOSE=1, i.e. `make VERBOSE=1 <target>` for the same
-# effect for a specific run.
-# VERBOSE = 1
-
+SRC := src
+NAMES := $(addsuffix .cc,$(NAMES))
 
 # ------- WRITER DEFINED VARIABLES -------
 
-ART = target
+ARTDIR = target
+DEPDIR = deps
 MKR = .dirstamp
 
 # Eventually make this partially user defined, i.e. by expanding a TARGET variable
@@ -46,95 +49,68 @@ define v
 endef
 endif
 
-DONE = \033[1;32mDone\033[0m!\n
-ERROR = \033[1;31mFailed\033[0m:\n\n
+# Eventually make this partially user defined, i.e. by expanding a TARGET variable
+# or something like that
+.PHONY: debug release clean all check makefile_debug directories test
+.SUFFIXES:
+ifneq ($(DEBUG), 1)
+else
+define dbg
+$(info $(shell printf "\033[1mDEBUG\033[0m:") $(1))
+endef
+$(call dbg,Debug mode active for Makefile)
+endif
 
-# Will have to do conversion from '/' character to '#' character eventually
-# And then make a meta-target function and stuff like that
-OBJ_NAMES = $(addsuffix .o, $(basename $(NAMES)))
+
+DONE = \033[1;32mDone\033[0m!
+ERROR = \033[1;31mFailed\033[0m
+
+NAMES := $(addprefix $(SRC),$(NAMES))
+OBJS = $(patsubst %,$(ARTDIR)/$(1)/%.o,$(basename $(SRCS)))
+DEPS = $(patsubst %,$(DEPDIR)/$(1)/%.o,$(basename $(SRCS)))
 
 # -------- TARGET DEFINITIONS --------
 
-debug: $(addprefix $(ART)/debug/,$(OBJ_NAMES))
-	$(call compile_bin,debug,-O0 -g)
 
-release: $(addprefix $(ART)/release/,$(OBJ_NAMES))
-	$(call compile_bin,release,-O3)
+debug: $(ARTDIR)/debug/$(MKR) $(DEPDIR)/$(MKR) $(call OBJS,$@) $(call DEPS,$@)
+
+release: $(ARTDIR)/release/$(MKR) $(DEPDIR)/$(MKR) $(call OBJS,$@) $(call DEPS,$@)
 
 clean:
 	@printf "Cleaning compilation artifacts...$v "
-	rm -rf $(ART)
-	@printf "$(DONE)"
+	rm -rf $(ARTDIR)
+	rm -rf $(DEPDIR)
+	@printf "$(DONE)\n"
 
-directories: $(ART)/debug/$(MKR) $(ART)/release/$(MKR)
+directories: $(ARTDIR)/debug/$(MKR) $(ARTDIR)/release/$(MKR) $(DEPDIR)/debug/$(MKR) $(DEPDIR)/release/$(MKR)
 
-check: $(addprefix $(ART)/check/,$(OBJ_NAMES))
+check: $(addprefix $(ARTDIR)/check/,$(OBJ_NAMES))
 	@printf "Check complete!\n"
 
 makefile_debug:
 	$(info $n------- Calling new_recipe,main,$$(TEMPLATE_HEADERS),$$(TEMPLATE_HEADERS) -------)
 	$(info $(call new_recipe,main,$(TEMPLATE_HEADERS),$(TEMPLATE_HEADERS)))
 	$(info $n------------ Calling path with various arguments ------------)
-	$(info $(call path,ART,debug,))
-	$(info $(call path,ART,release,MKR))
+	$(info $(call path,ARTDIR,debug,))
+	$(info $(call path,ARTDIR,release,MKR))
 	$(info $(call path,SRC,release,MKR))
 	$(info $n-------------- Creating Unique Local Variable ---------------)
-	$(info $@_MODE_PATH := $(call path,ART,debug))
+	$(info $@_MODE_PATH := $(call path,ARTDIR,debug))
 
 all: directories debug release
 
-# ------ META-RECIPE DEFINITIONS -----
+# ------- FUNCTION DEFINITIONS -------
+
+# Lowercase
+lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(subst G,g,$(subst H,h,$(subst I,i,$(subst J,j,$(subst K,k,$(subst L,l,$(subst M,m,$(subst N,n,$(subst O,o,$(subst P,p,$(subst Q,q,$(subst R,r,$(subst S,s,$(subst T,t,$(subst U,u,$(subst V,v,$(subst W,w,$(subst X,x,$(subst Y,y,$(subst Z,z,$1))))))))))))))))))))))))))
+
+# Uppercase
+uc = $(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst f,F,$(subst g,G,$(subst h,H,$(subst i,I,$(subst j,J,$(subst k,K,$(subst l,L,$(subst m,M,$(subst n,N,$(subst o,O,$(subst p,P,$(subst q,Q,$(subst r,R,$(subst s,S,$(subst t,T,$(subst u,U,$(subst v,V,$(subst w,W,$(subst x,X,$(subst y,Y,$(subst z,Z,$1))))))))))))))))))))))))))
 
 # Takes arguments:
 define path
 $(or $($(1)),$(1))$(addprefix /,$(or $($(2)), $(2)))$(addprefix /,$(or $($(3)),$(3)))
 endef
-
-# Handles the creation of a new recipe in a specific compilation mode.
-#
-# Takes arguments:
-# 1. Compilation mode: either release or debug
-# 2. File name: name of file without file extension
-# 3. Header files: header files of the form %.hpp, without the extension
-# 4. Header files: header files of the form %.cc, without the extension
-define _new_recipe
-$(eval $@OBJ_FILE := $(call path,ART,$(1),$(basename $(2)).o))
-$(eval $@DIR_MARKER := $(call path,ART,$(1),MKR))
-$($@OBJ_FILE) : $(SRC)/$(2) $(addprefix $(SRC)/,$(3)) $($@DIR_MARKER)
-	$$(call compile_obj,$(1),$(2),$(4))
-endef
-
-# Handles the creation of a new recipe in all compilation modes.
-#
-# Takes arguments:
-# 1. File name: name of file without file extension
-# 2. Header files: header files of the form %.hpp, without the extension
-# 3. Header files: header files of the form %.cc, without the extension
-define new_recipe
-$(call _new_recipe,debug,$(1),$(2),$(3),-O0 -g)
-
-$(call _new_recipe,release,$(1),$(2),$(3),-O3)
-
-$(call _new_recipe,check,$(1),$(2),$(3),-fsyntax-only)
-endef
-
-# -------- RECIPE DEFINITIONS --------
-
-$(eval $(call new_recipe,main.cc,$(HEADERS:=.hpp) $(TEMPLATE_HEADERS:=.hpp.cc)))
-
-$(eval $(call new_recipe,argparse.cc,argread.hpp argparse.hpp output.hpp))
-
-$(eval $(call new_recipe,argread.cc,argread.hpp))
-
-$(eval $(call new_recipe,output.cc,output.hpp))
-
-$(eval $(call new_recipe,maze.cc,maze.hpp))
-
-$(eval $(call new_recipe,path.cc,path.hpp maze.hpp output.hpp))
-
-$(eval $(call new_recipe,genetic.cc,genetic.hpp thread_pool.hpp argparse.hpp path.hpp maze.hpp))
-
-# --- HELPER FUNCTION DEFINITIONS ----
 
 # Generates a newline character
 define n
@@ -158,20 +134,20 @@ addaffix = $(addprefix $(1),$(addsuffix $(2),$(3)))
 # 1. Compilation mode: either release or debug
 # 2. File name: name of file without file extension
 # 3. Flags: additional flags to pass to the compiler
-define compile_bin
-$(eval $@ERROR_PATH := $(call path,ART,$(1))/.error)
-$(eval $@OBJ_FILES := $(addprefix $(ART)/$(1)/,$(OBJ_NAMES)))
-
-@printf "Building binary in $(call make_bold,$(1)) mode...$v "
-( \
-	$(CXX) -o $(OUT) \
-		$(FLAGS) -lpthread $(3) \
-		$($@OBJ_FILES) \
-		2>"$($@ERROR_PATH)" \
-	&& printf "$(DONE)" \
-	&& cat "$($@ERROR_PATH)" \
-) || (printf "$(ERROR)" && cat "$($@ERROR_PATH)" && false)
-endef
+# define compile_bin
+# $(eval $@ERROR_PATH := $(call path,ARTDIR,$(1))/.error)
+# $(eval $@OBJ_FILES := $(addprefix $(ARTDIR)/$(1)/,$(OBJ_NAMES)))
+# 
+# @printf "Building binary in $(call make_bold,$(1)) mode...$v "
+# ( \
+# 	$(CXX) -o $(OUT) \
+# 		$(FLAGS) -lpthread $(3) \
+# 		$($@OBJ_FILES) \
+# 		2>"$($@ERROR_PATH)" \
+# 	&& printf "$(DONE)" \
+# 	&& cat "$($@ERROR_PATH)" \
+# ) || (printf "$(ERROR)" && cat "$($@ERROR_PATH)" && false)
+# endef
 
 # Compiles a single .o file from a single C or C++ file.
 #
@@ -179,39 +155,44 @@ endef
 # 1. Compilation mode: either release or debug
 # 2. File name: name of single file without file extension
 # 3. Flags: additional flags to pass to the compiler
-define compile_obj
-$(eval $@MODE_PATH := $(call path,ART,$(1)))
-$(eval $@OBJ_FILE := $(call path,ART,$(1),$(basename $(2)).o))
-$(eval $@ERROR_PATH := $(call path,ART,$(1))/.error)
-
-@printf "Building compilation artifact \`$(basename $(2)).o' in $(call make_bold,$(1)) mode...$v "
-@touch "$($@OBJ_FILE)"
-( \
-	$(CXX) -o "$($@OBJ_FILE)" -c \
-		$(FLAGS) -pthread $(3) \
-		"$(SRC)/$(2)" 2>"$($@ERROR_PATH)" \
-	&& printf "$(DONE)" \
-	&& cat "$($@ERROR_PATH)" \
-) \
-|| ( \
-	printf "$(ERROR)" \
-	&& cat "$($@ERROR_PATH)" \
-	&& rm "$($@OBJ_FILE)" 2>/dev/null \
-	&& false \
-)
-endef
+# define compile_obj
+# $(eval $@MODE_PATH := $(call path,ARTDIR,$(1)))
+# $(eval $@OBJ_FILE := $(call path,ARTDIR,$(1),$(basename $(2)).o))
+# $(eval $@ERROR_PATH := $(call path,ARTDIR,$(1))/.error)
+# 
+# @printf "Building compilation artifact \`$(basename $(2)).o' in $(call make_bold,$(1)) mode...$v "
+# @touch "$($@OBJ_FILE)"
+# ( \
+# 	$(CXX) -o "$($@OBJ_FILE)" -c \
+# 		$(FLAGS) -pthread $(3) \
+# 		"$(SRC)/$(2)" 2>"$($@ERROR_PATH)" \
+# 	&& printf "$(DONE)" \
+# 	&& cat "$($@ERROR_PATH)" \
+# ) \
+# || ( \
+# 	printf "$(ERROR)" \
+# 	&& cat "$($@ERROR_PATH)" \
+# 	&& rm "$($@OBJ_FILE)" 2>/dev/null \
+# 	&& false \
+# )
+# endef
 
 # Builds the directory structure for a specific compilation mode.
 #
 # Takes arguments:
-# 1. Compilation mode: either release or debug
+# 1. Compilation folder: folder that holds compilation artifacts
 define build_dir
 	@if [ $(VERBOSE) ]; then \
-		printf "$(call make_bold,VERBOSE): Making the directory associated with \`$(call make_bold,$(1))' mode...$v "; fi
-	mkdir -p $(ART)/$(1) && touch $(ART)/$(1)/$(MKR) && touch $(ART)/$(1)/.error
+		printf "$(call make_bold,VERBOSE): Making the directory associated with \`$(call make_bold,$(dir $(1)))' mode...$v "; fi
+	mkdir -p $(1) && touch $(1)/$(MKR) && touch $(1)/.error
 	@if [ $(VERBOSE) ]; then \
 		printf "$(DONE)"; fi
 endef
 
-$(ART)/%/$(MKR):
-	$(call build_dir,$*)
+$(DEPDIR)/$(MKR):
+	$(call build_dir,$(@D))
+
+$(ARTDIR)/%/$(MKR):
+	$(call build_dir,$(@D))
+
+
