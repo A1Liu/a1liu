@@ -113,14 +113,13 @@ $(ART)/bin: $(ART)/$(MKR) $(DEPDIR)/$(MKR) $(OBJS)
 	@printf "$(DONE)\n"
 
 $(ART)/%.o : $(SRC)/%.cc $(DEPDIR)/%.dep
-	$$(call compile_obj,debug,$$(call get_target_flags,$(1),cpp) $$(call get_target_flags,$(1),cxx),$$@,$(SRC)/$$*.cc,$(DEPDIR)/$$*.dep)
+	$$(call compile_obj,$(1),$$(call get_target_flags,$(1),cpp) $$(call get_target_flags,$(1),cxx),$$@,$(SRC)/$$*.cc,$(DEPDIR)/$$*.dep)
 
 $(ART)/$(MKR):
 	$$(call build_dir,$(ART))
 
 endef
 
-#$(info $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
 $(eval $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
 
 clean:
@@ -160,16 +159,13 @@ endef
 # 5. Dependency file
 define compile_obj
 $(eval ERR := $(ARTDIR)/$(1)/$(ERROR_MKR))
-$(call vexe, \
-	printf "Building compilation artifact \`$(3)\`\
-	in $(call make_bold,$(1)) mode... $v" \
-)
+@printf "Building compilation artifact \`$(3:$(ARTDIR)/$(1)/%=%)\` in $(call make_bold,$(1)) mode... $v"
 
 @mkdir -p $(dir $(3))
 @mkdir -p $(dir $(5))
 @touch $(3)
 
-$(call vexe,$(call __compile_obj,$(2),$(3),$(4),$(5),$(ERR)))
+$(call __compile_obj,$(2),$(3),$(4),$(5),$(ERR))
 endef
 
 # Compile an object file.
@@ -179,17 +175,24 @@ endef
 # 3. Source file
 # 4. Dependency file
 # 5. Error file
-define __compile_obj
+define ___compile_obj
 	( \
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(1) \
-	-MD -MP -MF $(4) \
-	-o $(2) $(3) 2>"$(5)" \
-	&& printf "$(DONE)\n" && cat "$(5)" \
 	) || ( \
 		printf "$(ERROR)\n" \
 		&& cat "$(5)" \
 		&& rm "$(2)" 2>/dev/null \
 		&& false \
+	)
+endef
+
+define __compile_obj
+	$(call run_with_error, \
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(1) \
+		-MD -MP -MF $(4) \
+		-o $(2) $(3) \
+		&& printf "$(DONE)\n", \
+	rm "$(2)", \
+	$(5) \
 	)
 endef
 
@@ -200,14 +203,24 @@ endef
 # 2. Command to run to handle errors
 # 3. File to hold errors temporarily
 define run_with_error
-	( \
-		( $(1) ) 2>"$(3)" && cat "$(3)" \
-	) || ( \
-		printf "$(ERROR)\n" \
-		&& cat "$(3)" \
-		&& $(2) \
-		&& false \
-	)
+$(call __run_with_error,$(strip $(1)),$(strip $(2)),$(strip $(3)))
+endef
+
+# Runs a shell command, with nice error printing.
+#
+# Arguments
+# 1. Command to run
+# 2. Command to run to handle errors
+# 3. File to hold errors temporarily
+define __run_with_error
+( \
+	( $(1) ) 2>"$(3)" && cat "$(3)" \
+) || ( \
+	printf "$(ERROR)\n" \
+	&& cat "$(3)" \
+	&& $(2) \
+	&& false \
+)
 endef
 
 # Eventually make this partially user defined, i.e. by expanding a TARGET variable
@@ -221,6 +234,14 @@ define vexe
 	$(subst \',\\',$(subst \,\\,$(strip $(1))))\
 	\n$(NORMAL)'
 @$(1)
+endef
+define run_with_error
+
+	printf '\033[1mVERBOSE\033[0m:\033[0;33m\
+	$(subst \',\\',$(subst \,\\,$(strip $(1))))\n$(NORMAL)'
+
+$(call __run_with_error,$(strip $(1)),$(strip $(2)),$(strip $(3)))
+
 endef
 endif
 
@@ -245,8 +266,8 @@ endif
 # 1. Compilation folder: folder that holds compilation artifacts
 define build_dir
 	@if [ $(VERBOSE) ]; then \
-		printf "$(call make_bold,VERBOSE): Making the directory associated with \`$(call make_bold,$(dir $(1)))' mode... $v"; fi
-	mkdir -p $(1) && touch $(1)/$(MKR) && touch $(1)/.error
+		printf "$(call make_bold,VERBOSE): Making the directory associated with \`$(call make_bold,$(notdir $(1)))' mode... $v"; fi
+	$(call vexe,mkdir -p $(1) && touch $(1)/$(MKR) && touch $(1)/.error)
 	@if [ $(VERBOSE) ]; then \
 		printf "$(NORMAL)$(call make_bold,VERBOSE): $(DONE)\n"; fi
 endef
