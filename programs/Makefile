@@ -35,7 +35,7 @@ LDFLAGS :=
 # Compilation targets
 TARGETS := debug release check
 # Flags to use for target `check`
-DEBUG_FLAGS := -O0
+DEBUG_FLAGS := -O0 -g
 _FLAGS := -O3
 CHECK_FLAGS := -fsyntax-only
 
