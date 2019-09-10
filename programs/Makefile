@@ -56,14 +56,13 @@ NORMAL = \033[0m
 .SECONDARY:
 
 PATHS := $(addprefix $(SRC)/,$(NAMES))
-DEPS := $(patsubst %,$(DEPDIR)/%.o,$(basename $(NAMES)))
+DEPS := $(patsubst %,$(DEPDIR)/%.dep,$(basename $(NAMES)))
 get_objs = $(patsubst %,$(ARTDIR)/$(1)/%.o,$(basename $(NAMES)))
 
 # -------- TARGET DEFINITIONS --------
 
 define target_recipes
 $(eval ART := $(ARTDIR)/$(1))
-$(eval DEP := $(DEPDIR)/$(1))
 $(eval OBJS := $(call get_objs,$(1)))
 
 $(1): $(ART)/bin
@@ -73,8 +72,8 @@ $(1): $(ART)/bin
 $(ART)/bin: $(ART)/$(MKR) $(DEPDIR)/$(MKR) $(OBJS)
 	@$(CXX) $(LDFLAGS) $(OBJS) -o $(ART)/bin
 
-$(ART)/%.o : $(SRC)/%.cc
-	$$(call compile_obj,debug,$$(call get_target_flags,$(1)),$$@,$(SRC)/$$*.cc,$(DEP))
+$(ART)/%.o : $(SRC)/%.cc $(DEPDIR)/%.dep
+	$$(call compile_obj,debug,$$(call get_target_flags,$(1)),$$@,$(SRC)/$$*.cc,$(DEPDIR)/$$*.dep)
 
 $(ART)/$(MKR):
 	$$(call build_dir,$(ART))
@@ -127,6 +126,7 @@ $(call vexe, \
 )
 
 @mkdir -p $(dir $(3))
+@mkdir -p $(dir $(5))
 @touch $(3)
 
 $(call vexe,$(call __compile_obj,$(2),$(3),$(4),$(5),$(ERR)))
@@ -209,3 +209,5 @@ uc = $(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst f,F,$(s
 # ------- INCLUDE DEFINITIONS --------
 
 -include $(DEPS)
+
+$(DEPDIR)/%.dep: ;
