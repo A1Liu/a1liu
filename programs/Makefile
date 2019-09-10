@@ -35,6 +35,8 @@ LDFLAGS :=
 # Compilation targets
 TARGETS := debug release check
 # Flags to use for target `check`
+DEBUG_FLAGS := -O0
+_FLAGS := -O3
 CHECK_FLAGS := -fsyntax-only
 
 NAMES := $(addsuffix .cc,$(NAMES))
