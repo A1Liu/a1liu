@@ -35,7 +35,7 @@ LDFLAGS :=
 # Compilation targets
 TARGETS := debug release check
 # Flags to use for target `check`
-DEBUG_FLAGS := -O0 -g
+DEBUG_CXXFLAGS := -O0 -g
 _FLAGS := -O3
 CHECK_FLAGS := -fsyntax-only
 
@@ -44,14 +44,46 @@ NAMES := $(addsuffix .cc,$(NAMES))
 
 # ------- WRITER DEFINED VARIABLES -------
 
-ARTDIR = target
-DEPDIR = deps
-MKR = .dirstamp
-DONE_MKR = .done
-ERROR_MKR = .error
-DONE = \033[1;32mDone\033[0m!
-ERROR = \033[1;31mFailed\033[0m!
-NORMAL = \033[0m
+define def
+ifndef $(strip $(1))
+	$(strip $(1)) := $(strip $(2))
+endif
+
+endef
+
+define fun
+ifndef $(strip $(1))
+	$(strip $(1)) = $(strip $(2))
+endif
+
+endef
+
+
+# User-defined values
+$(eval $(call def,    SRC,                src))
+$(eval $(call def,    NAMES,              ))
+$(eval $(call def,    OUT,                out))
+
+$(eval $(call def,    CC,                 clang -fcolor-diagnostics))
+$(eval $(call def,    CXX,                clang++ -fcolor-diagnostics))
+$(eval $(call def,    CFLAGS,             -std=c99))
+$(eval $(call def,    CXXFLAGS,           -std=c++11 -Wnon-virtual-dtor))
+$(eval $(call def,    CPPFLAGS,           -Wall -Wextra -Wshadow -Wunused -pedantic))
+$(eval $(call def,    LDFLAGS,            -lpthread))
+$(eval $(call def,    TARGETS,            debug release check))
+$(eval $(call def,    DEBUG_CPPFLAGS,     -O0 -g))
+$(eval $(call def,    RELEASE_CPPFLAGS,   -O3))
+$(eval $(call def,    CHECK_FLAGS,        -fsyntax-only))
+
+# Directories
+$(eval $(call def,  ARTDIR,               target))
+$(eval $(call def,  DEPDIR,               deps))
+$(eval $(call def,  MKR,                  .dirstamp))
+$(eval $(call def,  DONE_MKR,             .done))
+$(eval $(call def,  ERROR_MKR,            .error))
+$(eval $(call def,  DONE,                 \033[1;32mDone\033[0m!))
+$(eval $(call def,  ERROR,                \033[1;31mFailed\033[0m!))
+$(eval $(call def,  NORMAL,               \033[0m))
 
 .PHONY: clean all $(TARGETS)
 .SUFFIXES:
@@ -63,26 +95,32 @@ get_objs = $(patsubst %,$(ARTDIR)/$(1)/%.o,$(basename $(NAMES)))
 
 # -------- TARGET DEFINITIONS --------
 
+# Creates a set of recipes for the given target.
+#
+# Arguments
+# 1. Target name
 define target_recipes
 $(eval ART := $(ARTDIR)/$(1))
 $(eval OBJS := $(call get_objs,$(1)))
 
 $(1): $(ART)/bin
-	@cp $(ART)/bin $(OUT)
+	$$(call vexe,cp $(ART)/bin $(OUT))
 	@printf "Compiled in \`$(1)\` mode.\n$(NORMAL)"
 
 $(ART)/bin: $(ART)/$(MKR) $(DEPDIR)/$(MKR) $(OBJS)
-	@$(CXX) $(LDFLAGS) $(OBJS) -o $(ART)/bin
+	@printf "Compiling binary in \`$(1)\` mode...$(NORMAL) $$v"
+	$$(call vexe, $(CXX) $(call get_target_flags,$(1),ld) $(LDFLAGS) $(OBJS) -o $(ART)/bin)
+	@printf "$(DONE)\n"
 
 $(ART)/%.o : $(SRC)/%.cc $(DEPDIR)/%.dep
-	$$(call compile_obj,debug,$$(call get_target_flags,$(1)),$$@,$(SRC)/$$*.cc,$(DEPDIR)/$$*.dep)
+	$$(call compile_obj,debug,$$(call get_target_flags,$(1),cpp) $$(call get_target_flags,$(1),cxx),$$@,$(SRC)/$$*.cc,$(DEPDIR)/$$*.dep)
 
 $(ART)/$(MKR):
 	$$(call build_dir,$(ART))
 
 endef
 
-# $(info $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
+#$(info $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
 $(eval $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
 
 clean:
@@ -107,7 +145,7 @@ define n
 
 endef
 
-get_target_flags = $($(call uc,$(1))_FLAGS)
+get_target_flags = $($(call uc,$(1))_$(call uc,$(2))FLAGS)
 
 define vexe
 @$(1)
@@ -151,6 +189,23 @@ define __compile_obj
 		printf "$(ERROR)\n" \
 		&& cat "$(5)" \
 		&& rm "$(2)" 2>/dev/null \
+		&& false \
+	)
+endef
+
+# Runs a shell command, with nice error printing.
+#
+# Arguments
+# 1. Command to run
+# 2. Command to run to handle errors
+# 3. File to hold errors temporarily
+define run_with_error
+	( \
+		( $(1) ) 2>"$(3)" && cat "$(3)" \
+	) || ( \
+		printf "$(ERROR)\n" \
+		&& cat "$(3)" \
+		&& $(2) \
 		&& false \
 	)
 endef
