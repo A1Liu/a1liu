@@ -10,30 +10,35 @@
 #
 # P.S. I'm pretty sure if you include whitespace in your filenames, this will break.
 
-# -------- USER DEFINED VARIABLES --------
+# ---------- FILE DECLARATIONS -----------
 
-NAMES := hi main
+SRC := src
+NAMES := 
+OUT = lab
+
+# -------- USER DEFINED VARIABLES --------
 
 # C Compiler
 CC = clang -fcolor-diagnostics
 # C++ Compiler
 CXX = clang++ -fcolor-diagnostics
-OUT = lab
 
 # C Flags
 CFLAGS :=
 # C++ Flags
-CXXFLAGS := -Wnon-virtual-dtor
+CXXFLAGS := -std=c++11 -Wnon-virtual-dtor
 # C/C++ Flags
 CPPFLAGS := -Wall -Wextra -Wshadow -Wunused -pedantic
 # Linking Flags
 LDFLAGS :=
 
-SRC := src
-NAMES := $(addsuffix .cc,$(NAMES))
-VERBOSE := 1
+# Compilation targets
+TARGETS := debug release check
+# Flags to use for target `check`
+CHECK_FLAGS := -fsyntax-only
 
-TARGETS = debug release
+NAMES := $(addsuffix .cc,$(NAMES))
+
 
 # ------- WRITER DEFINED VARIABLES -------
 
@@ -43,75 +48,52 @@ MKR = .dirstamp
 DONE_MKR = .done
 ERROR_MKR = .error
 DONE = \033[1;32mDone\033[0m!
-ERROR = \033[1;31mFailed\033[0m
+ERROR = \033[1;31mFailed\033[0m!
 NORMAL = \033[0m
-# Dependency Generation Flags
 
-.PHONY: clean all check
+.PHONY: clean all $(TARGETS)
 .SUFFIXES:
-
-# Eventually make this partially user defined, i.e. by expanding a TARGET variable
-# or something like that
-ifneq ($(VERBOSE), 1)
-.SILENT:
-else
-define v
-\n\033[1mVERBOSE\033[0m:\033[0;33m
-endef
-endif
-
-# Eventually make this partially user defined, i.e. by expanding a TARGET variable
-# or something like that
-ifeq ($(DEBUG), )
-else
-define dbg
-$(info $(shell printf "\033[1mDEBUG\033[0m:") $(1))
-endef
-
-# Maybe make this use the value of DEBUG
-define dbg_var
-$(info $(shell printf "\033[1mDEBUG\033[0m:") Variable `$(1)` defined as "$($(1))")
-endef
-endif
+.SECONDARY:
 
 PATHS := $(addprefix $(SRC)/,$(NAMES))
-OBJS = $(patsubst %,$(ARTDIR)/$(1)/%.o,$(basename $(NAMES)))
 DEPS := $(patsubst %,$(DEPDIR)/%.o,$(basename $(NAMES)))
+get_objs = $(patsubst %,$(ARTDIR)/$(1)/%.o,$(basename $(NAMES)))
 
 # -------- TARGET DEFINITIONS --------
 
 define target_recipes
 $(eval ART := $(ARTDIR)/$(1))
+$(eval DEP := $(DEPDIR)/$(1))
+$(eval OBJS := $(call get_objs,$(1)))
 
-$(1): $(ART)/$(DONE_MKR)
-	
+$(1): $(ART)/bin
+	@cp $(ART)/bin $(OUT)
+	@printf "Compiled in \`$(1)\` mode.\n$(NORMAL)"
 
-$(ART)/$(DONE_MKR): $(ART)/$(MKR) $(DEPDIR)/$(MKR) $(call OBJS,$(1))
-	@touch $(DEPDIR)/$(DONE_MKR)
-	@touch $(ART)/$(DONE_MKR)
+$(ART)/bin: $(ART)/$(MKR) $(DEPDIR)/$(MKR) $(OBJS)
+	@$(CXX) $(LDFLAGS) $(OBJS) -o $(ART)/bin
 
 $(ART)/%.o : $(SRC)/%.cc
-	$(CXX) -MD -MP -MF $(DEPDIR)/$$*.dep -c -o $$@ $(SRC)/$$*.cc
+	$$(call compile_obj,debug,$$(call get_target_flags,$(1)),$$@,$(SRC)/$$*.cc,$(DEP))
 
 $(ART)/$(MKR):
 	$$(call build_dir,$(ART))
 
 endef
 
+# $(info $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
 $(eval $(foreach targets,$(TARGETS),$(call target_recipes,$(targets))))
 
 clean:
-	@printf "Cleaning compilation artifacts...$v "
-	rm -rf $(ARTDIR)
-	rm -rf $(DEPDIR)
+	@printf "Cleaning compilation artifacts... $v"
+	$(call vexe,rm -rf $(ARTDIR))
+	$(call vexe,rm -rf $(DEPDIR))
 	@printf "$(DONE)\n"
-
-check: $(addprefix $(ARTDIR)/check/,$(OBJ_NAMES))
-	@printf "Check complete!\n"
 
 all: directories $(TARGETS)
 
 # ---- HELPER TARGET DEFINITIONS -----
+
 
 $(DEPDIR)/$(MKR):
 	$(call build_dir,$(@D))
@@ -124,13 +106,89 @@ define n
 
 endef
 
+get_target_flags = $($(call uc,$(1))_FLAGS)
+
+define vexe
+@$(1)
+endef
+
+# Compile an object file.
+# Arguments:
+# 1. Target name
+# 2. Target flags
+# 3. Artifact name
+# 4. Source file
+# 5. Dependency file
+define compile_obj
+$(eval ERR := $(ARTDIR)/$(1)/$(ERROR_MKR))
+$(call vexe, \
+	printf "Building compilation artifact \`$(3)\`\
+	in $(call make_bold,$(1)) mode... $v" \
+)
+
+@mkdir -p $(dir $(3))
+@touch $(3)
+
+$(call vexe,$(call __compile_obj,$(2),$(3),$(4),$(5),$(ERR)))
+endef
+
+# Compile an object file.
+# Arguments:
+# 1. Target flags
+# 2. Artifact name
+# 3. Source file
+# 4. Dependency file
+# 5. Error file
+define __compile_obj
+	( \
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(1) \
+	-MD -MP -MF $(4) \
+	-o $(2) $(3) 2>"$(5)" \
+	&& printf "$(DONE)\n" && cat "$(5)" \
+	) || ( \
+		printf "$(ERROR)\n" \
+		&& cat "$(5)" \
+		&& rm "$(2)" 2>/dev/null \
+		&& false \
+	)
+endef
+
+# Eventually make this partially user defined, i.e. by expanding a TARGET variable
+# or something like that
+ifneq ($(VERBOSE), 1)
+.SILENT:
+else
+v := \n
+define vexe
+@printf '\033[1mVERBOSE\033[0m:\033[0;33m\
+	$(subst \',\\',$(subst \,\\,$(strip $(1))))\
+	\n$(NORMAL)'
+@$(1)
+endef
+endif
+
+# Eventually make this partially user defined, i.e. by expanding a TARGET variable
+# or something like that
+ifeq ($(DEBUG), )
+else
+v := \n
+define dbg
+$(info $(shell printf "\033[1mDEBUG\033[0m:") $(1))
+endef
+
+# Maybe make this use the value of DEBUG
+define dbg_var
+$(info $(shell printf "\033[1mDEBUG\033[0m:") Variable `$(1)` defined as "$($(1))")
+endef
+endif
+
 # Builds the directory structure for a specific compilation mode.
 #
 # Takes arguments:
 # 1. Compilation folder: folder that holds compilation artifacts
 define build_dir
 	@if [ $(VERBOSE) ]; then \
-		printf "$(call make_bold,VERBOSE): Making the directory associated with \`$(call make_bold,$(dir $(1)))' mode...$v "; fi
+		printf "$(call make_bold,VERBOSE): Making the directory associated with \`$(call make_bold,$(dir $(1)))' mode... $v"; fi
 	mkdir -p $(1) && touch $(1)/$(MKR) && touch $(1)/.error
 	@if [ $(VERBOSE) ]; then \
 		printf "$(NORMAL)$(call make_bold,VERBOSE): $(DONE)\n"; fi
