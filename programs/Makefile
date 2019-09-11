@@ -13,7 +13,7 @@
 # ---------- FILE DECLARATIONS -----------
 
 SRC := src
-NAMES := 
+NAMES := main
 OUT = lab
 
 # -------- USER DEFINED VARIABLES --------
@@ -89,6 +89,8 @@ $(eval $(call def,  NORMAL,               \033[0m))
 .PHONY: directories clean all debug release check $(TARGETS)
 .SUFFIXES:
 .SECONDARY:
+$(eval $(call def,  .DEFAULT_GOAL,        debug))
+.DEFAULT_GOAL := debug
 
 PATHS := $(addprefix $(SRC)/,$(NAMES))
 DEPS := $(patsubst %,$(DEPDIR)/%.dep,$(basename $(NAMES)))
@@ -105,7 +107,7 @@ $(eval ART := $(ARTDIR)/$(1))
 $(eval OBJS := $(call get_objs,$(1)))
 $(eval ERR := $(ARTDIR)/$(1)/$(ERROR_MKR))
 
-ifeq ($$($$(call uc,$(1))_PHONY), 1)
+ifneq ($($(call uc,$(1))_PHONY), 1)
 $(1): $(ART)/bin
 	$$(call vexe,cp $(ART)/bin $(OUT))
 	@printf "Target \`$(1)\` finished.\n$(NORMAL)"
@@ -114,7 +116,7 @@ $(1): $(ART)/bin
 	@printf "Target \`$(1)\` finished.\n$(NORMAL)"
 endif
 
-ifeq ($$($$(call uc,$(1))_PHONY), 1)
+ifneq ($($(call uc,$(1))_PHONY), 1)
 $(ART)/bin: $(ART)/$(MKR) $(DEPDIR)/$(MKR) $(OBJS)
 	@printf "Compiling binary in \`$(1)\` mode...$(NORMAL) $$v"
 	$$(call run_with_error, $(CXX) $$(call get_target_flags,$(1),ld) $(LDFLAGS) $(OBJS) -o $(ART)/bin,true,$(ERR))
@@ -137,7 +139,6 @@ $(ART)/$(MKR):
 
 endef
 
-$(eval $(foreach targets,debug release check $(TARGETS),$(call target_recipes,$(targets))))
 
 clean:
 	@printf "Cleaning compilation artifacts... $v"
@@ -302,6 +303,9 @@ lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(s
 # Uppercase
 uc = $(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst f,F,$(subst g,G,$(subst h,H,$(subst i,I,$(subst j,J,$(subst k,K,$(subst l,L,$(subst m,M,$(subst n,N,$(subst o,O,$(subst p,P,$(subst q,Q,$(subst r,R,$(subst s,S,$(subst t,T,$(subst u,U,$(subst v,V,$(subst w,W,$(subst x,X,$(subst y,Y,$(subst z,Z,$1))))))))))))))))))))))))))
 
+
 # ------- INCLUDE DEFINITIONS --------
+
+$(eval $(foreach targets,debug release check $(TARGETS),$(call target_recipes,$(targets))))
 
 -include $(DEPS)
