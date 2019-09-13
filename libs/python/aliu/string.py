@@ -8,6 +8,7 @@ whitespace_regex = re.compile("[ \\t]+")
 def parse_args(txt, sep = None):
     if sep is None:
         txt = txt.strip()
+
     out = []
 
     def fmt(output):
@@ -30,7 +31,7 @@ def parse_args(txt, sep = None):
             else:
                 group = quote.group()
                 idx += len(group)
-                yield fmt(group[1:-1])
+                out = fmt(group[1:-1])
                 continue
         elif sep is None and (char == ' ' or char == '\t'):
             if out:
@@ -42,8 +43,10 @@ def parse_args(txt, sep = None):
         elif sep is not None and char in sep:
             yield fmt(out)
             out = []
+            idx += 1
         else:
             out.append(char)
-        idx += 1
+            idx += 1
 
-    yield fmt(out)
+    if out:
+        yield fmt(out)
