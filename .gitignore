@@ -8,6 +8,8 @@
 !/LICENSE
 !/install
 !/startup
+!/linux
+!/windows
 
 !/local
 /local/*
