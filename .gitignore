@@ -1,14 +1,12 @@
 /*
 
-!/neovim
 !/libs
+!/compat
 !/shells
 !/programs
 !/README.md
 !/LICENSE
 !/install
-!/linux
-!/windows
 
 !/local
 /local/*
