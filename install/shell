@@ -59,8 +59,8 @@ check_move() {
 }
 
 # Create all the soft links
-check_move .vimrc "/neovim/init.vim"
-check_move .vim "/neovim"
+check_move .vimrc "/programs/neovim/init.vim"
+check_move .vim "/programs/neovim"
 check_move .bashrc "/local/shell_interact_init"
 check_move .bash_profile "/local/shell_interact_init"
 check_move .zshrc "/local/shell_interact_init"
