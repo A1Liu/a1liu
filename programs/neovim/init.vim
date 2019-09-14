@@ -28,7 +28,8 @@ execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 execute 'source ' . g:vim_home_path . '/keybindings.vim'
 
 if has('wildmenu')
-  set wildignorecase wildmenu wildmode=longest,list
+  set wildignorecase wildmenu
+  " set wildmode=longest,list
 endif
 set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
