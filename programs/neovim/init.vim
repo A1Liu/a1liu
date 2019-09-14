@@ -27,9 +27,11 @@ execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 "" Keybindings
 execute 'source ' . g:vim_home_path . '/keybindings.vim'
 
-set wildignorecase wildmenu
+if has('wildmenu')
+  set wildignorecase wildmenu wildmode=longest,list
+endif
 set splitright splitbelow
-set ignorecase smartcase " Ignore case except when including capital letters
+set ignorecase smartcase " Ignore case in searching except when including capital letters
 
 
 "" Visual Changes
