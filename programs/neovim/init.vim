@@ -3,6 +3,7 @@
 " https://github.com/tonsky/FiraCode
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:placeholder = '<++>'
+
 let g:plug_path = g:vim_home_path . '/autoload/plug.vim'
 let g:first_install = empty(glob(g:plug_path))
 
@@ -11,15 +12,16 @@ set nomodeline modelines=0
 
 "" Compatibility
 set guicursor= " don't want unknown characters in linux
+" set t_co=256
 
 " Getting terminal colors to work
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 
-if has('nvim')
-  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
-  set termguicolors
-endif
+" if has('nvim') && $GOOD_TERM == '1'
+"   let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+"   let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+"   set termguicolors
+" endif
 
 "" Plugins
 execute 'source ' . g:vim_home_path . '/plugins-list.vim'

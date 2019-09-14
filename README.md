@@ -16,21 +16,21 @@ application settings, file organizations, etc.
 └── startup ------ Scripts that are run at startup
 ```
 
+### Semantically Meaningful Environment Variables
+
+- `CFG_DIR` - Configuration directory (this repository)
+- `IS_INTERACTIVE_SHELL` - Whether or not the shell is interactive
+- `CFG_SHELL_ENV` - Guard variable for checking if path is correctly set
+- `CFG_ENV` - Guard variable for checking if environment variables are set
+
 ### Installation Scripts
 The following scripts are usable:
-
-- `bootstrap` - Installs the repository to the current directory. Install with
-
-  ```
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/A1Liu/config/master/install/bootstrap)"
-  ```
-
-  This script must be installed before all others.
 
 - `shell` - Installs editor configurations for a working shell. Install with
 
   ```
   sh install/shell
   ```
+
 
 
