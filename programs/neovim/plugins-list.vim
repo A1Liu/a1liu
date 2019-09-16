@@ -11,7 +11,7 @@ call plug#begin(g:vim_home_path . '/plugged')
 " Plug 'nightsense/cosmic_latte'
 " Plug 'NLKNguyen/papercolor-theme'
 " Plug 'altercation/vim-colors-solarized'
-Plug 'lifepillar/vim-solarized8'
+" Plug 'lifepillar/vim-solarized8'
 
 " Airline
 " Plug 'vim-airline/vim-airline'

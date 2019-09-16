@@ -91,10 +91,10 @@ filetype plugin indent on
 syntax enable " Syntax highlighting
 let g:airline_theme='base16_solarized'
 let g:airline_solarized_bg='dark'
-set background=dark
-if !g:first_install
-  colorscheme solarized8_high
-endif
+set background=light
+" if !g:first_install
+"   colorscheme solarized8_high
+" endif
 
 " Showing non-printing characters
 set list
