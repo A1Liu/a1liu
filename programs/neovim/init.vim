@@ -29,6 +29,9 @@ execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 "" Keybindings
 execute 'source ' . g:vim_home_path . '/keybindings.vim'
 
+"" Keybindings
+execute 'source ' . g:vim_home_path . '/status-line.vim'
+
 if has('wildmenu')
   set wildignorecase wildmenu
   " set wildmode=longest,list

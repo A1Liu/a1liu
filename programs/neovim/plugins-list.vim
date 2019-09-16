@@ -14,8 +14,8 @@ call plug#begin(g:vim_home_path . '/plugged')
 Plug 'lifepillar/vim-solarized8'
 
 " Airline
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+" Plug 'vim-airline/vim-airline'
+" Plug 'vim-airline/vim-airline-themes'
 " Plug 'powerline/fonts'
 let g:airline_powerline_fonts = 0
 let g:airline#extensions#whitespace#enabled = 0
