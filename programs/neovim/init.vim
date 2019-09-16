@@ -92,6 +92,8 @@ syntax enable " Syntax highlighting
 let g:airline_theme='base16_solarized'
 let g:airline_solarized_bg='dark'
 set background=light
+hi ColorColumn ctermbg=Gray ctermfg=Black
+hi Search ctermbg=Gray ctermfg=Black
 " if !g:first_install
 "   colorscheme solarized8_high
 " endif
