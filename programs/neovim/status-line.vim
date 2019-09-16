@@ -4,5 +4,7 @@ set statusline+=%m
 set statusline+=%=
 set statusline+=\ %y
 set statusline+=\ %p%%
-set statusline+=\ %l:%c
+set statusline+=\ %c:%l
 set statusline+=\ 
+
+hi StatusLine ctermbg=Black ctermfg=Gray
