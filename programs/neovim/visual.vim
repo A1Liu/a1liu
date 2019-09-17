@@ -14,6 +14,7 @@ hi IncSearch ctermbg=Gray ctermfg=Black
 hi StatusLine ctermbg=Gray ctermfg=Black
 hi ErrorMsg ctermbg=Red ctermfg=White
 hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
+hi WildMenu ctermfg=Gray ctermbg=Black
 
 set statusline=
 set statusline+=\ %f

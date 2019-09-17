@@ -23,7 +23,6 @@ set guicursor= " don't want unknown characters in linux
 "   set termguicolors
 " endif
 
-
 "" Plugins
 execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 
