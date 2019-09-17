@@ -23,14 +23,15 @@ set guicursor= " don't want unknown characters in linux
 "   set termguicolors
 " endif
 
+
 "" Plugins
 execute 'source ' . g:vim_home_path . '/plugins-list.vim'
 
 "" Keybindings
 execute 'source ' . g:vim_home_path . '/keybindings.vim'
 
-"" Status Line
-execute 'source ' . g:vim_home_path . '/status-line.vim'
+"" Colors
+execute 'source ' . g:vim_home_path . '/visual.vim'
 
 if has('wildmenu')
   set wildignorecase wildmenu
@@ -39,12 +40,6 @@ endif
 set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
 
-
-"" Visual Changes
-set number relativenumber " line numberings
-set hlsearch incsearch " highlighting when using find
-set cc=80
-set cul
 " https://shapeshed.com/vim-statuslines/
 
 " Hiding the UI
@@ -86,45 +81,14 @@ autocmd InsertLeave,WinLeave *
     \ let &l:foldmethod=w:last_fdm | unlet w:last_fdm |
   \ endif
 
-" Color Scheme
-filetype plugin indent on
-syntax enable " Syntax highlighting
-let g:airline_theme='base16_solarized'
-let g:airline_solarized_bg='dark'
-set background=light
-hi ColorColumn ctermbg=Gray ctermfg=Black
-hi Search ctermbg=Gray ctermfg=Black
-" if !g:first_install
-"   colorscheme solarized8_high
-" endif
+" Syntax Highlighting
+filetype plugin indent on " Filetype detection
+syntax enable " Actual highlighting
 
 " Showing non-printing characters
 set list
 set showbreak=↪
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
-
-" Split panes more obvious, terminal prettier
-augroup BgHighlight
-  autocmd!
-  autocmd BufWinEnter,WinEnter,BufEnter *
-    \ if &ft != 'netrw' && &buftype !='terminal' |
-      \ setlocal cul cc=80 |
-      \ setlocal relativenumber |
-      \ let s:hidden_all = 1 | call ToggleHiddenAll() |
-    \ endif " Set color column
-  if has('nvim')
-    autocmd TermOpen * setlocal nonumber norelativenumber cc= wrap
-  endif
-  autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | setlocal cc= | endif
-  autocmd BufWinLeave,WinLeave *
-    \ if &ft != 'netrw' && &buftype != 'terminal' |
-      \ setlocal nocul |
-      \ setlocal cc= |
-      \ setlocal norelativenumber |
-    \ endif
-augroup END
-
-
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2
