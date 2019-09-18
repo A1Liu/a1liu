@@ -10,7 +10,7 @@ colorscheme darkblue
 set background=light
 hi ColorColumn ctermbg=Gray ctermfg=Black
 hi Search ctermbg=Gray ctermfg=Black
-hi IncSearch ctermbg=Gray ctermfg=Black
+hi IncSearch cterm=NONE ctermbg=Gray ctermfg=Black
 hi StatusLine ctermbg=Gray ctermfg=Black
 hi ErrorMsg ctermbg=Red ctermfg=White
 hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
