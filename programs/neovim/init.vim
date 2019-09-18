@@ -68,6 +68,9 @@ endfunction
 
 " nnoremap <S-h> :call ToggleHiddenAll()<CR>
 
+" Clipboard
+set clipboard=unnamedplus
+
 " Folding
 " https://vim.fandom.com/wiki/Keep_folds_closed_while_inserting_text
 autocmd InsertEnter *
