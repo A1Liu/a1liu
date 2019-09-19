@@ -1,5 +1,10 @@
 *.class
 
+# Output directory
+/bin/*
+!/bin/.gitkeep
+
+
 # Eclipse stuff
 .classpath
 .project
