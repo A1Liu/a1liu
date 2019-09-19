@@ -1,2 +1,6 @@
 *.class
 
+# Eclipse stuff
+.classpath
+.project
+
