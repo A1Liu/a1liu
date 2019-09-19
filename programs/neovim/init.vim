@@ -71,6 +71,9 @@ endfunction
 " Clipboard
 set clipboard=unnamed
 
+" Deleting in insert mode
+set backspace=indent,eol,start
+
 " Folding
 " https://vim.fandom.com/wiki/Keep_folds_closed_while_inserting_text
 autocmd InsertEnter *
