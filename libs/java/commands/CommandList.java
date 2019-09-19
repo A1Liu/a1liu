@@ -4,36 +4,32 @@ import static commands.Util.*;
 
 import java.util.Hashtable;
 
+// clang-format off
 /**
- *<pre>
  * Takes formatted command graph, and creates a graph of commands
  *
  * Format:
  *
+ *<pre>
  * 	Command
- * 		SubCommand:2; Words after the semicolon are considered help text,
- *and can be viewed by the user using the 'help' command. SubCommand2:4; The
- *integer after the colon specifies a key to be used when creating command
- *objects using setCommand(). SubCommand3:4; The integer isn't necessary, but it
- *helps make assigning commands to end-points in the tree easier.
- * 			SubSubCommand:-3; the integer can't be negative. This will
- *throw a CommandConfiguration exception SubSubCommand:2; Writing the same
- *command name for 2 commands that are siblings in the tree results in the
- *combining of both. The help text and integer ID of the last one are used
- * 			SubSubCommand:1; But the command below won't overwrite the
- *help text, because it doesn't have helpText. SubSubCommand SubSubCommand;
- *However, if you include a semicolon, it will overwrite the help text, like the
- *one below SubSubCommand; SubSubCommand:3; Even though the -3 is overridden by
- *2 in the above commands, -3 is checked first, so an exception will be thrown
- *before the interpreter reaches 2 help; adding the help command here overrides
- *the default help command Null; typing null anywhere in the tree creates a null
- *node. This can't be accessed by the user, so use these to make hidden commands
- *accessible only by code
+ * 		SubCommand:2; Words after the semicolon are considered help text, and can be viewed by the user using the 'help' command.
+ * 		SubCommand2:4; The integer after the colon specifies a key to be used when creating command objects using setCommand().
+ * 		SubCommand3:4; The integer isn't necessary, but it helps make assigning commands to end-points in the tree easier.
+ * 			SubSubCommand:-3; the integer can't be negative. This will throw a CommandConfiguration exception
+ * 			SubSubCommand:2; Writing the same command name for 2 commands that are siblings in the tree results in the combining of both. The help text and integer ID of the last one are used
+ * 			SubSubCommand:1; But the command below won't overwrite the help text, because it doesn't have helpText.
+ * 			SubSubCommand
+ * 			SubSubCommand; However, if you include a semicolon, it will overwrite the help text, like the one below
+ *			SubSubCommand;
+ * 			SubSubCommand:3; Even though the -3 is overridden by 2 in the above commands, -3 is checked first, so an exception will be thrown before the interpreter reaches 2
+ * 	help; adding the help command here overrides the default help command
+ * 	Null; typing null anywhere in the tree creates a null node. This can't be accessed by the user, so use these to make hidden commands accessible only by code
  * </pre>
  * @author aliu
  *
  */
 class CommandList {
+  // clang-format on
 
   private ComTree
       comTree; // This is the data structure that holds the command hierarchy.
@@ -56,7 +52,7 @@ class CommandList {
    */
   void addGraph(String[] commands) {
     for (int x = 0; x < commands.length; x++) {
-      int y = commands[x].lastIndexOf('\t') + 1;
+      int y = commands[x].lastIndexOf('\t') + 1; // TODO Make this more robust
       commands[x] = y + commands[x].trim() + " ";
     }
 
