@@ -15,6 +15,7 @@ hi StatusLine ctermbg=Gray ctermfg=Black
 hi ErrorMsg ctermbg=Red ctermfg=White
 hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
 hi WildMenu ctermfg=Gray ctermbg=Black
+hi Comment ctermfg=DarkGray
 
 set statusline=
 set statusline+=\ %f
