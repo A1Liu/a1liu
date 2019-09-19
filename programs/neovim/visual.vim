@@ -8,6 +8,7 @@ set cul
 " Color Scheme
 colorscheme darkblue
 set background=light
+hi Normal ctermfg=Gray ctermbg=Black
 hi ColorColumn ctermbg=Gray ctermfg=Black
 hi Search cterm=reverse ctermbg=Black ctermfg=Yellow
 hi IncSearch cterm=reverse ctermbg=Black ctermfg=Yellow
