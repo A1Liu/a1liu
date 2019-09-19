@@ -1,23 +1,8 @@
-
 "" Visual Changes
 set number relativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
 set cc=80
 set cul
-
-" Color Scheme
-colorscheme darkblue
-set background=light
-hi Normal ctermfg=Gray ctermbg=Black
-hi ColorColumn ctermbg=Gray ctermfg=Black
-hi Search cterm=reverse ctermbg=Black ctermfg=Yellow
-hi IncSearch cterm=reverse ctermbg=Black ctermfg=Yellow
-hi StatusLine ctermbg=Gray ctermfg=Black
-hi ErrorMsg ctermbg=Red ctermfg=White
-hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
-hi WildMenu ctermfg=Gray ctermbg=Black
-hi NonText ctermfg=LightBlue
-hi Comment ctermfg=DarkGray
 
 set statusline=
 set statusline+=\ %f
@@ -49,3 +34,21 @@ augroup BgHighlight
     \ endif
 augroup END
 
+" Color Scheme
+hi clear
+if exists("syntax_on")
+  syntax reset
+endif
+
+colorscheme darkblue
+set background=light
+hi Normal ctermfg=Gray ctermbg=Black
+hi ColorColumn ctermbg=Gray ctermfg=Black
+hi Search cterm=reverse ctermbg=Black ctermfg=Yellow
+hi IncSearch cterm=reverse ctermbg=Black ctermfg=Yellow
+hi StatusLine ctermbg=Gray ctermfg=Black
+hi ErrorMsg ctermbg=Red ctermfg=White
+hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
+hi WildMenu ctermfg=Gray ctermbg=Black
+hi NonText ctermfg=LightBlue
+hi Comment ctermfg=DarkGray
