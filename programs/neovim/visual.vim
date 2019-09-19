@@ -9,12 +9,13 @@ set cul
 colorscheme darkblue
 set background=light
 hi ColorColumn ctermbg=Gray ctermfg=Black
-hi Search ctermbg=Gray ctermfg=Black
-hi IncSearch cterm=NONE ctermbg=Gray ctermfg=Black
+hi Search cterm=reverse ctermbg=Black ctermfg=Yellow
+hi IncSearch cterm=reverse ctermbg=Black ctermfg=Yellow
 hi StatusLine ctermbg=Gray ctermfg=Black
 hi ErrorMsg ctermbg=Red ctermfg=White
 hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
 hi WildMenu ctermfg=Gray ctermbg=Black
+hi NonText ctermfg=LightBlue
 hi Comment ctermfg=DarkGray
 
 set statusline=
