@@ -96,14 +96,14 @@ set showbreak=↪
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
 
 "" Indenting
-set tabstop=2 expandtab shiftwidth=2
+set tabstop=2 expandtab shiftwidth=2 softtabstop=2
 set foldlevelstart=4
 
 " Markdown and Jekyll Settings
 function! MarkdownJekyllSettings()
   let l:begin=getline(1)
   if l:begin == "---"
-    set tabstop=3 shiftwidth=3
+    set tabstop=3 shiftwidth=3 softtabstop=3
   endif
 endfunction
 

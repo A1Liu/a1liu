@@ -2,6 +2,7 @@
 
 /autoload/*
 /plugged
+/view
 
 /eclimd
 /eclim
