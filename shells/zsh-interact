@@ -2,8 +2,11 @@
 
 skip_global_compinit=1
 
+source "$(dirname $0)/zsh/prompt"
+source "$(dirname $0)/zsh/key-bindings"
 source "$(dirname $0)/git-completions"
 zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh/git-completions"
+
 
 # Stolen shamelessly from Oh-my-zsh
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
@@ -12,6 +15,7 @@ zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh/git-completions"
 [ -z "$HISTFILE" ] && HISTFILE="$CFG_DIR/local/.zsh_history"
 HISTSIZE=50000
 SAVEHIST=10000
+
 
 # Stolen shamelessly from Oh-my-zsh
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
@@ -25,11 +29,3 @@ setopt hist_verify            # show command with history expansion before runni
 setopt inc_append_history     # add commands to HISTFILE in order of execution
 setopt share_history          # share command history data
 
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-bindkey "${terminfo[kcuu1]}" up-line-or-beginning-search # Up
-bindkey "${terminfo[kcud1]}" down-line-or-beginning-search # Down
-
-source "$(dirname $0)/zsh/prompt"
