@@ -1,7 +1,0 @@
-#!/bin/sh
-
-command -v git >/dev/null 2>&1 \
-  || { echo >&2 "Script requires git to install config folder, but git is not installed. Aborting."; exit 1; }
-
-git clone https://github.com/A1Liu/config.git
-touch ~/.aliu_config_successful
