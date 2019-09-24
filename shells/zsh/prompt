@@ -1,0 +1,55 @@
+#!/bin/zsh
+
+autoload -U colors && colors
+setopt PROMPT_SUBST
+
+PROMPT="%{$fg[magenta]%}\$(prompt_context)%{$fg[cyan]%}%c%{$reset_color%} \
+\$(git_prompt_info) %(?:%{$fg[green]%}➜ :%{$fg[red]%}➜ )%{$reset_color%}"
+
+# Shamelessly copied from
+# https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/git.zsh
+#
+# Outputs current branch info in prompt format
+function git_prompt_info() {
+  local ref
+  if [[ "$(command git config --get oh-my-zsh.hide-status 2>/dev/null)" != "1" ]]
+  then
+    ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
+    ref=$(command git rev-parse --short HEAD 2> /dev/null) || return 0
+    echo "%{$fg[yellow]%}${ref#refs/heads/}$(parse_git_dirty)%{$reset_color%}"
+  fi
+}
+
+# Shamelessly copied from
+# https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/git.zsh
+#
+# Checks if working tree is dirty
+function parse_git_dirty() {
+  local STATUS
+  local -a FLAGS
+  FLAGS=('--porcelain' '--ignore-submodules=dirty' '--untracked-files=no')
+  if [[ "$(command git config --get oh-my-zsh.hide-dirty)" != "1" ]]; then
+    STATUS=$(command git status ${FLAGS} 2> /dev/null | tail -n1)
+  fi
+  if [[ -n $STATUS ]]; then
+    echo "(%{$fg[red]%}✗%{$fg[yellow]%})"
+  fi
+}
+
+prompt_context() {
+  if [[ -n "$SSH_CLIENT" ]]; then
+    echo -n "%n@%m "
+  elif [[ "$USER" == "$USER_IGNORE" ]]; then
+    echo -n ""
+  else
+    echo -n "%n "
+  fi
+}
+
+# Commands for prompt stuff
+alias ignore-user="USER_IGNORE=$(whoami)"
+ignore-user
+# alias terse="prompt_dir() {; prompt_segment blue black '%c'; }"
+# alias verbose="prompt_dir() {; prompt_segment blue black '%~'; }"
+# terse
+

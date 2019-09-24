@@ -1,73 +1,35 @@
 #!/bin/zsh
 
-# export ZSH=~/.oh-my-zsh
-# source $ZSH/oh-my-zsh.sh
-# plugins=( git )
-
 skip_global_compinit=1
-DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh-git-completions"
 source "$(dirname $0)/git-completions"
+zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh/git-completions"
 
-autoload -U colors && colors
-setopt PROMPT_SUBST
-
-PROMPT="%{$fg[magenta]%}\$(prompt_context)%{$fg[cyan]%}%c%{$reset_color%} \
-\$(git_prompt_info)%(?:%{$fg[green]%}➜ :%{$fg[red]%}➜ )%{$reset_color%}"
-
-# Shamelessly copied from
-# https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/git.zsh
+# Stolen shamelessly from Oh-my-zsh
+# https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
 #
-# Outputs current branch info in prompt format
-function git_prompt_info() {
-  local ref
-  local ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[yellow]%}"
-  local ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
-  if [[ "$(command git config --get oh-my-zsh.hide-status 2>/dev/null)" != "1" ]]; then
-    ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
-    ref=$(command git rev-parse --short HEAD 2> /dev/null) || return 0
-    echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(parse_git_dirty)$ZSH_THEME_GIT_PROMPT_SUFFIX"
-  fi
-}
+# History file configuration
+[ -z "$HISTFILE" ] && HISTFILE="$CFG_DIR/local/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=10000
 
-# Shamelessly copied from
-# https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/git.zsh
+# Stolen shamelessly from Oh-my-zsh
+# https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
 #
-# Checks if working tree is dirty
-function parse_git_dirty() {
-  local STATUS
-  local -a FLAGS
-  local ZSH_THEME_GIT_PROMPT_DIRTY="(%{$fg[red]%}✗%{$fg[yellow]%})"
-  FLAGS=('--porcelain' '--ignore-submodules=dirty')
-  if [[ "$(command git config --get oh-my-zsh.hide-dirty)" != "1" ]]; then
-    if [[ "$DISABLE_UNTRACKED_FILES_DIRTY" == "true" ]]; then
-      FLAGS+='--untracked-files=no'
-    fi
-    STATUS=$(command git status ${FLAGS} 2> /dev/null | tail -n1)
-  fi
-  if [[ -n $STATUS ]]; then
-    echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
-  # else
-  #   echo "$ZSH_THEME_GIT_PROMPT_CLEAN"
-  fi
-}
+# History command configuration
+setopt extended_history       # record timestamp of command in HISTFILE
+setopt hist_expire_dups_first # delete duplicates first
+setopt hist_ignore_dups       # ignore duplicated commands history list
+setopt hist_ignore_space      # ignore commands that start with space
+setopt hist_verify            # show command with history expansion before running
+setopt inc_append_history     # add commands to HISTFILE in order of execution
+setopt share_history          # share command history data
 
-prompt_context() {
-  if [[ -n "$SSH_CLIENT" ]]; then
-    echo -n "%n@%m "
-  elif [[ "$USER" == "$USER_IGNORE" ]]; then
-    echo -n ""
-  else
-    echo -n "%n "
-  fi
-}
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "${terminfo[kcuu1]}" up-line-or-beginning-search # Up
+bindkey "${terminfo[kcud1]}" down-line-or-beginning-search # Down
 
-# Commands for prompt stuff
-alias ignore-user="USER_IGNORE=$(whoami)"
-ignore-user
-# alias terse="prompt_dir() {; prompt_segment blue black '%c'; }"
-# alias verbose="prompt_dir() {; prompt_segment blue black '%~'; }"
-# terse
-
-
+source "$(dirname $0)/zsh/prompt"

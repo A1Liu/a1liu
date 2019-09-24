@@ -17,10 +17,11 @@ shell_path="$(echo "$SHELL_DIR/${CUR_SHELL}"| tr -d "-")"
 if [ $IS_INTERACTIVE_SHELL = true ]; then
   source "$SHELL_DIR/common-interact"
   shell_path="${shell_path}-interact"
+
+  # Source shell-specific stuff
+  if [ -e $shell_path ]; then
+    source $shell_path
+  fi
 fi
 
-# Source shell-specific stuff
-if [ -e $shell_path ]; then
-  source $shell_path
-fi
 
