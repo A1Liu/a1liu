@@ -3,8 +3,10 @@
 autoload -U colors && colors
 setopt PROMPT_SUBST
 
-PROMPT="%{$fg[magenta]%}\$(prompt_context)%{$fg[cyan]%}%c%{$reset_color%} \
-\$(git_prompt_info) %(?:%{$fg[green]%}➜ :%{$fg[red]%}➜ )%{$reset_color%}"
+PROMPT="\
+%{$fg[magenta]%}\$(prompt_context)\
+%{$fg[cyan]%}%c%{$reset_color%} \
+\$(git_prompt_info)%(?:%{$fg[green]%}#:%{$fg[red]%}#)%{$reset_color%} "
 
 # Shamelessly copied from
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/git.zsh
@@ -16,7 +18,7 @@ function git_prompt_info() {
   then
     ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
     ref=$(command git rev-parse --short HEAD 2> /dev/null) || return 0
-    echo "%{$fg[yellow]%}${ref#refs/heads/}$(parse_git_dirty)%{$reset_color%}"
+    echo -n "%{$fg[yellow]%}${ref#refs/heads/}$(parse_git_dirty)%{$reset_color%} "
   fi
 }
 
@@ -32,7 +34,7 @@ function parse_git_dirty() {
     STATUS=$(command git status ${FLAGS} 2> /dev/null | tail -n1)
   fi
   if [[ -n $STATUS ]]; then
-    echo "(%{$fg[red]%}✗%{$fg[yellow]%})"
+    echo -n "(%{$fg[red]%}✗%{$fg[yellow]%})"
   fi
 }
 
