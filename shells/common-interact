@@ -8,6 +8,10 @@ export ECLIM_SERVER_SCRIPT="${CFG_DIR}/programs/neovim/eclimd"
 # SSH
 alias ssh='TERM=xterm-256color ssh'
 
+# tree and ls using exa instead
+alias tree='exa -T'
+alias ls=exa
+
 # Git
 function branch() {
     >&2 echo "Getting current branch..."

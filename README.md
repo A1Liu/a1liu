@@ -6,14 +6,15 @@ application settings, file organizations, etc.
 
 ```
 .
-├── local -------- Machine-specific configuration settings
+├── local ======== Machine-specific configuration settings
 │   └── preconf -- Files that my configurations replaced
-├── install ------ Scripts to install this configuration on a new machine
+├── install ====== Scripts to install this configuration on a new machine
 │   └── undo ----- Scripts that undo their counterpart in `install`
-├── neovim ------- Vim configuration settings
+├── programs ===== Configurations used by programs that I use
 ├── shells ------- Configurations used by shell sessions
-├── programs ----- Configurations used by programs that I use
-└── startup ------ Scripts that are run at startup
+├── compat ======= Configurations that need to be different for each OS
+├── libs --------- Utility libraries that I've written over the years
+└── startup ====== Scripts that are run at startup
 ```
 
 ### Semantically Meaningful Environment Variables
@@ -28,9 +29,11 @@ The following scripts are usable:
 
 - `shell` - Installs editor configurations for a working shell. Install with
 
-  ```
+  ```sh
   sh install/shell
   ```
+
+- `windows.ps1` - Installs programs for windows.
 
 
 
