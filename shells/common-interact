@@ -3,6 +3,11 @@
 # Vim Commands
 alias :q!=exit
 alias :q=exit
+alias :ex=vi
+alias vi=nvim
+alias vim=nvim
+
+# Eclim
 export ECLIM_SERVER_SCRIPT="${CFG_DIR}/programs/neovim/eclimd"
 
 # SSH
@@ -38,13 +43,13 @@ function git_gofwd() {
 
 # PYTHON
 
-# export PATH="/anaconda3/bin:$PATH"
 alias python="python3"
 alias pip="pip3"
 
 # Default python development environment to fuck around in
 export PYDEVENV=~/.pydenv/bin/activate
 function pydev() {
+    # Deactivate previous environment
     deactivate 2>/dev/null
     # || deactivate_conda_env
     if [ $# = 0 ]
@@ -58,38 +63,9 @@ function pydev() {
     echo "Created alias 'deactivate' to exit environment."
 }
 
-# # ANACONDA
-# export CONDA_SETUP=0
-# function deactivate_conda_env() {
-#     conda deactivate 2>/dev/null &&
-#     conda deactivate 2>/dev/null
-#     unalias deactivate 2>/dev/null &&
-#     echo "Exited from conda environment."
-# }
-# function condadev() {
-#     deactivate 2>/dev/null || deactivate_conda_env
-#     if (( "$CONDA_SETUP" == 0 ))
-#     then
-#         # Setup script to add conda to path
-#         source /anaconda3/etc/profile.d/conda.sh
-#         export CONDA_SETUP=1
-#     fi
-#
-#     if [ $# = 0 ]
-#     then
-#         echo "No args => Entering default conda environment..."
-#         conda activate conda-default-env
-#     else
-#         echo "Input was '$1' => executing `conda activate $1`"
-#         conda activate $1
-#     fi
-#     alias deactivate="deactivate_conda_env"
-#     echo "Created alias 'deactivate' to exit environment."
-# }
-
 # RUBY
-alias ruby_setup="export PATH=\"\$HOME/.rbenv/bin:\$PATH\" && eval \"\$(rbenv init -)\" && alias ruby_setup=true"
-alias jekyll="ruby_setup && unalias jekyll && jekyll"
+alias ruby_setup='export PATH="$HOME/.rbenv/bin:$PATH" && eval "$(rbenv init -)" && alias ruby_setup=true'
+alias jekyll='ruby_setup && unalias jekyll && jekyll'
 
 # Node
 alias gulp="npm run gulp"
