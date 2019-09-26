@@ -13,6 +13,31 @@ set statusline+=\ %p%%
 set statusline+=\ %c:%l
 set statusline+=\ 
 
+" Hiding the UI
+" https://unix.stackexchange.com/questions/140898/vim-hide-status-line-in-the-bottom
+let s:hidden_all = 0
+function! ToggleHiddenAll()
+  if s:hidden_all  == 0
+    let s:hidden_all = 1
+    set noshowmode
+    set noruler
+    set laststatus=0
+    set noshowcmd
+    set nocul
+    set cc=
+  else
+    let s:hidden_all = 0
+    set showmode
+    if &ft != 'netrw'
+      set ruler
+      set cul
+      set cc=80
+    endif
+    set laststatus=2
+    set showcmd
+  endif
+endfunction
+
 " Split panes more obvious, terminal prettier
 augroup BgHighlight
   autocmd!

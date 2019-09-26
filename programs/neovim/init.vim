@@ -7,6 +7,15 @@ let g:placeholder = '<++>'
 let g:plug_path = g:vim_home_path . '/autoload/plug.vim'
 let g:first_install = empty(glob(g:plug_path))
 
+" Print debugging information
+function! DebugPrint(message)
+  if $VIM_DEBUG != ''
+    echo 'DEBUG:' a:message
+  endif
+endfunction
+
+call DebugPrint('Debug mode active')
+
 "" Security
 set nomodeline modelines=0
 
@@ -40,33 +49,6 @@ set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
 
 " https://shapeshed.com/vim-statuslines/
-
-" Hiding the UI
-" https://unix.stackexchange.com/questions/140898/vim-hide-status-line-in-the-bottom
-let s:hidden_all = 0
-function! ToggleHiddenAll()
-  if s:hidden_all  == 0
-    let s:hidden_all = 1
-    set noshowmode
-    set noruler
-    set laststatus=0
-    set noshowcmd
-    set nocul
-    set cc=
-  else
-    let s:hidden_all = 0
-    set showmode
-    if &ft != 'netrw'
-      set ruler
-      set cul
-      set cc=80
-    endif
-    set laststatus=2
-    set showcmd
-  endif
-endfunction
-
-" nnoremap <S-h> :call ToggleHiddenAll()<CR>
 
 " Clipboard
 set clipboard=unnamed
