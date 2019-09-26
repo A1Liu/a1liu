@@ -23,6 +23,7 @@ application settings, file organizations, etc.
 - `IS_INTERACTIVE_SHELL` - Whether or not the shell is interactive
 - `CFG_SHELL_ENV` - Guard variable for checking if path is correctly set
 - `CFG_ENV` - Guard variable for checking if environment variables are set
+- `VIM_DEBUG` - Debug flag for vim
 
 ### Installation Scripts
 The following scripts are usable:
