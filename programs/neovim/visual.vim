@@ -77,3 +77,5 @@ hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
 hi WildMenu ctermfg=Gray ctermbg=Black
 hi NonText ctermfg=LightBlue
 hi Comment ctermfg=DarkGray
+hi Pmenu ctermbg=Gray ctermfg=Black
+hi PmenuSel ctermbg=Magenta ctermfg=Black
