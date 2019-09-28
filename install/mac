@@ -1,0 +1,10 @@
+#!/usr/sh
+
+xcode-select --install
+
+URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
+
+echo -n '- Installing brew ... '
+echo | /usr/bin/ruby -e "$(curl -fsSL $URL_BREW)"
+if [ $? -eq 0 ]; then echo 'OK'; else echo 'FAIL'; fi
+
