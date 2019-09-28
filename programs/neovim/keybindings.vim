@@ -10,6 +10,8 @@ noremap! <C-C> <Esc>
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cnoremap <C-H> <C-C>
+nnoremap r<C-H> <Nop>
+nnoremap r<C-C> <Nop>
 cunmap <C-C>
 
 " Using <C-J> and <C-K> for navigating the pop-up menu
