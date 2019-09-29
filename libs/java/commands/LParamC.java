@@ -1,7 +1,7 @@
 package commands;
 
 /**
- * This class is the lambda notation version of the PCommand Class. The two are
+ * This class is the lambda notation version of the ParamC Class. The two are
  * separated to preserve the abstract marker on execute(Object... elist) in
  * PCommand
  * @author aliu
