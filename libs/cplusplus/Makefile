@@ -10,7 +10,15 @@
 #
 # P.S. I'm pretty sure if you include whitespace in your filenames, this will break.
 
+# TODO Add support for adding libraries to path
+# 	mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+# 	current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+# TODO Add support for inserting another makefile at beginning,
+# 	middle, and end of execution
+
 # ---------- FILE DECLARATIONS -----------
+
+$(info $(MAKEFILE_LIST))
 
 SRC := src
 NAMES := main
