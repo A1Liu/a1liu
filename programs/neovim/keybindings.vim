@@ -14,6 +14,9 @@ nnoremap r<C-H> <Nop>
 nnoremap r<C-C> <Nop>
 cunmap <C-C>
 
+" What the heck is Select mode?
+nnoremap gh <Nop>
+
 " Using <C-J> and <C-K> for navigating the pop-up menu
 inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"
 inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
