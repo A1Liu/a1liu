@@ -13,6 +13,9 @@ export ECLIM_SERVER_SCRIPT="${CFG_DIR}/programs/neovim/eclimd"
 # SSH
 alias ssh='TERM=xterm-256color ssh'
 
+# Tmux
+alias aliu='tmux attach -t aliu || tmux new -s aliu'
+
 # tree and ls using exa instead
 alias tree='exa -T'
 alias ls=exa
