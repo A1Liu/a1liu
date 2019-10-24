@@ -16,24 +16,26 @@ if [ "$DEBUG" = "true" ]; then
 fi
 
 restore_move() {
+  DEST="$(echo "~/$1" | tr -s "/")"
   LINK="$(echo "${CFG_DIR}/$1" | tr -s "/")"
 
   if [ "$DEBUG" = "true" ]; then
-    echo "restore_move'ing file path $LINK"
+    echo "restore_move'ing file path '$LINK' to '$DEST'"
   fi
 
+  # Remove my configs
+  rm -f "$DEST"
+
+  # Add back old configs if they existed
   if [ -e "$LINK" ]; then
-    mv "$LINK" "$(echo "~/$1" | tr -s "/")"
+    mv "$LINK" "$DEST"
   fi
 }
-
-# Remove my configs
-# Could probably be done a little bit cleaner with a for loop
-rm -f ~/.vimrc ~/.vim ~/.bashrc ~/.bash_profile ~/.profile ~/.zshrc
 
 restore_move .vimrc
 restore_move .vim
 restore_move .bashrc
 restore_move .bash_profile
 restore_move .zshrc
-
+restore_move .gitconfig
+restore_move .gitignore_global
