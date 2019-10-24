@@ -28,10 +28,16 @@ application settings, file organizations, etc.
 ### Installation Scripts
 The following scripts are usable:
 
-- `shell` - Installs editor configurations for a working shell. Install with
+- `shell` - Installs editor/Git configurations for a working shell. Install with
 
   ```sh
   sh install/shell
+  ```
+
+- `powershell.ps1` - Install editor/Git configurations for Powershell. Install with
+
+  ```powershell
+  .\install\powershell.ps1
   ```
 
 - `windows.ps1` - Installs programs for windows.
