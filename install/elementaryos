@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Assumes Git has already been installed
+project="$(dirname $0)"
+export project="$(dirname "$project")"
+
+# Updating, upgrading
+apt dist-upgrade -y
+apt update -y
+apt upgrade -y
+apt autoremove -y
+
+# Pretty useful software
+apt install -y \
+software-properties-common snapd \
+exfat-utils exfat-fuse ntfs-3g \
+default-jre default-jdk \
+build-essential \
+conky-all gcalcli \
+python3.6 python2.7
+
+# Z Shell
+apt install -y zsh
+chsh -s /bin/zsh
+
+source "$project/install/shell"

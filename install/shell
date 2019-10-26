@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source "$(dirname "$0")/utils"
+. "$(dirname "$0")/utils"
 INSTALL_DIR="$(dirname "$(realpath "$0")")"
 CFG_DIR="$(dirname "$INSTALL_DIR")"
 LOCAL_DIR="${CFG_DIR}/local"

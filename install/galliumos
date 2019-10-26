@@ -11,8 +11,7 @@ apt upgrade -y
 
 # Pretty useful software
 apt install -y \
-software-properties-common \
-git snapd \
+software-properties-common snapd \
 exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
 build-essential \
@@ -43,7 +42,7 @@ touch ~/.vimrc
 echo "runtime ${project}/neovim/init.vim" > ~/.vimrc
 
 # Eclim
-ln -s /opt/eclipse/ "${project}/neovim/eclimd"
+# ln -s /opt/eclipse/ "${project}/neovim/eclimd"
 
 # Z Shell
 apt install zsh
