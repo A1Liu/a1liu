@@ -1,5 +1,6 @@
 #!/bin/sh
 
+source "$(dirname "$0")/utils"
 INSTALL_DIR="$(dirname "$(realpath "$0")")"
 CFG_DIR="$(dirname "$INSTALL_DIR")"
 LOCAL_DIR="${CFG_DIR}/local"
@@ -47,15 +48,19 @@ check_move() {
   elif test -d "$file_path"; then
     if [ "$DEBUG" = "true" ]; then
       echo "Detected existing directory, moving to ${MOVE_DIR}/$1"
+      mv "$file_path" "${MOVE_DIR}" || rm "$file_path"
+    else
+      mv "$file_path" "${MOVE_DIR}" 2>/dev/null || rm "$file_path"
     fi
 
-    mv "$file_path" "${MOVE_DIR}"
   fi
 
   if [ "$DEBUG" = "true" ]; then
-    echo "Creating softink to $(echo "${CFG_DIR}/$2"| tr -s "/")\n"
+    echo "Creating softink to $(echo "${CFG_DIR}/$2"| tr -s "/")"
+    # echo Command is: "ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" $file_path"
   fi
   ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" "$file_path"
+  echo
 }
 
 # Create all the soft links
