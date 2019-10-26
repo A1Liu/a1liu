@@ -18,10 +18,10 @@ mkdir -p $MOVE_DIR
 # Template for machine-local shell endpoints
 PRINT_TEMPLATE="#!/bin/sh\n\
 \n\
-export CFG_DIR=\"$CFG_DIR\"\nCUR_SHELL=\"\$0\"\n\
+export CFG_DIR=\"$CFG_DIR\"\nCUR_SHELL=\"\$(basename \"\$0\" | tr -d \"-\")\"\n\
 IS_INTERACTIVE_SHELL=%s\n\
 \n\
-source \"$CFG_DIR/shells/dispatch\"\n"
+. \"$CFG_DIR/shells/dispatch\"\n"
 
 if [ "$DEBUG" = "true" ]; then
   echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF\n"
