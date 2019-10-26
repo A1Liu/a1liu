@@ -23,8 +23,6 @@ if [[ $CFG_SHELL_ENV != 1 ]]; then
   # Adding stuff to python path
   export PYTHONPATH="${CFG_DIR}/libs/python:${PYTHONPATH}"
 
-  export PATH="/Library/Frameworks/Python.framework/Versions/3.7/bin:${PATH}"
-
   # Haskell
   source_if_necessary $HOME/.ghcup/env cabal
 
