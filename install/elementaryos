@@ -17,7 +17,8 @@ exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
 build-essential \
 conky-all gcalcli \
-python3.6 python2.7
+python3.6 python2.7 \
+vim
 
 # Z Shell
 apt install -y zsh
