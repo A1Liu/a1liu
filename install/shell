@@ -24,7 +24,7 @@ IS_INTERACTIVE_SHELL=%s\n\
 source \"$CFG_DIR/shells/dispatch\"\n"
 
 if [ "$DEBUG" = "true" ]; then
-  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF"
+  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF\n"
 fi
 
 # Sets up machine-local endpoints that can be soft-linked to while still
@@ -59,8 +59,12 @@ check_move() {
   if [ "$DEBUG" = "true" ]; then
     echo "Creating softink to $(echo "${CFG_DIR}/$2"| tr -s "/")"
   fi
+
   ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" "$file_path"
-  echo
+
+  if [ "$DEBUG" = "true" ]; then
+    echo
+  fi
 }
 
 # Create all the soft links
