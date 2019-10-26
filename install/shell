@@ -13,6 +13,8 @@ if [ "$DEBUG" = "true" ]; then
   echo "Preconfig directory is:      $MOVE_DIR"
 fi
 
+mkdir -p $MOVE_DIR
+
 # Template for machine-local shell endpoints
 PRINT_TEMPLATE="#!/bin/sh\n\
 \n\
@@ -36,6 +38,8 @@ printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
 # Function to check for existing configs, and move them if necessary
 check_move() {
   file_path="$(realpath ~)/$1"
+
+
   if [ "$DEBUG" = "true" ]; then
     echo "check_move'ing file path $file_path"
   fi
@@ -44,20 +48,16 @@ check_move() {
     if [ "$DEBUG" = "true" ]; then
       echo "Detected existing file, moving to ${MOVE_DIR}/$1"
     fi
-    mv "$file_path" "${MOVE_DIR}/$1"
+    move_safe "$file_path" "${MOVE_DIR}/$1"
   elif test -d "$file_path"; then
     if [ "$DEBUG" = "true" ]; then
       echo "Detected existing directory, moving to ${MOVE_DIR}/$1"
-      mv "$file_path" "${MOVE_DIR}" || rm "$file_path"
-    else
-      mv "$file_path" "${MOVE_DIR}" 2>/dev/null || rm "$file_path"
     fi
-
+    move_safe "$file_path" "${MOVE_DIR}/$1"
   fi
 
   if [ "$DEBUG" = "true" ]; then
     echo "Creating softink to $(echo "${CFG_DIR}/$2"| tr -s "/")"
-    # echo Command is: "ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" $file_path"
   fi
   ln -s "$(echo "${CFG_DIR}/$2" | tr -s "/")" "$file_path"
   echo

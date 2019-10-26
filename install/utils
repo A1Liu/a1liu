@@ -12,3 +12,24 @@ realpath() {
   cd "$OURPWD"
   echo "$REALPATH"
 }
+
+move_safe() {
+  local src_file_path="$1"
+  local dest_file_path="$2"
+  local move_file_path="$(dirname "$dest_file_path")/_$(basename "$dest_file_path")"
+
+  if test -f "$dest_file_path"; then
+    if [ "$DEBUG" = "true" ]; then
+      echo "Detected existing file $dest_file_path, moving it to $move_file_path first"
+    fi
+    move_safe "$dest_file_path" "$move_file_path"
+  elif test -d "$dest_file_path"; then
+    if [ "$DEBUG" = "true" ]; then
+      echo "Detected existing directory $dest_file_path, moving it to $move_file_path first"
+    fi
+    move_safe "$dest_file_path" "$move_file_path"
+  fi
+
+  mv "$src_file_path" "$dest_file_path"
+}
+
