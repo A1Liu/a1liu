@@ -48,12 +48,16 @@ endif
 set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
 
-" https://shapeshed.com/vim-statuslines/
-
 " Clipboard
-set clipboard=unnamedplus
-if executable('xsel')
-  autocmd VimLeave * call system("xsel -ib", getreg('+'))
+if has('macunix')
+  call DebugPrint('Operating System is MacOS')
+  set clipboard=unnamed
+else
+  call DebugPrint('Operating System is not MacOS')
+  set clipboard=unnamedplus
+  if executable('xsel')
+    autocmd VimLeave * call system("xsel -ib", getreg('+'))
+  endif
 endif
 
 " Deleting in insert mode

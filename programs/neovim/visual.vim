@@ -4,6 +4,7 @@ set hlsearch incsearch " highlighting when using find
 set cc=80
 set cul
 
+" https://shapeshed.com/vim-statuslines/
 set statusline=
 set statusline+=\ %f
 set statusline+=%m
