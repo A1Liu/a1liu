@@ -5,3 +5,6 @@
 1. Install Git using `sudo apt-get install git`
 2. Install software using `sudo source ./install/elementaryos`
 3. Install keybindings by going into `settings -> keyboard -> layout`
+4. Set up ssh stuff with `ssh-keygen`
+
+<!-- TODO figure out how tf to set up clipboard correctly -->
