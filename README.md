@@ -33,8 +33,12 @@ following scripts are usable:
 - `shell` - Installs editor/Git configurations for a working shell. Install with
 
   ```sh
-  sh install/shell
+  . install/shell
   ```
 
 - `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
+
+  ```sh
+  . install/elementaryos
+  ```
 
