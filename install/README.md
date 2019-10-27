@@ -3,7 +3,8 @@
 ## ElementaryOS
 
 1. Install Git using `sudo apt-get install git`
-2. Install software using `sudo source ./install/elementaryos`
+2. Clone repository with `git clone https://github.com/A1Liu/config`
+2. Install software using `sudo . config/install/elementaryos`
 3. Install keybindings by going into `settings -> keyboard -> layout`
 4. Set up ssh stuff with `ssh-keygen`
 5. Potentially diagnose and fix problems with graphics card not waking up after

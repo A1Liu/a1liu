@@ -76,4 +76,5 @@ check_move .bash_profile "/local/shell_interact_init"
 check_move .zshrc "/local/shell_interact_init"
 check_move .gitconfig "/programs/gitconfig"
 check_move .gitignore_global "/programs/gitignore_global"
+check_move .tmux.conf "/programs/tmux.conf"
 
