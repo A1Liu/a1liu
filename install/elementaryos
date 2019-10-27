@@ -10,6 +10,8 @@ apt update -y
 apt upgrade -y
 apt autoremove -y
 
+apt remove vim-tiny -y
+
 # Pretty useful software
 apt install -y \
 software-properties-common snapd \
@@ -17,7 +19,7 @@ exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
 build-essential \
 conky-all gcalcli \
-python3.6 python2.7 \
+python3.7 python2.7 \
 vim-gtk firefox tmux xsel
 
 # Z Shell
