@@ -51,7 +51,7 @@ set ignorecase smartcase " Ignore case in searching except when including capita
 " https://shapeshed.com/vim-statuslines/
 
 " Clipboard
-set clipboard=unnamed
+set clipboard=unnamedplus
 
 " Deleting in insert mode
 set backspace=indent,eol,start

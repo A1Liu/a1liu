@@ -18,10 +18,17 @@ default-jre default-jdk \
 build-essential \
 conky-all gcalcli \
 python3.6 python2.7 \
-vim firefox
+vim-gtk firefox xclip
 
 # Z Shell
 apt install -y zsh
 chsh -s /bin/zsh
 
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
+
 source "$project/install/shell"
+
+echo "Running 'rustup' to install the Rust programming langague"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+apt install haskell-platform
