@@ -17,8 +17,8 @@ alias ssh='TERM=xterm-256color ssh'
 alias aliu='tmux attach -t aliu || tmux new -s aliu'
 
 # tree and ls using exa instead
-alias tree='exa -T'
-alias ls=exa
+# alias tree='exa -T'
+# alias ls=exa
 
 # Git
 function branch() {
