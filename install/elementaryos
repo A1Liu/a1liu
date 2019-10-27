@@ -4,40 +4,53 @@
 project="$(dirname $0)"
 export project="$(dirname "$project")"
 
-# Updating, upgrading
+echo "Removing useless software..."
+apt remove -y \
+vim-tiny
+
+echo "Upgrading distribution..."
 apt dist-upgrade -y
 apt update -y
 apt upgrade -y
 apt autoremove -y
 
-apt remove vim-tiny -y
-
+echo "Installing Vim..."
+apt install -y xsel vim-gtk
+echo "Installing Firefox..."
+apt install -y firefox
+echo "Installing Zsh..."
+apt install -y zsh && chsh -s /bin/zsh
 # Pretty useful software
+echo "Installing miscellaneous software..."
 apt install -y \
 software-properties-common snapd \
-exfat-utils exfat-fuse ntfs-3g \
-default-jre default-jdk \
-build-essential \
-conky-all gcalcli \
-python3.7 python2.7 \
-vim-gtk firefox tmux xsel
-
-# Z Shell
-apt install -y zsh
-chsh -s /bin/zsh
+exfat-utils exfat-fuse ntfs-3g build-essential
+curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
 
 # Tmux
-tic -x "$project/programs/xterm-256color-italic.terminfo"
-tic -x "$project/programs/tmux-256color.terminfo"
-gsettings set io.elementary.terminal.settings natural-copy-paste false
+echo "Installing tmux and related integrations..."
+gsettings set io.elementary.terminal.settings natural-copy-paste false \
+&& apt install -y tmux \
+&& tic -x "$project/programs/xterm-256color-italic.terminfo" \
+&& tic -x "$project/programs/tmux-256color.terminfo" \
 
 # Install nvm
+echo "Installing Node version manager..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
-nvm install v12.13.0
 
+echo "Installing shell configurations (overwriting Node shell configs)..."
 source "$project/install/shell"
 
-echo "Running 'rustup' to install the Rust programming langague"
+echo "Installing programming languages..."
+echo "  - JavaScript"
+nvm install v12.13.0
+echo "  - Python"
+apt install -y python3.7 python2.7
+echo "  - Java"
+apt install -y default-jre default-jdk
+echo "  - Rust"
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
+echo "  - Haskell"
 apt install haskell-platform
+echo "  - Kotlin"
+snap install --classic kotlin
