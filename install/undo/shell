@@ -39,3 +39,5 @@ restore_move .bash_profile
 restore_move .zshrc
 restore_move .gitconfig
 restore_move .gitignore_global
+restore_move .tmux.conf
+
