@@ -18,7 +18,7 @@ default-jre default-jdk \
 build-essential \
 conky-all gcalcli \
 python3.6 python2.7 \
-vim-gtk firefox tmux
+vim-gtk firefox tmux xsel
 
 # Z Shell
 apt install -y zsh

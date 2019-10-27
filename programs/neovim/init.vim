@@ -52,6 +52,9 @@ set ignorecase smartcase " Ignore case in searching except when including capita
 
 " Clipboard
 set clipboard=unnamedplus
+if executable('xsel')
+  autocmd VimLeave * call system("xsel -ib", getreg('+'))
+endif
 
 " Deleting in insert mode
 set backspace=indent,eol,start
