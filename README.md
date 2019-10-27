@@ -26,7 +26,9 @@ application settings, file organizations, etc.
 - `VIM_DEBUG` - Debug flag for vim
 
 ### Installation Scripts
-The following scripts are usable:
+This repository includes multiple installation scripts for setting up a new computer.
+For more information about installation, please see `install/README.md`. The
+following scripts are usable:
 
 - `shell` - Installs editor/Git configurations for a working shell. Install with
 
@@ -34,13 +36,5 @@ The following scripts are usable:
   sh install/shell
   ```
 
-- `powershell.ps1` - Install editor/Git configurations for Powershell. Install with
-
-  ```powershell
-  .\install\powershell.ps1
-  ```
-
-- `windows.ps1` - Installs programs for windows.
-
-
+- `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
 
