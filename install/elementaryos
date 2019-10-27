@@ -18,7 +18,7 @@ default-jre default-jdk \
 build-essential \
 conky-all gcalcli \
 python3.6 python2.7 \
-vim
+vim firefox
 
 # Z Shell
 apt install -y zsh

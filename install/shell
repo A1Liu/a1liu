@@ -18,7 +18,8 @@ mkdir -p $MOVE_DIR
 # Template for machine-local shell endpoints
 PRINT_TEMPLATE="#!/bin/sh\n\
 \n\
-export CFG_DIR=\"$CFG_DIR\"\nCUR_SHELL=\"\$(basename \"\$0\" | tr -d \"-\")\"\n\
+export CFG_DIR=\"$CFG_DIR\"\n\
+CUR_SHELL=\"\$(basename \"\$0\" 2>/dev/null || echo \"\$0\" | tr -d \"-\")\"\n\
 IS_INTERACTIVE_SHELL=%s\n\
 \n\
 . \"$CFG_DIR/shells/dispatch\"\n"
