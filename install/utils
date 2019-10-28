@@ -118,16 +118,15 @@ move_safe() {
   local dest_file_path="$2"
   local move_file_path="$(dirname "$dest_file_path")/_$(basename "$dest_file_path")"
 
-  readlink "$src_file_path"
+  readlink "$src_file_path" >/dev/null
   if [ $? -eq 0 ]; then
-    local old_src_file_path="$src_file_path"
-    new_src_file_path="$(realpath "$src_file_path")"
-    if test -f "$src_file_path"; then
+    src_file_path_content="$(realpath "$src_file_path")"
+    if test -f "$src_file_path_content"; then
       if [ "$DEBUG" = "true" ]; then
         echo "Source file path '$src_file_path' is a soft link to a file."
       fi
-      rm "$old_src_file_path"
-      cp "$src_file_path" "$old_src_file_path"
+      rm "$src_file_path"
+      cp "$src_file_path_content" "$src_file_path"
     fi
   fi
 
