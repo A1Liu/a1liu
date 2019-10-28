@@ -113,22 +113,35 @@ _bsd_stat_readlink() {
 
 # End copied content https://github.com/mkropat/sh-realpath
 
-
 move_safe() {
-  echo "IMPLEMENT THIS CORRECTLY"
-  exit 1
   local src_file_path="$1"
   local dest_file_path="$2"
   local move_file_path="$(dirname "$dest_file_path")/_$(basename "$dest_file_path")"
 
+  readlink "$src_file_path"
+  if [ $? -eq 0 ]; then
+    local old_src_file_path="$src_file_path"
+    new_src_file_path="$(realpath "$src_file_path")"
+    if test -f "$src_file_path"; then
+      if [ "$DEBUG" = "true" ]; then
+        echo "Source file path '$src_file_path' is a soft link to a file."
+      fi
+      rm "$old_src_file_path"
+      cp "$src_file_path" "$old_src_file_path"
+    fi
+  fi
+
   if test -f "$dest_file_path"; then
     if [ "$DEBUG" = "true" ]; then
-      echo "Detected existing file $dest_file_path, moving it to $move_file_path first"
+      echo "Destination '$dest_file_path' already exists," \
+           "moving it to '$move_file_path' first"
     fi
+
     move_safe "$dest_file_path" "$move_file_path"
   elif test -d "$dest_file_path"; then
     if [ "$DEBUG" = "true" ]; then
-      echo "Detected existing directory $dest_file_path, moving it to $move_file_path first"
+      echo "Destination '$dest_file_path' already exists," \
+           "moving it to '$move_file_path' first"
     fi
     move_safe "$dest_file_path" "$move_file_path"
   fi
