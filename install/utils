@@ -115,6 +115,8 @@ _bsd_stat_readlink() {
 
 
 move_safe() {
+  echo "IMPLEMENT THIS CORRECTLY"
+  exit 1
   local src_file_path="$1"
   local dest_file_path="$2"
   local move_file_path="$(dirname "$dest_file_path")/_$(basename "$dest_file_path")"
