@@ -14,6 +14,19 @@ fi
 
 mkdir -p $MOVE_DIR
 
+# Template for machine-local shell endpoints
+PRINT_TEMPLATE="#!/bin/sh\n\
+\n\
+export CFG_DIR=\"$CFG_DIR\"\n\
+CUR_SHELL=\"\$(basename \"\$0\" 2>/dev/null || echo \"\$0\" | tr -d \"-\")\"\n\
+IS_INTERACTIVE_SHELL=%s\n\
+\n\
+. \"$CFG_DIR/shells/dispatch\"\n"
+
+if [ "$DEBUG" = "true" ]; then
+  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF\n"
+fi
+
 # Function to check for existing configs, and move them if necessary
 check_move() {
   file_path="$(realpath ~)/$1"
@@ -55,19 +68,6 @@ check_move .zshrc "/local/shell_interact_init"
 check_move .gitconfig "/programs/gitconfig"
 check_move .gitignore_global "/programs/gitignore_global"
 check_move .tmux.conf "/programs/tmux.conf"
-
-# Template for machine-local shell endpoints
-PRINT_TEMPLATE="#!/bin/sh\n\
-\n\
-export CFG_DIR=\"$CFG_DIR\"\n\
-CUR_SHELL=\"\$(basename \"\$0\" 2>/dev/null || echo \"\$0\" | tr -d \"-\")\"\n\
-IS_INTERACTIVE_SHELL=%s\n\
-\n\
-. \"$CFG_DIR/shells/dispatch\"\n"
-
-if [ "$DEBUG" = "true" ]; then
-  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF\n"
-fi
 
 # Sets up machine-local endpoints that can be soft-linked to while still
 # maintaining flexibility
