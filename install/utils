@@ -120,10 +120,10 @@ move_safe() {
 
   readlink "$src_file_path" >/dev/null
   if [ $? -eq 0 ]; then
-    src_file_path_content="$(realpath "$src_file_path")"
+    local src_file_path_content="$(realpath "$src_file_path")"
     if test -f "$src_file_path_content"; then
       if [ "$DEBUG" = "true" ]; then
-        echo "Source file path '$src_file_path' is a soft link to a file."
+        echo "Source file path '$src_file_path' is a soft link to '$src_file_path_content'."
       fi
       rm "$src_file_path"
       cp "$src_file_path_content" "$src_file_path"

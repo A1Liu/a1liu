@@ -1,5 +1,4 @@
 #!/bin/sh
-
 . "$(dirname "$0")/utils"
 INSTALL_DIR="$(dirname "$(realpath "$0")")"
 CFG_DIR="$(dirname "$INSTALL_DIR")"
@@ -14,27 +13,6 @@ if [ "$DEBUG" = "true" ]; then
 fi
 
 mkdir -p $MOVE_DIR
-
-# Template for machine-local shell endpoints
-PRINT_TEMPLATE="#!/bin/sh\n\
-\n\
-export CFG_DIR=\"$CFG_DIR\"\n\
-CUR_SHELL=\"\$(basename \"\$0\" 2>/dev/null || echo \"\$0\" | tr -d \"-\")\"\n\
-IS_INTERACTIVE_SHELL=%s\n\
-\n\
-. \"$CFG_DIR/shells/dispatch\"\n"
-
-if [ "$DEBUG" = "true" ]; then
-  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF\n"
-fi
-
-# Sets up machine-local endpoints that can be soft-linked to while still
-# maintaining flexibility
-touch "$LOCAL_DIR/shell_init"
-printf "${PRINT_TEMPLATE}\n" 'false' > "$LOCAL_DIR/shell_init"
-touch "$LOCAL_DIR/shell_interact_init"
-printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
-
 
 # Function to check for existing configs, and move them if necessary
 check_move() {
@@ -78,3 +56,22 @@ check_move .gitconfig "/programs/gitconfig"
 check_move .gitignore_global "/programs/gitignore_global"
 check_move .tmux.conf "/programs/tmux.conf"
 
+# Template for machine-local shell endpoints
+PRINT_TEMPLATE="#!/bin/sh\n\
+\n\
+export CFG_DIR=\"$CFG_DIR\"\n\
+CUR_SHELL=\"\$(basename \"\$0\" 2>/dev/null || echo \"\$0\" | tr -d \"-\")\"\n\
+IS_INTERACTIVE_SHELL=%s\n\
+\n\
+. \"$CFG_DIR/shells/dispatch\"\n"
+
+if [ "$DEBUG" = "true" ]; then
+  echo "Print template is: EOF\n$PRINT_TEMPLATE\nEOF\n"
+fi
+
+# Sets up machine-local endpoints that can be soft-linked to while still
+# maintaining flexibility
+touch "$LOCAL_DIR/shell_init"
+printf "${PRINT_TEMPLATE}\n" 'false' > "$LOCAL_DIR/shell_init"
+touch "$LOCAL_DIR/shell_interact_init"
+printf "${PRINT_TEMPLATE}\n" 'true' > "$LOCAL_DIR/shell_interact_init"
