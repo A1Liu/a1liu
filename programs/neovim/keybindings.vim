@@ -29,6 +29,9 @@ nnoremap <C-Q> <Nop>
 " " Saving with <C-S>
 " nnoremap <C-S> :w<CR>
 
+" Disabling ex mode
+nnoremap <S-Q> <Nop>
+
 " Formatting with <Leader><S>
 nnoremap <Leader><C-S> :FormatCode<CR>
 
