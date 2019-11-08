@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 import os,sys
-dirname = os.path.dirname
-install_dir = dirname(os.path.realpath(__file__))
-project_dir = dirname(install_dir)
+install_dir = os.path.dirname(os.path.realpath(__file__))
+project_dir = os.path.dirname(install_dir)
 sys.path.insert(0, os.path.join(project_dir, 'libs', 'python'))
 from aliu import files
 from aliu import config
 from aliu.logging import *
+
+if config.already_installed("shell"):
+    print("Already installed.")
+    exit(0)
+else:
+    with open(config.install_flag_filename("shell"), 'w') as f:
+        pass
 
 
 if config.debug_mode():

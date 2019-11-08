@@ -1,75 +1,84 @@
-import logging, inspect, re, sys, os
-from logging import DEBUG
-from logging import INFO
-from logging import WARN
-from logging import ERROR
+import inspect, re, sys, os
 
-# TODO Remove the logging package and instead use in-house, print to std out logger
-# TODO Add trace, warn, and error
-
-def __configure_logger(logger, level = None, handlers = None):
-
-    if level is not None:
-        logger.setLevel(level)
-    elif not hasattr(logger, '__aliu__'):
-        logger.setLevel(WARN)
-
-    if handlers is not None:
-        logger.handlers = handlers
-    elif not hasattr(logger, '__aliu__'):
-        logger.handlers = []
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        handler.setFormatter(logging.Formatter('%(name)s:%(message)s'))
-        logger.addHandler(handler)
-    logger.__aliu__ = True
-
-def __get_logger(obj):
-    if isinstance(obj, logging.Logger):
-        return obj
+def _get_logger_id(obj):
     if isinstance(obj, str):
-        return logging.getLogger(obj)
-    elif hasattr(obj, '__call__'):
+        return (obj, None)
+    elif hasattr(obj, '_call_'):
         filename = inspect.getsourcefile(obj)
-        name = "%s:%s" % (os.path.relpath(filename), obj.__name__)
-        return logging.getLogger(name)
-    elif isinstance(obj, inspect.types.FrameType):
+        return (os.path.relpath(filename), obj._name_)
+    elif isinstance(obj, inspect.types.FrameType) or obj is None:
+        if obj is None:
+            obj = inspect.currentframe().f_back.f_back
         frame_info = inspect.getframeinfo(obj)
-        name = "%s:%s" % (os.path.relpath(frame_info.filename), frame_info.function)
-        return logging.getLogger(name)
-    elif obj is None:
-        frame_info = inspect.getframeinfo(inspect.currentframe().f_back.f_back)
         if frame_info.function == '<module>':
-            name = "%s" % os.path.relpath(frame_info.filename)
+            return (os.path.relpath(frame_info.filename), None)
         else:
-            name = "%s:%s" % (os.path.relpath(frame_info.filename), frame_info.function)
-        return logging.getLogger(name)
+            return (os.path.relpath(frame_info.filename), frame_info.function)
     else:
-        raise AssertionError("Incorrect type passed for __get_logger (type=%s)" % (type(obj)))
+        raise AssertionError("Incorrect type passed for _get_logger (type=%s)" % (type(obj)))
 
+class Logger(object):
+    TRACE = 10
+    DEBUG = 20
+    INFO = 30
+    WARN = 40
+    ERROR = 50
+    REGISTERED_LOGGERS = {}
+
+    def __init__(self, obj = None):
+        global _get_logger_id
+        self.level = WARN
+        self.id = _get_logger_id(obj)
+        self.prefix = True
+        if self.id in Logger.REGISTERED_LOGGERS:
+            raise AssertionError("Rebuilt existing logger.")
+        else:
+            Logger.REGISTERED_LOGGERS[self.id] = self
+            if (self.id[0], None) not in Logger.REGISTERED_LOGGERS:
+                Logger(obj = self.id)
+
+    def get_prefix(self):
+        if self.id[1] is None:
+            return str(self.id[0])
+        else:
+            return ':'.join(self.id)
+
+    def log(self, *args, level = 20, sep = ' ', end = '\n'):
+        if level >= self.level:
+            print(self.id[0], *args, sep = sep, end = end, file = sys.stderr)
+
+def _get_logger(obj):
+    frame = inspect.currentframe().f_back.f_back
+    id = _get_logger_id(frame)
+    if id in Logger.REGISTERED_LOGGERS:
+        return Logger.REGISTERED_LOGGERS[id]
+    return Logger(frame)
 
 def get_logger(obj = None):
-    logger = __get_logger(obj)
-    if not hasattr(logger, '__aliu__'):
-        __configure_logger(logger)
+    return _get_logger(obj)
+
+def configure_logger(obj = None, level = None):
+    logger = _get_logger(obj)
+    logger.level = level
     return logger
 
-def configure_logger(obj = None, level = None, handlers = None):
-    logger = __get_logger(obj)
-    __configure_logger(logger, level = level, handlers = handlers)
-    return logger
-
-def log_function(level = None, handlers = None):
+def log_function(level = None):
     def decorator(func):
-        logger = __get_logger(func)
-        __configure_logger(logger, level = level, handlers = handlers)
+        logger = _get_logger(func)
+        if level is not None:
+            logger.level = level
         return func
     return decorator
 
 def debug(*args, sep = ' '):
-    logger = __get_logger(None)
+    logger = _get_logger(None)
     prefix = '%s ~ ' % inspect.getframeinfo( inspect.currentframe().f_back ).lineno
     message = sep.join(args)
     for line in message.split('\n'):
-        logger.debug(prefix + line)
+        logger.log(prefix + line, level = Logger.DEBUG)
 
+TRACE = Logger.TRACE
+DEBUG = Logger.DEBUG
+INFO = Logger.INFO
+WARN = Logger.WARN
+ERROR = Logger.ERROR
