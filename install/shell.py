@@ -14,7 +14,6 @@ else:
     with open(config.install_flag_filename("shell"), 'w') as f:
         pass
 
-
 if config.debug_mode():
     logger = configure_logger(level = DEBUG)
     logger = configure_logger(files.move_safe, level = DEBUG)
