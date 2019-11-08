@@ -4,6 +4,9 @@ from logging import INFO
 from logging import WARN
 from logging import ERROR
 
+# TODO Remove the logging package and instead use in-house, print to std out logger
+# TODO Add trace, warn, and error
+
 def __configure_logger(logger, level = None, handlers = None):
 
     if level is not None:
@@ -55,6 +58,13 @@ def configure_logger(obj = None, level = None, handlers = None):
     logger = __get_logger(obj)
     __configure_logger(logger, level = level, handlers = handlers)
     return logger
+
+def log_function(level = None, handlers = None):
+    def decorator(func):
+        logger = __get_logger(func)
+        __configure_logger(logger, level = level, handlers = handlers)
+        return func
+    return decorator
 
 def debug(*args, sep = ' '):
     logger = __get_logger(None)

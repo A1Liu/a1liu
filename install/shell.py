@@ -5,11 +5,12 @@ install_dir = dirname(os.path.realpath(__file__))
 project_dir = dirname(install_dir)
 sys.path.insert(0, os.path.join(project_dir, 'libs', 'python'))
 from aliu import files
+from aliu import config
 from aliu.logging import *
 
 logger = configure_logger(files.move_safe, level = DEBUG)
 
-if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
+if config.debug_mode():
     logger = configure_logger(level = DEBUG)
 
 local_dir = os.path.join(project_dir, 'local')
@@ -36,16 +37,21 @@ IS_INTERACTIVE_SHELL=%s
 
 debug("print_template=", print_template.replace('\n', '\n' + ' ' * 14 + '='), sep='')
 
+@log_function(level = DEBUG)
 def add_safe(name, src):
-    debug(f'name={name}, src={src}')
     move_path = os.path.join(move_dir, name)
     output_path = os.path.join(os.path.expanduser('~'), name)
-    debug(f'move_path={move_path}, output_path={output_path}')
-    if os.path.exists(output_path):
-        files.move_safe(output_path, move_path)
-    assert not os.path.exists(output_path)
-    os.symlink(os.path.join(project_dir, src), output_path, os.path.isdir(src))
-configure_logger(add_safe, level = DEBUG)
+    link_path = os.path.join(project_dir, src)
+    if not config.dry_run():
+        if os.path.exists(output_path):
+            files.move_safe(output_path, move_path)
+        os.symlink(link_path, output_path, os.path.isdir(src))
+    else:
+        print(f"link_path={link_path}")
+        print(f"output_path={output_path}")
+        if os.path.exists(output_path):
+            print(f"`output_path` exists, would have to move it")
+        print(f"Would symlink `link_path` to `output_path`")
 
 add_safe(".vimrc", "programs/neovim/init.vim")
 add_safe(".vim", "programs/neovim")
