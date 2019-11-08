@@ -47,11 +47,6 @@ def add_safe(name, src):
     os.symlink(os.path.join(project_dir, src), output_path, os.path.isdir(src))
 configure_logger(add_safe, level = DEBUG)
 
-# add_safe("test", "programs/neovim/init.vim")
-
-
-
-
 add_safe(".vimrc", "programs/neovim/init.vim")
 add_safe(".vim", "programs/neovim")
 add_safe(".bashrc", "local/shell_interact_init")

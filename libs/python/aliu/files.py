@@ -12,13 +12,21 @@ def move_safe(src, dest, prefix = '_'):
         replace_dest = os.path.join(os.path.dirname(dest), prefix + os.path.basename(dest))
         move_safe(dest, replace_dest, prefix)
 
-    if os.path.isfile(src):
+    if os.path.isdir(src):
+        debug(f"Source is a directory! (src={src})")
+        os.rename(src, dest)
+    elif os.path.islink(src):
+        debug(f"Source is a symbolic link! (src={src})")
+        with open(src, 'r') as f:
+            source_data = f.read()
+        with open(dest, 'w') as f:
+            f.write(source_data)
+        os.remove(src)
+    elif os.path.isfile(src):
         debug(f"Source is a file! (src={src})")
         with open(src, 'r') as f:
             source_data = f.read()
         with open(dest, 'w') as f:
             f.write(source_data)
         os.remove(src)
-    elif os.path.isdir(src):
-        debug(f"Source is a directory! (src={src})")
-        os.rename(src, dest)
+
