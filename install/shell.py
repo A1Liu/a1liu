@@ -15,8 +15,8 @@ else:
         pass
 
 if config.debug_mode():
-    logger = configure_logger(level = DEBUG)
-    logger = configure_logger(files.move_safe, level = DEBUG)
+    configure_logger(level = DEBUG)
+    configure_logger(files.move_safe, level = DEBUG)
 
 local_dir = os.path.join(project_dir, 'local')
 move_dir = os.path.join(local_dir, 'preconf')
