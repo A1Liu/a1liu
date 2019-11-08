@@ -36,4 +36,28 @@ IS_INTERACTIVE_SHELL=%s
 
 debug("print_template=", print_template.replace('\n', '\n' + ' ' * 14 + '='), sep='')
 
-files.move_safe('asdf', 'asdf')
+def add_safe(name, src):
+    debug(f'name={name}, src={src}')
+    move_path = os.path.join(move_dir, name)
+    output_path = os.path.join(os.path.expanduser('~'), name)
+    debug(f'move_path={move_path}, output_path={output_path}')
+    if os.path.exists(output_path):
+        files.move_safe(output_path, move_path)
+    assert not os.path.exists(output_path)
+    os.symlink(os.path.join(project_dir, src), output_path, os.path.isdir(src))
+configure_logger(add_safe, level = DEBUG)
+
+# add_safe("test", "programs/neovim/init.vim")
+
+
+
+
+add_safe(".vimrc", "programs/neovim/init.vim")
+add_safe(".vim", "programs/neovim")
+add_safe(".bashrc", "local/shell_interact_init")
+add_safe(".bash_profile", "local/shell_interact_init")
+add_safe(".zshrc", "local/shell_interact_init")
+add_safe(".gitconfig", "programs/gitconfig")
+add_safe(".gitignore_global", "programs/gitignore_global")
+add_safe(".tmux.conf", "programs/tmux.conf")
+

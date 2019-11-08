@@ -1,5 +1,4 @@
 import logging, inspect, re, sys, os
-from types import ModuleType
 from logging import DEBUG
 from logging import INFO
 from logging import WARN
