@@ -57,5 +57,7 @@ echo "  - Haskell"
 sudo apt install -y haskell-platform
 echo "  - Kotlin"
 sudo snap install --classic kotlin
+echo "  - C"
+sudo apt install -y cmake
 echo "  - C++"
 sudo apt install -y clang clang-format
