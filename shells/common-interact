@@ -77,4 +77,5 @@ alias load_nvm='export PATH="$PATH:$HOME/.nvm" && export NVM_DIR="$HOME/.nvm" &&
 alias node='unalias node && load_nvm && node'
 alias npm='unalias npm && load_nvm && npm'
 alias prettier='unalias prettier && load_nvm && prettier'
+alias npx='unalias npx && load_nvm && npx'
 
