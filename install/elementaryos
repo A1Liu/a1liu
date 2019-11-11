@@ -35,7 +35,7 @@ echo "Installing tmux and related integrations..."
 gsettings set io.elementary.terminal.settings natural-copy-paste false \
 && sudo apt install -y tmux \
 && tic -x "$project/programs/xterm-256color-italic.terminfo" \
-&& tic -x "$project/programs/tmux-256color.terminfo" \
+&& tic -x "$project/programs/tmux-256color.terminfo"
 
 # Install nvm
 echo "Installing Node version manager..."
