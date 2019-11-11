@@ -21,7 +21,7 @@ sudo apt install -y firefox
 echo "Installing Zsh..."
 sudo apt install -y zsh && chsh -s /bin/zsh
 echo "Installing git-lfs"
-sudo apt install -y git-lfs
+git lfs install
 
 # Pretty useful software
 echo "Installing miscellaneous software..."
