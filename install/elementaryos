@@ -20,6 +20,9 @@ echo "Installing Firefox..."
 sudo apt install -y firefox
 echo "Installing Zsh..."
 sudo apt install -y zsh && chsh -s /bin/zsh
+echo "Installing git-lfs"
+sudo apt-get install git-lfs
+
 # Pretty useful software
 echo "Installing miscellaneous software..."
 sudo apt install -y \
@@ -30,7 +33,7 @@ curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
 # Tmux
 echo "Installing tmux and related integrations..."
 gsettings set io.elementary.terminal.settings natural-copy-paste false \
-&& apt install -y tmux \
+&& sudo apt install -y tmux \
 && tic -x "$project/programs/xterm-256color-italic.terminfo" \
 && tic -x "$project/programs/tmux-256color.terminfo" \
 
