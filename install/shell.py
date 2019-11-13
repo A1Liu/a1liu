@@ -42,8 +42,9 @@ IS_INTERACTIVE_SHELL=%s
 
 debug("print_template=", print_template.replace('\n', '\n' + ' ' * 14 + '='), sep='')
 
-@log_function(level = DEBUG)
+@log_function
 def add_safe(name, src):
+    debug("hi")
     move_path = os.path.join(move_dir, name)
     output_path = os.path.join(os.path.expanduser('~'), name)
     link_path = os.path.join(project_dir, src)

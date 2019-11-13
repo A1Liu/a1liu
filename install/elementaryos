@@ -27,7 +27,8 @@ git lfs install
 echo "Installing miscellaneous software..."
 sudo apt install -y \
 software-properties-common snapd \
-exfat-utils exfat-fuse ntfs-3g build-essential
+exfat-utils exfat-fuse ntfs-3g build-essential \
+libssl-dev libreadline-dev
 curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
 
 # Tmux
@@ -61,3 +62,6 @@ echo "  - C"
 sudo apt install -y cmake
 echo "  - C++"
 sudo apt install -y clang clang-format
+echo "  - Ruby"
+curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-installer | bash
+rbenv install 2.6.3
