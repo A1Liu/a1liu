@@ -16,6 +16,11 @@ alias ssh='TERM=xterm-256color ssh'
 # Tmux
 alias aliu='tmux attach -t aliu || tmux new -s aliu'
 
+# The open command
+if command -v 'xdg-open' >/dev/null 2>&1 ; then
+  alias open=xdg-open
+fi
+
 # tree and ls using exa instead
 # alias tree='exa -T'
 # alias ls=exa
