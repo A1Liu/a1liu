@@ -13,9 +13,9 @@ if [[ $CFG_SHELL_ENV != 1 ]]; then
   # 1. path to source
   # 2. command that should be available after source
   source_if_necessary() {
-    if [ -e $1 ]; then
-      if ! command -v $2 >/dev/null 2>&1 ; then
-        source $1
+    if [ -e "$1" ]; then
+      if ! command -v "$2" >/dev/null 2>&1 ; then
+        source "$1"
       fi
     fi
   }
@@ -28,6 +28,9 @@ if [[ $CFG_SHELL_ENV != 1 ]]; then
 
   # Rust
   source_if_necessary $HOME/.cargo/env cargo
+
+  # SDKMan
+  source_if_necessary $HOME/.sdkman/bin/sdkman-init.sh sdk
 fi
 
 # Guard prevents this from being sourced in environments that already have it.
