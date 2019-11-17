@@ -67,7 +67,7 @@ if exists("syntax_on")
 endif
 
 colorscheme solarized8_high
-set background=dark
+set background=light
 
 " colorscheme darkblue
 " hi Normal ctermfg=Gray ctermbg=Black

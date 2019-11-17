@@ -42,8 +42,8 @@ execute 'source ' . g:vim_home_path . '/keybindings.vim'
 execute 'source ' . g:vim_home_path . '/visual.vim'
 
 if has('wildmenu')
+  set wildmode=longest,full
   set wildignorecase wildmenu
-  " set wildmode=longest,list
 endif
 set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
@@ -82,7 +82,7 @@ syntax enable " Actual highlighting
 " Showing non-printing characters
 set list
 set showbreak=↪
-set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " ,eol:↲
+set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2 softtabstop=2
@@ -131,9 +131,6 @@ execute 'set undodir=' . g:vim_home_path . '/undohist'
 "" Commands
 " TODO Make a toggle for showing column on left hand side
 
-" TODO Fix this command
-" command! -nargs=* AL aboveleft
-" command! BR belowright
 command! RunInit so $MYVIMRC
 
 " Vim tab-local working directories
