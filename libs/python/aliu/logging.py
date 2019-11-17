@@ -61,10 +61,6 @@ def configure_logger(obj = None, level = None):
 
 def disable_logger(obj = None):
     logger = _get_logger(obj)
-    logger.enabled = False
-
-def disable_logger(obj = None):
-    logger = _get_logger(obj)
     logger.enabled = True
 
 def log_function(func):
