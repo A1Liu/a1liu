@@ -38,11 +38,15 @@ class Logger(object):
             return ':'.join(self.id)
 
     def log(self, *args, sep = ' ', end = '\n'):
-        if self.enabled:
-            print(self.id[0], *args, sep = sep, end = end, file = sys.stderr)
+        if not self.enabled:
+            return
+        if self.id[1] is not None and not Logger.REGISTERED_LOGGERS[(self.id[0], None)].enabled:
+            return
+        print(self.id[0] if self.id[1] is None else self.id, *args, sep = sep, end = end, file = sys.stderr)
 
 def _get_logger(obj):
-    id = _get_logger_id(obj if obj is not None else inspect.currentframe().f_back.f_back)
+    obj = obj if obj is not None else inspect.currentframe().f_back.f_back
+    id = _get_logger_id(obj)
     if id in Logger.REGISTERED_LOGGERS:
         return Logger.REGISTERED_LOGGERS[id]
     return Logger(obj)
@@ -70,6 +74,6 @@ def log_function(func):
 def debug(*args, sep = ' '):
     logger = _get_logger(None)
     prefix = '%s ~ ' % inspect.getframeinfo( inspect.currentframe().f_back ).lineno
-    message = sep.join(args)
+    message = sep.join([str(arg) for arg in args])
     for line in message.split('\n'):
         logger.log(prefix + line)
