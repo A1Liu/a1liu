@@ -1,6 +1,6 @@
 # Configurations
-My configurations! This repo represents the things that I like to keep constant between systems; things like
-application settings, file organizations, etc.
+My configurations! This repo represents the things that I like to keep constant
+between systems; things like application settings, file organizations, etc.
 
 ### Structure
 
@@ -33,7 +33,6 @@ application settings, file organizations, etc.
 - `VIM_DEBUG` - Debug flag for vim
 
 ### Flag Files
-
 - `installed-S` - Whether or not `S` has been run, where `S` is a script in the
   install folder.
 
