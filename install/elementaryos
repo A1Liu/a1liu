@@ -49,7 +49,7 @@ echo "Installing programming languages..."
 echo "  - JavaScript"
 nvm install v12.13.0
 echo "  - Python"
-sudo apt install -y python3.7 python2.7
+sudo apt install -y python3.7 python2.7 python3-pip python-pip virtualenv
 echo "  - Java"
 sudo apt install -y default-jre default-jdk
 echo "  - Rust"
