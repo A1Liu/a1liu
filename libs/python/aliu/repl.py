@@ -19,7 +19,7 @@ else:
         return ch
 
 def _repr_buffer(state):
-    return ''.join([state.char_repr(c) for c in state.current_buffer])
+    return ''.join([char_repr(c) for c in state.current_buffer])
 
 def initialize_state(state):
     return state
@@ -35,11 +35,17 @@ def handle_all(state, char):
 
 def fallback(state, char):
     state.current_buffer.append(char)
-    print(state.char_repr(char), end = '', flush = True)
-    state.current_index += len(state.char_repr(char))
+    print(char_repr(char), end = '', flush = True)
+    state.current_index += len(char)
+
+def repl_evaluate(state, buffer):
+    return "'" + _repr_buffer(state) + "'"
+
+def repl_print(state, value):
+    print(f"\n{value}")
 
 def handle_enter(state):
-    print("\n'" + _repr_buffer(state) + "'")
+    state.print(state, state.evaluate(state, state.current_buffer))
     state.current_buffer = []
     state.current_index = len(state.prompt)
     print(f"{state.prompt}", end = '', flush = True)
@@ -47,16 +53,14 @@ def handle_enter(state):
 def handle_delete(state):
     if len(state.current_buffer) > 0:
         print(f"\r{state.prompt}" + ' ' * state.current_index, end = '', flush = True)
-        state.current_index -= len(state.char_repr(state.current_buffer[-1]))
+        state.current_index -= len(state.current_buffer[-1])
         del state.current_buffer[-1]
         print(f"\r{state.prompt}{_repr_buffer(state)}", end = '', flush = True)
 
-def repl(char_repr = char_repr,
-         fallback = fallback,
-         initialize_state = initialize_state,
-         handle_all = handle_all,
-         callbacks = {}):
+def should_continue(state):
+    return True
 
+def repl(initialize_state = initialize_state, callbacks = {}):
     callbacks = {
         '\r'   : handle_enter,
         '\x7f' : handle_delete,
@@ -67,19 +71,22 @@ def repl(char_repr = char_repr,
     state.prompt = '$ '
     state.current_buffer = []
     state.current_index = 0
-    state.char_repr = char_repr
     state.fallback = fallback
     state.handle_all = handle_all
     state.getch = lambda state: getch()
     state.callbacks = callbacks
+    state.should_continue = should_continue
+    state.evaluate = repl_evaluate
+    state.print = repl_print
     state = initialize_state(state)
 
     print(f"{state.prompt}", end = '', flush = True)
     state.current_index = len(state.prompt)
 
-    while True:
+    while state.should_continue(state):
         try:
             char = state.getch(state)
         except KeyboardInterrupt:
-            pass # TODO write this code
+            print()
+            break
         handle_all(state, char)
