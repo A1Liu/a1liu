@@ -18,75 +18,74 @@ else:
             raise KeyboardInterrupt()
         return ch
 
-def _repr_buffer(state):
-    return ''.join([char_repr(c) for c in state.current_buffer])
+ENTER = '\r'
+DELETE = '\x7f'
 
-def initialize_state(state):
-    return state
-
-def char_repr(char):
+def _char_repr(char):
     return repr(char)[1:-1]
 
-def handle_all(state, char):
-    if char in state.callbacks:
-        state.callbacks[char](state)
-    else:
-        state.fallback(state, char)
+def _repr_buffer(buffer):
+    return ''.join([_char_repr(c) for c in buffer])
 
-def fallback(state, char):
-    state.current_buffer.append(char)
-    print(char_repr(char), end = '', flush = True)
-    state.current_index += len(char)
+def handle_enter(repl):
+    repl.print(repl.eval(repl.current_buffer))
+    repl.current_buffer = []
+    repl.current_index = len(repl.prompt)
+    print(f"{repl.prompt}", end = '', flush = True)
 
-def repl_evaluate(state, buffer):
-    return "'" + _repr_buffer(state) + "'"
+def handle_delete(repl):
+    if len(repl.current_buffer) > 0:
+        print(f"\r{repl.prompt}" + ' ' * repl.current_index, end = '', flush = True)
+        repl.current_index -= len(repl.current_buffer[-1])
+        del repl.current_buffer[-1]
+        print(f"\r{repl.prompt}{_repr_buffer(repl)}", end = '', flush = True)
 
-def repl_print(state, value):
-    print(f"\n{value}")
+class Repl:
 
-def handle_enter(state):
-    state.print(state, state.evaluate(state, state.current_buffer))
-    state.current_buffer = []
-    state.current_index = len(state.prompt)
-    print(f"{state.prompt}", end = '', flush = True)
+    def __init__(self, prompt = '$ ', callbacks = {}):
+        self.prompt = prompt
+        self.current_buffer = []
+        self.current_index = 0
+        self.should_continue = True
+        self.callbacks = {
+            ENTER  : handle_enter,
+            DELETE : handle_delete,
+            **callbacks
+        }
 
-def handle_delete(state):
-    if len(state.current_buffer) > 0:
-        print(f"\r{state.prompt}" + ' ' * state.current_index, end = '', flush = True)
-        state.current_index -= len(state.current_buffer[-1])
-        del state.current_buffer[-1]
-        print(f"\r{state.prompt}{_repr_buffer(state)}", end = '', flush = True)
+    def getch(self):
+        return getch()
 
-def should_continue(state):
-    return True
+    def eval(self, buffer):
+        return _repr_buffer(buffer)
 
-def repl(initialize_state = initialize_state, callbacks = {}):
-    callbacks = {
-        '\r'   : handle_enter,
-        '\x7f' : handle_delete,
-        **callbacks
-    }
+    def print(self, value):
+        print(f"\n{value}")
 
-    state = lambda: None
-    state.prompt = '$ '
-    state.current_buffer = []
-    state.current_index = 0
-    state.fallback = fallback
-    state.handle_all = handle_all
-    state.getch = lambda state: getch()
-    state.callbacks = callbacks
-    state.should_continue = should_continue
-    state.evaluate = repl_evaluate
-    state.print = repl_print
-    state = initialize_state(state)
+    def handle_all(self, char):
+        if char in self.callbacks:
+            self.callbacks[char](self)
+        else:
+            self.fallback(char)
 
-    print(f"{state.prompt}", end = '', flush = True)
-    state.current_index = len(state.prompt)
+    def fallback(self, char):
+        self.current_buffer.append(char)
+        print(_char_repr(char), end = '', flush = True)
+        self.current_index += len(char)
 
-    while state.should_continue(state):
-        try:
-            char = state.getch(state)
-        except KeyboardInterrupt:
-            print()
-            break
-        handle_all(state, char)
+    def handle_exception(self, e):
+        print(e)
+        self.should_continue = False
+
+    def run(self):
+        print(f"{self.prompt}", end = '', flush = True)
+        self.current_index = len(self.prompt)
+
+        while self.should_continue:
+            try:
+                char = self.getch()
+            except Exception as e:
+                self.handle_exception(e)
+            if self.should_continue:
+                self.handle_all(char)
+
