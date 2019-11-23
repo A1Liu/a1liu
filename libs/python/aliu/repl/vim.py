@@ -2,6 +2,7 @@
 import sys
 from . import flags
 from .common import Repl
+from .keyboard import KeyCode
 
 if sys.platform == 'linux':
     from .unix import read_key

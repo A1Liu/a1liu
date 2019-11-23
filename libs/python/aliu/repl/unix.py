@@ -1,6 +1,6 @@
 import sys
 import tty, termios
-from aliu.keyboard import KeyCode
+from .keyboard import KeyCode
 
 def getch():
     fd = sys.stdin.fileno()
