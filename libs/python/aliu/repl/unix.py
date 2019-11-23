@@ -62,6 +62,7 @@ class Repl(_Repl):
             char += getch()
 
         if char not in _key_codes:
+            print(repr(char))
             raise Exception("Key not in key codes!")
             return char, KeyCode.unrecognized_character
         return char,_key_codes[char]
