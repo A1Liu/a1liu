@@ -1,5 +1,5 @@
 import sys
-from aliu.repl.flags import *
-
-if sys.platform == 'linux':
-    from aliu.repl.unix import Repl
+from .flags import *
+from .common import Repl
+from .vim import VimRepl
+import readline

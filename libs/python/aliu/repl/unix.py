@@ -1,7 +1,6 @@
 import sys
 import tty, termios
 from aliu.keyboard import KeyCode
-from aliu.repl.common import _Repl
 
 def getch():
     fd = sys.stdin.fileno()
@@ -50,20 +49,19 @@ _key_codes = {
     '\x1b[D'  : KeyCode.left,
 }
 
-class Repl(_Repl):
 
-    def read_key(self):
-        # return getch(), KeyCode.esc
-        char = getch()
-        if ord(char) >= 32 and ord(char) < 127:
-            return char, KeyCode.printing_character
+def read_key(repl):
+    # return getch(), KeyCode.esc
+    char = getch()
+    if ord(char) >= 32 and ord(char) < 127:
+        return char, KeyCode.printing_character
 
-        while char not in _key_codes and len(char) < 3:
-            char += getch()
+    while char not in _key_codes and len(char) < 3:
+        char += getch()
 
-        if char not in _key_codes:
-            print(repr(char))
-            raise Exception("Key not in key codes!")
-            return char, KeyCode.unrecognized_character
-        return char,_key_codes[char]
+    if char not in _key_codes:
+        print(repr(char))
+        raise Exception("Key not in key codes!")
+        return char, KeyCode.unrecognized_character
+    return char,_key_codes[char]
 

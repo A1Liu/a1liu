@@ -1,6 +1,4 @@
-from aliu.keyboard import KeyCode
 from aliu.repl import flags
-from collections import deque
 
 def _char_repr(char):
     return repr(char)[1:-1]
@@ -14,62 +12,21 @@ class _CurrentLine:
         self.cursor_location = 0
         self.prompt = prompt
 
-def handle_enter(repl, line, char, code):
-    return flags.READLINE_RETURN_BUFFER
+class Repl:
 
-def handle_backspace(repl, line, char, code):
-    if len(line.buffer) == 0:
-        return
-    repl.print(f"\r{line.prompt}" + ' ' * sum(len(_char_repr(c)) for c in line.buffer))
-    line.cursor_location -= len(repr(line.buffer[-1])[1:-1])
-    del line.buffer[-1]
-    repl.print(f"\r{line.prompt}{_repr_buffer(line.buffer)}")
-
-def handle_ctrl_d(repl, line, char, code):
-    repl.print('\n')
-    return flags.QUIT_REPL
-
-def handle_arrow_keys(repl, line, char, code):
-    pass
-
-class _Repl:
-
-    def __init__(self, prompt = '$ ', continuation = '... ', handlers = {}):
+    def __init__(self, prompt = '$ ', continuation = '... '):
         self.prompt = prompt
         self.continuation = continuation
-        self.history = deque()
-        self.handlers = {
-            KeyCode.enter:handle_enter,
-            KeyCode.backspace:handle_backspace,
-            KeyCode.ctrl_d:handle_ctrl_d,
-            KeyCode.up:handle_arrow_keys,
-            KeyCode.down:handle_arrow_keys,
-            KeyCode.left:handle_arrow_keys,
-            KeyCode.right:handle_arrow_keys,
-            **handlers
-        }
-
-    def read_key(self):
-        return None, None
 
     def readline(self, prompt):
         """Reads data from the user, returning it in a list of semantically
         meaningful chunks. The default behavior is to return a list
         of keycodes."""
-        self.print(prompt)
-        line = _CurrentLine(prompt)
-        while True:
-            char, code = self.read_key()
-            if code in self.handlers:
-                ret_flag = self.handlers[code](self, line, char, code)
-                if ret_flag is flags.READLINE_RETURN_BUFFER:
-                    return line.buffer
-                elif ret_flag is flags.QUIT_REPL:
-                    return ret_flag
-            else:
-                line.cursor_location += len(_char_repr(char))
-                line.buffer.append(char)
-                self.print(_char_repr(char))
+        try:
+            return input(prompt).strip()
+        except EOFError:
+            self.print('\n')
+            return flags.QUIT_REPL
 
     def parse(self, buffer):
         if len(buffer) > 0 and buffer[-1] == '\\':
@@ -120,9 +77,14 @@ class _Repl:
                     parsed_value = self.handle_read_error(e, command_buffer)
                 except Exception as e:
                     parsed_value = self.handle_read_error(e, command_buffer)
-            self.history.append(command_buffer)
+
+            if parsed_value is flags.SKIP_EVALUATION:
+                continue
+
             value = self.eval(parsed_value)
             if value is flags.QUIT_REPL:
                 break
-            self.print(f"\n{value}\n")
+            if value is flags.SKIP_PRINTING:
+                continue
+            self.print(f"{value}\n")
 

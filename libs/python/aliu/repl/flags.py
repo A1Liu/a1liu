@@ -3,6 +3,9 @@ class _ReplFlag:
         pass
 
 READLINE_RETURN_BUFFER = _ReplFlag()
+SKIP_PRINTING = _ReplFlag()
+
+SKIP_EVALUATION = _ReplFlag()
 
 CONTINUE_READING = _ReplFlag()
 

@@ -5,7 +5,8 @@ whitespace_regex = re.compile("[ \\t]+")
 
 # Parses a string into a list of arguments using bash syntax
 # Doesn't handle multiline string
-def parse_args(txt, sep = None):
+# if sep is none, separation is whitespace
+def parse_args(txt, sep = ' \t'):
     if sep is None:
         txt = txt.strip()
 
