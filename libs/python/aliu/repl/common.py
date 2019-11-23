@@ -120,6 +120,7 @@ class _Repl:
                     parsed_value = self.handle_read_error(e, command_buffer)
                 except Exception as e:
                     parsed_value = self.handle_read_error(e, command_buffer)
+            self.history.append(command_buffer)
             value = self.eval(parsed_value)
             if value is flags.QUIT_REPL:
                 break
