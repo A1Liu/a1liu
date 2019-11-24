@@ -86,5 +86,6 @@ class Repl:
                 break
             if value is flags.SKIP_PRINTING:
                 continue
-            self.print(f"{value}\n")
+            self.print(value)
+            self.print('\n')
 
