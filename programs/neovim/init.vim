@@ -108,16 +108,18 @@ augroup END
 
 "" Formatting
 augroup autoformat_settings
-  autocmd FileType bzl AutoFormatBuffer buildifier
   autocmd FileType c,cpp,proto,java AutoFormatBuffer clang-format
   autocmd FileType javascript AutoFormatBuffer prettier
-  autocmd FileType dart AutoFormatBuffer dartfmt
-  autocmd FileType go AutoFormatBuffer gofmt
-  autocmd FileType gn AutoFormatBuffer gn
-  " autocmd FileType html,css,sass,scss,less,json AutoFormatBuffer js-beautify
+  if executable('js-beautify')
+    autocmd FileType html,css,sass,scss,less,json AutoFormatBuffer js-beautify
+  endif
   " autocmd FileType python AutoFormatBuffer yapf
+  " autocmd FileType dart AutoFormatBuffer dartfmt
+  " autocmd FileType go AutoFormatBuffer gofmt
+  " autocmd FileType bzl AutoFormatBuffer buildifier
+  " autocmd FileType gn AutoFormatBuffer gn
   " Alternative: autocmd FileType python AutoFormatBuffer autopep8
-  autocmd FileType vue AutoFormatBuffer prettier
+  " autocmd FileType vue AutoFormatBuffer prettier
 augroup END
 
 
