@@ -109,7 +109,9 @@ augroup END
 "" Formatting
 augroup autoformat_settings
   autocmd FileType c,cpp,proto,java AutoFormatBuffer clang-format
-  autocmd FileType javascript AutoFormatBuffer prettier
+  if executable('prettier')
+    autocmd FileType javascript AutoFormatBuffer prettier
+  endif
   if executable('js-beautify')
     autocmd FileType html,css,sass,scss,less,json AutoFormatBuffer js-beautify
   endif
