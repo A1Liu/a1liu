@@ -112,7 +112,7 @@ augroup END
 
 "" Formatting
 augroup autoformat_settings
-  autocmd FileType c,cpp,proto,java AutoFormatBuffer clang-format
+  autocmd FileType c,cpp,proto,java,glsl AutoFormatBuffer clang-format
   if executable('prettier')
     autocmd FileType javascript AutoFormatBuffer prettier
   endif
