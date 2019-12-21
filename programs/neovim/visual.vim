@@ -67,7 +67,25 @@ if exists("syntax_on")
 endif
 
 colorscheme solarized8_high
-set background=light
+
+let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
+let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
+" function! ToggleBg()
+"   if filereadable(s:dark_mode_flag)
+"     " execute "delete '" . s:dark_mode_flag . "'"
+"     set background=light
+"   else
+"      " execute "file '" . s:dark_mode_flag
+"     set background=dark
+"   endif
+" endfunction
+
+
+if filereadable(s:dark_mode_flag)
+  set background=dark
+else
+  set background=light
+endif
 
 " colorscheme darkblue
 " hi Normal ctermfg=Gray ctermbg=Black
