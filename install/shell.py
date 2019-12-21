@@ -10,9 +10,8 @@ from aliu.logging import *
 if config.already_installed("shell"):
     print("Already installed.")
     exit(0)
-else:
-    with open(config.install_flag_filename("shell"), 'w') as f:
-        pass
+
+open(config.install_flag_filename("shell"), 'w').close()
 
 if config.debug_mode():
     configure_logger(level = DEBUG)
@@ -44,7 +43,7 @@ debug("print_template=", print_template.replace('\n', '\n' + ' ' * 14 + '='), se
 
 @log_function
 def add_safe(name, src):
-    debug("hi")
+    debug("called")
     move_path = os.path.join(move_dir, name)
     output_path = os.path.join(os.path.expanduser('~'), name)
     link_path = os.path.join(project_dir, src)

@@ -1,10 +1,12 @@
 import os, subprocess
 
-aliu_dir = os.path.dirname(os.path.realpath(__file__))
-python_dir = os.path.dirname(aliu_dir)
-libs_dir = os.path.dirname(python_dir)
+__aliu_dir = os.path.dirname(os.path.realpath(__file__))
+__python_dir = os.path.dirname(__aliu_dir)
+libs_dir = os.path.dirname(__python_dir)
 project_dir = os.path.dirname(libs_dir)
-flag_dir = os.path.join(project_dir, 'local', 'flags')
+install_dir = os.path.join(project_dir, 'install')
+local_dir = os.path.join(project_dir, 'local')
+flags_dir = os.path.join(local_dir, 'flags')
 
 def debug_mode():
     return 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true'
@@ -16,10 +18,10 @@ def run_command(*args):
     return subprocess.run(args, check = True)
 
 def flag_filename(flag):
-    return os.path.join(flag_dir, flag)
+    return os.path.join(flags_dir, flag)
 
 def install_flag_filename(flag):
-    return os.path.join(flag_dir, "installed-" + flag)
+    return os.path.join(flags_dir, "installed-" + flag)
 
 def check_flag(flag):
     return os.path.exists(flag_filename(flag))
