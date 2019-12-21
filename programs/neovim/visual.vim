@@ -91,6 +91,7 @@ function! ReadBgFlag()
     set background=light
   endif
 endfunction
+
 ReadBgFlag
 
 " colorscheme darkblue
