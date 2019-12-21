@@ -64,7 +64,7 @@ nnoremap <C-P> <C-I>
 
 " Better Screen Repaint
 " Taken shamelessly verbatim from vim-sensible
-nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+nnoremap <silent> <C-L> :ReadBgFlag<CR>:nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 
 " New buffer in window to the right
 nnoremap <C-W>v <C-W>v:enew<CR>
