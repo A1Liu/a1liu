@@ -70,6 +70,7 @@ colorscheme solarized8_high
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
 let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
+
 command! ToggleBgFlag call ToggleBg()
 command! ToggleBg call ToggleBg()
 function! ToggleBg()
