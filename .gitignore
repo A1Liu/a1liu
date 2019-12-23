@@ -8,6 +8,7 @@
 !/LICENSE
 !/install
 !/local
+!/data
 
 /local/*
 !/local/.gitkeep
