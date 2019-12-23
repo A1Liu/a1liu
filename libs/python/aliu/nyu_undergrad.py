@@ -2,11 +2,11 @@ from aliu import config
 import json
 
 def get_grades(ignore = set()):
-    with config.data_file('transcript.json') as transcript:
+    with config.data_file('nyu-undergrad-transcript.json') as transcript:
         return [{k:v for k,v in course.items() if k not in ignore} for course in json.load(transcript)]
 
 def set_grades(grades):
-    with config.data_file('transcript.json', 'w') as transcript:
+    with config.data_file('nyu-undergrad-transcript.json', 'w') as transcript:
         json.dump(grades, transcript)
 
 def sem_to_number(sem):
