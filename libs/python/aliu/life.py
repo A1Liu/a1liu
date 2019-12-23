@@ -9,6 +9,17 @@ def set_grades(grades):
     with config.data_file('transcript.json', 'w') as transcript:
         json.dump(grades, transcript)
 
+def sem_to_number(sem):
+    if sem == 'ja':
+        return 0
+    if sem == 'sp':
+        return 1
+    if sem == 'su':
+        return 2
+    if sem == 'fa':
+        return 3
+    assert(False) # It's an enum, should only have one of those four values
+
 def validate_course(course):
     def validate_key(key, validation):
         assert(key in course and validation(course[key]))
@@ -42,8 +53,15 @@ def add_grade(name, grade, subject = 'core-ua', credits = 4, semester = None):
 
     assert(data not in grade_data)
     grade_data.append(data)
-    set_grades(grade_data)
 
+    def course_to_key(course):
+        return (
+            course['year'],
+            sem_to_number(course['semester']),
+            course['name']
+        )
+
+    set_grades(sorted(grade_data, key = course_to_key))
 
 def remove_grade(index):
     grades = get_grades()
