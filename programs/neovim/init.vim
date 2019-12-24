@@ -112,14 +112,16 @@ augroup END
 
 "" Formatting
 augroup autoformat_settings
-  autocmd FileType c,cpp,proto,java,glsl AutoFormatBuffer clang-format
-  if executable('prettier')
-    autocmd FileType javascript AutoFormatBuffer prettier
-  endif
+  autocmd FileType c,cpp,proto,java,javascript,glsl AutoFormatBuffer clang-format
   if executable('js-beautify')
-    autocmd FileType html,css,sass,scss,less,json AutoFormatBuffer js-beautify
+    autocmd FileType html,css,sass,scss,less AutoFormatBuffer js-beautify
   endif
-  " autocmd FileType python AutoFormatBuffer yapf
+  if executable('yapf')
+    autocmd FileType python AutoFormatBuffer yapf
+  endif
+  " if executable('prettier')
+  "   autocmd FileType javascript AutoFormatBuffer prettier
+  " endif
   " autocmd FileType dart AutoFormatBuffer dartfmt
   " autocmd FileType go AutoFormatBuffer gofmt
   " autocmd FileType bzl AutoFormatBuffer buildifier

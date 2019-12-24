@@ -3,10 +3,11 @@ import re
 single_quote_regex = re.compile("'([^\\']|\\')*?'")
 whitespace_regex = re.compile("[ \\t]+")
 
+
 # Parses a string into a list of arguments using bash syntax
 # Doesn't handle multiline string
 # if sep is none, separation is whitespace
-def parse_args(txt, sep = ' \t'):
+def parse_args(txt, sep=' \t'):
     if sep is None:
         txt = txt.strip()
 
@@ -14,7 +15,6 @@ def parse_args(txt, sep = ' \t'):
 
     def fmt(output):
         return ''.join(output).encode('utf-8').decode('unicode_escape')
-
 
     idx = 0
 

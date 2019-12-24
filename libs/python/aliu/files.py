@@ -1,7 +1,8 @@
 import os, sys
 from aliu.logging import *
 
-def move_safe(src, dest, prefix = '_'):
+
+def move_safe(src, dest, prefix='_'):
     src, dest = os.path.expanduser(src), os.path.expanduser(dest)
     debug(f"move_safe(src={src}, dest={dest})")
     if not os.path.exists(src):
@@ -9,7 +10,8 @@ def move_safe(src, dest, prefix = '_'):
         return
     if os.path.exists(dest):
         debug(f"Destination exists! (dest={dest})")
-        replace_dest = os.path.join(os.path.dirname(dest), prefix + os.path.basename(dest))
+        replace_dest = os.path.join(os.path.dirname(dest),
+                                    prefix + os.path.basename(dest))
         move_safe(dest, replace_dest, prefix)
 
     if os.path.isdir(src):
@@ -29,4 +31,3 @@ def move_safe(src, dest, prefix = '_'):
         with open(dest, 'w') as f:
             f.write(source_data)
         os.remove(src)
-
