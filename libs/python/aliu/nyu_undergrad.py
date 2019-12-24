@@ -11,21 +11,21 @@ def set_grades(grades):
 
 def sem_to_number(sem):
     if sem == 'ja':
-        return 0
-    if sem == 'sp':
         return 1
-    if sem == 'su':
+    if sem == 'sp':
         return 2
-    if sem == 'fa':
+    if sem == 'su':
         return 3
-    assert(False) # It's an enum, should only have one of those four values
+    if sem == 'fa':
+        return 4
+    return False # It's an enum, should only have one of those four values
 
 def validate_course(course):
     def validate_key(key, validation):
         assert(key in course and validation(course[key]))
 
     validate_key('name', lambda name: isinstance(name, str))
-    validate_key('grade', lambda grade: isinstance(grade, str) and isinstance(grade_to_number(grade), object))
+    validate_key('grade', lambda grade: grade_to_number(grade) is not False)
     validate_key('credits', lambda credits: credits <= 4 and credits >= 0 and isinstance(credits, int))
     validate_key('year', lambda year: isinstance(year, int) and year > 2000)
     validate_key('semester', lambda sem: sem in ['sp', 'fa', 'su', 'ja'])
@@ -46,6 +46,7 @@ def add_grade(name, grade, subject = 'core-ua', credits = 4, semester = None):
         'year':year,
         'semester':semester[0:2],
     }
+
     if isinstance(subject, str):
         data['subject'],data['school'] = subject.upper().split('-')
 
@@ -55,11 +56,7 @@ def add_grade(name, grade, subject = 'core-ua', credits = 4, semester = None):
     grade_data.append(data)
 
     def course_to_key(course):
-        return (
-            course['year'],
-            sem_to_number(course['semester']),
-            course['name']
-        )
+        return (course['year'], sem_to_number(course['semester']), course['name'])
 
     set_grades(sorted(grade_data, key = course_to_key))
 
@@ -80,10 +77,10 @@ def grade_to_number(grade_letter):
     if grade_letter == 'B-':
         return 2.666666
     if grade_letter == 'P':
-        return None
+        return -1
     if grade_letter == 'W':
-        return None
-    assert(false) # Should not get here
+        return -1
+    return False # Should not get here
 
 def gpa():
     grade_data = get_grades()
@@ -92,7 +89,7 @@ def gpa():
     for course in grade_data:
         grade = grade_to_number(course['grade'])
         credits = course['credits']
-        if grade is None: # Grade shouldn't be counted
+        if grade == -1: # Grade shouldn't be counted
             continue
         else:
             total += grade * credits
@@ -113,7 +110,7 @@ def major_gpa(major = 'csci-ua'):
 
         grade = grade_to_number(course['grade'])
         credits = course['credits']
-        if grade is None: # Grade shouldn't be counted
+        if grade == -1: # Grade shouldn't be counted
             continue
         else:
             total += grade * credits
