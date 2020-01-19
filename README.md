@@ -14,8 +14,7 @@ between systems; things like application settings, file organizations, etc.
 ├── programs ===== Configurations used by programs that I use
 ├── shells ------- Configurations used by shell sessions
 ├── compat ======= Configurations that need to be different for each OS
-├── libs --------- Utility libraries that I've written over the years
-└── startup ====== Scripts that are run at startup
+└── libs --------- Utility libraries that I've written over the years
 ```
 
 ### Semantically Meaningful Environment Variables
