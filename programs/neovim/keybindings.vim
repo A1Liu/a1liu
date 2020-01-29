@@ -51,6 +51,9 @@ endif
 nnoremap <Leader><Tab> /<++><CR>cf>
 nnoremap <Leader><S-Tab> ?<++><CR>cf>
 
+" Go to definition
+nnoremap <C-t> :Def<CR>
+
 "" Tabs
 " New tab in terminal using gn
 nnoremap gn :tabnew<Enter>:term<Enter>
@@ -74,6 +77,6 @@ nnoremap <C-W><S-N> :aboveleft :split<CR>:enew<CR>
 " Pressing j and k go up and down the sections of a soft-wrapped line
 " https://statico.github.io/vim.html
 " https://statico.github.io/vim2.html
-nmap j gj
-nmap k gk
+nnoremap j gj
+nnoremap k gk
 

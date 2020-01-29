@@ -162,7 +162,28 @@ augroup END
 
 
 
-"" netrw
+"" File System
+
+" Ctags
+" Code mostly from https://github.com/webastien/vim-ctags
+set tags=./tags,./TAGS,tags,TAGS
+
+function! GoToCurrentTag() " Go to definition of word under cursor
+  return GoToTag(expand("<cword>"))
+endfunction
+
+function! GoToTag(tagname) " Go to a tag
+  if a:tagname != ""
+    try | silent exe 'ts ' . a:tagname | catch | return | endtry
+    let l:old_tags = &tags
+    let &tags = get(tagfiles(), 0) " Don't know why this is necessary but it is
+    exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
+    let &tags = l:old_tags
+  endif
+endfunction
+
+command! Def call GoToCurrentTag()
+
 " Folders n stuff
 let g:netrw_sort_sequence='[\/]$,\<core\%(\.\d\+\)\=\>,'
 
