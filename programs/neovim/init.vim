@@ -11,7 +11,9 @@ let g:first_install = empty(glob(g:plug_path))
 function! DebugPrint(message)
   if $VIM_DEBUG != ''
     echo 'DEBUG:' a:message
+    return 1
   endif
+  return 0
 endfunction
 
 call DebugPrint('Debug mode active')
@@ -162,7 +164,12 @@ augroup END
 
 
 
-"" File System
+"" File System/Navigation
+
+" Rooter
+function! GitRoot()
+  return system('git rev-parse --show-toplevel')
+endfunction
 
 " Ctags
 " Code mostly from https://github.com/webastien/vim-ctags
