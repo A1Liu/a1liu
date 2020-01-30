@@ -36,19 +36,6 @@ between systems; things like application settings, file organizations, etc.
   install folder.
 
 ### Installation Scripts
-This repository includes multiple installation scripts for setting up a new computer.
-For more information about installation, please see `install/README.md`. The
-following scripts are usable:
-
-- `shell` - Installs editor/Git configurations for a working shell. Install with
-
-  ```sh
-  . install/shell
-  ```
-
-- `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
-
-  ```sh
-  . install/elementaryos
-  ```
-
+This repository includes multiple installation scripts for setting up a new computer,
+or just trying out some of my configurations. For more information about installation,
+please see `install/README.md`.
