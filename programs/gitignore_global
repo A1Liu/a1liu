@@ -6,3 +6,6 @@
 
 # Ctags files
 tags
+
+# Intellij
+.idea
