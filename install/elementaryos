@@ -43,7 +43,7 @@ echo "Installing Node version manager..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 
 echo "Installing shell configurations (overwriting Node shell configs)..."
-source "$project/install/shell"
+python3 "$project/install/shell.py"
 
 echo "Installing programming languages..."
 echo "  - JavaScript"

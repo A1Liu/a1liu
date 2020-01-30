@@ -1,10 +1,42 @@
-# Installation Instructions
+# Install Scripts
+All of these scripts should be run locally by cloning the repository first.
 
-## ElementaryOS
+## Available Scripts
+The following scripts are usable:
 
+- `shell` - Installs editor/Git configurations for a working shell. Install with
+
+  ```sh
+  python3 install/shell.py
+  ```
+
+- `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
+
+  ```sh
+  . install/elementaryos
+  ```
+
+
+## Installation Instructions
+The instructions below supplement the installation scripts in this directory, and
+hopefully make the process easier.
+
+### Shell
+1. Install Python 3.
+2. Clone repository with `git clone https://github.com/A1Liu/config.git`
+3. Install environment using `python3 install/shell.py`. Replaced files will be
+   stored in `local/preconf`, under their original name. If for some godforsaken
+   reason there are multiple versions of the same file, they will be renamed in
+   turn with a prefixed underscore.
+
+To undo, run `python3 install/undo/shell.py`. It'll reset your configuration to
+before the install script was run. Note that this requires the appropriate files
+to have been saved in `local/preconf`.
+
+### ElementaryOS
 1. Install Git using `sudo apt-get install git`
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-2. Install software using `sudo . config/install/elementaryos`
+2. Install software using `. install/elementaryos` (this will require admin access)
 3. Install keybindings by going into `settings -> keyboard -> layout`
 4. Set up ssh stuff with `ssh-keygen`
 5. Remove bell sounds with `sudo vi /etc/inputrc`, uncommenting the line `set bell-style none`
