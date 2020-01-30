@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import os,sys
+import os, sys
+from pathlib import Path
 install_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(install_dir)
 sys.path.insert(0, os.path.join(project_dir, 'libs', 'python'))
@@ -14,8 +15,8 @@ if config.already_installed("shell"):
 open(config.install_flag_filename("shell"), 'w').close()
 
 if config.debug_mode():
-    configure_logger(level = DEBUG)
-    configure_logger(files.move_safe, level = DEBUG)
+    configure_logger(level=DEBUG)
+    configure_logger(files.move_safe, level=DEBUG)
 
 local_dir = os.path.join(project_dir, 'local')
 move_dir = os.path.join(local_dir, 'preconf')
@@ -39,7 +40,10 @@ IS_INTERACTIVE_SHELL=%s
 . "$CFG_DIR/shells/dispatch"
 """
 
-debug("print_template=", print_template.replace('\n', '\n' + ' ' * 14 + '='), sep='')
+debug("print_template=",
+      print_template.replace('\n', '\n' + ' ' * 14 + '='),
+      sep='')
+
 
 @log_function
 def add_safe(name, src):
@@ -47,16 +51,20 @@ def add_safe(name, src):
     move_path = os.path.join(move_dir, name)
     output_path = os.path.join(os.path.expanduser('~'), name)
     link_path = os.path.join(project_dir, src)
-    if not config.dry_run():
-        if os.path.exists(output_path):
-            files.move_safe(output_path, move_path)
-        os.symlink(link_path, output_path, os.path.isdir(src))
-    else:
+
+    if config.dry_run():
         print(f"link_path={link_path}")
         print(f"output_path={output_path}")
         if os.path.exists(output_path):
             print(f"`output_path` exists, would have to move it")
         print(f"Would symlink `link_path` to `output_path`")
+        return
+
+    if os.path.exists(output_path):
+        files.move_safe(output_path, move_path)
+
+    os.symlink(link_path, output_path, os.path.isdir(src))
+
 
 add_safe(".vimrc", "programs/neovim/init.vim")
 add_safe(".vim", "programs/neovim")
@@ -66,4 +74,3 @@ add_safe(".zshrc", "local/shell_interact_init")
 add_safe(".gitconfig", "programs/gitconfig")
 add_safe(".gitignore_global", "programs/gitignore_global")
 add_safe(".tmux.conf", "programs/tmux.conf")
-

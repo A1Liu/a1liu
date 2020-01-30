@@ -1,5 +1,8 @@
 import inspect, re, sys, os
 
+DEBUG = 0
+ERROR = 1
+
 
 def _get_logger_id(obj):
     if isinstance(obj, str):
@@ -23,10 +26,11 @@ def _get_logger_id(obj):
 class Logger(object):
     REGISTERED_LOGGERS = {}
 
-    def __init__(self, obj=None):
+    def __init__(self, obj=None, level=ERROR):
         global _get_logger_id
         self.enabled = True
         self.id = _get_logger_id(obj)
+        self.level = ERROR
         if self.id in Logger.REGISTERED_LOGGERS:
             raise AssertionError("Rebuilt existing logger.")
         else:
@@ -40,8 +44,8 @@ class Logger(object):
         else:
             return ':'.join(self.id)
 
-    def log(self, *args, sep=' ', end='\n'):
-        if not self.enabled:
+    def log(self, *args, sep=' ', end='\n', level=DEBUG):
+        if not self.enabled or self.level > level:
             return
         if self.id[1] is not None and not Logger.REGISTERED_LOGGERS[
             (self.id[0], None)].enabled:
@@ -67,13 +71,19 @@ def get_logger(obj=None):
 
 def configure_logger(obj=None, level=None):
     logger = _get_logger(obj)
-    logger.level = level
+    if level is not None:
+        logger.level = level
     return logger
 
 
 def disable_logger(obj=None):
     logger = _get_logger(obj)
-    logger.enabled = True
+    logger.enabled = False
+
+
+def enable_logger(obj=None):
+    logger = _get_logger(obj)
+    logger.enabled = False
 
 
 def log_function(func):
@@ -87,4 +97,4 @@ def debug(*args, sep=' '):
         inspect.currentframe().f_back).lineno
     message = sep.join([str(arg) for arg in args])
     for line in message.split('\n'):
-        logger.log(prefix + line)
+        logger.log(prefix + line, DEBUG)
