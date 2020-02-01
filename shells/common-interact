@@ -28,6 +28,8 @@ fi
 # alias tree='exa -T'
 # alias ls=exa
 
+alias groot='cd "$(git root)"'
+
 # Git
 function branch() {
     >&2 echo "Getting current branch..."

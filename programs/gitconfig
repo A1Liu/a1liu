@@ -20,6 +20,7 @@
   back = checkout HEAD~1
 	ca = commit --amend -m
   s = status
+  root = rev-parse --show-toplevel
 [push]
 	default = simple
 [color "status"]
