@@ -28,7 +28,7 @@ echo "Installing miscellaneous software..."
 sudo apt install -y \
 software-properties-common snapd \
 exfat-utils exfat-fuse ntfs-3g build-essential \
-libssl-dev libreadline-dev
+libssl-dev libreadline-dev inotify-tools
 curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
 
 # Tmux
