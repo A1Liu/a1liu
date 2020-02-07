@@ -82,10 +82,18 @@ alias gem='ruby_setup && unalias gem && gem'
 alias bundle='ruby_setup && unalias bundle && bundle'
 alias jekyll='bundle exec jekyll'
 
+function load_nvm() {
+  export PATH="$PATH:$HOME/.nvm" && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  alias load_nvm=true
+}
+
 # Node
-# alias nvm="unalias nvm && load_nvm && nvm"
-alias gulp="npm run gulp"
-alias load_nvm='export PATH="$PATH:$HOME/.nvm" && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && alias load_nvm=true'
+function nvm() {
+  load_nvm
+  nvm
+}
+
+alias gulp='npm run gulp'
 alias node='unalias node && load_nvm && node'
 alias npm='unalias npm && load_nvm && npm'
 alias prettier='unalias prettier && load_nvm && prettier'
