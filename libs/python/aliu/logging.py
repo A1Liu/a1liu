@@ -88,6 +88,7 @@ def enable_logger(obj=None):
 
 def log_function(func):
     logger = _get_logger(func)
+    logger.level = DEBUG
     return func
 
 

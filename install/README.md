@@ -69,5 +69,7 @@ to have been saved in `local/preconf`.
 6. Install a distribution of Linux, then open it, right click on the window bar,
    and select properties. Then enable "Use Ctrl+Shift+C/V as Copy/Paste"
 
-5. Download SharpKeys and load the settings stored in this repository under
+7. Enable developer mode.
+
+8. Download SharpKeys and load the settings stored in this repository under
    `compat/windows/keybindings.skl`
