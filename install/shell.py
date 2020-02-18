@@ -31,13 +31,13 @@ if os.path.isfile(move_dir):
 if not os.path.isdir(move_dir):
     os.makedirs(move_dir)
 
-print_template = """#!/bin/sh
+print_template = f"""#!/bin/sh
 
-export CFG_DIR="$CFG_DIR"
+export CFG_DIR="{project_dir}"
 CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"
 IS_INTERACTIVE_SHELL=%s
 
-. "$CFG_DIR/shells/dispatch"
+. "{project_dir}/shells/dispatch"
 """
 
 debug("print_template=",
