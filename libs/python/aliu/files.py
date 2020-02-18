@@ -3,7 +3,6 @@ from aliu.logging import *
 
 
 def move_safe(src, dest, prefix='_'):
-    src, dest = os.path.expanduser(src), os.path.expanduser(dest)
     debug(f"move_safe(src={src}, dest={dest})")
     if not os.path.exists(src):
         debug(f"Source doesn't exist! (src={src})")

@@ -98,4 +98,4 @@ def debug(*args, sep=' '):
         inspect.currentframe().f_back).lineno
     message = sep.join([str(arg) for arg in args])
     for line in message.split('\n'):
-        logger.log(prefix + line, DEBUG)
+        logger.log(prefix + line, level=DEBUG)
