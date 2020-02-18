@@ -46,3 +46,28 @@ to have been saved in `local/preconf`.
    -  https://www.reddit.com/r/elementaryos/comments/382e76/how_to_fix_cannot_wake_up_from_suspend_issue/
 7. [Set up virtual console](https://askubuntu.com/questions/982863/change-caps-lock-to-control-in-virtual-console-on-ubuntu-17)
 
+### Windows
+1. Enable execution of scripts using `Set-ExecutionPolicy AllSigned`
+2. Install Chocolatey using:
+
+   ```
+   iex ((New-Object System.Net.WebClient).DownloadString("https://chocolatey.org/install.ps1"))
+   ```
+
+3. Install Git using:
+
+   ```
+   choco install git.install --params "/GitAndUnixToolsOnPath /WindowsTerminal" -y
+   ```
+
+4. Install Windows Subsystem for Linux
+
+   ```
+   Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+   ```
+
+6. Install a distribution of Linux, then open it, right click on the window bar,
+   and select properties. Then enable "Use Ctrl+Shift+C/V as Copy/Paste"
+
+5. Download SharpKeys and load the settings stored in this repository under
+   `compat/windows/keybindings.skl`

@@ -7,6 +7,7 @@ export project="$(dirname "$project")"
 echo "Removing useless software..."
 sudo apt remove -y \
 vim-tiny
+sudo apt autoremove
 
 echo "Upgrading distribution..."
 sudo apt dist-upgrade -y
