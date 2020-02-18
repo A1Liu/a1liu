@@ -44,9 +44,9 @@ debug("print_template=",
       print_template.replace('\n', '\n' + ' ' * 14 + '='),
       sep='')
 
-with open("shell_init", 'w') as f:
+with open(os.path.join(local_dir, "shell_init"), 'w') as f:
     f.write(print_template % "false")
-with open("shell_interact_init", 'w') as f:
+with open(os.path.join(local_dir, "shell_interact_init"), 'w') as f:
     f.write(print_template % "true")
 
 
