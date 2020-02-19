@@ -1,10 +1,57 @@
-#!/usr/sh
+#!/bin/bash
 
 xcode-select --install
 
+# Assumes Git has already been installed
+project="$(dirname $0)"
+export project="$(dirname "$project")"
+
 URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
 
-echo -n '- Installing brew ... '
+# Install Homebrew
 echo | /usr/bin/ruby -e "$(curl -fsSL $URL_BREW)"
-if [ $? -eq 0 ]; then echo 'OK'; else echo 'FAIL'; fi
 
+echo "Installing Firefox..."
+brew cask install firefox
+echo "Setting up Zsh..."
+chsh -s /bin/zsh
+echo "Installing git-lfs"
+git lfs install
+
+echo "Installing miscellaneous software..."
+brew install fswatch
+curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
+
+# Tmux
+echo "Installing tmux and related integrations..."
+&& brew install tmux \
+&& tic -x "$project/programs/xterm-256color-italic.terminfo" \
+&& tic -x "$project/programs/tmux-256color.terminfo"
+
+# Install nvm
+echo "Installing Node version manager..."
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
+
+echo "Installing shell configurations (overwriting Node shell configs)..."
+python3 "$project/install/shell.py"
+
+echo "Installing programming languages..."
+echo "  - JavaScript"
+nvm install v12.13.0
+echo "  - Python"
+brew install python python@2
+echo "  - Java"
+brew cask install java
+echo "  - Rust"
+curl https://sh.rustup.rs -sSf | sh -s -- -y
+echo "  - Haskell"
+brew install ghc cabal-install haskell-stack
+echo "  - Kotlin"
+brew install kotlin
+echo "  - C"
+brew install cmake
+echo "  - C++"
+brew install clang clang-format
+echo "  - Ruby"
+curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-installer | bash
+rbenv install 2.6.3
