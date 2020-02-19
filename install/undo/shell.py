@@ -20,7 +20,6 @@ debug(f"Installation directory is:   {config.install_dir}")
 debug(f"Machine-local directory is:  {config.local_dir}")
 debug(f"Preconfig directory is:      {move_dir}")
 
-@log_function
 def remove_replace(src):
     debug("called")
 
