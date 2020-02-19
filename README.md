@@ -7,7 +7,7 @@ between systems; things like application settings, file organizations, etc.
 ```
 .
 ├── local -------- Machine-specific configuration settings
-│   ├── flags ==== Persistent flags for configuration, like whether a config has been run
+│   ├── flags ==== Persistent configuration flags, e.g. whether a config has been run
 │   └── preconf -- Files that my configurations replaced
 ├── install ====== Scripts to install this configuration on a new machine
 │   └── undo ----- Scripts that undo their counterpart in `install`
