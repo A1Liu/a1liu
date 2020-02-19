@@ -11,6 +11,8 @@ URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
 # Install Homebrew
 echo | /usr/bin/ruby -e "$(curl -fsSL $URL_BREW)"
 
+brew cleanup
+
 echo "Installing Firefox..."
 brew cask install firefox
 echo "Setting up Zsh..."
