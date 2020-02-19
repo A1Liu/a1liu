@@ -49,8 +49,6 @@ with open(os.path.join(local_dir, "shell_init"), 'w') as f:
 with open(os.path.join(local_dir, "shell_interact_init"), 'w') as f:
     f.write(print_template % "true")
 
-
-@log_function
 def add_safe(name, src):
     debug("called")
     move_path = os.path.join(move_dir, name)
@@ -70,6 +68,8 @@ def add_safe(name, src):
 
     os.symlink(link_path, output_path, os.path.isdir(src))
 
+if config.debug_mode():
+    configure_logger(add_safe.move_safe, level=DEBUG)
 
 add_safe(".vimrc", "programs/neovim/init.vim")
 add_safe(".vim", "programs/neovim")
