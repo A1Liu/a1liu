@@ -66,7 +66,9 @@ if exists("syntax_on")
   syntax reset
 endif
 
-colorscheme solarized8_high
+if g:first_install == 0
+  colorscheme solarized8_high
+endif
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
 let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
