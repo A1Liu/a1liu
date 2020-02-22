@@ -10,8 +10,8 @@ if not config.already_installed("shell"):
 os.remove(config.install_flag_filename("shell"))
 
 if config.debug_mode():
-    configure_logger(level = DEBUG)
-    configure_logger(files.move_safe, level = DEBUG)
+    configure_logger(level=DEBUG)
+    configure_logger(files.move_safe, level=DEBUG)
 
 move_dir = os.path.join(config.local_dir, 'preconf')
 
@@ -19,6 +19,7 @@ debug(f"Config directory is:         {config.project_dir}")
 debug(f"Installation directory is:   {config.install_dir}")
 debug(f"Machine-local directory is:  {config.local_dir}")
 debug(f"Preconfig directory is:      {move_dir}")
+
 
 def remove_replace(src):
     debug("called")
@@ -31,10 +32,12 @@ def remove_replace(src):
     if os.path.exists(previous_file_path):
         os.rename(previous_file_path, file_path)
 
+
 remove_replace(".vimrc")
 remove_replace(".vim")
 remove_replace(".bashrc")
 remove_replace(".bash_profile")
+remove_replace(".inputrc")
 remove_replace(".zshrc")
 remove_replace(".gitconfig")
 remove_replace(".gitignore_global")

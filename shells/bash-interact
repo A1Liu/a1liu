@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. "${SHELL_DIR}/git-completions"
+
 E="\[\033["
 
 branch() {

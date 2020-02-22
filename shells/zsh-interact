@@ -2,9 +2,9 @@
 
 skip_global_compinit=1
 
-source "$(dirname $0)/zsh/prompt"
-source "$(dirname $0)/zsh/key-bindings"
-source "$(dirname $0)/git-completions"
+. "${SHELL_DIR}/zsh/prompt"
+. "${SHELL_DIR}/zsh/key-bindings"
+. "${SHELL_DIR}/git-completions"
 zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh/git-completions"
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 

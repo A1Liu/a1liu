@@ -1,0 +1,5 @@
+# "\C-i": menu-complete
+$if Bash
+"\e[Z": "\e-1\C-i"
+set show-all-if-ambiguous on
+$endif
