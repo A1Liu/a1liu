@@ -73,3 +73,6 @@ to have been saved in `local/preconf`.
 
 8. Download SharpKeys and load the settings stored in this repository under
    `compat/windows/keybindings.skl`
+
+### Windows Subsystem for Linux
+1. Enable copy-paste functionality in Vim using https://github.com/Microsoft/WSL/issues/892#issuecomment-275873108

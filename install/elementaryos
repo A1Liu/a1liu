@@ -31,6 +31,7 @@ software-properties-common snapd \
 exfat-utils exfat-fuse ntfs-3g build-essential \
 libssl-dev libreadline-dev inotify-tools
 curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
+sdk install gradle 6.2.1
 
 # Tmux
 echo "Installing tmux and related integrations..."

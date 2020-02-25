@@ -34,7 +34,7 @@ function parse_git_dirty() {
     STATUS=$(command git status ${FLAGS} 2> /dev/null | tail -n1)
   fi
   if [[ -n $STATUS ]]; then
-    echo -n "(%{$fg[red]%}✗%{$fg[yellow]%})"
+    echo -n "(%{$fg[red]%}X%{$fg[yellow]%})"
   fi
 }
 

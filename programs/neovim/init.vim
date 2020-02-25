@@ -22,7 +22,8 @@ call DebugPrint('Debug mode active')
 set nomodeline modelines=0
 
 "" Compatibility
-set guicursor= " don't want unknown characters in linux
+set guicursor= " Don't want unknown characters in Linux
+" set t_ut= " Dont want background to do weird stuff
 " set t_co=256
 
 " Getting terminal colors to work
@@ -87,7 +88,7 @@ syntax enable " Actual highlighting
 
 " Showing non-printing characters
 set list
-set showbreak=↪
+set showbreak=~
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
 
 "" Indenting
