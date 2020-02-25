@@ -4,7 +4,7 @@
 project="$(dirname $0)"
 export project="$(dirname "$project")"
 
-echo "Removing useless software..."
+sudo echo "Removing useless software..."
 sudo apt remove -y \
 vim-tiny
 sudo apt autoremove

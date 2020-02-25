@@ -33,6 +33,16 @@ To undo, run `python3 install/undo/shell.py`. It'll reset your configuration to
 before the install script was run. Note that this requires the appropriate files
 to have been saved in `local/preconf`.
 
+### MacOS
+1. Install XCode tools using `xcode-select --install`
+2. Clone repository with `git clone https://github.com/A1Liu/config.git`
+3. Install software using `. install/mac` (this will require admin access)
+4. Remove annoying Terminal stuff:
+   1. Preferences > Profiles > Shell > When Shell Exits
+   1. Preferences > Profiles > Advanced > Bell > Audible bell
+5. Remap Caps Lock to control: System Preferences > Keyboard > Keyboard > Modifier Keys
+6. 
+
 ### ElementaryOS
 1. Install Git using `sudo apt-get install git`
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-xcode-select --install
-
 # Assumes Git has already been installed
 project="$(dirname $0)"
 export project="$(dirname "$project")"
+
+sudo echo
 
 URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
 
@@ -13,11 +13,15 @@ echo | /usr/bin/ruby -e "$(curl -fsSL $URL_BREW)"
 
 brew cleanup
 
+
 echo "Installing Firefox..."
 brew cask install firefox
+echo "Installing Vim"
+brew install vim
 echo "Setting up Zsh..."
 chsh -s /bin/zsh
 echo "Installing git-lfs"
+brew install git git-lfs
 git lfs install
 
 echo "Installing miscellaneous software..."
@@ -26,7 +30,7 @@ curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
 
 # Tmux
 echo "Installing tmux and related integrations..."
-&& brew install tmux \
+brew install tmux \
 && tic -x "$project/programs/xterm-256color-italic.terminfo" \
 && tic -x "$project/programs/tmux-256color.terminfo"
 
@@ -34,14 +38,19 @@ echo "Installing tmux and related integrations..."
 echo "Installing Node version manager..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 
+# Install Python
+echo "Installing Python (dependency of shell configs)..."
+brew install python
+
 echo "Installing shell configurations (overwriting Node shell configs)..."
 python3 "$project/install/shell.py"
+
+echo "Sourcing configs"
+. ~/.bashrc
 
 echo "Installing programming languages..."
 echo "  - JavaScript"
 nvm install v12.13.0
-echo "  - Python"
-brew install python python@2
 echo "  - Java"
 brew cask install java
 echo "  - Rust"
@@ -53,7 +62,18 @@ brew install kotlin
 echo "  - C"
 brew install cmake
 echo "  - C++"
-brew install clang clang-format
+brew install clang-format
 echo "  - Ruby"
-curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-installer | bash
+brew install rbenv
 rbenv install 2.6.3
+
+echo "Installing tooling..."
+
+echo "  - Ctags"
+brew install ctags
+
+echo "  - Ripgrep"
+brew install ripgrep
+
+echo "  - fd"
+brew install fd
