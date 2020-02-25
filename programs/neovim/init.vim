@@ -4,7 +4,16 @@
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:placeholder = '<++>'
 
-let g:plug_path = g:vim_home_path . '/autoload/plug.vim'
+" Combine paths in a cross-platform way
+function! PathJoin(...)
+  if has('win32')
+    return join(a:000, '\')
+  else
+    return join(a:000, '/')
+  endif
+endfunction
+
+let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
 let g:first_install = empty(glob(g:plug_path))
 
 " Print debugging information
@@ -36,13 +45,16 @@ set guicursor= " Don't want unknown characters in Linux
 " endif
 
 "" Plugins
-execute 'source ' . g:vim_home_path . '/plugins-list.vim'
+let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
+execute 'source ' . s:temp
 
 "" Keybindings
-execute 'source ' . g:vim_home_path . '/keybindings.vim'
+let s:temp = PathJoin(g:vim_home_path, 'keybindings.vim')
+execute 'source ' . s:temp
 
 "" Colors
-execute 'source ' . g:vim_home_path . '/visual.vim'
+let s:temp = PathJoin(g:vim_home_path, 'visual.vim')
+execute 'source ' . s:temp
 
 if has('wildmenu')
   set wildmode=longest,full
@@ -54,6 +66,9 @@ set ignorecase smartcase " Ignore case in searching except when including capita
 " Clipboard
 if has('macunix')
   call DebugPrint('Operating System is MacOS')
+  set clipboard=unnamed
+elseif has('win32')
+  call DebugPrint('Operating System is Windows')
   set clipboard=unnamed
 else
   call DebugPrint('Operating System is not MacOS')
@@ -137,8 +152,8 @@ augroup END
 
 "" Saving my ass
 set undofile
-execute 'set undodir=' . g:vim_home_path . '/undohist'
-
+let s:temp = PathJoin(g:vim_home_path, 'undohist')
+execute 'set undodir=' . s:temp
 
 
 "" Commands

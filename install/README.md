@@ -65,6 +65,10 @@ to have been saved in `local/preconf`.
 5. Download SharpKeys and load the settings stored in this repository under
    `compat/windows/keybindings.skl`
 
+6. Install Vim using https://www.vim.org/download.php
+
+7. Link files using `mklink`
+
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
 
