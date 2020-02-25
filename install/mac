@@ -22,7 +22,6 @@ echo "Setting up Zsh..."
 chsh -s /bin/zsh
 echo "Installing git-lfs"
 brew install git git-lfs
-git lfs install
 
 echo "Installing miscellaneous software..."
 brew install fswatch
