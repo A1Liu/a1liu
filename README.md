@@ -1,5 +1,5 @@
 # Configurations
-My configurations! This repo represents the things that I like to keep constant
+My configurations! This repo contains the things that I like to keep constant
 between systems; things like application settings, file organizations, etc.
 
 ### Structure
