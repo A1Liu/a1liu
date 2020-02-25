@@ -60,19 +60,19 @@ to have been saved in `local/preconf`.
    choco install git.install --params "/GitAndUnixToolsOnPath /WindowsTerminal" -y
    ```
 
-4. Install Windows Subsystem for Linux
+4. Enable developer mode.
+
+5. Download SharpKeys and load the settings stored in this repository under
+   `compat/windows/keybindings.skl`
+
+### Windows Subsystem for Linux
+1. Install Windows Subsystem for Linux
 
    ```
    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
    ```
 
-6. Install a distribution of Linux, then open it, right click on the window bar,
+2. Install a distribution of Linux, then open it, right click on the window bar,
    and select properties. Then enable "Use Ctrl+Shift+C/V as Copy/Paste"
 
-7. Enable developer mode.
-
-8. Download SharpKeys and load the settings stored in this repository under
-   `compat/windows/keybindings.skl`
-
-### Windows Subsystem for Linux
-1. Enable copy-paste functionality in Vim using https://github.com/Microsoft/WSL/issues/892#issuecomment-275873108
+3. Enable copy-paste functionality in Vim using https://github.com/Microsoft/WSL/issues/892#issuecomment-275873108
