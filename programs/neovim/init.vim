@@ -1,20 +1,6 @@
 "" Initialize global variables
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 " https://github.com/tonsky/FiraCode
-let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-let g:placeholder = '<++>'
-
-" Combine paths in a cross-platform way
-function! PathJoin(...)
-  if has('win32')
-    return join(a:000, '\')
-  else
-    return join(a:000, '/')
-  endif
-endfunction
-
-let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
-let g:first_install = empty(glob(g:plug_path))
 
 " Print debugging information
 function! DebugPrint(message)
@@ -26,6 +12,37 @@ function! DebugPrint(message)
 endfunction
 
 call DebugPrint('Debug mode active')
+
+if !exists('g:os')
+  if has('win64') || has('win32') || has('win16')
+    let g:os = 'Windows'
+    " https://stackoverflow.com/questions/94382/vim-with-powershell
+    set shell=cmd.exe
+    set shellcmdflag=/c\ powershell.exe\ -NoLogo\ -NoProfile\ -NonInteractive\ -ExecutionPolicy\ RemoteSigned
+    set shellpipe=|
+    set shellredir=>
+  else
+    let g:os = substitute(system('uname'), '\n', '', '')
+  endif
+endif
+call DebugPrint('OS is: ' . g:os)
+
+" Combine paths in a cross-platform way
+function! PathJoin(...)
+  if g:os == 'Windows'
+    return join(a:000, '\')
+  else
+    return join(a:000, '/')
+  endif
+endfunction
+
+let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let g:placeholder = '<++>'
+call DebugPrint('Vim Home path is: ' . g:vim_home_path)
+
+let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
+let g:first_run = empty(glob(g:plug_path))
+
 
 "" Security
 set nomodeline modelines=0
@@ -64,14 +81,11 @@ set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
 
 " Clipboard
-if has('macunix')
-  call DebugPrint('Operating System is MacOS')
+if g:os == 'Darwin'
   set clipboard=unnamed
-elseif has('win32')
-  call DebugPrint('Operating System is Windows')
+elseif g:os == 'Windows'
   set clipboard=unnamed
 else
-  call DebugPrint('Operating System is not MacOS')
   set clipboard=unnamedplus
   if executable('xsel')
     autocmd VimLeave * call system("xsel -ib", getreg('+'))
@@ -84,26 +98,13 @@ set backspace=indent,eol,start
 " End of line in files
 set nofixendofline
 
-" Folding
-set foldmethod=manual
-" https://vim.fandom.com/wiki/Keep_folds_closed_while_inserting_text
-" autocmd InsertEnter *
-"   \ if !exists('w:last_fdm') |
-"     \ let w:last_fdm=&foldmethod |
-"     \ setlocal foldmethod=manual |
-"   \ endif
-" autocmd InsertLeave,WinLeave *
-"   \ if exists('w:last_fdm') |
-"     \ let &l:foldmethod=w:last_fdm | unlet w:last_fdm |
-"   \ endif
-
 " Syntax Highlighting
 filetype plugin indent on " Filetype detection
 syntax enable " Actual highlighting
 
 " Showing non-printing characters
 set list
-set showbreak=~
+set showbreak=‹›
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
 
 "" Indenting

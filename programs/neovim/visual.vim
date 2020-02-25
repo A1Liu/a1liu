@@ -66,7 +66,7 @@ if exists("syntax_on")
   syntax reset
 endif
 
-if g:first_install == 0
+if g:first_run == 0
   colorscheme solarized8_high
 endif
 

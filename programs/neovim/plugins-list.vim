@@ -1,8 +1,18 @@
 "" Plugins
 
-if g:first_install
-  execute "silent !curl -fLo " . g:plug_path . ' --create-dirs  "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
+if g:first_run
+  call DebugPrint('First run, installing packages...')
+  if g:os == 'Windows'
+    call system('(New-Object Net.WebClient).DownloadFile(' .\
+    '"https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim", ' . \
+    '$ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(' . \
+    '"' . g:plug_path . '"  ) "  )')
+  else
+    execute "silent !curl -fLo " . g:plug_path . ' "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
+  endif
   autocmd VimEnter * PlugInstall --sync | so $MYVIMRC
+else
+  call DebugPrint("Not first run.")
 endif
 
 call plug#begin(g:vim_home_path . '/plugged')
@@ -78,6 +88,6 @@ Plug 'tpope/vim-eunuch'
 
 call plug#end()
 
-if !g:first_install
+if !g:first_run
   call glaive#Install()
 endif
