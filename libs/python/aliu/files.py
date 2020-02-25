@@ -4,11 +4,11 @@ from aliu.logging import *
 
 def move_safe(src, dest, prefix='_'):
     debug(f"move_safe(src={src}, dest={dest})")
-    if not os.path.exists(src):
+    if not os.path.exists(src) and not os.path.islink(src):
         debug(f"Source doesn't exist! (src={src})")
         return
 
-    if os.path.exists(dest):
+    if os.path.islink(dest) or os.path.exists(dest):
         debug(f"Destination exists! (dest={dest})")
         replace_dest = os.path.join(os.path.dirname(dest),
                                     prefix + os.path.basename(dest))

@@ -64,7 +64,7 @@ def add_safe(name, src):
         print(f"Would symlink `link_path` to `output_path`")
         return
 
-    if os.path.exists(output_path):
+    if os.path.islink(output_path) or os.path.exists(output_path):
         files.move_safe(output_path, move_path)
 
     os.symlink(link_path, output_path, os.path.isdir(src))
