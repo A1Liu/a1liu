@@ -56,17 +56,10 @@ set nomodeline modelines=0
 
 "" Compatibility
 set guicursor= " Don't want unknown characters in Linux
-" set t_ut= " Dont want background to do weird stuff
-" set t_co=256
+set t_ut= " Dont want background to do weird stuff
 
 " Getting terminal colors to work
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
-
-" if has('nvim') && $GOOD_TERM == '1'
-"   let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-"   let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
-"   set termguicolors
-" endif
 
 "" Plugins
 let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
@@ -111,8 +104,8 @@ syntax enable " Actual highlighting
 
 " Showing non-printing characters
 set list
-set showbreak=‹›
-set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
+set showbreak=\\r
+set listchars=tab:»\ ,nbsp:·,trail:· " extends:›,precedes:‹,
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2 softtabstop=2
