@@ -1,6 +1,7 @@
 "" Plugins
 
 let g:plug_home = PathJoin(g:vim_home_path, 'plugged')
+call DebugPrint('Plug home is: ' . g:plug_home)
 
 if g:first_run
   call DebugPrint('First run, installing packages...')
