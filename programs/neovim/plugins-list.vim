@@ -1,21 +1,15 @@
 "" Plugins
 
+let g:plug_home = PathJoin(g:vim_home_path, 'plugged')
+
 if g:first_run
   call DebugPrint('First run, installing packages...')
-  " if g:os == 'Windows'
-  "   call system('(New-Object Net.WebClient).DownloadFile(' .\
-  "   '"https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim", ' . \
-  "   '$ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(' . \
-  "   '"' . g:plug_path . '"  ) "  )')
-  " else
-  "   execute "silent !curl -fLo " . g:plug_path . ' "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
-  " endif
   autocmd VimEnter * PlugInstall --sync | so $MYVIMRC
 else
   call DebugPrint("Not first run.")
 endif
 
-call plug#begin(g:vim_home_path . '/plugged')
+call plug#begin()
 
 " Color Schemes
 " Plug 'nightsense/cosmic_latte'
