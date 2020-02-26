@@ -153,8 +153,9 @@ augroup END
 
 "" Saving my ass
 set undofile
-let s:temp = PathJoin(g:vim_home_path, 'undohist')
+let s:temp = substitute(PathJoin(g:vim_home_path, 'undohist'), ' ', '\ ', '')
 execute 'set undodir=' . s:temp
+call DebugPrint("Undo dir is: " . s:temp)
 
 
 "" Commands
