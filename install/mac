@@ -26,6 +26,7 @@ brew install git git-lfs
 echo "Installing miscellaneous software..."
 brew install fswatch
 curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
+sdk install gradle 6.2.1
 
 # Tmux
 echo "Installing tmux and related integrations..."
