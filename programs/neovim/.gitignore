@@ -1,7 +1,7 @@
 .netrwhist
 
 /autoload/*
-!/autoload/.gitkeep
+!/autoload/plug.vim
 /plugged
 /view
 

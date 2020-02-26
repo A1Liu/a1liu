@@ -33,7 +33,7 @@ between systems; things like application settings, file organizations, etc.
 
 ### Flag Files
 - `installed-S` - Whether or not `S` has been run, where `S` is a script in the
-  install folder.
+  install folder. This includes `vim` plugins.
 
 ### Installation Scripts
 This repository includes multiple installation scripts for setting up a new computer,

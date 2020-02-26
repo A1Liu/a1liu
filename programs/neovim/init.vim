@@ -37,12 +37,19 @@ function! PathJoin(...)
 endfunction
 
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 let g:placeholder = '<++>'
 call DebugPrint('Vim Home path is: ' . g:vim_home_path)
+call DebugPrint('Config path is: ' . g:cfg_dir)
 
 let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
-let g:first_run = empty(glob(g:plug_path))
+let g:first_run_flag_path = PathJoin(g:cfg_dir,'local', 'flags', 'installed-vim')
+let g:first_run = empty(glob(g:first_run_flag_path))
 
+if g:first_run
+  execute "silent split " . g:first_run_flag_path
+  execute "silent wq"
+endif
 
 "" Security
 set nomodeline modelines=0
