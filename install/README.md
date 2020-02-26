@@ -77,7 +77,10 @@ to have been saved in `local/preconf`.
 
 6. Install Vim using https://www.vim.org/download.php
 
-7. Link files using `mklink`
+7. Link files using `mklink`:
+
+   1. link `~/vimfiles` to `config/programs/neovim`
+   2. link `~/.vimrc` `config/programs/neovim/init.vim`
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
