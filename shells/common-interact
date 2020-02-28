@@ -19,6 +19,8 @@ alias aliu='tmux attach -t aliu || tmux new -s aliu'
 # Disable <C-s> behavior
 stty -ixon
 
+alias gs="ls && echo && git s"
+
 # The open command
 if command -v 'xdg-open' >/dev/null 2>&1 ; then
   alias open=xdg-open
