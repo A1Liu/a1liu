@@ -2,7 +2,7 @@
 
 . "${SHELL_DIR}/git-completions"
 
-E="\[\033["
+E="\\[\033["
 
 branch() {
   git branch 2>/dev/null | grep '^*' | colrm 1 2 | sed 's/$/ /g'
@@ -14,6 +14,6 @@ dirty() {
 
 
 export PS1="\
-${E}0;36m\]\
-\\W ${E}033m\]\$(branch)\$(dirty)${E}0m\]\\$ "
+${E}0;36m\\]\
+\\W ${E}033m\\]\$(branch)\$(dirty)${E}0m\\]\\$ "
 
