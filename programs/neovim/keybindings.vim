@@ -14,6 +14,13 @@ nnoremap r<C-H> <Nop>
 nnoremap r<C-C> <Nop>
 cunmap <C-C>
 
+" Fixing C-Left and C-Right
+" https://unix.stackexchange.com/questions/1709/how-to-fix-ctrl-arrows-in-vim
+noremap <ESC>[1;5D <C-Left>
+noremap <ESC>[1;5C <C-Right>
+noremap! <ESC>[1;5D <C-Left>
+noremap! <ESC>[1;5C <C-Right>
+
 " What the heck is Select mode?
 nnoremap gh <Nop>
 nnoremap g<C-H> <Nop>

@@ -42,6 +42,7 @@ let g:EclimJavascriptLintEnabled = 0
 
 " Unix Commands
 Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-rsi'
 
 call plug#end()
 
