@@ -22,6 +22,7 @@ noremap! <ESC>[1;5D <C-Left>
 noremap! <ESC>[1;5C <C-Right>
 
 " Setting up Ctrl-K
+" https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142
 inoremap <c-k> <c-o>D
 cnoremap <c-k> <c-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
 
