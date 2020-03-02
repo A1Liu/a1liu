@@ -21,6 +21,10 @@ noremap <ESC>[1;5C <C-Right>
 noremap! <ESC>[1;5D <C-Left>
 noremap! <ESC>[1;5C <C-Right>
 
+" Setting up Ctrl-K
+inoremap <c-k> <c-o>D
+cnoremap <c-k> <c-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
+
 " What the heck is Select mode?
 nnoremap gh <Nop>
 nnoremap g<C-H> <Nop>
