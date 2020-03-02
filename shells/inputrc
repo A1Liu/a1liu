@@ -1,5 +1,12 @@
 # "\C-i": menu-complete
 $if Bash
 "\e[Z": "\e-1\C-i"
+
+## arrow up
+"\e[A":history-search-backward
+## arrow down
+"\e[B":history-search-forward
+
 set show-all-if-ambiguous on
+
 $endif
