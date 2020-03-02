@@ -8,6 +8,8 @@ skip_global_compinit=1
 zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh/git-completions"
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
+bindkey \^U backward-kill-line
+
 # Stolen shamelessly from Oh-my-zsh
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
 #

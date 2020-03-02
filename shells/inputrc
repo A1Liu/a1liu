@@ -2,10 +2,13 @@
 $if Bash
 "\e[Z": "\e-1\C-i"
 
-## arrow up
+# arrow up/down
 "\e[A":history-search-backward
-## arrow down
 "\e[B":history-search-forward
+
+# Arrow right/left
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
 
 set show-all-if-ambiguous on
 
