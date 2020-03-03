@@ -105,7 +105,11 @@ syntax enable " Actual highlighting
 " Showing non-printing characters
 set list
 set showbreak=>
-set listchars=tab:»\ ,nbsp:·,trail:· " extends:›,precedes:‹,
+if g:os == "Windows"
+  set listchars=tab:>>,nbsp:·,trail:· " extends:›,precedes:‹,
+else
+  set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
+endif
 
 "" Indenting
 set tabstop=2 expandtab shiftwidth=2 softtabstop=2
