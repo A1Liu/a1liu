@@ -64,7 +64,7 @@ nnoremap <Leader><Tab> /<++><CR>cf>
 nnoremap <Leader><S-Tab> ?<++><CR>cf>
 
 " Go to definition
-nnoremap <C-t> :Def<CR>
+nnoremap gd :Def<CR>
 
 "" Tabs
 " New tab in terminal using gn

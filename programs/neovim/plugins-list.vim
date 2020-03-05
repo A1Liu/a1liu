@@ -34,6 +34,12 @@ Plug 'google/vim-maktaba'
 Plug 'google/vim-codefmt'
 Plug 'google/vim-glaive'
 
+" Language server support because I have to I guess
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
+
 " Eclim
 let g:EclimJavascriptValidate = 0
 let g:EclimJavascriptLintEnabled = 0

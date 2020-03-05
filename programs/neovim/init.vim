@@ -29,7 +29,7 @@ call DebugPrint('OS is: ' . g:os)
 
 " Combine paths in a cross-platform way
 function! PathJoin(...)
-  if g:os == 'Windows'
+  if g:os ==? 'Windows'
     return join(a:000, '\')
   else
     return join(a:000, '/')
@@ -83,9 +83,9 @@ set splitright splitbelow
 set ignorecase smartcase " Ignore case in searching except when including capital letters
 
 " Clipboard
-if g:os == 'Darwin'
+if g:os ==? 'Darwin'
   set clipboard=unnamed
-elseif g:os == 'Windows'
+elseif g:os ==? 'Windows'
   set clipboard=unnamed
 else
   set clipboard=unnamedplus
@@ -107,7 +107,7 @@ syntax enable " Actual highlighting
 " Showing non-printing characters
 set list
 set showbreak=>
-if g:os == "Windows"
+if g:os ==? "Windows"
   set listchars=tab:>>,nbsp:·,trail:· " extends:›,precedes:‹,
 else
   set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
@@ -120,7 +120,7 @@ set foldlevelstart=4
 " Markdown and Jekyll Settings
 function! MarkdownJekyllSettings()
   let l:begin=getline(1)
-  if l:begin == "---"
+  if l:begin ==# "---"
     set tabstop=3 shiftwidth=3 softtabstop=3
   endif
 endfunction
@@ -144,15 +144,9 @@ augroup autoformat_settings
   if executable('yapf')
     autocmd FileType python AutoFormatBuffer yapf
   endif
-  " if executable('prettier')
-  "   autocmd FileType javascript AutoFormatBuffer prettier
-  " endif
-  " autocmd FileType dart AutoFormatBuffer dartfmt
-  " autocmd FileType go AutoFormatBuffer gofmt
-  " autocmd FileType bzl AutoFormatBuffer buildifier
-  " autocmd FileType gn AutoFormatBuffer gn
-  " Alternative: autocmd FileType python AutoFormatBuffer autopep8
-  " autocmd FileType vue AutoFormatBuffer prettier
+  if executable('gofmt')
+    autocmd FileType go AutoFormatBuffer gofmt
+  endif
 augroup END
 
 
@@ -165,7 +159,6 @@ call DebugPrint("Undo dir is: " . s:temp)
 
 
 "" Commands
-" TODO Make a toggle for showing column on left hand side
 
 command! RunInit so $MYVIMRC
 
@@ -175,17 +168,6 @@ augroup TabContext
   " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
   au TabEnter * if exists("t:wd") | exe "cd" t:wd | endif
 augroup END
-
-" command! Root exe "Rooter" | let t:wd=getcwd()
-
-" https://github.com/junegunn/fzf.vim/issues/251
-" command! -nargs=? -complete=dir FD call
-"   \ fzf#run(fzf#wrap(
-"   \ {'source': 'find '
-"   \ . (<q-args> == '' ? fnamemodify('.', ':p:h') : fnamemodify(<q-args>, ':p:h'))
-"   \ . ' -type d',
-"   \  'sink': 'Cd'}))
-
 
 
 "" File System/Navigation
@@ -204,13 +186,18 @@ function! GoToCurrentTag() " Go to definition of word under cursor
 endfunction
 
 function! GoToTag(tagname) " Go to a tag
-  if a:tagname != ""
-    try | silent exe 'ts ' . a:tagname | catch | return | endtry
-    let l:old_tags = &tags
-    let &tags = get(tagfiles(), 0) " Don't know why this is necessary but it is
-    exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
-    let &tags = l:old_tags
-  endif
+
+  try
+    call LanguageClient#textDocument_definition()
+  catch
+    if a:tagname != ""
+      try | silent exe 'ts ' . a:tagname | catch | return | endtry
+      let l:old_tags = &tags
+      let &tags = get(tagfiles(), 0) " Don't know why this is necessary but it is
+      exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
+      let &tags = l:old_tags
+    endif
+  endtry
 endfunction
 
 command! Def call GoToCurrentTag()
@@ -220,22 +207,16 @@ let g:netrw_sort_sequence='[\/]$,\<core\%(\.\d\+\)\=\>,'
 
 " Docs
 let g:netrw_sort_sequence.= 'README,LICENSE,*.md$,*.markdown$,'
-
 " C and C++ Files
 let g:netrw_sort_sequence.= '\.h$,\.c$,\.cpp$,'
-
 " Java files
 let g:netrw_sort_sequence.= '\.java$,'
-
 " The vast majority of files
 let g:netrw_sort_sequence.= '\~\=\*$,*,'
-
 " Files that begin with the '.' character, and other mildly hidden files
 let g:netrw_sort_sequence.= '^\..*$,'
-
 " Compiled files
 let g:netrw_sort_sequence.= '\.o$,\.obj$,\.class$,'
-
 " Vim files? Text editor info files and dumb files
 let g:netrw_sort_sequence.= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
 
