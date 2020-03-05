@@ -60,6 +60,14 @@ augroup BgHighlight
     \ endif
 augroup END
 
+command! SynStack call SynStack()
+function! SynStack()
+  if !exists("*synstack")
+    return
+  endif
+  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
+endfunction
+
 " Color Scheme
 hi clear
 if exists("syntax_on")
@@ -67,7 +75,8 @@ if exists("syntax_on")
 endif
 
 if g:first_run == 0
-  colorscheme solarized8_high
+  colorscheme slate
+  silent! colorscheme solarized8_high
 endif
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')

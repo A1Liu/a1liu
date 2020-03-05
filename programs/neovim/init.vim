@@ -62,8 +62,10 @@ set t_ut= " Dont want background to do weird stuff
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 
 "" Plugins
-let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
-execute 'source ' . s:temp
+if g:os != "Windows"
+  let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
+  execute 'source ' . s:temp
+endif
 
 "" Keybindings
 let s:temp = PathJoin(g:vim_home_path, 'keybindings.vim')
