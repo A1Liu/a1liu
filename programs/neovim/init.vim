@@ -108,7 +108,7 @@ syntax enable " Actual highlighting
 set list
 set showbreak=¶
 if g:os ==? "Windows"
-  set listchars=tab:>> ,nbsp:-,trail:- " extends:›,precedes:‹,
+  set listchars=tab:>>,nbsp:-,trail:- " extends:›,precedes:‹,
 else
   set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
 endif
