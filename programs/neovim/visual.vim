@@ -2,7 +2,7 @@
 set number relativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
 set cc=80
-set cul
+set cursorline
 
 " https://shapeshed.com/vim-statuslines/
 set statusline=
@@ -74,10 +74,13 @@ if exists("syntax_on")
   syntax reset
 endif
 
-if g:first_run == 0
-  colorscheme slate
-  silent! colorscheme solarized8_high
-endif
+highlight ColorColumn ctermfg=NONE ctermbg=8 guibg=NONE guifg=NONE
+highlight CursorLine ctermbg=7 cterm=NONE
+highlight CursorLineNr ctermbg=7 cterm=bold
+highlight Cursor ctermbg=9
+highlight iCursor ctermbg=9
+
+silent! colorscheme solarized8_high
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
 let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
@@ -102,10 +105,8 @@ function! ReadBgFlag()
     set background=light
   endif
 endfunction
-
 ReadBgFlag
 
-" colorscheme darkblue
 " hi Normal ctermfg=Gray ctermbg=Black
 " hi ColorColumn ctermbg=Gray ctermfg=Black
 " hi Search cterm=reverse ctermbg=Black ctermfg=Yellow

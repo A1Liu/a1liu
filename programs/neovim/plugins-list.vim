@@ -13,7 +13,7 @@ endif
 call plug#begin()
 
 " Color Schemes
-Plug 'lifepillar/vim-solarized8'
+" Plug 'lifepillar/vim-solarized8'
 
 "" Highlighting
 
