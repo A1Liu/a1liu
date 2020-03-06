@@ -69,7 +69,11 @@ function! SynStack()
 endfunction
 
 " Color Scheme
-silent! colorscheme solarized8_high
+if g:os ==? "Windows"
+  colorscheme apprentice
+else
+  colorscheme solarized8_high
+endif
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
 let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
