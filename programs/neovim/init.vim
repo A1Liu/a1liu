@@ -106,9 +106,9 @@ syntax enable " Actual highlighting
 
 " Showing non-printing characters
 set list
-set showbreak=>
+set showbreak=¶
 if g:os ==? "Windows"
-  set listchars=tab:>>,nbsp:·,trail:· " extends:›,precedes:‹,
+  set listchars=tab:»\ ,nbsp:·,trail:· " extends:›,precedes:‹,
 else
   set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
 endif
@@ -188,15 +188,15 @@ endfunction
 function! GoToTag(tagname) " Go to a tag
 
   try
-    call LanguageClient#textDocument_definition()
-  catch
     if a:tagname != ""
-      try | silent exe 'ts ' . a:tagname | catch | return | endtry
+      silent exe 'ts ' . a:tagname
       let l:old_tags = &tags
       let &tags = get(tagfiles(), 0) " Don't know why this is necessary but it is
       exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
       let &tags = l:old_tags
     endif
+  catch
+    call LanguageClient#textDocument_definition()
   endtry
 endfunction
 
