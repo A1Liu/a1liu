@@ -147,7 +147,9 @@ augroup END
 
 "" Formatting
 augroup autoformat_settings
-  autocmd FileType c,cpp,proto,java,javascript,glsl AutoFormatBuffer clang-format
+  if executable('clang-format')
+    autocmd FileType c,cpp,proto,java,javascript,glsl AutoFormatBuffer clang-format
+  endif
   if executable('js-beautify')
     autocmd FileType html,css,sass,scss,less AutoFormatBuffer js-beautify
   endif
@@ -181,7 +183,7 @@ augroup END
 
 
 "" File System/Navigation
-
+6
 " Rooter
 function! GitRoot()
   return system('git rev-parse --show-toplevel')
