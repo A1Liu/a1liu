@@ -75,6 +75,15 @@ else
   colorscheme solarized8_high
 endif
 
+" Font on GUI Programs
+if g:os ==? 'Windows'
+set guifont=Consolas:h12
+elseif g:os ==? 'Darwin'
+  set guifont=Menlo:h12
+else
+  set guifont=Courier:h12
+endif
+
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
 let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
 
@@ -99,16 +108,3 @@ function! ReadBgFlag()
   endif
 endfunction
 ReadBgFlag
-
-" hi Normal ctermfg=Gray ctermbg=Black
-" hi ColorColumn ctermbg=Gray ctermfg=Black
-" hi Search cterm=reverse ctermbg=Black ctermfg=Yellow
-" hi IncSearch cterm=reverse ctermbg=Black ctermfg=Yellow
-" hi StatusLine ctermbg=Gray ctermfg=Black
-" hi ErrorMsg ctermbg=Red ctermfg=White
-" hi Visual cterm=reverse ctermfg=Gray ctermbg=Black
-" hi WildMenu ctermfg=Gray ctermbg=Black
-" hi NonText ctermfg=LightBlue
-" hi Comment ctermfg=DarkGray
-" hi Pmenu ctermbg=Gray ctermfg=Black
-" hi PmenuSel ctermbg=Magenta ctermfg=Black

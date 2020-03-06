@@ -100,15 +100,6 @@ set backspace=indent,eol,start
 " End of line in files
 set nofixendofline
 
-" Font on GUI Programs
-if g:os ==? 'Windows'
-set guifont=Consolas:h12
-elseif g:os ==? 'Darwin'
-  set guifont=Menlo:h12
-else
-  set guifont=Courier:h12
-endif
-
 " Syntax Highlighting
 filetype plugin indent on " Filetype detection
 syntax enable " Actual highlighting
