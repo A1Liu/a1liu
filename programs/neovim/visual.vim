@@ -69,17 +69,6 @@ function! SynStack()
 endfunction
 
 " Color Scheme
-hi clear
-if exists("syntax_on")
-  syntax reset
-endif
-
-highlight ColorColumn ctermfg=NONE ctermbg=8 guibg=NONE guifg=NONE
-highlight CursorLine ctermbg=7 cterm=NONE
-highlight CursorLineNr ctermbg=7 cterm=bold
-highlight Cursor ctermbg=9
-highlight iCursor ctermbg=9
-
 silent! colorscheme solarized8_high
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
