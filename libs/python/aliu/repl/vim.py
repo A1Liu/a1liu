@@ -17,7 +17,7 @@ def handle_backspace(repl, line, char, code):
     repl.print(f"\r{line.prompt}" + ' ' * sum(len(_char_repr(c)) for c in line.buffer))
     line.cursor_location -= len(repr(line.buffer[-1])[1:-1])
     del line.buffer[-1]
-    repl.print(f"\r{line.prompt}{_repr_buffer(line.buffer)}")
+    repl.print("\r{}{}".format(line.prompt, _repr_buffer(line.buffer)))
 
 def handle_ctrl_d(repl, line, char, code):
     repl.print('\n')

@@ -37,11 +37,11 @@ class Repl:
     def eval(self, parse_tree):
         """Evaluates the data stored in the given buffer. This method is typically
         overriden."""
-        return f"'{parse_tree}'"
+        return "'{}'".format(parse_tree)
 
     def print(self, value):
         """Prints the data to the screen."""
-        print(f"{value}", end = '', flush = True)
+        print(str(value), end = '', flush = True)
 
     def handle_read_error(self, exception, command_buffer):
         if isinstance(exception, KeyboardInterrupt):
