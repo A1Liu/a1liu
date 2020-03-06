@@ -62,7 +62,7 @@ set t_ut= " Dont want background to do weird stuff
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 
 "" Plugins
-if g:os != "Windows"
+if g:os !=? "Windows"
   let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
   execute 'source ' . s:temp
 endif
@@ -100,13 +100,22 @@ set backspace=indent,eol,start
 " End of line in files
 set nofixendofline
 
+" Font on GUI Programs
+if g:os ==? 'Windows'
+set guifont=Consolas:h12
+elseif g:os ==? 'Darwin'
+  set guifont=Menlo:h12
+else
+  set guifont=Courier:h12
+endif
+
 " Syntax Highlighting
 filetype plugin indent on " Filetype detection
 syntax enable " Actual highlighting
 
 " Showing non-printing characters
 set list
-if g:os ==? "Windows"
+if g:os ==? 'Windows'
   set showbreak=¶
   set listchars=tab:>>,nbsp:-,trail:- " extends:›,precedes:‹,
 else
