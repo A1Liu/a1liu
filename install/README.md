@@ -10,12 +10,15 @@ The following scripts are usable:
   python3 install/shell.py
   ```
 
+  **NOTE:** After running this, you should run `git config --global user.name <name>`
+  and `git config --global user.email <email>`, where `<name>` is your namne and
+  `<email>` is your email.
+
 - `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
 
   ```sh
   . install/elementaryos
   ```
-
 
 ## Installation Instructions
 The instructions below supplement the installation scripts in this directory, and
