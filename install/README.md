@@ -4,17 +4,20 @@ All of these scripts should be run locally by cloning the repository first.
 ## Available Scripts
 The following scripts are usable:
 
-- `shell` - Installs editor/Git configurations for a working shell. Install with
+- `shell.py` - Installs editor/shell configurations for a working shell. Install with
 
   ```sh
   python3 install/shell.py
   ```
 
-  **NOTE:** After running this, you should run `git config --global user.name <name>`
-  and `git config --global user.email <email>`, where `<name>` is your namne and
-  `<email>` is your email.
+- `integrations.py` installs Git and Tmux configurations. Install with
+
+  ```sh
+  python3 install/integrations.py
+  ```
 
 - `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
+  Install with
 
   ```sh
   . install/elementaryos

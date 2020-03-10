@@ -45,6 +45,7 @@ brew install python
 
 echo "Installing shell configurations (overwriting Node shell configs)..."
 python3 "$project/install/shell.py"
+python3 "$project/install/integrations.py"
 
 echo "Sourcing configs"
 . ~/.bashrc

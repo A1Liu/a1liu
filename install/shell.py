@@ -41,6 +41,7 @@ with open(os.path.join(config.local_dir, "shell_init"), 'w') as f:
 with open(os.path.join(config.local_dir, "shell_interact_init"), 'w') as f:
     f.write(print_template % "true")
 
+config.add_safe("~/.vimrc", "programs/neovim/init.vim")
 config.add_safe("~/.vim", "programs/neovim")
 config.add_safe("~/.bashrc", "local/shell_interact_init")
 config.add_safe("~/.bash_profile", "local/shell_interact_init")

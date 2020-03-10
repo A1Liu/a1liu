@@ -47,6 +47,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 
 echo "Installing shell configurations (overwriting Node shell configs)..."
 python3 "$project/install/shell.py"
+python3 "$project/install/integrations.py"
 
 echo "Installing programming languages..."
 echo "  - JavaScript"
