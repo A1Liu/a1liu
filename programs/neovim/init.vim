@@ -13,6 +13,7 @@ endfunction
 
 call DebugPrint('Debug mode active')
 
+" Setting g:os flag
 if !exists('g:os')
   if has('win64') || has('win32') || has('win16')
     let g:os = 'Windows'
@@ -57,6 +58,12 @@ set nomodeline modelines=0
 "" Compatibility
 set guicursor= " Don't want unknown characters in Linux
 set t_ut= " Dont want background to do weird stuff
+if exists('+termguicolors') && g:os ==? 'Darwin'
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 
 " Getting terminal colors to work
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
