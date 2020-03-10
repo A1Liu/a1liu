@@ -155,6 +155,7 @@ augroup END
 
 
 "" Saving my ass
+set noswapfile
 set undofile
 let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
