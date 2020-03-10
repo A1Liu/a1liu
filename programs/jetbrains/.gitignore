@@ -1,0 +1,11 @@
+/tasks
+/workspace
+/port
+/event-log-whitelist
+/idea.key
+/port.lock
+!/options
+/options/*
+!/options/colors.scheme.xml
+!/options/code.style.schemes
+
