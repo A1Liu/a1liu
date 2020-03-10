@@ -37,9 +37,8 @@ inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
 " Unmapping <C-Q>
 nnoremap <C-Q> <Nop>
 
-" Not portable
-" " Saving with <C-S>
-" nnoremap <C-S> :w<CR>
+" Mapping semicolon to colon
+nmap ; :
 
 " Disabling ex mode
 nnoremap <S-Q> <Nop>
