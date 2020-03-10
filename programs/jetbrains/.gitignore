@@ -8,4 +8,6 @@
 /options/*
 !/options/colors.scheme.xml
 !/options/code.style.schemes
-
+!/options/ide.general.xml
+!/options/markdown.xml
+!/options/laf.xml
