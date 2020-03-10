@@ -8,6 +8,7 @@ install_dir = os.path.join(project_dir, 'install')
 local_dir = os.path.join(project_dir, 'local')
 flags_dir = os.path.join(local_dir, 'flags')
 data_dir = os.path.join(project_dir, 'data')
+move_dir = os.path.join(local_dir, 'preconf')
 
 
 def debug_mode():
@@ -36,6 +37,36 @@ def check_flag(flag):
 
 def already_installed(script):
     return os.path.exists(install_flag_filename(script))
+
+
+def add_safe(output_path, src):
+    output_path = os.path.expanduser(output_path)
+    name = os.path.basename(output_path)
+    move_path = os.path.join(move_dir, name)
+    link_path = os.path.join(project_dir, src)
+
+    if dry_run():
+        print(f"link_path={link_path}")
+        print(f"output_path={output_path}")
+        if os.path.islink(output_path) or os.path.exists(output_path):
+            print(f"`output_path` exists, would have to move it")
+        print(f"Would symlink `link_path` to `output_path`")
+        return
+
+    if os.path.islink(output_path) or os.path.exists(output_path):
+        files.move_safe(output_path, move_path)
+
+    os.symlink(link_path, output_path, os.path.isdir(src))
+
+
+def remove_replace(src):
+    file_path = os.path.expanduser(src)
+    previous_file_path = os.path.join(move_dir, src)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    if os.path.exists(previous_file_path):
+        os.rename(previous_file_path, file_path)
 
 
 def local_file(path, mode='r'):
