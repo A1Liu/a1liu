@@ -1,9 +1,4 @@
-/tasks
-/workspace
-/port
-/event-log-whitelist
-/idea.key
-/port.lock
+/*
 !/options
 /options/*
 !/options/colors.scheme.xml
@@ -11,3 +6,5 @@
 !/options/ide.general.xml
 !/options/markdown.xml
 !/options/laf.xml
+!/options/terminal.xml
+
