@@ -15,7 +15,7 @@ brew cleanup
 
 
 echo "Installing Firefox..."
-brew cask install firefox
+brew cask install firefox-developer-edition
 echo "Installing Vim"
 brew install vim
 echo "Setting up Zsh..."
@@ -27,6 +27,7 @@ echo "Installing miscellaneous software..."
 brew install fswatch
 curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
 sdk install gradle 6.2.1
+brew cask install spotify slack iterm2
 
 # Tmux
 echo "Installing tmux and related integrations..."
