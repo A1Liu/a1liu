@@ -1,4 +1,5 @@
 import os, subprocess
+import aliu.files as files
 
 __aliu_dir = os.path.dirname(os.path.realpath(__file__))
 __python_dir = os.path.dirname(__aliu_dir)
