@@ -1,5 +1,5 @@
 "" Visual Changes
-set number relativenumber " line numberings
+set number " line numberings
 set hlsearch incsearch " highlighting when using find
 set cc=80
 set cursorline
