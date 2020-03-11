@@ -18,8 +18,6 @@
 
 # ---------- FILE DECLARATIONS -----------
 
-$(info $(MAKEFILE_LIST))
-
 SRC := src
 NAMES := main
 OUT = lab
