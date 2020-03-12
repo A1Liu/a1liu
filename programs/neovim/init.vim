@@ -107,6 +107,9 @@ set backspace=indent,eol,start
 " End of line in files
 set nofixendofline
 
+" Bell
+set belloff=all
+
 " Syntax Highlighting
 filetype plugin indent on " Filetype detection
 syntax enable " Actual highlighting
