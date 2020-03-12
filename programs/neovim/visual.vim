@@ -1,5 +1,5 @@
 "" Visual Changes
-set number " line numberings
+set number norelativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
 set cc=80
 set cursorline
@@ -45,7 +45,6 @@ augroup BgHighlight
   autocmd BufWinEnter,WinEnter,BufEnter *
     \ if &ft != 'netrw' && &buftype !='terminal' |
       \ setlocal cul cc=80 |
-      \ setlocal relativenumber |
       \ let s:hidden_all = 1 | call ToggleHiddenAll() |
     \ endif " Set color column
   if has('nvim')
@@ -56,7 +55,6 @@ augroup BgHighlight
     \ if &ft != 'netrw' && &buftype != 'terminal' |
       \ setlocal nocul |
       \ setlocal cc= |
-      \ setlocal norelativenumber |
     \ endif
 augroup END
 
