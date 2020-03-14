@@ -21,10 +21,13 @@ noremap <ESC>[1;5C <C-Right>
 noremap! <ESC>[1;5D <C-Left>
 noremap! <ESC>[1;5C <C-Right>
 
-" Setting up Ctrl-K
+" Setting up Ctrl-K in normal mode
 " https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142
-inoremap <c-k> <c-o>D
-cnoremap <c-k> <c-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
+inoremap <C-K> <C-O>D
+cnoremap <C-K> <C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
+
+" Screw that man pages stuff
+nnoremap <S-K> <Nop>
 
 " What the heck is Select mode?
 nnoremap gh <Nop>
