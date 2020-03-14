@@ -181,7 +181,7 @@
 	<key>NSWindow Frame NSColorPanel</key>
 	<string>0 134 224 280 0 0 1680 1028 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 79 1680 948 0 0 1680 1027 </string>
+	<string>0 599 1680 428 0 0 1680 1027 </string>
 	<key>NeverWarnAboutShortLivedSessions_B107C9C0-288B-492A-814A-F65076CAAF29</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_B107C9C0-288B-492A-814A-F65076CAAF29_selection</key>
@@ -437,7 +437,7 @@
 			<key>Close Sessions On End</key>
 			<true/>
 			<key>Columns</key>
-			<integer>100</integer>
+			<integer>250</integer>
 			<key>Command</key>
 			<string></string>
 			<key>Cursor Boost</key>
@@ -840,7 +840,7 @@
 			<key>Right Option Key Sends</key>
 			<integer>0</integer>
 			<key>Rows</key>
-			<integer>30</integer>
+			<integer>100</integer>
 			<key>Screen</key>
 			<integer>-1</integer>
 			<key>Scrollback Lines</key>
@@ -2372,15 +2372,17 @@
 	<key>NoSyncInstallationId</key>
 	<string>CADE9F6E-6F49-4972-981F-704B183DA039</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>4</integer>
+	<integer>8</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
 	<integer>0</integer>
 	<key>NoSyncNextAnnoyanceTime</key>
-	<real>605738371.29437399</real>
+	<real>605892014.82334805</real>
 	<key>NoSyncOnboardingWindowHasBeenShown</key>
 	<true/>
+	<key>NoSyncPermissionToShowTip</key>
+	<false/>
 	<key>NoSyncRecordedVariables</key>
 	<dict>
 		<key>0</key>
