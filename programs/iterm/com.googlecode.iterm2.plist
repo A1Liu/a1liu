@@ -157,7 +157,7 @@
 	dWxs0g0ODxJaTlMub2JqZWN0c1YkY2xhc3OiEBGAAoAKgA3TFA0OFRkdV05TLmtleXOj
 	FhcYgAOABIAFoxobHIAGgAeACIAJWklkZW50aWZpZXJVV2lkdGhWSGlkZGVuUTAjQGjA
 	AAAAAAAI0iUmJyhaJGNsYXNzbmFtZVgkY2xhc3Nlc1xOU0RpY3Rpb25hcnmiJylYTlNP
-	YmplY3TTFA0OKy8doxYXGIADgASABaMwMRyAC4AMgAiACVExI0B0oZ2yLQ5W0iUmNzhe
+	YmplY3TTFA0OKy8doxYXGIADgASABaMwMRyAC4AMgAiACVExI0BzsZ2yLQ5W0iUmNzhe
 	TlNNdXRhYmxlQXJyYXmjNzkpV05TQXJyYXkACAARABoAJAApADIANwBJAEwAUgBUAGMA
 	aQBuAHkAgACDAIUAhwCJAJAAmACcAJ4AoACiAKYAqACqAKwArgC5AL8AxgDIANEA0gDX
 	AOIA6wD4APsBBAELAQ8BEQETARUBGQEbAR0BHwEhASMBLAExAUABRAAAAAAAAAIBAAAA
@@ -181,7 +181,7 @@
 	<key>NSWindow Frame NSColorPanel</key>
 	<string>0 134 224 280 0 0 1680 1028 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 599 1680 428 0 0 1680 1027 </string>
+	<string>0 56 1680 971 0 0 1680 1027 </string>
 	<key>NeverWarnAboutShortLivedSessions_B107C9C0-288B-492A-814A-F65076CAAF29</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_B107C9C0-288B-492A-814A-F65076CAAF29_selection</key>
@@ -190,7 +190,7 @@
 	<array>
 		<dict>
 			<key>ASCII Anti Aliased</key>
-			<false/>
+			<true/>
 			<key>ASCII Ligatures</key>
 			<true/>
 			<key>AWDS Pane Directory</key>
@@ -2362,17 +2362,22 @@
 	<array>
 		<string>3.3.9</string>
 	</array>
+	<key>NoSyncBFPRecents</key>
+	<array>
+		<string>Courier New</string>
+		<string>Menlo</string>
+	</array>
 	<key>NoSyncFrame_SharedPreferences</key>
 	<dict>
 		<key>screenFrame</key>
-		<string>{{0, 0}, {1680, 1050}}</string>
+		<string>{{0, 0}, {1920, 1200}}</string>
 		<key>topLeft</key>
-		<string>{518, 837}</string>
+		<string>{116, 876}</string>
 	</dict>
 	<key>NoSyncInstallationId</key>
 	<string>CADE9F6E-6F49-4972-981F-704B183DA039</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>8</integer>
+	<integer>9</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
@@ -2726,6 +2731,14 @@
 				<true/>
 				<key>name</key>
 				<string>currentTab.currentSession.termid</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.terminalIconName</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
