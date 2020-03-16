@@ -83,26 +83,26 @@ else
 endif
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
-let s:dark_mode_flag = s:config_dir . '/local/flags/vim-dark-mode'
+let s:light_mode_flag = s:config_dir . '/local/flags/vim-light-mode'
 
 command! ToggleBgFlag call ToggleBg()
 command! ToggleBg call ToggleBg()
 function! ToggleBg()
-  if filereadable(s:dark_mode_flag)
-    execute "call delete(fnameescape('" . s:dark_mode_flag . "'))"
-    set background=light
-  else
-    execute "call writefile([], '" . s:dark_mode_flag . "')"
+  if filereadable(s:light_mode_flag)
+    execute "call delete(fnameescape('" . s:light_mode_flag . "'))"
     set background=dark
+  else
+    execute "call writefile([], '" . s:light_mode_flag . "')"
+    set background=light
   endif
 endfunction
 
 command! ReadBgFlag call ReadBgFlag()
 function! ReadBgFlag()
-  if filereadable(s:dark_mode_flag)
-    set background=dark
-  else
+  if filereadable(s:light_mode_flag)
     set background=light
+  else
+    set background=dark
   endif
 endfunction
 ReadBgFlag
