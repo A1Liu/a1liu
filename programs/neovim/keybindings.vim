@@ -27,7 +27,9 @@ inoremap <C-K> <C-O>D
 cnoremap <C-K> <C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
 
 " Screw that man pages stuff
-nnoremap <S-K> <Nop>
+nnoremap <S-K> gk
+vnoremap <S-K> gk
+vnoremap <S-J> gj
 
 " What the heck is Select mode?
 nnoremap gh <Nop>
