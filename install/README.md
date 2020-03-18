@@ -4,36 +4,22 @@ All of these scripts should be run locally by cloning the repository first.
 ## Available Scripts
 The following scripts are usable:
 
-- `shell.py` - Installs editor/shell configurations for a working shell. Install with
-
-  ```sh
-  python3 install/shell.py
-  ```
-
-- `integrations.py` installs Git and Tmux configurations. Install with
-
-  ```sh
-  python3 install/integrations.py
-  ```
-
-- `elementaryos` - Installs useful programs for ElementaryOS, and also runs `shell`.
-  Install with
-
-  ```sh
-  . install/elementaryos
-  ```
+- `shell.py` - Installs editor/shell configurations for a working shell.
+- `integrations.py` installs Git and Tmux configurations.
+- `elementaryos` - Installs useful programs for ElementaryOS.
+- `mac` - Installs useful programs for MacOS.
+- `windows.ps1` - Sets up programs like Vim and Windows Terminal to work properly.
 
 ## Installation Instructions
 The instructions below supplement the installation scripts in this directory, and
 hopefully make the process easier.
 
 ### Shell
-1. Install Python 3.
-2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-3. Install environment using `python3 install/shell.py`. Replaced files will be
-   stored in `local/preconf`, under their original name. If for some godforsaken
-   reason there are multiple versions of the same file, they will be renamed in
-   turn with a prefixed underscore.
+This script depends on Python 3 being installed.
+
+1. Clone repository with `git clone https://github.com/A1Liu/config.git`
+2. Install environment using `python3 install/shell.py`. Replaced files will be
+2  stored in `local/preconf`, under their original name.
 
 To undo, run `python3 install/undo/shell.py`. It'll reset your configuration to
 before the install script was run. Note that this requires the appropriate files
@@ -47,7 +33,6 @@ to have been saved in `local/preconf`.
    1. Preferences > Profiles > Shell > When Shell Exits
    1. Preferences > Profiles > Advanced > Bell > Audible bell
 5. Remap Caps Lock to control: System Preferences > Keyboard > Keyboard > Modifier Keys
-6. 
 
 ### ElementaryOS
 1. Install Git using `sudo apt-get install git`

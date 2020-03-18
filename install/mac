@@ -43,13 +43,6 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 echo "Installing Python (dependency of shell configs)..."
 brew install python
 
-echo "Installing shell configurations (overwriting Node shell configs)..."
-python3 "$project/install/shell.py"
-python3 "$project/install/integrations.py"
-
-echo "Sourcing configs"
-. ~/.bashrc
-
 echo "Installing programming languages..."
 echo "  - JavaScript"
 nvm install v12.13.0

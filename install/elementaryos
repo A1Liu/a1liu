@@ -45,12 +45,6 @@ gsettings set io.elementary.terminal.settings natural-copy-paste false \
 echo "Installing Node version manager..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 
-echo "Installing shell configurations (overwriting Node shell configs)..."
-python3 "$project/install/shell.py"
-python3 "$project/install/integrations.py"
-
-source ~/.bashrc
-
 echo "Installing programming languages..."
 echo "  - JavaScript"
 nvm install v12.13.0
