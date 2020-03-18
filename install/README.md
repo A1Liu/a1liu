@@ -83,10 +83,10 @@ to have been saved in `local/preconf`.
 
 6. [Install Vim](https://www.vim.org/download.php)
 
-7. Link files using `mklink` in Command Prompt:
+7. Link files using `mklink` in Command Prompt, from your home directory:
 
-   1. `mklink /d ~/vimfiles config/programs/neovim`
-   2. `mklink ~/.vimrc config/programs/neovim/init.vim`
+   1. `mklink /d "vimfiles" "path\to\config\programs\neovim"`
+   2. `mklink ".vimrc" "path\to\config\programs\neovim\init.vim"`
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
