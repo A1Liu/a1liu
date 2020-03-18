@@ -3,10 +3,10 @@
 
     "defaultProfile": "{c6eaf9f4-32a7-5fdc-b5cf-066e8a4b1e40}",
 
-    "cursorShape": "filledBox",
+    
 
     "profiles": {
-        "defaults": {},
+        "defaults": {"cursorShape": "filledBox"},
         "list": [{
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
                 "name": "Windows PowerShell",
