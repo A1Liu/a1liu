@@ -14,3 +14,9 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-L
 # Install Ubuntu
 # Invoke-RestMethod -Uri "https://aka.ms/wsl-debian-gnulinux" -OutFile "~/Ubuntu.zip" -UseBasicParsing
 
+# Making Windows Terminal behave correctly
+rm "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\profiles.json"
+
+# Use mklink in command prompt to make a hard link to the correct place
+
+

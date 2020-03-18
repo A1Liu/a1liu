@@ -117,7 +117,7 @@ syntax enable " Actual highlighting
 " Showing non-printing characters
 set list
 if g:os ==? 'Windows'
-  set showbreak=¶
+  set showbreak=>
   set listchars=tab:>>,nbsp:-,trail:- " extends:›,precedes:‹,
 else
   set showbreak=↳
