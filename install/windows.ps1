@@ -1,4 +1,9 @@
-Set-ExecutionPolicy AllSigned
+# Set-ExecutionPolicy AllSigned
+
+
+$installDir = [System.IO.Path]::GetDirectoryName($PSCommandPath)
+$configDir = [System.IO.Path]::GetDirectoryName($installDir)
+
 
 iex ((New-Object System.Net.WebClient).DownloadString("https://chocolatey.org/install.ps1"))
 
@@ -14,8 +19,14 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-L
 # Install Ubuntu
 # Invoke-RestMethod -Uri "https://aka.ms/wsl-debian-gnulinux" -OutFile "~/Ubuntu.zip" -UseBasicParsing
 
+# Setting up Vim
+New-Item -ItemType SymbolicLink -Path "$HOME\.vimrc" -Target "$configDir\programs\neovim\init.vim"
+New-Item -ItemType SymbolicLink -Path "$HOME\vimfiles" -Target "$configDir\programs\neovim"
+
 # Making Windows Terminal behave correctly
-rm "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\profiles.json"
+# TODO Fix this by using the same features that every other script uses
+rm -rf "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState"
+New-Item -ItemType SymbolicLink -Path "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState" -Target "$configDir\programs\windows-terminal"
 
 # Use mklink in command prompt to make a hard link to the correct place
 

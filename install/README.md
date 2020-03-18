@@ -63,30 +63,26 @@ to have been saved in `local/preconf`.
 7. [Set up virtual console](https://askubuntu.com/questions/982863/change-caps-lock-to-control-in-virtual-console-on-ubuntu-17)
 
 ### Windows
-1. Enable developer mode and associated features (Settings -> Updates &amp; Security -> For Developers)
-2. Install Chocolatey using:
+1. Enable developer mode and associated features (Settings -&gt; Updates &amp; Security
+   -&gt; For Developers)
+
+2. Install Chocolatey and Git:
 
    ```
    iex ((New-Object System.Net.WebClient).DownloadString("https://chocolatey.org/install.ps1"))
-   ```
-
-3. Install Git using:
-
-   ```
    choco install git.install --params "/GitAndUnixToolsOnPath /WindowsTerminal" -y
    ```
 
-4. Clone the repository using `git clone https://github.com/a1liu/config`
+3. Clone the repository using `git clone https://github.com/a1liu/config`
+
+4. [Install Vim](https://www.vim.org/download.php)
 
 5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
    the settings stored in this repository under `compat/windows/keybindings.skl`
 
-6. [Install Vim](https://www.vim.org/download.php)
+6. Download Windows Terminal from the Microsoft Store
 
-7. Link files using `mklink` in Command Prompt, from your home directory:
-
-   1. `mklink /d "vimfiles" "path\to\config\programs\neovim"`
-   2. `mklink ".vimrc" "path\to\config\programs\neovim\init.vim"`
+7. Run setup script `windows.ps1`.
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
@@ -94,6 +90,8 @@ to have been saved in `local/preconf`.
    ```
    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
    ```
+
+   And then restart your computer.
 
 2. Install a distribution of Linux, then open it, right click on the window bar,
    and select properties. Then enable "Use Ctrl+Shift+C/V as Copy/Paste"
