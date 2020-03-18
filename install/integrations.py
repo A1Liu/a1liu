@@ -8,7 +8,7 @@ from aliu import files
 from aliu import config
 from aliu.logging import *
 
-if config.already_installed("shell2"):
+if config.already_installed("integrations"):
     print("Already installed.")
     exit(0)
 
