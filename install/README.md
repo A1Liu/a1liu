@@ -63,7 +63,7 @@ to have been saved in `local/preconf`.
 7. [Set up virtual console](https://askubuntu.com/questions/982863/change-caps-lock-to-control-in-virtual-console-on-ubuntu-17)
 
 ### Windows
-1. Enable execution of scripts using `Set-ExecutionPolicy AllSigned`
+1. Enable developer mode and associated features (Settings -> Updates &amp; Security -> For Developers)
 2. Install Chocolatey using:
 
    ```
@@ -76,17 +76,17 @@ to have been saved in `local/preconf`.
    choco install git.install --params "/GitAndUnixToolsOnPath /WindowsTerminal" -y
    ```
 
-4. Enable developer mode.
+4. Clone the repository using `git clone https://github.com/a1liu/config`
 
-5. Download SharpKeys and load the settings stored in this repository under
-   `compat/windows/keybindings.skl`
+5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
+   the settings stored in this repository under `compat/windows/keybindings.skl`
 
-6. Install Vim using https://www.vim.org/download.php
+6. [Install Vim](https://www.vim.org/download.php)
 
-7. Link files using `mklink`:
+7. Link files using `mklink` in Command Prompt:
 
-   1. link `~/vimfiles` to `config/programs/neovim`
-   2. link `~/.vimrc` `config/programs/neovim/init.vim`
+   1. `mklink /d ~/vimfiles config/programs/neovim`
+   2. `mklink ~/.vimrc config/programs/neovim/init.vim`
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
