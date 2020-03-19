@@ -1,0 +1,2 @@
+@cd %HOMEPATH%\code
+

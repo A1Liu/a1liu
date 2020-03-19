@@ -71,12 +71,12 @@ nnoremap <Leader><S-Tab> ?<++><CR>cf>
 nnoremap gd :Def<CR>
 
 "" Tabs
-" New tab in terminal using gn
-nnoremap gn :tabnew<Enter>:term<Enter>
-
-" Chrome-like tab handling
-nnoremap <Tab> gt
-nnoremap <S-Tab> gT
+nnoremap <C-W><C-t> :tabnew<Enter>
+nnoremap <C-W><C-e> :tabNext<Enter>
+nnoremap <C-W><C-r> :tabnext<Enter>
+nnoremap <C-W>t :tabnew<Enter>
+nnoremap <C-W>e :tabNext<Enter>
+nnoremap <C-W>r :tabnext<Enter>
 
 " Getting back jump list functionality
 nnoremap <C-P> <C-I>
