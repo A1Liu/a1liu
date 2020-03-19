@@ -23,6 +23,9 @@ if [[ $CFG_SHELL_ENV != 1 ]]; then
   # Adding stuff to python path
   export PYTHONPATH="${CFG_DIR}/libs/python:${PYTHONPATH}"
 
+  export GOROOT="/usr/local/go"
+  export GOPATH="$HOME/.go"
+
   # Haskell
   source_if_necessary $HOME/.ghcup/env cabal
 

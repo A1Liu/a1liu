@@ -31,4 +31,6 @@ $(get-item "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\L
 New-Item -ItemType SymbolicLink -Path "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState" -Target "$configDir\programs\windows-terminal"
 
 New-ItemProperty -Path "HKCU\Software\Microsoft\Command Processor" -Name 'AutoRun' -Value "$configDir\shells\command-prompt.cmd" -PropertyType DWORD
+# Get VcXsrc to start alongside Windows
+# New-Item -ItemType SymbolicLink -Path "$HOME\AppData\Roaming\Microsoft\Windows\"
 
