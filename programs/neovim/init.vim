@@ -19,9 +19,9 @@ if !exists('g:os')
     let g:os = 'Windows'
     " https://stackoverflow.com/questions/94382/vim-with-powershell
     set shell=cmd.exe
-    set shellcmdflag=/c\ powershell.exe\ -NoLogo\ -NoProfile\ -NonInteractive\ -ExecutionPolicy\ RemoteSigned
-    set shellpipe=|
-    set shellredir=>
+    " set shellcmdflag=/c\ powershell.exe\ -NoLogo\ -NoProfile\ -NonInteractive\ -ExecutionPolicy\ RemoteSigned
+    " set shellpipe=|
+    " set shellredir=>
   else
     let g:os = substitute(system('uname'), '\n', '', '')
   endif
@@ -43,7 +43,7 @@ let g:placeholder = '<++>'
 call DebugPrint('Vim Home path is: ' . g:vim_home_path)
 call DebugPrint('Config path is: ' . g:cfg_dir)
 
-let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
+" let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
 let g:first_run_flag_path = PathJoin(g:cfg_dir,'local', 'flags', 'installed-vim')
 let g:first_run = empty(glob(g:first_run_flag_path))
 
@@ -69,10 +69,8 @@ endif
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 
 "" Plugins
-if g:os !=? "Windows"
-  let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
-  execute 'source ' . s:temp
-endif
+let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
+execute 'source ' . s:temp
 
 "" Keybindings
 let s:temp = PathJoin(g:vim_home_path, 'keybindings.vim')
@@ -148,6 +146,7 @@ augroup END
 
 "" Formatting
 augroup autoformat_settings
+  autocmd!
   if executable('clang-format')
     autocmd FileType c,cpp,proto,java,javascript,glsl AutoFormatBuffer clang-format
   endif
@@ -180,8 +179,9 @@ command! RunInit so $MYVIMRC
 " command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
 augroup TabContext
   " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
-  au TabEnter * if exists("t:wd") | exe "cd" . t:wd | endif
-  au TabLeave * let t:wd = getcwd()
+  autocmd!
+  autocmd TabEnter * if exists("t:wd") | exe "cd " . t:wd | endif
+  autocmd TabLeave * let t:wd = getcwd()
 augroup END
 
 

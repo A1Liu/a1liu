@@ -13,3 +13,5 @@
 /undohist/*
 !/undohist/.gitkeep
 
+/bundle/*
+!/bundle/.gitkeep

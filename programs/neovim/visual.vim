@@ -71,7 +71,7 @@ function! SynStack()
 endfunction
 
 " Color Scheme
-if g:os ==? "Windows" || g:first_run
+if g:first_run
   colorscheme apprentice
 else
   colorscheme solarized8_high
