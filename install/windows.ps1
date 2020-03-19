@@ -30,5 +30,7 @@ New-Item -ItemType SymbolicLink -Path "$HOME\vimfiles" -Target "$configDir\progr
 $(get-item "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState").Delete()
 New-Item -ItemType SymbolicLink -Path "$env:LocalAppData\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState" -Target "$configDir\programs\windows-terminal"
 
+# Get VcXsrc to start alongside Windows
+# New-Item -ItemType SymbolicLink -Path "$HOME\AppData\Roaming\Microsoft\Windows\"
 
 

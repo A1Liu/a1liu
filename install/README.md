@@ -81,4 +81,6 @@ to have been saved in `local/preconf`.
 2. Install a distribution of Linux, then open it, right click on the window bar,
    and select properties. Then enable "Use Ctrl+Shift+C/V as Copy/Paste"
 
-3. Enable copy-paste functionality in Vim using https://github.com/Microsoft/WSL/issues/892#issuecomment-275873108
+3. Enable copy-paste functionality in Vim using
+   [VcXsrv](https://sourceforge.net/projects/vcxsrv/) with its default configurations,
+   then save those configurations to `$HOME\AppData\Roaming\Microsoft\Windows\Startup`
