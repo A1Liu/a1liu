@@ -129,7 +129,7 @@ set tabstop=2 expandtab shiftwidth=2 softtabstop=2
 set foldlevelstart=4
 
 " Markdown and Jekyll Settings
-function! MarkdownJekyllSettings()
+function! MdJekyllSettings()
   let l:begin=getline(1)
   if l:begin ==# "---"
     set tabstop=3 shiftwidth=3 softtabstop=3
@@ -139,7 +139,7 @@ endfunction
 augroup KramdownHighlighting
   autocmd!
   autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown
-    \ call MarkdownJekyllSettings()
+    \ call MdJekyllSettings()
   autocmd BufLeave *.md,*.markdown
     \ set tabstop=2 | set shiftwidth=2
 augroup END
@@ -177,10 +177,11 @@ call DebugPrint("Undo dir is: " . s:temp)
 command! RunInit so $MYVIMRC
 
 " Vim tab-local working directories
-command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
+" command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
 augroup TabContext
   " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
-  au TabEnter * if exists("t:wd") | exe "cd" t:wd | endif
+  au TabEnter * if exists("t:wd") | exe "cd" . t:wd | endif
+  au TabLeave * let t:wd = getcwd()
 augroup END
 
 
@@ -215,6 +216,8 @@ function! GoToTag(tagname) " Go to a tag
 endfunction
 
 command! Def call GoToCurrentTag()
+
+
 
 " Folders n stuff
 let g:netrw_sort_sequence='[\/]$,\<core\%(\.\d\+\)\=\>,'

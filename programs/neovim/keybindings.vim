@@ -21,9 +21,13 @@ noremap <ESC>[1;5C <C-Right>
 noremap! <ESC>[1;5D <C-Left>
 noremap! <ESC>[1;5C <C-Right>
 
+" Taken from vim-rsi
+cnoremap <C-B> <C-Left>
+cnoremap <C-F> <C-Right>
+
 " Setting up Ctrl-K in normal mode
 " https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142
-inoremap <C-K> <C-O>D
+cnoremap <C-A> <Home>
 cnoremap <C-K> <C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
 
 " Screw that man pages stuff
@@ -52,8 +56,7 @@ nnoremap <S-Q> <Nop>
 nnoremap <Leader><C-S> :FormatCode<CR>
 
 " Terminal keybindings
-if has('nvim')
-  tnoremap <C-\><C-\> <C-\><C-N>
+if exists(':terminal')
   tnoremap <C-H> <C-\><C-N>
 endif
 
