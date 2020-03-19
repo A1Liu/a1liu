@@ -1,2 +1,2 @@
-@cd %HOMEPATH%\code
+@Rem @cd %HOMEPATH%\code
 
