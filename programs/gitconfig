@@ -5,6 +5,7 @@
 	ui = true
 [core]
 	excludesfile = ~/.gitignore_global
+	autocrlf = input
 [pager]
 	branch = false
 	tag = false

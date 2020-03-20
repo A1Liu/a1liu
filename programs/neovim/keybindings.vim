@@ -33,6 +33,8 @@ nnoremap <Leader>R :read !
 " https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142
 cnoremap <C-A> <Home>
 cnoremap <C-K> <C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
+cnoremap <C-B> <C-Left>
+cnoremap <C-F> <C-Right>
 
 " Screw that man pages stuff
 nnoremap <S-K> gk
