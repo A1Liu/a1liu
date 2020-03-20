@@ -145,21 +145,23 @@ augroup END
 
 
 "" Formatting
-augroup autoformat_settings
-  autocmd!
-  if executable('clang-format')
-    autocmd FileType c,cpp,proto,java,javascript,glsl AutoFormatBuffer clang-format
-  endif
-  if executable('js-beautify')
-    autocmd FileType html,css,sass,scss,less AutoFormatBuffer js-beautify
-  endif
-  if executable('yapf')
-    autocmd FileType python AutoFormatBuffer yapf
-  endif
-  if executable('gofmt')
-    autocmd FileType go AutoFormatBuffer gofmt
-  endif
-augroup END
+if g:os !=? "Windows"
+  augroup autoformat_settings
+    autocmd!
+    if executable('clang-format')
+      autocmd FileType c,cpp,proto,java,javascript,glsl silent AutoFormatBuffer clang-format
+    endif
+    if executable('js-beautify')
+      autocmd FileType html,css,sass,scss,less silent AutoFormatBuffer js-beautify
+    endif
+    if executable('yapf')
+      autocmd FileType python silent AutoFormatBuffer yapf
+    endif
+    if executable('gofmt')
+      autocmd FileType go silent AutoFormatBuffer gofmt
+    endif
+  augroup END
+endif
 
 
 

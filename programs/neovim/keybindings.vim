@@ -21,6 +21,9 @@ noremap <ESC>[1;5C <C-Right>
 noremap! <ESC>[1;5D <C-Left>
 noremap! <ESC>[1;5C <C-Right>
 
+" Leader Mappings
+nnoremap <Leader>r :!
+
 " Taken from vim-rsi
 cnoremap <C-B> <C-Left>
 cnoremap <C-F> <C-Right>

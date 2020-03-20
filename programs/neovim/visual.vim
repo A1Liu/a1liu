@@ -39,6 +39,11 @@ function! ToggleHiddenAll()
   endif
 endfunction
 
+" GUI Mode
+if has('gui_running')
+  set guioptions=s
+endif
+
 " Split panes more obvious, terminal prettier
 augroup BgHighlight
   autocmd!
