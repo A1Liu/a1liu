@@ -1,4 +1,9 @@
 /*
+
+!/plugins
+/plugins/*
+!/plugins/.gitkeep
+
 !/options
 /options/*
 !/options/colors.scheme.xml

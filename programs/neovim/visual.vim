@@ -41,7 +41,7 @@ endfunction
 
 " GUI Mode
 if has('gui_running')
-  set guioptions=s
+  set guioptions=cs
 endif
 
 " Split panes more obvious, terminal prettier
@@ -84,11 +84,17 @@ endif
 
 " Font on GUI Programs
 if g:os ==? 'Windows'
-set guifont=Consolas:h12
+  if &guifont !=? 'Consolas:h12'
+    set guifont=Consolas:h12
+  endif
 elseif g:os ==? 'Darwin'
-  set guifont=Menlo:h12
+  if &guifont !=? 'Menlo:h12'
+    set guifont=Menlo:h12
+  endif
 else
-  set guifont=Courier:h12
+  if &guifont !=? 'Courier:h12'
+    set guifont=Courier:h12
+  endif
 endif
 
 let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')

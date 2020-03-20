@@ -23,10 +23,11 @@ noremap! <ESC>[1;5C <C-Right>
 
 " Leader Mappings
 nnoremap <Leader>r :!
+nnoremap <Leader>R :read !
 
 " Taken from vim-rsi
-cnoremap <C-B> <C-Left>
-cnoremap <C-F> <C-Right>
+" cnoremap <C-B> <C-Left>
+" cnoremap <C-F> <C-Right>
 
 " Setting up Ctrl-K in normal mode
 " https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142
@@ -50,7 +51,7 @@ inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
 nnoremap <C-Q> <Nop>
 
 " Mapping semicolon to colon
-nmap ; :
+nnoremap ; :
 
 " Disabling ex mode
 nnoremap <S-Q> <Nop>
@@ -61,6 +62,7 @@ nnoremap <Leader><C-S> :FormatCode<CR>
 " Terminal keybindings
 if exists(':terminal')
   tnoremap <C-H> <C-\><C-N>
+  tnoremap <C-W><C-H> <C-W>h
 endif
 
 " Placeholder

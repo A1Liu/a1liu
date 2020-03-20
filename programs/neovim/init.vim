@@ -165,6 +165,15 @@ endif
 
 
 
+"" Warnings and Error Messages
+set autoread
+" augroup WarningMessages
+"   autocmd!
+"   autocmd FileChangedShell * echo 'File was changed'
+" augroup END
+
+
+
 "" Saving my ass
 set noswapfile
 set undofile
