@@ -47,10 +47,10 @@ def add_safe(output_path, src):
     link_path = os.path.join(project_dir, src)
 
     if dry_run():
-        print(f"link_path={link_path}")
-        print(f"output_path={output_path}")
+        print("link_path={}".format(link_path))
+        print("output_path={}".format(output_path))
         if os.path.islink(output_path) or os.path.exists(output_path):
-            print(f"`output_path` exists, would have to move it")
+            print("`output_path` exists, would have to move it")
         print(f"Would symlink `link_path` to `output_path`")
         return
 
