@@ -165,6 +165,14 @@ endif
 
 
 
+"" Langauge specific stuff
+augroup LanguageSpecific
+  autocmd!
+  autocmd FileType go setlocal nolist noexpandtab
+augroup END
+
+
+
 "" Warnings and Error Messages
 set autoread
 " augroup WarningMessages
