@@ -59,10 +59,10 @@ Plug 'google/vim-codefmt'
 Plug 'google/vim-glaive'
 
 " Language server support because I have to I guess
-" Plug 'autozimu/LanguageClient-neovim', {
-"     \ 'branch': 'next',
-"     \ 'do': 'bash install.sh',
-"     \ }
+Plug 'autozimu/LanguageClient-neovim'
+let g:LanguageClient_serverCommands = {
+    \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+    \ }
 
 " Eclim
 let g:EclimJavascriptValidate = 0
