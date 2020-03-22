@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Takes as arguments:
+# 1. path to source
+# 2. command that should be available after source
+source_if_necessary() {
+  if [ -e "$1" ]; then
+    if ! command -v "$2" >/dev/null 2>&1 ; then
+      source "$1"
+    fi
+  fi
+}
+
 # Contains environment variables that should be present in all executions of
 # a shell.
 #
@@ -8,23 +19,6 @@
 # Block focuses on shell variables.
 if [[ $CFG_SHELL_ENV != 1 ]]; then
   CFG_SHELL_ENV=1
-
-  # Takes as arguments:
-  # 1. path to source
-  # 2. command that should be available after source
-  source_if_necessary() {
-    if [ -e "$1" ]; then
-      if ! command -v "$2" >/dev/null 2>&1 ; then
-        source "$1"
-      fi
-    fi
-  }
-
-  # Adding stuff to python path
-  export PYTHONPATH="${CFG_DIR}/libs/python:${PYTHONPATH}"
-
-  # export GOROOT="/usr/local/go"
-  # export GOPATH="$HOME/.go"
 
   # Haskell
   source_if_necessary $HOME/.ghcup/env cabal
@@ -42,5 +36,10 @@ if [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
   export EDITOR='vim'
   export VISUAL='vim'
+
+  # Adding stuff to python path
+  export PYTHONPATH="${CFG_DIR}/libs/python:${PYTHONPATH}"
+  # export GOROOT="/usr/local/go"
+  export GOPATH="$HOME/go:${GOPATH}"
 fi
 
