@@ -83,9 +83,11 @@ let g:LanguageClient_serverCommands = {
     \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
     \ 'go'  : ['gopls'],
     \ }
-command LCRename :call LanguageClient#textDocument_rename()
-command LCStart LanguageClientStart
-command LCStop LanguageClientStop
+command! LCRename :call LanguageClient#textDocument_rename()
+command! LCAction :call LanguageClient_textDocument_codeAction()
+command! LCContext :call LanguageClient_contextMenu()
+command! LCStart LanguageClientStart
+command! LCStop LanguageClientStop
 
 " Eclim
 let g:EclimJavascriptValidate = 0

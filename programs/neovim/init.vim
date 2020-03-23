@@ -58,15 +58,15 @@ set nomodeline modelines=0
 "" Compatibility
 set guicursor= " Don't want unknown characters in Linux
 set t_ut= " Dont want background to do weird stuff
+
+" Getting terminal colors to work
+" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 if exists('+termguicolors') && g:os ==? 'Darwin'
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
   set termguicolors
 endif
 
-
-" Getting terminal colors to work
-" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 
 "" Plugins
 let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
@@ -222,10 +222,7 @@ function! GoToCurrentTag() " Go to definition of word under cursor
 endfunction
 
 function! GoToTag(tagname) " Go to a tag
-
   try
-    call LanguageClient#textDocument_definition()
-  catch
     if a:tagname != ""
       silent exe 'ts ' . a:tagname
       let l:old_tags = &tags
@@ -233,10 +230,11 @@ function! GoToTag(tagname) " Go to a tag
       exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
       let &tags = l:old_tags
     endif
+  catch
   endtry
 endfunction
 
-command! Def call GoToCurrentTag()
+command! Def :call LanguageClient#textDocument_definition()
 
 
 
@@ -257,4 +255,3 @@ let g:netrw_sort_sequence.= '^\..*$,'
 let g:netrw_sort_sequence.= '\.o$,\.obj$,\.class$,'
 " Vim files? Text editor info files and dumb files
 let g:netrw_sort_sequence.= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
-
