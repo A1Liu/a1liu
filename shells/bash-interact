@@ -5,10 +5,9 @@
 # ANSI Colors
 Y="\033[0;33m"
 B="\033[0;36m"
-G="\033[0;33m"
+G="\033[0;32m"
 R="\033[0;31m"
 NORM="\033[0m"
-
 # ANSI Colors with escapes
 YE="\001$Y\002"
 RE="\001$R\002"
@@ -18,13 +17,13 @@ branch() {
   git branch 2>/dev/null | grep '^*' | colrm 1 1
 }
 
-function parse_git_dirty {
+parse_git_dirty() {
   [[ "$(git status --porcelain 2> /dev/null | tail -n1)"  != "" ]] \
     && echo -e "$YE(${RE}X$YE) " || echo " "
 }
 
 
-function parse_ret_code {
+parse_ret_code() {
   if [ $? -eq 0 ]; then
     echo -e "${GE}#"
   else
@@ -32,6 +31,18 @@ function parse_ret_code {
   fi
 }
 
+PROMPT_COMMAND=__prompt_command
 
-export PS1="\[$B\]\\W\[$Y\]\$(branch)\$(parse_git_dirty)\[$NORM\]\\$ "
+__prompt_command() {
+  local EXIT="$?"
+  PS1="\[$B\]\\W\[$Y\]\$(branch)\$(parse_git_dirty)"
+  if [ $EXIT -eq 0 ]; then
+    PS1+="\[$G\]"
+  else
+    PS1+="\[$R\]"
+  fi
+
+  PS1+="#\[$NORM\] "
+}
+
 
