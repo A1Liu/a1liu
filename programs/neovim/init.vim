@@ -140,29 +140,8 @@ endfunction
 
 augroup KramdownHighlighting
   autocmd!
-  autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown
-    \ call MdJekyllSettings()
-  autocmd BufLeave *.md,*.markdown
-    \ set tabstop=2 | set shiftwidth=2
-augroup END
-
-
-
-"" Formatting
-augroup autoformat_settings
-  autocmd!
-  if executable('clang-format')
-    autocmd FileType c,cpp,proto,java,javascript,glsl silent AutoFormatBuffer clang-format
-  endif
-  if executable('js-beautify')
-    autocmd FileType html,css,sass,scss,less silent AutoFormatBuffer js-beautify
-  endif
-  if executable('yapf')
-    autocmd FileType python silent AutoFormatBuffer yapf
-  endif
-  if executable('gofmt')
-    autocmd FileType go silent AutoFormatBuffer gofmt
-  endif
+  autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown call MdJekyllSettings()
+  autocmd BufLeave *.md,*.markdown set tabstop=2 | set shiftwidth=2 | set softtabstop=2
 augroup END
 
 

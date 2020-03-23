@@ -58,46 +58,36 @@ endif
 " Color Schemes
 Plug 'lifepillar/vim-solarized8'
 
-"" Highlighting
-
-" Markdown highlighting
-Plug 'plasticboy/vim-markdown'
+" Languages
+Plug 'sheerun/vim-polyglot'
+let g:rustfmt_autosave = 1
 let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_new_list_item_indent = 0
 let g:vim_markdown_auto_insert_bullets = 0
 
-" Languages
-Plug 'sheerun/vim-polyglot'
-let g:rustfmt_autosave = 1
-
-" Google's Formatter
-Plug 'google/vim-maktaba'
-Plug 'google/vim-codefmt'
-Plug 'google/vim-glaive'
+" Autoformatters
+Plug 'Chiel92/vim-autoformat'
+augroup AutoFormatting
+  autocmd!
+  autocmd BufWrite * :Autoformat
+  autocmd FileType markdown,tex
+        \ let b:autoformat_autoindent=0
+        \ | let g:autoformat_remove_trailing_spaces = 0
+augroup END
 
 " Language server support because I have to I guess
 Plug 'autozimu/LanguageClient-neovim'
 let g:LanguageClient_serverCommands = {
-    \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-    \ 'go'  : ['gopls'],
-    \ }
+      \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+      \ 'go'  : ['gopls'],
+      \ }
 command! LCRename :call LanguageClient#textDocument_rename()
 command! LCAction :call LanguageClient_textDocument_codeAction()
 command! LCContext :call LanguageClient_contextMenu()
 command! LCStart LanguageClientStart
 command! LCStop LanguageClientStop
-
-" Eclim
-let g:EclimJavascriptValidate = 0
-let g:EclimJavascriptLintEnabled = 0
-
-"" Tim Pope Plugins <3
-
-" Eclim
-let g:EclimJavascriptValidate = 0
-let g:EclimJavascriptLintEnabled = 0
 
 "" Tim Pope Plugins <3
 
@@ -107,11 +97,5 @@ Plug 'tpope/vim-eunuch'
 if g:os !=? 'Windows'
   call plug#end()
 else
-  " https://github.com/google/vim-maktaba/issues/215
   execute pathogen#infect()
-  call maktaba#syscall#SetUsableShellRegex('\v^/bin/sh|cmd|cmd\.exe|command\.com$')
-endif
-
-if !g:first_run
-  call glaive#Install()
 endif
