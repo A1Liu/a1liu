@@ -77,6 +77,8 @@ Plug 'tpope/vim-rsi'
 if g:os !=? 'Windows'
   call plug#end()
 else
+  " https://github.com/google/vim-maktaba/issues/215
+  call maktaba#syscall#SetUsableShellRegex('\v^/bin/sh|cmd|cmd\.exe|command\.com$')
   execute pathogen#infect()
 endif
 
