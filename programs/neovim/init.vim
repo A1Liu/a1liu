@@ -112,6 +112,10 @@ set belloff=all
 filetype plugin indent on " Filetype detection
 syntax enable " Actual highlighting
 
+" Completions
+" set omnifunc
+set completefunc=LanguageClient#complete
+
 " Showing non-printing characters
 set list
 if g:os ==? 'Windows'
