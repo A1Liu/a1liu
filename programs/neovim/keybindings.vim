@@ -42,7 +42,7 @@ vnoremap <S-K> gk
 vnoremap <S-J> gj
 
 " What the heck is Select mode?
-nnoremap gh <Nop>
+nnoremap <silent> gh :call LanguageClient#textDocument_hover()<CR>
 nnoremap g<C-H> <Nop>
 
 " Using <C-J> and <C-K> for navigating the pop-up menu

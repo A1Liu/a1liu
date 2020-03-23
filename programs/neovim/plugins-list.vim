@@ -6,13 +6,31 @@ let s:autoload_path = PathJoin(g:vim_home_path, 'autoload')
 call DebugPrint('Plug home is: ' . s:plug_home)
 call DebugPrint('Pathogen home is: ' . s:pathogen_home)
 
+let s:plugins_list = []
 function! InstallPathogenPlugin(path)
+  let s:plugins_list = s:plugins_list + [ a:path ]
   if g:first_run
     let s:cwd = getcwd()
-    execute "cd " . s:bundle_path
-    execute "silent !git clone https://github.com/" . a:path
-    execute "cd " . s:cwd
+    execute 'cd ' . s:pathogen_home
+    execute 'silent !git clone https://github.com/' . a:path
+    execute 'cd ' . s:cwd
   endif
+endfunction
+
+function! ReinstallPathogenPlugins()
+  let s:cwd = getcwd()
+  for plugin in s:plugins_list
+    let s:plugin_path = PathJoin(s:pathogen_home, split(plugin,'/')[1])
+    if empty(glob(s:plugin_path))
+      execute "cd " . s:pathogen_home
+      execute 'silent !git clone https://github.com/' . plugin
+    else
+      execute "cd " . s:plugin_path
+      execute 'silent !git pull'
+    endif
+  endfor
+  execute "cd " . s:cwd
+  execute pathogen#infect()
 endfunction
 
 if g:first_run
@@ -24,16 +42,17 @@ if g:first_run
     autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
   else
     let s:pathogen_install_path = PathJoin(s:autoload_path, 'pathogen.vim')
-    execute "silent !curl -LSso " . s:pathogen_install_path . " https://tpo.pe/pathogen.vim"
+    execute 'silent !curl -LSso ' . s:pathogen_install_path . ' https://tpo.pe/pathogen.vim'
   endif
 else
-  call DebugPrint("Not first run.")
+  call DebugPrint('Not first run.')
 endif
 
 if g:os !=? 'Windows'
   call plug#begin()
 else
   command! -nargs=1 Plug call InstallPathogenPlugin(<args>)
+  command! PlugInstall call ReinstallPathogenPlugins()
 endif
 
 " Color Schemes
@@ -62,8 +81,9 @@ Plug 'google/vim-glaive'
 Plug 'autozimu/LanguageClient-neovim'
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-    \ 'go'  : ['gopls'],
+    \ 'go'  : ['go-langserver'],
     \ }
+command LCRename :call LanguageClient#textDocument_rename()
 
 " Eclim
 let g:EclimJavascriptValidate = 0
@@ -79,8 +99,8 @@ if g:os !=? 'Windows'
   call plug#end()
 else
   " https://github.com/google/vim-maktaba/issues/215
-  call maktaba#syscall#SetUsableShellRegex('\v^/bin/sh|cmd|cmd\.exe|command\.com$')
   execute pathogen#infect()
+  call maktaba#syscall#SetUsableShellRegex('\v^/bin/sh|cmd|cmd\.exe|command\.com$')
 endif
 
 if !g:first_run
