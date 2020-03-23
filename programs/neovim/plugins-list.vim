@@ -96,7 +96,7 @@ let g:EclimJavascriptLintEnabled = 0
 " Eclim
 let g:EclimJavascriptValidate = 0
 let g:EclimJavascriptLintEnabled = 0
-t
+
 "" Tim Pope Plugins <3
 
 " Unix Commands
