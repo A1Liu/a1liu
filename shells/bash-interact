@@ -2,22 +2,36 @@
 
 . "${SHELL_DIR}/git-completions"
 
-E="\\["
+# ANSI Colors
+Y="\033[0;33m"
+B="\033[0;36m"
+G="\033[0;33m"
+R="\033[0;31m"
+NORM="\033[0m"
+
+# ANSI Colors with escapes
+YE="\001$Y\002"
+RE="\001$R\002"
+GE="\001$G\002"
 
 branch() {
   git branch 2>/dev/null | grep '^*' | colrm 1 1
-  # | sed 's/$/ /g'
 }
 
 function parse_git_dirty {
-  [[ "$(git status --porcelain 2> /dev/null | tail -n1)"  != "" ]] && echo "~" || echo " "
+  [[ "$(git status --porcelain 2> /dev/null | tail -n1)"  != "" ]] \
+    && echo -e "$YE(${RE}X$YE) " || echo " "
 }
 
 
-# dirty() {
-#   ([[ $(git status --porcelain 2>/dev/null | tail -n1) != "" ]] && printf "\b\033[0;31m~")
-# }
+function parse_ret_code {
+  if [ $? -eq 0 ]; then
+    echo -e "${GE}#"
+  else
+    echo -e "${RE}#"
+  fi
+}
 
 
-export PS1="\[\033[0;36m\]\\W\[\033[033m\]\$(branch)\[\033[0;31m\]\$(parse_git_dirty)\[\033[0m\]\\$ "
+export PS1="\[$B\]\\W\[$Y\]\$(branch)\$(parse_git_dirty)\[$NORM\]\\$ "
 
