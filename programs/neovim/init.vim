@@ -222,6 +222,8 @@ endfunction
 function! GoToTag(tagname) " Go to a tag
 
   try
+    call LanguageClient#textDocument_definition()
+  catch
     if a:tagname != ""
       silent exe 'ts ' . a:tagname
       let l:old_tags = &tags
@@ -229,8 +231,6 @@ function! GoToTag(tagname) " Go to a tag
       exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
       let &tags = l:old_tags
     endif
-  catch
-    call LanguageClient#textDocument_definition()
   endtry
 endfunction
 

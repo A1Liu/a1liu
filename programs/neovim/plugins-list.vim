@@ -62,6 +62,7 @@ Plug 'google/vim-glaive'
 Plug 'autozimu/LanguageClient-neovim'
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+    \ 'go'  : ['gopls'],
     \ }
 
 " Eclim

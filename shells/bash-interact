@@ -5,7 +5,7 @@
 E="\\["
 
 branch() {
-  git branch 2>/dev/null | grep '^*' | colrm 1 2
+  git branch 2>/dev/null | grep '^*' | colrm 1 1
   # | sed 's/$/ /g'
 }
 
@@ -19,5 +19,5 @@ function parse_git_dirty {
 # }
 
 
-export PS1="\[\033[0;36m\]\\W \[\033[033m\]\$(branch)\[\033[0;31m\]\$(parse_git_dirty)\[\033[0m\]\\$ "
+export PS1="\[\033[0;36m\]\\W\[\033[033m\]\$(branch)\[\033[0;31m\]\$(parse_git_dirty)\[\033[0m\]\\$ "
 

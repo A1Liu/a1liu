@@ -36,10 +36,12 @@ if [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
   export EDITOR='vim'
   export VISUAL='vim'
+  export BASH_SILENCE_DEPRECATION_WARNING=1
 
   # Adding stuff to python path
   export PYTHONPATH="${CFG_DIR}/libs/python:${PYTHONPATH}"
   # export GOROOT="/usr/local/go"
-  export GOPATH="$HOME/go:${GOPATH}"
+  export GOPATH="$HOME/go"
+  export PATH="${GOPATH}:${GOPATH}/bin:${PATH}"
 fi
 
