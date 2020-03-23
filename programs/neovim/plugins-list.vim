@@ -81,14 +81,22 @@ Plug 'google/vim-glaive'
 Plug 'autozimu/LanguageClient-neovim'
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-    \ 'go'  : ['go-langserver'],
+    \ 'go'  : ['gopls'],
     \ }
 command LCRename :call LanguageClient#textDocument_rename()
+command LCStart LanguageClientStart
+command LCStop LanguageClientStop
 
 " Eclim
 let g:EclimJavascriptValidate = 0
 let g:EclimJavascriptLintEnabled = 0
 
+"" Tim Pope Plugins <3
+
+" Eclim
+let g:EclimJavascriptValidate = 0
+let g:EclimJavascriptLintEnabled = 0
+t
 "" Tim Pope Plugins <3
 
 " Unix Commands
