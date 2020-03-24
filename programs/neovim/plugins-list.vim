@@ -76,8 +76,7 @@ let g:formatters_java = ['clangformat']
 augroup AutoFormatting
   autocmd!
   autocmd BufWrite * :Autoformat
-  autocmd FileType markdown,tex
-        \ let b:autoformat_autoindent=0
+  autocmd FileType markdown,tex let b:autoformat_autoindent=0
         \ | let g:autoformat_remove_trailing_spaces = 0
 augroup END
 
