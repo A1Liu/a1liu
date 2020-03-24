@@ -69,6 +69,10 @@ let g:vim_markdown_auto_insert_bullets = 0
 
 " Autoformatters
 Plug 'Chiel92/vim-autoformat'
+let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
+let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\"'"
+let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
+let g:formatters_java = ['clangformat']
 augroup AutoFormatting
   autocmd!
   autocmd BufWrite * :Autoformat
