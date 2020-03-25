@@ -60,7 +60,7 @@ to have been saved in `local/preconf`.
 
 3. Clone the repository using `git clone https://github.com/a1liu/config`
 
-4. [Install Vim](https://www.vim.org/download.php)
+4. [Install Vim](https://github.com/vim/vim-win32-installer/releases)
 
 5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
    the settings stored in this repository under `compat/windows/keybindings.skl`
@@ -68,6 +68,9 @@ to have been saved in `local/preconf`.
 6. Download Windows Terminal from the Microsoft Store
 
 7. Run setup script `windows.ps1`.
+
+8. Install Python 3.8 using the Python 3.8 installer, ensuring that it's installed
+   for all users.
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
