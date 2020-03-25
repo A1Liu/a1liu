@@ -185,6 +185,7 @@ augroup TabContext
   autocmd!
   autocmd TabEnter * if exists("t:wd") | exe "cd " . t:wd | endif
   autocmd TabLeave * let t:wd = getcwd()
+  autocmd TabNew * try | exe "cd ". PathJoin('~', 'code') | catch | cd ~ | endtry
 augroup END
 
 
