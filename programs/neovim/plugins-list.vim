@@ -86,6 +86,7 @@ augroup AutoFormatting
   autocmd BufWrite vim :Autoformat
   autocmd FileType markdown,tex let b:autoformat_autoindent=0
         \ | let g:autoformat_remove_trailing_spaces = 0
+        \ | let g:autoformat_retab = 0
 augroup END
 
 " Language server support because I have to I guess
