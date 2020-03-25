@@ -67,6 +67,13 @@ let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_new_list_item_indent = 0
 let g:vim_markdown_auto_insert_bullets = 0
 
+" Snippets
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+let g:UltiSnipsExpandTrigger="<C-N><C-N>"
+let g:UltiSnipsJumpForwardTrigger="<C-R>"
+let g:UltiSnipsJumpBackwardTrigger="<C-E>"
+
 " Autoformatters
 Plug 'Chiel92/vim-autoformat'
 let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
@@ -75,7 +82,8 @@ let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfi
 let g:formatters_java = ['clangformat']
 augroup AutoFormatting
   autocmd!
-  autocmd BufWrite * :Autoformat
+  autocmd BufWrite java,c,cpp,python,go :Autoformat
+  autocmd BufWrite vim :Autoformat
   autocmd FileType markdown,tex let b:autoformat_autoindent=0
         \ | let g:autoformat_remove_trailing_spaces = 0
 augroup END

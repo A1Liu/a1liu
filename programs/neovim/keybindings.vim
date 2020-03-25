@@ -46,8 +46,9 @@ nnoremap <silent> gh :call LanguageClient#textDocument_hover()<CR>
 nnoremap g<C-H> <Nop>
 
 " Using <C-J> and <C-K> for navigating the pop-up menu
-inoremap <C-N><C-N> <C-N>
-inoremap <C-N> <C-X>
+" inoremap <C-N><C-O> <C-N>
+inoremap <C-N><C-O> <C-X><C-O>
+inoremap <C-N> <Nop>
 inoremap <expr> <C-D> pumvisible() ? "\<C-N>\<C-N>\<C-N>\<C-N>\<C-N>" : "\<C-D>"
 inoremap <expr> <C-U> pumvisible() ? "\<C-P>\<C-P>\<C-P>\<C-P>\<C-P>" : "\<C-U>"
 inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"

@@ -2,12 +2,11 @@
 
 /autoload/*
 !/autoload/.gitkeep
-/plugged
-/view
 
 /eclimd
 /eclim
 /plugin/eclim.vim
+
 *.jar
 
 /undohist/*
@@ -15,3 +14,14 @@
 
 /bundle/*
 !/bundle/.gitkeep
+
+/plugged
+/view
+/indent
+/ftdetect
+/ftplugin
+/keymap
+/syntax
+/utilsnips
+/compiler
+/doc
