@@ -38,6 +38,9 @@ function! PathJoin(...)
 endfunction
 
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+if g:os ==? 'Windows' && has('nvim') " Hack because neovim doesn't work
+  let g:vim_home_path = 'C:\Users\Alyer\code\config\programs\neovim'
+endif
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 let g:placeholder = '<++>'
 call DebugPrint('Vim Home path is: ' . g:vim_home_path)
