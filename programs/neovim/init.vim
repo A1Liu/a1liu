@@ -176,8 +176,15 @@ call DebugPrint("Undo dir is: " . s:temp)
 
 
 "" Commands
-
-command! RunInit so $MYVIMRC
+try
+  function! RunInit()
+    let save_pos = getpos(".")
+    source $MYVIMRC
+    call setpos(".", save_pos)
+  endfunction
+  command RunInit call RunInit()
+catch
+endtry
 
 " Vim tab-local working directories
 " command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
