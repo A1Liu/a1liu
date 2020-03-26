@@ -18,9 +18,12 @@ debug(f"Installation directory is:   {config.install_dir}")
 debug(f"Machine-local directory is:  {config.local_dir}")
 debug(f"Preconfig directory is:      {config.move_dir}")
 
-config.remove_replace("~/.vimrc")
-config.remove_replace("~/.vim")
 config.remove_replace("~/.bashrc")
 config.remove_replace("~/.bash_profile")
 config.remove_replace("~/.inputrc")
 config.remove_replace("~/.zshrc")
+config.remove_replace("~/.vimrc")
+if platform.system() == "Windows":
+    config.remove_replace("~/vimfiles")
+else:
+    config.remove_replace("~/.vim")

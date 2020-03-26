@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os, sys
+import platform
 from pathlib import Path
 install_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(install_dir)
@@ -41,9 +42,12 @@ with open(os.path.join(config.local_dir, "shell_init"), 'w') as f:
 with open(os.path.join(config.local_dir, "shell_interact_init"), 'w') as f:
     f.write(print_template % "true")
 
-config.add_safe("~/.vimrc", "programs/neovim/init.vim")
-config.add_safe("~/.vim", "programs/neovim")
 config.add_safe("~/.bashrc", "local/shell_interact_init")
 config.add_safe("~/.bash_profile", "local/shell_interact_init")
 config.add_safe("~/.inputrc", "shells/inputrc")
 config.add_safe("~/.zshrc", "local/shell_interact_init")
+config.add_safe("~/.vimrc", "programs/neovim/init.vim")
+if platform.system() == "Windows":
+    config.add_safe("~/vimfiles", "programs/neovim")
+else:
+    config.add_safe("~/.vim", "programs/neovim")
