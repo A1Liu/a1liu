@@ -32,11 +32,11 @@ parse_ret_code() {
 }
 
 PROMPT_COMMAND=__prompt_command
+PS1="\[$B\]\\W\[$Y\]\$(branch)\$(parse_git_dirty)\[$G\]#\[$NORM\] "
 
 # https://stackoverflow.com/questions/16715103/bash-prompt-with-last-exit-code
-__prompt_command() {
-  local EXIT="$?"
-  PS1="\[$B\]\\W\[$Y\]\$(branch)\$(parse_git_dirty)"
+__prompt_command() { local EXIT="$?"
+  PS1="${PS1:0:$((${#PS1} - 27))}"
   if [ $EXIT -eq 0 ]; then
     PS1+="\[$G\]"
   else
