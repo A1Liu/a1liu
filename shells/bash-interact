@@ -2,6 +2,10 @@
 
 . "${SHELL_DIR}/git-completions"
 
+export HISTCONTROL=ignoreboth:erasedups
+export HISTSIZE=1000
+export HISTFILESIZE=1000
+
 # ANSI Colors
 Y="\033[0;33m"
 B="\033[0;36m"
@@ -35,7 +39,16 @@ PROMPT_COMMAND=__prompt_command
 PS1="\[$B\]\\W\[$Y\]\$(branch)\$(parse_git_dirty)\[$G\]#\[$NORM\] "
 
 # https://stackoverflow.com/questions/16715103/bash-prompt-with-last-exit-code
-__prompt_command() { local EXIT="$?"
+__prompt_command() {
+
+  local EXIT="$?"
+
+  # https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443
+  history -n
+  history -w
+  history -c
+  history -r
+
   PS1="${PS1:0:$((${#PS1} - 27))}"
   if [ $EXIT -eq 0 ]; then
     PS1+="\[$G\]"

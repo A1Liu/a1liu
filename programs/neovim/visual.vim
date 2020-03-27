@@ -12,7 +12,7 @@ set statusline+=%=
 set statusline+=\ %y
 set statusline+=\ %p%%
 set statusline+=\ %c:%l
-set statusline+=\ 
+set statusline+=\
 
 " Hiding the UI
 " https://unix.stackexchange.com/questions/140898/vim-hide-status-line-in-the-bottom
@@ -48,23 +48,23 @@ endif
 augroup BgHighlight
   autocmd!
   autocmd BufWinEnter,WinEnter,BufEnter *
-    \ if &ft != 'netrw' && &buftype !='terminal' |
-      \ setlocal cul cc=80 |
-      \ let s:hidden_all = 1 | call ToggleHiddenAll() |
-    \ endif " Set color column
+        \ if &ft != 'netrw' && &buftype !='terminal' |
+        \ setlocal cul cc=80 |
+        \ let s:hidden_all = 1 | call ToggleHiddenAll() |
+        \ endif " Set color column
   if exists(':terminal')
     if has('nvim')
       autocmd TermOpen * setlocal nonumber norelativenumber cc= wrap
-    else
+    elseif exists(':terminal')
       autocmd TerminalOpen * setlocal nonumber norelativenumber cc= wrap
     endif
   endif
   autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | setlocal cc= | endif
   autocmd BufWinLeave,WinLeave *
-    \ if &ft != 'netrw' && &buftype != 'terminal' |
-      \ setlocal nocul |
-      \ setlocal cc= |
-    \ endif
+        \ if &ft != 'netrw' && &buftype != 'terminal' |
+        \ setlocal nocul |
+        \ setlocal cc= |
+        \ endif
 augroup END
 
 command! SynStack call SynStack()
