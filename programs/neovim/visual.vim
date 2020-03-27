@@ -55,7 +55,7 @@ augroup BgHighlight
   if exists(':terminal')
     if has('nvim')
       autocmd TermOpen * setlocal nonumber norelativenumber cc= wrap
-    elseif exists(':terminal')
+    elseif exists('##TerminalOpen')
       autocmd TerminalOpen * setlocal nonumber norelativenumber cc= wrap
     endif
   endif
