@@ -42,7 +42,6 @@ with open(os.path.join(config.local_dir, "shell_init"), 'w') as f:
 with open(os.path.join(config.local_dir, "shell_interact_init"), 'w') as f:
     f.write(print_template % "true")
 
-config.add_safe("~/.bashrc", "local/shell_interact_init")
 config.add_safe("~/.bash_profile", "local/shell_interact_init")
 config.add_safe("~/.inputrc", "shells/inputrc")
 config.add_safe("~/.zshrc", "local/shell_interact_init")

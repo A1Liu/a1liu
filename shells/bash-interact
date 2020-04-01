@@ -2,9 +2,9 @@
 
 . "${SHELL_DIR}/git-completions"
 
-export HISTCONTROL=ignoreboth:erasedups
-export HISTSIZE=1000
-export HISTFILESIZE=1000
+HISTCONTROL=ignoreboth:erasedups
+HISTSIZE=1000
+HISTFILESIZE=1000
 
 # ANSI Colors
 Y="\033[0;33m"
@@ -44,8 +44,7 @@ __prompt_command() {
   local EXIT="$?"
 
   # https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443
-  history -n
-  history -w
+  history -a
   history -c
   history -r
 
