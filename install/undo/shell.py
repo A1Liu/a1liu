@@ -2,6 +2,7 @@
 from aliu import files
 from aliu import config
 from aliu.logging import *
+import platform
 
 if not config.already_installed("shell"):
     print("Shell config not installed.")
