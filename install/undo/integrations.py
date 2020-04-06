@@ -12,7 +12,7 @@ if not config.already_installed("integrations"):
     print("Shell config not installed.")
     exit(0)
 
-os.remove(config.install_flag_filename("shell2"))
+os.remove(config.install_flag_filename("integrations"))
 
 if config.debug_mode():
     configure_logger(level=DEBUG)

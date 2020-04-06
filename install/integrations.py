@@ -12,7 +12,7 @@ if config.already_installed("integrations"):
     print("Already installed.")
     exit(0)
 
-open(config.install_flag_filename("shell2"), 'w').close()
+open(config.install_flag_filename("integrations"), 'w').close()
 
 if config.debug_mode():
     configure_logger(level=DEBUG)
