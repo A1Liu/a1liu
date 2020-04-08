@@ -7,6 +7,8 @@ nnoremap <SPACE> <Nop>
 " Mapping <C-H> to escape
 noremap <C-C> <Esc>
 noremap! <C-C> <Esc>
+snoremap <C-C> <Esc>
+snoremap <C-H> <Esc>
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cnoremap <C-H> <C-C>
@@ -49,6 +51,7 @@ nnoremap g<C-H> <Nop>
 " inoremap <C-N><C-O> <C-N>
 inoremap <C-N><C-O> <C-X><C-O>
 inoremap <C-N> <Nop>
+inoremap <C-N><C-T> <C-N>
 inoremap <expr> <C-D> pumvisible() ? "\<C-N>\<C-N>\<C-N>\<C-N>\<C-N>" : "\<C-D>"
 inoremap <expr> <C-U> pumvisible() ? "\<C-P>\<C-P>\<C-P>\<C-P>\<C-P>" : "\<C-U>"
 inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"
