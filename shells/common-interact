@@ -100,4 +100,5 @@ alias node='unalias node && load_nvm && node'
 alias npm='unalias npm && load_nvm && npm'
 alias prettier='unalias prettier && load_nvm && prettier'
 alias npx='unalias npx && load_nvm && npx'
+alias firebase='unalias firebase && load_nvm && firebase'
 

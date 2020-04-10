@@ -102,6 +102,7 @@ command! LCContext :call LanguageClient_contextMenu()
 command! LCStart LanguageClientStart
 command! LCStop LanguageClientStop
 
+
 "" Tim Pope Plugins <3
 
 " Unix Commands
