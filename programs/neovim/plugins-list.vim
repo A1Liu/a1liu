@@ -80,9 +80,10 @@ let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --as
 let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\"'"
 let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
 let g:formatters_java = ['clangformat']
+let g:formatters_arduino = ['clangformat']
 augroup AutoFormatting
   autocmd!
-  autocmd FileType java,c,cpp,python,go,javascript let b:autoformat_enabled = 1
+  autocmd FileType java,c,cpp,python,go,javascript,arduino let b:autoformat_enabled = 1
   autocmd FileType vim let b:autoformat_enabled = 1
   autocmd BufWrite * if exists('b:autoformat_enabled') | Autoformat | endif
   autocmd FileType markdown,tex let b:autoformat_autoindent = 0
