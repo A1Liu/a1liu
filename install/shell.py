@@ -38,7 +38,7 @@ IS_INTERACTIVE_SHELL=%s
 """
 
 debug("print_template=",
-      print_template.replace('\n', '\n' + ' ' * 14 + '='),
+      print_template.strip().replace('\n', '\n' + ' ' * 14 + '='),
       sep='')
 
 with open(os.path.join(config.local_dir, "shell_init"), 'w') as f:
