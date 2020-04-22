@@ -25,5 +25,8 @@ inline bool operator!=(const TString &, const TString &) noexcept;
 inline bool operator!=(const TString &, const char *) noexcept;
 inline bool operator!=(const char *, const TString &) noexcept;
 
-TString operator+(const TString &, const TString &) noexcept;
+inline TString operator+(const TString &, const TString &) noexcept;
+inline TString operator+(const char *, const TString &) noexcept;
+inline TString operator+(const TString &, const char *) noexcept;
+
 std::ostream &operator<<(std::ostream &, const TString &) noexcept;

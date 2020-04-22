@@ -1,11 +1,10 @@
 #include "string.h"
+#include <cstring>
 #include <deque>
 #include <iostream>
 #include <mutex>
 
 #define BLOCK_SIZE 1024 * 1024 * 4
-
-std::mutex mut;
 
 // Circular char queue with enqueue(uint64_t) and dequeue(uint64_t)
 struct CharQueue {
@@ -39,7 +38,6 @@ struct CharQueue {
   }
 
   char *enqueue(uint64_t len) noexcept {
-    std::lock_guard<std::mutex> g(mut);
     if (!begin)
       return nullptr;
     if (section_begin <= section_end) {
@@ -101,30 +99,40 @@ struct StringTracker {
 };
 
 uint64_t base_idx = 1;
+std::mutex mut;
 CharQueue pool;
 std::deque<StringTracker> tracker_queue;
 
-TString::TString() noexcept : begin(nullptr), end(nullptr), tracker_index(0) {}
+static void alloc_string(TString *tstring, uint64_t len) {
+  mut.lock();
+  tstring->begin = pool.enqueue(len);
+  mut.unlock();
+
+  if (tstring->begin == nullptr) {
+    tstring->begin = new char[len];
+    tstring->end = tstring->begin + len;
+    tstring->tracker_index = -1;
+  } else {
+    tstring->end = tstring->begin + len;
+    std::lock_guard<std::mutex> g(mut);
+    tstring->tracker_index = base_idx + tracker_queue.size();
+    tracker_queue.emplace_back(tstring->begin, tstring->end);
+  }
+}
 
 void TString::set_pool_size(uint64_t size) noexcept {
+  std::lock_guard<std::mutex> g(mut);
   new (&pool) CharQueue(size);
 }
 
+TString::TString() noexcept : begin(nullptr), end(nullptr), tracker_index(0) {}
+
 TString::TString(const char *s) noexcept {
   uint64_t len = strlen(s);
-  if ((begin = pool.enqueue(len)) == nullptr) {
-    begin = new char[len];
-  }
-  end = begin + len;
+  alloc_string(this, len);
 
   for (char *i = begin; *s != '\0'; i++, s++)
     *i = *s;
-
-  {
-    std::lock_guard<std::mutex> g(mut);
-    tracker_index = base_idx + tracker_queue.size();
-    tracker_queue.emplace_back(begin, end);
-  }
 }
 
 TString::TString(TString &&other) noexcept
@@ -159,9 +167,21 @@ uint64_t TString::size() const noexcept { return end - begin; }
 
 TString &TString::operator=(const TString &other) noexcept {
   this->~TString();
+  if (other.tracker_index == -1) {
+    alloc_string(this, other.size());
+    char *dest = begin, *src = other.begin;
+    for (; dest != end; src++, dest++)
+      *dest = *src;
+
+    return *this;
+  }
+
   begin = other.begin;
   end = other.end;
   tracker_index = other.tracker_index;
+  if (tracker_index == 0) {
+    return *this;
+  }
 
   std::lock_guard<std::mutex> g(mut);
   tracker_queue[tracker_index - base_idx].ref_count++;
@@ -206,13 +226,10 @@ inline bool operator!=(const char *a, const TString &b) noexcept {
   return !(a == b);
 }
 
-TString operator+(const TString &a, const TString &b) noexcept {
+inline TString operator+(const TString &a, const TString &b) noexcept {
   TString t;
   uint64_t len = a.size() + b.size();
-  if ((t.begin = pool.enqueue(len)) == nullptr) {
-    t.begin = new char[len];
-  }
-  t.end = t.begin + len;
+  alloc_string(&t, len);
 
   char *dest = t.begin, *src;
   for (src = a.begin; src != a.end; dest++, src++)
@@ -220,11 +237,44 @@ TString operator+(const TString &a, const TString &b) noexcept {
   for (src = b.begin; src != b.end; dest++, src++)
     *dest = *src;
 
-  {
-    std::lock_guard<std::mutex> g(mut);
-    t.tracker_index = base_idx + tracker_queue.size();
-    tracker_queue.emplace_back(t.begin, t.end);
+  return t;
+}
+
+inline TString operator+(const TString &a, const char *bc) noexcept {
+  TString t;
+  if (bc == nullptr) {
+    t = a;
+    return t;
   }
+
+  alloc_string(&t, a.size() + strlen(bc));
+
+  char *dest = t.begin;
+  const char *src;
+  for (src = a.begin; src != a.end; dest++, src++)
+    *dest = *src;
+  for (src = bc; *src != '\0'; dest++, src++)
+    *dest = *src;
+
+  return t;
+}
+
+inline TString operator+(const char *ac, const TString &b) noexcept {
+  TString t;
+  if (ac == nullptr) {
+    t = b;
+    return t;
+  }
+
+  alloc_string(&t, b.size() + strlen(ac));
+
+  char *dest = t.begin;
+  const char *src;
+  for (src = ac; *src != '\0'; dest++, src++)
+    *dest = *src;
+  for (src = b.begin; src != b.end; dest++, src++)
+    *dest = *src;
+
   return t;
 }
 

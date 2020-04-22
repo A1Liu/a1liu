@@ -32,6 +32,7 @@ int main() {
   a = b;
   assert(a == b);
   assert(a == " bye");
-  assert(!(a == "bye"));
+  assert(a != "bye");
   std::cout << a + b << std::endl;
+  std::cout << "hello" + a << std::endl;
 }
