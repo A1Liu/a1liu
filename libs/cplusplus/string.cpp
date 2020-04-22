@@ -80,6 +80,7 @@ struct CharQueue {
 struct StringTracker {
   char *begin, *end;
   uint64_t ref_count;
+  StringTracker() noexcept : begin(nullptr), end(nullptr), ref_count(0) {}
   StringTracker(char *begin_, char *end_) noexcept
       : begin(begin_), end(end_), ref_count(1) {}
 };
@@ -126,8 +127,10 @@ TString::~TString() noexcept {
   } else if (tracker_index != 0) {
     std::lock_guard<std::mutex> g(mut);
     tracker_queue[tracker_index - base_idx].ref_count--;
-    for (StringTracker tracker = tracker_queue.front(); tracker.ref_count == 0;
-         tracker_queue.pop_front(), tracker = tracker_queue.front()) {
+    for (StringTracker tracker;
+         tracker_queue.size() > 0 &&
+         (tracker = tracker_queue.front()).ref_count == 0;
+         tracker_queue.pop_front()) {
       pool.dequeue(tracker.end - tracker.begin);
     }
   }
