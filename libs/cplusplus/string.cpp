@@ -1,5 +1,6 @@
 #include "string.h"
 #include <deque>
+#include <iostream>
 #include <mutex>
 
 #define BLOCK_SIZE 1024 * 1024 * 4
@@ -11,13 +12,14 @@ struct CharQueue {
   char *begin, *end;
   char *section_begin, *section_end;
 
-  CharQueue() noexcept {
-    begin = new char[BLOCK_SIZE];
-    end = begin + BLOCK_SIZE;
-    section_begin = section_end = begin;
-  }
+  CharQueue() noexcept
+      : begin(nullptr), end(nullptr), section_begin(nullptr),
+        section_end(nullptr) {}
 
-  ~CharQueue() noexcept { delete begin; }
+  ~CharQueue() noexcept {
+    if (begin)
+      delete begin;
+  }
 
   CharQueue(uint64_t len) {
     begin = new char[len];
@@ -25,8 +27,21 @@ struct CharQueue {
     section_begin = section_end = begin;
   }
 
+  uint64_t size() {
+    if (!begin)
+      return 0;
+
+    if (section_begin <= section_end) {
+      return section_end - section_begin;
+    } else {
+      return (end - section_begin) + (section_end - begin);
+    }
+  }
+
   char *enqueue(uint64_t len) noexcept {
     std::lock_guard<std::mutex> g(mut);
+    if (!begin)
+      return nullptr;
     if (section_begin <= section_end) {
       if (end - section_end >= len) {
         char *ret_val = section_end;
@@ -91,6 +106,10 @@ std::deque<StringTracker> tracker_queue;
 
 TString::TString() noexcept : begin(nullptr), end(nullptr), tracker_index(0) {}
 
+void TString::set_pool_size(uint64_t size) noexcept {
+  new (&pool) CharQueue(size);
+}
+
 TString::TString(const char *s) noexcept {
   uint64_t len = strlen(s);
   if ((begin = pool.enqueue(len)) == nullptr) {
@@ -132,11 +151,14 @@ TString::~TString() noexcept {
          (tracker = tracker_queue.front()).ref_count == 0;
          tracker_queue.pop_front()) {
       pool.dequeue(tracker.end - tracker.begin);
+      base_idx++;
     }
   }
 }
+uint64_t TString::size() const noexcept { return end - begin; }
 
 TString &TString::operator=(const TString &other) noexcept {
+  this->~TString();
   begin = other.begin;
   end = other.end;
   tracker_index = other.tracker_index;
@@ -146,9 +168,47 @@ TString &TString::operator=(const TString &other) noexcept {
   return *this;
 }
 
+inline bool operator==(const TString &a, const TString &b) noexcept {
+  if (a.begin == b.begin && a.end == b.end) {
+    return true;
+  }
+
+  if (a.size() != b.size())
+    return false;
+
+  const char *ac = a.begin, *bc = b.begin;
+  for (; ac != a.end && *ac == *bc; ac++, bc++)
+    ;
+  return ac == a.end;
+}
+
+inline bool operator==(const TString &a, const char *bc) noexcept {
+  if (bc == nullptr)
+    return false;
+  const char *ac = a.begin;
+  for (; ac != a.end && *bc != '\0' && *ac == *bc; ac++, bc++)
+    ;
+
+  return ac == a.end && *bc == '\0';
+}
+
+inline bool operator==(const char *a, const TString &b) noexcept {
+  return b == a;
+}
+
+inline bool operator!=(const TString &a, const TString &b) noexcept {
+  return !(a == b);
+}
+inline bool operator!=(const TString &a, const char *b) noexcept {
+  return !(a == b);
+}
+inline bool operator!=(const char *a, const TString &b) noexcept {
+  return !(a == b);
+}
+
 TString operator+(const TString &a, const TString &b) noexcept {
   TString t;
-  uint64_t len = (a.end - a.begin) + (b.end - b.begin);
+  uint64_t len = a.size() + b.size();
   if ((t.begin = pool.enqueue(len)) == nullptr) {
     t.begin = new char[len];
   }

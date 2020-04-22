@@ -13,7 +13,17 @@ struct TString {
   ~TString() noexcept;
 
   TString &operator=(const TString &) noexcept;
+  uint64_t size() const noexcept;
+  static void set_pool_size(uint64_t size) noexcept;
 };
+
+inline bool operator==(const TString &, const TString &) noexcept;
+inline bool operator==(const TString &a, const char *b) noexcept;
+inline bool operator==(const char *, const TString &) noexcept;
+
+inline bool operator!=(const TString &, const TString &) noexcept;
+inline bool operator!=(const TString &, const char *) noexcept;
+inline bool operator!=(const char *, const TString &) noexcept;
 
 TString operator+(const TString &, const TString &) noexcept;
 std::ostream &operator<<(std::ostream &, const TString &) noexcept;

@@ -23,6 +23,15 @@ int main() {
   q.dequeue(128);
   char *val5 = q.enqueue(127);
   assert(val3 == val5);
+  q.dequeue(255);
 
   std::cout << q << std::endl;
+  TString a{"hello"}, b{" bye"};
+  std::cout << a + b << std::endl;
+
+  a = b;
+  assert(a == b);
+  assert(a == " bye");
+  assert(!(a == "bye"));
+  std::cout << a + b << std::endl;
 }
