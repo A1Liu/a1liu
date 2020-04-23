@@ -13,12 +13,6 @@ if config.already_installed("shell"):
     print("Already installed.")
     exit(0)
 
-if platform.system() == "Windows":
-    config.add_safe(config.flag_filename("test"), "install/shell.py")
-    os.remove(config.flag_filename("test"))
-
-open(config.install_flag_filename("shell"), 'w').close()
-
 if config.debug_mode():
     configure_logger(level=DEBUG)
     configure_logger(files.move_safe, level=DEBUG)
@@ -55,3 +49,6 @@ if platform.system() == "Windows":
     config.add_safe("~/vimfiles", "programs/neovim")
 else:
     config.add_safe("~/.vim", "programs/neovim")
+
+# Confirm install
+open(config.install_flag_filename("shell"), 'w').close()
