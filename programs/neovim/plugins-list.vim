@@ -98,8 +98,10 @@ let g:LanguageClient_serverCommands = {
       \ 'go'  : ['gopls'],
       \ }
 command! LCRename :call LanguageClient#textDocument_rename()
+command! LCHover :call LanguageClient#textDocument_hover()
 command! LCAction :call LanguageClient_textDocument_codeAction()
 command! LCContext :call LanguageClient_contextMenu()
+command! LCStart LanguageClientStart
 command! LCStart LanguageClientStart
 command! LCStop LanguageClientStop
 
