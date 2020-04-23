@@ -163,7 +163,6 @@ TString::~TString() noexcept {
     }
   }
 }
-uint64_t TString::size() const noexcept { return end - begin; }
 
 TString &TString::operator=(const TString &other) noexcept {
   this->~TString();
@@ -188,7 +187,17 @@ TString &TString::operator=(const TString &other) noexcept {
   return *this;
 }
 
-inline bool operator==(const TString &a, const TString &b) noexcept {
+uint64_t TString::size() const noexcept { return end - begin; }
+
+TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
+  TString t;
+  t = *this;
+  t.begin += idx;
+  t.end += idx + len;
+  return t;
+}
+
+bool operator==(const TString &a, const TString &b) noexcept {
   if (a.begin == b.begin && a.end == b.end) {
     return true;
   }
@@ -202,7 +211,7 @@ inline bool operator==(const TString &a, const TString &b) noexcept {
   return ac == a.end;
 }
 
-inline bool operator==(const TString &a, const char *bc) noexcept {
+bool operator==(const TString &a, const char *bc) noexcept {
   if (bc == nullptr)
     return false;
   const char *ac = a.begin;
@@ -212,21 +221,15 @@ inline bool operator==(const TString &a, const char *bc) noexcept {
   return ac == a.end && *bc == '\0';
 }
 
-inline bool operator==(const char *a, const TString &b) noexcept {
-  return b == a;
-}
+bool operator==(const char *a, const TString &b) noexcept { return b == a; }
 
-inline bool operator!=(const TString &a, const TString &b) noexcept {
+bool operator!=(const TString &a, const TString &b) noexcept {
   return !(a == b);
 }
-inline bool operator!=(const TString &a, const char *b) noexcept {
-  return !(a == b);
-}
-inline bool operator!=(const char *a, const TString &b) noexcept {
-  return !(a == b);
-}
+bool operator!=(const TString &a, const char *b) noexcept { return !(a == b); }
+bool operator!=(const char *a, const TString &b) noexcept { return !(a == b); }
 
-inline TString operator+(const TString &a, const TString &b) noexcept {
+TString operator+(const TString &a, const TString &b) noexcept {
   TString t;
   uint64_t len = a.size() + b.size();
   alloc_string(&t, len);
@@ -240,7 +243,7 @@ inline TString operator+(const TString &a, const TString &b) noexcept {
   return t;
 }
 
-inline TString operator+(const TString &a, const char *bc) noexcept {
+TString operator+(const TString &a, const char *bc) noexcept {
   TString t;
   if (bc == nullptr) {
     t = a;
@@ -259,7 +262,7 @@ inline TString operator+(const TString &a, const char *bc) noexcept {
   return t;
 }
 
-inline TString operator+(const char *ac, const TString &b) noexcept {
+TString operator+(const char *ac, const TString &b) noexcept {
   TString t;
   if (ac == nullptr) {
     t = b;
