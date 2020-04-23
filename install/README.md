@@ -69,8 +69,9 @@ to have been saved in `local/preconf`.
 
 7. Run setup script `windows.ps1`.
 
-8. Install Python 3.8 using the Python 3.8 installer, ensuring that it's installed
-   for all users.
+8. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
+   and customize the install by ensuring that it's installed for all users, adding
+   python to the environment variables, and not precompiling the standard library.
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
