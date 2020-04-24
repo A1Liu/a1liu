@@ -197,6 +197,11 @@ TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
   return t;
 }
 
+char &TString::front() noexcept { return *begin; }
+const char &TString::front() const noexcept { return *begin; }
+char &TString::back() noexcept { return *(end - 1); }
+const char &TString::back() const noexcept { return *(end - 1); }
+
 bool operator==(const TString &a, const TString &b) noexcept {
   if (a.begin == b.begin && a.end == b.end) {
     return true;

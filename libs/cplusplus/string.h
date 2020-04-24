@@ -14,10 +14,15 @@ struct TString {
   TString(const TString &other) noexcept;
   ~TString() noexcept;
 
-  TString &operator=(const TString &) noexcept;
+  const TString &operator=(const TString &) noexcept;
 
   uint64_t size() const noexcept;
   TString substr(uint64_t idx, uint64_t len) const noexcept;
+
+  char &front() noexcept;
+  const char &front() const noexcept;
+  char &back() noexcept;
+  const char &back() const noexcept;
 };
 
 bool operator==(const TString &, const TString &) noexcept;
