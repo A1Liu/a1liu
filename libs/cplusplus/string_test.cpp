@@ -10,22 +10,8 @@ std::ostream &operator<<(std::ostream &os, const CharQueue &q) noexcept {
 }
 
 int main() {
-  CharQueue q{256};
-  char *val = q.enqueue(256);
+  TString::set_pool_size(10000);
 
-  q.dequeue(256);
-  char *val2 = q.enqueue(256);
-  assert(val == val2);
-  q.dequeue(256);
-
-  char *val3 = q.enqueue(128);
-  char *val4 = q.enqueue(128);
-  q.dequeue(128);
-  char *val5 = q.enqueue(127);
-  assert(val3 == val5);
-  q.dequeue(255);
-
-  std::cout << q << std::endl;
   TString a{"hello"}, b{" bye"};
   std::cout << a + b << std::endl;
 

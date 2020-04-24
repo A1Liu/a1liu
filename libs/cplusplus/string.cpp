@@ -13,10 +13,10 @@ struct CharQueue {
       : begin(nullptr), end(nullptr), section_begin(nullptr),
         section_end(nullptr) {}
 
-  ~CharQueue() noexcept {
-    if (begin)
-      delete begin;
-  }
+  // ~CharQueue() noexcept {
+  //   if (begin)
+  //     delete begin;
+  // }
 
   CharQueue(uint64_t len) {
     begin = new char[len];
@@ -35,6 +35,15 @@ struct CharQueue {
     }
   }
 
+  char *eat_up_end() {
+    if (section_begin <= section_end && section_end != end) {
+      char *ret_val = section_end;
+      section_end = section_begin == begin ? end : begin;
+      return ret_val;
+    }
+    return nullptr;
+  }
+
   char *enqueue(uint64_t len) noexcept {
     if (!begin)
       return nullptr;
@@ -43,11 +52,6 @@ struct CharQueue {
         char *ret_val = section_end;
         section_end += len;
         return ret_val;
-      }
-
-      if (section_begin - begin > len) {
-        section_end = begin + len;
-        return begin;
       }
 
       return nullptr;
@@ -94,6 +98,8 @@ struct StringTracker {
   StringTracker() noexcept : begin(nullptr), end(nullptr), ref_count(0) {}
   StringTracker(char *begin_, char *end_) noexcept
       : begin(begin_), end(end_), ref_count(1) {}
+  StringTracker(char *begin_, char *end_, uint64_t ref_count_) noexcept
+      : begin(begin_), end(end_), ref_count(ref_count_) {}
 };
 
 uint64_t base_idx = 1;
@@ -106,6 +112,22 @@ static void alloc_string(TString *tstring, uint64_t len) {
   tstring->begin = pool.enqueue(len);
   mut.unlock();
 
+  if (tstring->begin != nullptr) {
+    tstring->end = tstring->begin + len;
+    std::lock_guard<std::mutex> g(mut);
+    tstring->tracker_index = base_idx + tracker_queue.size();
+    tracker_queue.emplace_back(tstring->begin, tstring->end);
+    return;
+  }
+
+  mut.lock();
+  char *last_begin = pool.eat_up_end();
+  if (last_begin != nullptr) {
+    tracker_queue.emplace_back(last_begin, pool.end, 0);
+  }
+  tstring->begin = pool.enqueue(len);
+  mut.unlock();
+
   if (tstring->begin == nullptr) {
     tstring->begin = new char[len];
     tstring->end = tstring->begin + len;
@@ -115,6 +137,7 @@ static void alloc_string(TString *tstring, uint64_t len) {
     std::lock_guard<std::mutex> g(mut);
     tstring->tracker_index = base_idx + tracker_queue.size();
     tracker_queue.emplace_back(tstring->begin, tstring->end);
+    return;
   }
 }
 
