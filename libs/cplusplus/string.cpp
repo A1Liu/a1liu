@@ -4,8 +4,6 @@
 #include <iostream>
 #include <mutex>
 
-#define BLOCK_SIZE 1024 * 1024 * 4
-
 // Circular char queue with enqueue(uint64_t) and dequeue(uint64_t)
 struct CharQueue {
   char *begin, *end;
