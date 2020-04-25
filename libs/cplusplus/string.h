@@ -5,7 +5,7 @@
 struct TString {
   uint64_t tracker_index = 0;
   char *begin = nullptr;
-  char *end = nullptr;
+  uint64_t len = 0;
 
   static void set_pool_size(uint64_t size) noexcept;
 

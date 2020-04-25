@@ -140,15 +140,17 @@ uint64_t to_from_be(uint64_t val) {
 }
 
 static void alloc_string(TString *tstring, uint64_t len) {
+  tstring->len = len;
+
   mut.lock();
   tstring->begin = pool.enqueue(len);
   mut.unlock();
 
   if (tstring->begin != nullptr) {
-    tstring->end = tstring->begin + len;
+    tstring->len = len;
     std::lock_guard<std::mutex> g(mut);
     tstring->tracker_index = base_idx + tracker_queue.size();
-    tracker_queue.emplace_back(tstring->begin, tstring->end);
+    tracker_queue.emplace_back(tstring->begin, tstring->begin + len);
     return;
   }
 
@@ -162,13 +164,11 @@ static void alloc_string(TString *tstring, uint64_t len) {
 
   if (tstring->begin == nullptr) {
     tstring->begin = new char[len];
-    tstring->end = tstring->begin + len;
     tstring->tracker_index = -1;
   } else {
-    tstring->end = tstring->begin + len;
     std::lock_guard<std::mutex> g(mut);
     tstring->tracker_index = base_idx + tracker_queue.size();
-    tracker_queue.emplace_back(tstring->begin, tstring->end);
+    tracker_queue.emplace_back(tstring->begin, tstring->begin + len);
     return;
   }
 }
@@ -178,7 +178,7 @@ void TString::set_pool_size(uint64_t size) noexcept {
   new (&pool) CharQueue(size);
 }
 
-TString::TString() noexcept : begin(nullptr), end(nullptr), tracker_index(0) {}
+TString::TString() noexcept : begin(nullptr), len(0), tracker_index(0) {}
 
 TString::TString(const char *s) noexcept {
   uint64_t len = strlen(s);
@@ -189,14 +189,14 @@ TString::TString(const char *s) noexcept {
 }
 
 TString::TString(TString &&other) noexcept
-    : begin(other.begin), end(other.end), tracker_index(other.tracker_index) {
-  other.begin = nullptr;
-  other.end = nullptr;
+    : begin(other.begin), len(other.len), tracker_index(other.tracker_index) {
   other.tracker_index = 0;
+  other.begin = nullptr;
+  other.len = 0;
 }
 
 TString::TString(const TString &other) noexcept
-    : begin(other.begin), end(other.end), tracker_index(other.tracker_index) {
+    : begin(other.begin), len(other.len), tracker_index(other.tracker_index) {
   std::lock_guard<std::mutex> g(mut);
   tracker_queue[other.tracker_index - base_idx].ref_count++;
 }
@@ -221,15 +221,14 @@ TString &TString::operator=(const TString &other) noexcept {
   this->~TString();
   if (other.tracker_index == -1) {
     alloc_string(this, other.size());
-    char *dest = begin, *src = other.begin;
-    for (; dest != end; src++, dest++)
-      *dest = *src;
+    for (uint64_t i = 0; i < len; i++)
+      *(this->begin + i) = *(other.begin + i);
 
     return *this;
   }
 
   begin = other.begin;
-  end = other.end;
+  len = other.len;
   tracker_index = other.tracker_index;
   if (tracker_index == 0) {
     return *this;
@@ -240,7 +239,7 @@ TString &TString::operator=(const TString &other) noexcept {
   return *this;
 }
 
-uint64_t TString::size() const noexcept { return end - begin; }
+uint64_t TString::size() const noexcept { return len; }
 
 TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
   if (len == 0) {
@@ -253,37 +252,32 @@ TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
   TString t;
   t = *this;
   t.begin += idx;
-  t.end += idx + len;
+  t.len += len;
   return t;
 }
 
 char &TString::front() noexcept { return *begin; }
 const char &TString::front() const noexcept { return *begin; }
-char &TString::back() noexcept { return *(end - 1); }
-const char &TString::back() const noexcept { return *(end - 1); }
+char &TString::back() noexcept { return *(begin + len - 1); }
+const char &TString::back() const noexcept { return *(begin + len - 1); }
 
 bool operator==(const TString &a, const TString &b) noexcept {
-  if (a.begin == b.begin && a.end == b.end) {
+  if (a.begin == b.begin && a.len == b.len)
     return true;
-  }
 
   if (a.size() != b.size())
     return false;
 
-  const char *ac = a.begin, *bc = b.begin;
-  for (; ac != a.end && *ac == *bc; ac++, bc++)
-    ;
-  return ac == a.end;
+  return strncmp(a.begin, b.begin, a.size()) == 0;
 }
 
 bool operator==(const TString &a, const char *bc) noexcept {
+  if (bc == nullptr && a.begin == nullptr)
+    return true;
   if (bc == nullptr)
     return false;
-  const char *ac = a.begin;
-  for (; ac != a.end && *bc != '\0' && *ac == *bc; ac++, bc++)
-    ;
 
-  return ac == a.end && *bc == '\0';
+  return strncmp(a.begin, bc, a.size()) == 0;
 }
 
 bool operator==(const char *a, const TString &b) noexcept { return b == a; }
@@ -299,11 +293,8 @@ TString operator+(const TString &a, const TString &b) noexcept {
   uint64_t len = a.size() + b.size();
   alloc_string(&t, len);
 
-  char *dest = t.begin, *src;
-  for (src = a.begin; src != a.end; dest++, src++)
-    *dest = *src;
-  for (src = b.begin; src != b.end; dest++, src++)
-    *dest = *src;
+  strncpy(t.begin, a.begin, a.size());
+  strncpy(t.begin + a.size(), b.begin, b.size());
 
   return t;
 }
@@ -315,14 +306,11 @@ TString operator+(const TString &a, const char *bc) noexcept {
     return t;
   }
 
-  alloc_string(&t, a.size() + strlen(bc));
+  uint64_t bc_size = strlen(bc);
+  alloc_string(&t, a.size() + bc_size);
 
-  char *dest = t.begin;
-  const char *src;
-  for (src = a.begin; src != a.end; dest++, src++)
-    *dest = *src;
-  for (src = bc; *src != '\0'; dest++, src++)
-    *dest = *src;
+  strncpy(t.begin, a.begin, a.size());
+  strncpy(t.begin + a.size(), bc, bc_size);
 
   return t;
 }
@@ -334,20 +322,17 @@ TString operator+(const char *ac, const TString &b) noexcept {
     return t;
   }
 
-  alloc_string(&t, b.size() + strlen(ac));
+  uint64_t ac_size = strlen(ac);
+  alloc_string(&t, b.size() + ac_size);
 
-  char *dest = t.begin;
-  const char *src;
-  for (src = ac; *src != '\0'; dest++, src++)
-    *dest = *src;
-  for (src = b.begin; src != b.end; dest++, src++)
-    *dest = *src;
+  strncpy(t.begin, ac, ac_size);
+  strncpy(t.begin + ac_size, b.begin, b.size());
 
   return t;
 }
 
 std::ostream &operator<<(std::ostream &os, const TString &tstring) noexcept {
-  for (const char *i = tstring.begin; i != tstring.end; i++)
-    os << *i;
+  for (uint64_t i = 0; i < tstring.len; i++)
+    os << *(tstring.begin + i);
   return os;
 }

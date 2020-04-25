@@ -12,6 +12,8 @@ int main() {
   TString::set_pool_size(10000);
 
   TString a{"hello"}, b{" bye"};
+  assert(a + b == "hello bye");
+
   std::cout << a + b << std::endl;
 
   a = b;
