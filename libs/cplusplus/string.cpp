@@ -119,6 +119,14 @@ static inline bool is_big_endian() {
   return convert.h == 1;
 }
 
+static uint64_t be_lshift_8(uint64_t val) {
+  ConvertEndian convert = {val};
+  convert.a = convert.b, convert.b = convert.c, convert.c = convert.d,
+  convert.d = convert.e, convert.e = convert.f, convert.f = convert.g,
+  convert.g = convert.h, convert.h = 0;
+  return convert.val;
+}
+
 static uint64_t be_rshift_8(uint64_t val) {
   ConvertEndian convert = {val};
   convert.h = convert.g, convert.g = convert.f, convert.f = convert.e,
@@ -149,7 +157,10 @@ static inline uint8_t be_get_lowest_8(uint64_t val) {
 
 static inline uint64_t intern_length() { return 8 * 3 - 1; }
 
-static void set_tstring_len(TString *tstring, uint64_t len) {
+static inline void set_tstring_len(TString *tstring, uint64_t len) {
+  if (len <= intern_length()) {
+    tstring->len = to_from_be(len);
+  }
   tstring->len = len;
 }
 
