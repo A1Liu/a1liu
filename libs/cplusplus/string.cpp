@@ -114,12 +114,12 @@ std::mutex mut;
 CharQueue pool;
 std::deque<StringTracker> tracker_queue;
 
-inline bool is_big_endian() {
+static inline bool is_big_endian() {
   ConvertEndian convert = {0x01};
   return convert.h == 1;
 }
 
-uint64_t be_rshift_8(uint64_t val) {
+static uint64_t be_rshift_8(uint64_t val) {
   ConvertEndian convert = {val};
   convert.h = convert.g, convert.g = convert.f, convert.f = convert.e,
   convert.e = convert.d, convert.d = convert.c, convert.c = convert.b,
@@ -127,7 +127,7 @@ uint64_t be_rshift_8(uint64_t val) {
   return convert.val;
 }
 
-uint64_t to_from_be(uint64_t val) {
+static uint64_t to_from_be(uint64_t val) {
   if (is_big_endian()) {
     return val;
   } else {
@@ -139,15 +139,18 @@ uint64_t to_from_be(uint64_t val) {
   }
 }
 
-static void alloc_string(TString *tstring, uint64_t len) {
+static void set_tstring_len(TString *tstring, uint64_t len) {
   tstring->len = len;
+}
+
+static void alloc_string(TString *tstring, uint64_t len) {
+  set_tstring_len(tstring, len);
 
   mut.lock();
   tstring->begin = pool.enqueue(len);
   mut.unlock();
 
   if (tstring->begin != nullptr) {
-    tstring->len = len;
     std::lock_guard<std::mutex> g(mut);
     tstring->tracker_index = base_idx + tracker_queue.size();
     tracker_queue.emplace_back(tstring->begin, tstring->begin + len);
@@ -252,7 +255,7 @@ TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
   TString t;
   t = *this;
   t.begin += idx;
-  t.len += len;
+  set_tstring_len(&t, len);
   return t;
 }
 
@@ -332,7 +335,7 @@ TString operator+(const char *ac, const TString &b) noexcept {
 }
 
 std::ostream &operator<<(std::ostream &os, const TString &tstring) noexcept {
-  for (uint64_t i = 0; i < tstring.len; i++)
+  for (uint64_t i = 0; i < tstring.size(); i++)
     os << *(tstring.begin + i);
   return os;
 }
