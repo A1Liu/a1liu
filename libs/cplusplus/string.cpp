@@ -139,6 +139,16 @@ static uint64_t to_from_be(uint64_t val) {
   }
 }
 
+static inline uint8_t be_get_lowest_8(uint64_t val) {
+  if (is_big_endian()) {
+    return val & 0xff;
+  } else {
+    return val & 0xff00000000000000;
+  }
+}
+
+static inline uint64_t intern_length() { return 8 * 3 - 1; }
+
 static void set_tstring_len(TString *tstring, uint64_t len) {
   tstring->len = len;
 }
