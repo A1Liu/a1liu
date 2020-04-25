@@ -1,7 +1,7 @@
 #include "string.h"
+#include <assert.h>
 #include <cstring>
 #include <deque>
-#include <iostream>
 #include <mutex>
 
 // Circular char queue with enqueue(uint64_t) and dequeue(uint64_t)
@@ -13,10 +13,10 @@ struct CharQueue {
       : begin(nullptr), end(nullptr), section_begin(nullptr),
         section_end(nullptr) {}
 
-  // ~CharQueue() noexcept {
-  //   if (begin)
-  //     delete begin;
-  // }
+  ~CharQueue() noexcept {
+    if (begin)
+      delete begin;
+  }
 
   CharQueue(uint64_t len) {
     begin = new char[len];
@@ -92,6 +92,13 @@ struct CharQueue {
   }
 };
 
+typedef union {
+  uint64_t val;
+  struct {
+    uint8_t a, b, c, d, e, f, g, h;
+  };
+} ConvertEndian;
+
 struct StringTracker {
   char *begin, *end;
   uint64_t ref_count;
@@ -106,6 +113,31 @@ uint64_t base_idx = 1;
 std::mutex mut;
 CharQueue pool;
 std::deque<StringTracker> tracker_queue;
+
+inline bool is_big_endian() {
+  ConvertEndian convert = {0x01};
+  return convert.h == 1;
+}
+
+uint64_t be_rshift_8(uint64_t val) {
+  ConvertEndian convert = {val};
+  convert.h = convert.g, convert.g = convert.f, convert.f = convert.e,
+  convert.e = convert.d, convert.d = convert.c, convert.c = convert.b,
+  convert.b = convert.a, convert.a = 0;
+  return convert.val;
+}
+
+uint64_t to_from_be(uint64_t val) {
+  if (is_big_endian()) {
+    return val;
+  } else {
+    ConvertEndian source, dest;
+    source.val = val;
+    dest.a = source.h, dest.b = source.g, dest.c = source.f, dest.d = source.e,
+    dest.e = source.d, dest.f = source.c, dest.g = source.b, dest.h = source.a;
+    return dest.val;
+  }
+}
 
 static void alloc_string(TString *tstring, uint64_t len) {
   mut.lock();
@@ -211,6 +243,13 @@ TString &TString::operator=(const TString &other) noexcept {
 uint64_t TString::size() const noexcept { return end - begin; }
 
 TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
+  if (len == 0) {
+    return TString();
+  }
+
+  assert(idx < size());
+  assert(idx + len <= size());
+
   TString t;
   t = *this;
   t.begin += idx;

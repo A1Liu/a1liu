@@ -1,5 +1,4 @@
 #include "string.cpp"
-#include <assert.h>
 #include <iostream>
 
 std::ostream &operator<<(std::ostream &os, const CharQueue &q) noexcept {

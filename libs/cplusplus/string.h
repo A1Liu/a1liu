@@ -3,8 +3,9 @@
 #include <ostream>
 
 struct TString {
-  char *begin = nullptr, *end = nullptr;
   uint64_t tracker_index = 0;
+  char *begin = nullptr;
+  char *end = nullptr;
 
   static void set_pool_size(uint64_t size) noexcept;
 
