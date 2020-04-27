@@ -24,7 +24,7 @@ struct TString {
   const char *end() const noexcept;
 
   uint64_t size() const noexcept;
-  // TString substr(uint64_t idx, uint64_t len) const noexcept;
+  TString substr(uint64_t idx, uint64_t len) const noexcept;
 };
 
 bool operator==(const TString &, const TString &) noexcept;

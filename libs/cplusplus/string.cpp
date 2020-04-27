@@ -267,22 +267,31 @@ uint64_t TString::size() const noexcept {
   return len_bytes[7] != 0 ? len_bytes[7] : (to_from_be(len_value) >> 8);
 }
 
-// TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
-//   if (len == 0)
-//     return TString();
-//
-//   assert(idx < size());
-//   assert(idx + len <= size());
-//
-//   if (len <= INTERN_LENGTH) {
-//   }
-//
-//   TString t;
-//   t = *this;
-//   t.start += idx;
-//   set_tstring_len(&t, len);
-//   return t;
-// }
+TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
+  if (len == 0)
+    return TString();
+
+  assert(idx < size());
+  assert(idx + len <= size());
+
+  TString t;
+  char *tc;
+  if (len <= INTERN_LENGTH) {
+    t.len_bytes[7] = len;
+    tc = (char *)&t;
+  } else {
+    t.len_value = to_from_be(len << 8);
+    alloc_string(&t, len);
+    tc = t.start;
+  }
+
+  const char *substr_begin = begin() + idx;
+  const char *substr_end = substr_begin + len;
+  for (const char *c = substr_begin; c != substr_end; tc++, c++)
+    *tc = *c;
+
+  return t;
+}
 
 bool operator==(const TString &a, const TString &b) noexcept {
   if (a.len_bytes[7] != b.len_bytes[7])
@@ -307,14 +316,22 @@ bool operator==(const TString &a, const TString &b) noexcept {
   return len == a.size();
 }
 
-bool operator==(const TString &a,
-                const char *bc) noexcept { // TODO fix this for the case that
-                                           // tstring contains null char
+bool operator==(const TString &a, const char *bc) noexcept {
   if (a.len_bytes[7] != 0) {
-    return strncmp((char *)&a, bc, a.len_bytes[7]) == 0;
+    uint8_t len = 0;
+    for (char *ac = (char *)&a;
+         len < a.len_bytes[7] && *ac == *bc && *bc != '\0'; ac++, bc++, len++)
+      ;
+
+    return len == a.len_bytes[7];
   }
 
-  return strncmp(a.start, bc, to_from_be(a.len_value) >> 8) == 0;
+  uint64_t alen = to_from_be(a.len_value) >> 8;
+  uint64_t len = 0;
+  for (char *ac = a.start; len < alen && *ac == *bc && *bc != '\0';
+       ac++, bc++, len++)
+    ;
+  return len == alen;
 }
 
 bool operator==(const char *a, const TString &b) noexcept { return b == a; }
