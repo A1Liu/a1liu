@@ -4,8 +4,11 @@
 
 struct TString {
   uint64_t tracker_index = 0;
-  char *begin = nullptr;
-  uint64_t len = 0;
+  char *start = nullptr;
+  union {
+    uint64_t len_value = 0;
+    uint8_t len_bytes[8];
+  };
 
   static void set_pool_size(uint64_t size) noexcept;
 
@@ -17,13 +20,11 @@ struct TString {
 
   TString &operator=(const TString &) noexcept;
 
-  uint64_t size() const noexcept;
-  TString substr(uint64_t idx, uint64_t len) const noexcept;
+  const char *begin() const noexcept;
+  const char *end() const noexcept;
 
-  char &front() noexcept;
-  const char &front() const noexcept;
-  char &back() noexcept;
-  const char &back() const noexcept;
+  uint64_t size() const noexcept;
+  // TString substr(uint64_t idx, uint64_t len) const noexcept;
 };
 
 bool operator==(const TString &, const TString &) noexcept;

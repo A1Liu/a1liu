@@ -2,7 +2,10 @@
 #include <assert.h>
 #include <cstring>
 #include <deque>
+#include <iostream>
 #include <mutex>
+
+#define INTERN_LENGTH 23
 
 // Circular char queue with enqueue(uint64_t) and dequeue(uint64_t)
 struct CharQueue {
@@ -100,13 +103,13 @@ typedef union {
 } ConvertEndian;
 
 struct StringTracker {
-  char *begin, *end;
+  char *start, *end;
   uint64_t ref_count;
-  StringTracker() noexcept : begin(nullptr), end(nullptr), ref_count(0) {}
-  StringTracker(char *begin_, char *end_) noexcept
-      : begin(begin_), end(end_), ref_count(1) {}
-  StringTracker(char *begin_, char *end_, uint64_t ref_count_) noexcept
-      : begin(begin_), end(end_), ref_count(ref_count_) {}
+  StringTracker() noexcept : start(nullptr), end(nullptr), ref_count(0) {}
+  StringTracker(char *start_, char *end_) noexcept
+      : start(start_), end(end_), ref_count(1) {}
+  StringTracker(char *start_, char *end_, uint64_t ref_count_) noexcept
+      : start(start_), end(end_), ref_count(ref_count_) {}
 };
 
 uint64_t base_idx = 1;
@@ -114,29 +117,8 @@ std::mutex mut;
 CharQueue pool;
 std::deque<StringTracker> tracker_queue;
 
-static inline bool is_big_endian() {
-  ConvertEndian convert = {0x01};
-  return convert.h == 1;
-}
-
-static uint64_t be_lshift_8(uint64_t val) {
-  ConvertEndian convert = {val};
-  convert.a = convert.b, convert.b = convert.c, convert.c = convert.d,
-  convert.d = convert.e, convert.e = convert.f, convert.f = convert.g,
-  convert.g = convert.h, convert.h = 0;
-  return convert.val;
-}
-
-static uint64_t be_rshift_8(uint64_t val) {
-  ConvertEndian convert = {val};
-  convert.h = convert.g, convert.g = convert.f, convert.f = convert.e,
-  convert.e = convert.d, convert.d = convert.c, convert.c = convert.b,
-  convert.b = convert.a, convert.a = 0;
-  return convert.val;
-}
-
 static uint64_t to_from_be(uint64_t val) {
-  if (is_big_endian()) {
+  if (ConvertEndian{0x01}.h == 1) {
     return val;
   } else {
     ConvertEndian source, dest;
@@ -147,52 +129,33 @@ static uint64_t to_from_be(uint64_t val) {
   }
 }
 
-static inline uint8_t be_get_lowest_8(uint64_t val) {
-  if (is_big_endian()) {
-    return val & 0xff;
-  } else {
-    return val & 0xff00000000000000;
-  }
-}
-
-static inline uint64_t intern_length() { return 8 * 3 - 1; }
-
-static inline void set_tstring_len(TString *tstring, uint64_t len) {
-  if (len <= intern_length()) {
-    tstring->len = to_from_be(len);
-  }
-  tstring->len = len;
-}
-
 static void alloc_string(TString *tstring, uint64_t len) {
-  set_tstring_len(tstring, len);
-
   mut.lock();
-  tstring->begin = pool.enqueue(len);
+  tstring->start = pool.enqueue(len);
   mut.unlock();
 
-  if (tstring->begin != nullptr) {
+  if (tstring->start != nullptr) {
     std::lock_guard<std::mutex> g(mut);
     tstring->tracker_index = base_idx + tracker_queue.size();
-    tracker_queue.emplace_back(tstring->begin, tstring->begin + len);
+    tracker_queue.emplace_back(tstring->start, tstring->start + len);
     return;
   }
 
   mut.lock();
-  char *last_begin = pool.eat_up_end();
-  if (last_begin != nullptr) {
-    tracker_queue.emplace_back(last_begin, pool.end, 0);
+  char *last_start = pool.eat_up_end();
+  if (last_start != nullptr) {
+    tracker_queue.emplace_back(last_start, pool.end, 0);
   }
-  tstring->begin = pool.enqueue(len);
+  tstring->start = pool.enqueue(len);
   mut.unlock();
 
-  if (tstring->begin == nullptr) {
-    tstring->begin = new char[len];
+  if (tstring->start == nullptr) {
+    tstring->start = new char[len];
     tstring->tracker_index = -1;
   } else {
     std::lock_guard<std::mutex> g(mut);
     tstring->tracker_index = base_idx + tracker_queue.size();
-    tracker_queue.emplace_back(tstring->begin, tstring->begin + len);
+    tracker_queue.emplace_back(tstring->start, tstring->start + len);
     return;
   }
 }
@@ -202,32 +165,56 @@ void TString::set_pool_size(uint64_t size) noexcept {
   new (&pool) CharQueue(size);
 }
 
-TString::TString() noexcept : begin(nullptr), len(0), tracker_index(0) {}
+TString::TString() noexcept : start(nullptr), len_value(0), tracker_index(0) {}
 
 TString::TString(const char *s) noexcept {
-  uint64_t len = strlen(s);
-  alloc_string(this, len);
+  if (s == nullptr) {
+    len_value = tracker_index = 0;
+    start = nullptr;
+    return;
+  }
 
-  for (char *i = begin; *s != '\0'; i++, s++)
-    *i = *s;
+  uint64_t len = strlen(s);
+  if (len == 0) {
+    return;
+  }
+
+  if (len <= INTERN_LENGTH) {
+    len_bytes[7] = len;
+    for (char *i = (char *)this; *s != '\0'; i++, s++)
+      *i = *s;
+  } else {
+    len_value = to_from_be(len << 8);
+    alloc_string(this, len);
+    for (char *i = start; *s != '\0'; i++, s++)
+      *i = *s;
+  }
 }
 
 TString::TString(TString &&other) noexcept
-    : begin(other.begin), len(other.len), tracker_index(other.tracker_index) {
+    : start(other.start), len_value(other.len_value),
+      tracker_index(other.tracker_index) {
   other.tracker_index = 0;
-  other.begin = nullptr;
-  other.len = 0;
+  other.start = nullptr;
+  other.len_value = 0;
 }
 
 TString::TString(const TString &other) noexcept
-    : begin(other.begin), len(other.len), tracker_index(other.tracker_index) {
-  std::lock_guard<std::mutex> g(mut);
-  tracker_queue[other.tracker_index - base_idx].ref_count++;
+    : start(other.start), len_value(other.len_value),
+      tracker_index(other.tracker_index) {
+  if (other.len_bytes[7] > INTERN_LENGTH) {
+    std::lock_guard<std::mutex> g(mut);
+    tracker_queue[other.tracker_index - base_idx].ref_count++;
+  }
 }
 
 TString::~TString() noexcept {
+  if (len_value == 0 || len_bytes[7] != 0) {
+    return;
+  }
+
   if (tracker_index == -1) {
-    delete begin;
+    delete start;
   } else if (tracker_index != 0) {
     std::lock_guard<std::mutex> g(mut);
     tracker_queue[tracker_index - base_idx].ref_count--;
@@ -235,7 +222,7 @@ TString::~TString() noexcept {
          tracker_queue.size() > 0 &&
          (tracker = tracker_queue.front()).ref_count == 0;
          tracker_queue.pop_front()) {
-      pool.dequeue(tracker.end - tracker.begin);
+      pool.dequeue(tracker.end - tracker.start);
       base_idx++;
     }
   }
@@ -243,65 +230,91 @@ TString::~TString() noexcept {
 
 TString &TString::operator=(const TString &other) noexcept {
   this->~TString();
-  if (other.tracker_index == -1) {
+
+  if (other.len_bytes[7] == 0 && other.tracker_index == -1) {
     alloc_string(this, other.size());
+    uint64_t len = to_from_be(len_value) >> 8;
     for (uint64_t i = 0; i < len; i++)
-      *(this->begin + i) = *(other.begin + i);
+      *(this->start + i) = *(other.start + i);
 
     return *this;
   }
 
-  begin = other.begin;
-  len = other.len;
+  start = other.start;
+  len_value = other.len_value;
   tracker_index = other.tracker_index;
-  if (tracker_index == 0) {
+  if (other.len_bytes[7] != 0 || tracker_index == 0)
     return *this;
-  }
 
   std::lock_guard<std::mutex> g(mut);
   tracker_queue[tracker_index - base_idx].ref_count++;
   return *this;
 }
 
-uint64_t TString::size() const noexcept { return len; }
-
-TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
-  if (len == 0) {
-    return TString();
-  }
-
-  assert(idx < size());
-  assert(idx + len <= size());
-
-  TString t;
-  t = *this;
-  t.begin += idx;
-  set_tstring_len(&t, len);
-  return t;
+const char *TString::begin() const noexcept {
+  if (len_bytes[7] != 0)
+    return (char *)this;
+  return start;
 }
 
-char &TString::front() noexcept { return *begin; }
-const char &TString::front() const noexcept { return *begin; }
-char &TString::back() noexcept { return *(begin + len - 1); }
-const char &TString::back() const noexcept { return *(begin + len - 1); }
+const char *TString::end() const noexcept {
+  if (len_bytes[7] != 0)
+    return ((char *)this) + len_bytes[7];
+  return start + (to_from_be(len_value) >> 8);
+}
+
+uint64_t TString::size() const noexcept {
+  return len_bytes[7] != 0 ? len_bytes[7] : (to_from_be(len_value) >> 8);
+}
+
+// TString TString::substr(uint64_t idx, uint64_t len) const noexcept {
+//   if (len == 0)
+//     return TString();
+//
+//   assert(idx < size());
+//   assert(idx + len <= size());
+//
+//   if (len <= INTERN_LENGTH) {
+//   }
+//
+//   TString t;
+//   t = *this;
+//   t.start += idx;
+//   set_tstring_len(&t, len);
+//   return t;
+// }
 
 bool operator==(const TString &a, const TString &b) noexcept {
-  if (a.begin == b.begin && a.len == b.len)
-    return true;
-
-  if (a.size() != b.size())
+  if (a.len_bytes[7] != b.len_bytes[7])
     return false;
 
-  return strncmp(a.begin, b.begin, a.size()) == 0;
+  if (a.len_bytes[7] != 0) {
+    uint8_t len = 0;
+    for (char *ac = (char *)&a, *bc = (char *)&b;
+         len < a.len_bytes[7] && *ac == *bc; ac++, bc++, len++)
+      ;
+
+    return len == a.len_bytes[7];
+  }
+
+  if (a.start == b.start)
+    return a.len_value == b.len_value;
+
+  uint64_t len = 0;
+  for (char *ac = (char *)&a, *bc = (char *)&b; len < a.size() && *ac == *bc;
+       ac++, bc++, len++)
+    ;
+  return len == a.size();
 }
 
-bool operator==(const TString &a, const char *bc) noexcept {
-  if (bc == nullptr && a.begin == nullptr)
-    return true;
-  if (bc == nullptr)
-    return false;
+bool operator==(const TString &a,
+                const char *bc) noexcept { // TODO fix this for the case that
+                                           // tstring contains null char
+  if (a.len_bytes[7] != 0) {
+    return strncmp((char *)&a, bc, a.len_bytes[7]) == 0;
+  }
 
-  return strncmp(a.begin, bc, a.size()) == 0;
+  return strncmp(a.start, bc, to_from_be(a.len_value) >> 8) == 0;
 }
 
 bool operator==(const char *a, const TString &b) noexcept { return b == a; }
@@ -315,48 +328,78 @@ bool operator!=(const char *a, const TString &b) noexcept { return !(a == b); }
 TString operator+(const TString &a, const TString &b) noexcept {
   TString t;
   uint64_t len = a.size() + b.size();
-  alloc_string(&t, len);
+  if (len == 0) {
+    return t;
+  }
 
-  strncpy(t.begin, a.begin, a.size());
-  strncpy(t.begin + a.size(), b.begin, b.size());
-
+  if (len <= INTERN_LENGTH) {
+    t.len_bytes[7] = len;
+    char *tc = (char *)&t;
+    for (const char *ac = a.begin(); ac != a.end(); tc++, ac++)
+      *tc = *ac;
+    for (const char *bc = b.begin(); bc != b.end(); tc++, bc++)
+      *tc = *bc;
+  } else {
+    t.len_value = to_from_be(len << 8);
+    alloc_string(&t, len);
+    char *tc = (char *)&t;
+    for (const char *ac = a.begin(); ac != a.end(); tc++, ac++)
+      *tc = *ac;
+    for (const char *bc = b.begin(); bc != b.end(); tc++, bc++)
+      *tc = *bc;
+  }
   return t;
 }
 
 TString operator+(const TString &a, const char *bc) noexcept {
   TString t;
-  if (bc == nullptr) {
-    t = a;
-    return t;
-  }
 
   uint64_t bc_size = strlen(bc);
-  alloc_string(&t, a.size() + bc_size);
+  uint64_t len = a.size() + bc_size;
 
-  strncpy(t.begin, a.begin, a.size());
-  strncpy(t.begin + a.size(), bc, bc_size);
+  char *tc;
+  if (len <= INTERN_LENGTH) {
+    t.len_bytes[7] = len;
+    tc = (char *)&t;
+  } else {
+    t.len_value = to_from_be(len << 8);
+    alloc_string(&t, a.size() + bc_size);
+    tc = t.start;
+  }
 
+  for (const char *ac = a.begin(); ac != a.end(); tc++, ac++)
+    *tc = *ac;
+  for (; *bc != '\0'; tc++, bc++)
+    *tc = *bc;
   return t;
 }
 
 TString operator+(const char *ac, const TString &b) noexcept {
   TString t;
-  if (ac == nullptr) {
-    t = b;
-    return t;
-  }
 
   uint64_t ac_size = strlen(ac);
-  alloc_string(&t, b.size() + ac_size);
+  uint64_t len = ac_size + b.size();
 
-  strncpy(t.begin, ac, ac_size);
-  strncpy(t.begin + ac_size, b.begin, b.size());
+  char *tc;
+  if (len <= INTERN_LENGTH) {
+    t.len_bytes[7] = len;
+    tc = (char *)&t;
+  } else {
+    t.len_value = to_from_be(len << 8);
+    alloc_string(&t, len);
+    tc = t.start;
+  }
 
+  for (; *ac != '\0'; tc++, ac++)
+    *tc = *ac;
+  for (const char *bc = b.begin(); bc != b.end(); tc++, bc++)
+    *tc = *bc;
   return t;
 }
 
 std::ostream &operator<<(std::ostream &os, const TString &tstring) noexcept {
-  for (uint64_t i = 0; i < tstring.size(); i++)
-    os << *(tstring.begin + i);
+  for (const char *tc = tstring.begin(); tc != tstring.end(); tc++) {
+    os << *tc;
+  }
   return os;
 }
