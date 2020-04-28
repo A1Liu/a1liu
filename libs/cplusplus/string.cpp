@@ -257,10 +257,38 @@ const char *TString::begin() const noexcept {
   return start;
 }
 
+char *TString::begin() noexcept {
+  if (len_bytes[7] != 0)
+    return (char *)this;
+  return start;
+}
+
+char *TString::end() noexcept {
+  if (len_bytes[7] != 0)
+    return ((char *)this) + len_bytes[7];
+  return start + (to_from_be(len_value) >> 8);
+}
+
 const char *TString::end() const noexcept {
   if (len_bytes[7] != 0)
     return ((char *)this) + len_bytes[7];
   return start + (to_from_be(len_value) >> 8);
+}
+
+const char &TString::operator[](uint64_t idx) const noexcept {
+  return *(begin() + idx);
+}
+char &TString::operator[](uint64_t idx) noexcept { return *(begin() + idx); }
+
+const char &TString::at(uint64_t idx) const noexcept {
+  const char *c = begin() + idx;
+  assert(c < end());
+  return *c;
+}
+char &TString::at(uint64_t idx) noexcept {
+  char *c = begin() + idx;
+  assert(c < end());
+  return *c;
 }
 
 uint64_t TString::size() const noexcept {

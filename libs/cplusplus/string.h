@@ -21,7 +21,15 @@ struct TString {
   TString &operator=(const TString &) noexcept;
 
   const char *begin() const noexcept;
+  char *begin() noexcept;
   const char *end() const noexcept;
+  char *end() noexcept;
+
+  const char &operator[](uint64_t idx) const noexcept;
+  char &operator[](uint64_t idx) noexcept;
+
+  const char &at(uint64_t idx) const noexcept;
+  char &at(uint64_t idx) noexcept;
 
   uint64_t size() const noexcept;
   TString substr(uint64_t idx, uint64_t len) const noexcept;
