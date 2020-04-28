@@ -317,21 +317,20 @@ bool operator==(const TString &a, const TString &b) noexcept {
 }
 
 bool operator==(const TString &a, const char *bc) noexcept {
+  char *ac;
+  uint64_t target_len = 0;
   if (a.len_bytes[7] != 0) {
-    uint8_t len = 0;
-    for (char *ac = (char *)&a;
-         len < a.len_bytes[7] && *ac == *bc && *bc != '\0'; ac++, bc++, len++)
-      ;
-
-    return len == a.len_bytes[7];
+    ac = (char *)&a;
+    target_len = a.len_bytes[7];
+  } else {
+    ac = a.start;
+    target_len = to_from_be(a.len_value) >> 8;
   }
 
-  uint64_t alen = to_from_be(a.len_value) >> 8;
   uint64_t len = 0;
-  for (char *ac = a.start; len < alen && *ac == *bc && *bc != '\0';
-       ac++, bc++, len++)
+  for (; len < target_len && *ac == *bc && *bc != '\0'; ac++, bc++, len++)
     ;
-  return len == alen;
+  return len == target_len;
 }
 
 bool operator==(const char *a, const TString &b) noexcept { return b == a; }
