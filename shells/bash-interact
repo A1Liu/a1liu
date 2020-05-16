@@ -3,8 +3,8 @@
 . "${SHELL_DIR}/git-completions"
 
 HISTCONTROL=ignoreboth:erasedups
-HISTSIZE=1000
-HISTFILESIZE=1000
+HISTSIZE=10000
+HISTFILESIZE=10000
 
 # ANSI Colors
 Y="\033[0;33m"
