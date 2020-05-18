@@ -1,6 +1,3 @@
-"" Initialize global variables
-" https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
-" https://github.com/tonsky/FiraCode
 
 " Print debugging information
 function! DebugPrint(message)
@@ -11,6 +8,9 @@ function! DebugPrint(message)
   return 0
 endfunction
 
+if $VIM_DEBUG != ''
+  let g:autoformat_verbosemode=1
+endif
 call DebugPrint('Debug mode active')
 
 " Setting g:os flag
@@ -37,6 +37,7 @@ function! PathJoin(...)
   endif
 endfunction
 
+" https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 if g:os ==? 'Windows' && has('nvim') " Hack because neovim doesn't work
   let g:vim_home_path = 'C:\Users\Alyer\code\config\programs\neovim'

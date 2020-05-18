@@ -79,24 +79,30 @@ Plug 'Chiel92/vim-autoformat'
 let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
 let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\"'"
 let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
+let g:formatdef_swiftformat = "'swiftformat --quiet'"
 let g:formatters_java = ['clangformat']
 let g:formatters_javascript = ['clangformat']
 let g:formatters_arduino = ['clangformat']
+let g:formatters_swift = ['swiftformat']
 augroup AutoFormatting
   autocmd!
   autocmd FileType java,c,cpp,python,go,javascript,arduino let b:autoformat_enabled = 1
+  autocmd FileType swift let b:autoformat_enabled = 1
+        \ | let b:autoformat_remove_trailing_spaces = 0
+        \ | let b:autoformat_retab = 0
   autocmd FileType vim let b:autoformat_enabled = 1
   autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
   autocmd FileType markdown,tex let b:autoformat_autoindent = 0
-        \ | let g:autoformat_remove_trailing_spaces = 0
-        \ | let g:autoformat_retab = 0
+        \ | let b:autoformat_remove_trailing_spaces = 0
+        \ | let b:autoformat_retab = 0
 augroup END
 
 " Language server support because I have to I guess
 Plug 'autozimu/LanguageClient-neovim'
 let g:LanguageClient_serverCommands = {
-      \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-      \ 'go'  : ['gopls'],
+      \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+      \ 'go'   : ['gopls'],
+      \ 'swift': ['xcrun', 'sourcekit-ls'],
       \ }
 command! LCRename :call LanguageClient#textDocument_rename()
 command! LCHover :call LanguageClient#textDocument_hover()
