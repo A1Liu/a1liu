@@ -15,15 +15,14 @@ call DebugPrint('Debug mode active')
 
 " Setting g:os flag
 if !exists('g:os')
-  if has('win64') || has('win32') || has('win16')
+  let g:os = substitute(system('uname'), '\n', '', '')
+  if has('win64') || has('win32') || has('win16') || g:os =~ "^MSYS_NT\.\+$"
     let g:os = 'Windows'
     " https://stackoverflow.com/questions/94382/vim-with-powershell
     set shell=cmd.exe
     " set shellcmdflag=/c\ powershell.exe\ -NoLogo\ -NoProfile\ -NonInteractive\ -ExecutionPolicy\ RemoteSigned
     " set shellpipe=|
     " set shellredir=>
-  else
-    let g:os = substitute(system('uname'), '\n', '', '')
   endif
 endif
 call DebugPrint('OS is: ' . g:os)
