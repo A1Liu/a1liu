@@ -1,7 +1,7 @@
 
 " Print debugging information
 function! DebugPrint(message)
-  if $VIM_DEBUG != ''
+  if $VIM_DEBUG == '1'
     echo 'DEBUG:' a:message
     return 1
   endif
