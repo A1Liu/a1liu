@@ -16,7 +16,7 @@ call DebugPrint('Debug mode active')
 " Setting g:os flag
 if !exists('g:os')
   let g:os = substitute(system('uname'), '\n', '', '')
-  if has('win64') || has('win32') || has('win16') || g:os =~ "^MSYS_NT\.\+$"
+  if has('win64') || has('win32') || has('win16') " || g:os =~ '^MSYS_NT\.\+$'
     let g:os = 'Windows'
     " https://stackoverflow.com/questions/94382/vim-with-powershell
     set shell=cmd.exe
