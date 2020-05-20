@@ -18,7 +18,7 @@ RE="\001$R\002"
 GE="\001$G\002"
 
 branch() {
-  git branch 2>/dev/null | grep '^*' | colrm 1 1 2>"$CFG_DIR/local/null" || echo -n ''
+  git branch 2>/dev/null | grep '^*' | sed 's/^\*\(.*\)$/\1/'
 }
 
 parse_git_dirty() {
