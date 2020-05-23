@@ -229,10 +229,11 @@ endfunction
 command! Def :call LanguageClient#textDocument_definition()
 
 
+"" Netrw
+let g:netrw_banner = 0
 
 " Folders n stuff
 let g:netrw_sort_sequence='[\/]$,\<core\%(\.\d\+\)\=\>,'
-
 " Docs
 let g:netrw_sort_sequence.= 'README,LICENSE,*.md$,*.markdown$,'
 " C and C++ Files
