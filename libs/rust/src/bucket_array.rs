@@ -20,7 +20,8 @@ pub struct BucketArray<'a> {
 
 impl<'a> BucketArray<'a> {
     pub fn new() -> Self {
-        let begin = unsafe { alloc(Layout::from_size_align_unchecked(BUCKET_SIZE, 8)) };
+        let begin =
+            unsafe { alloc(Layout::from_size_align(BUCKET_SIZE, 8).expect("this is an error")) };
         return Self {
             buckets: vec![Bucket { begin, end: begin }],
             unused: PhantomData,
