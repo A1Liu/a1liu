@@ -81,7 +81,7 @@ let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --
 let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
 let g:formatdef_swiftformat = "'swiftformat --quiet'"
 let g:formatters_java = ['clangformat']
-let g:formatters_javascript = ['clangformat']
+let g:formatters_javascript = ['prettier', 'clangformat']
 let g:formatters_arduino = ['clangformat']
 let g:formatters_swift = ['swiftformat']
 augroup AutoFormatting
