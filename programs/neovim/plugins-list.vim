@@ -86,7 +86,7 @@ let g:formatters_arduino = ['clangformat']
 let g:formatters_swift = ['swiftformat']
 augroup AutoFormatting
   autocmd!
-  autocmd FileType java,c,cpp,python,go,javascript,arduino let b:autoformat_enabled = 1
+  autocmd FileType java,c,cpp,python,go,arduino let b:autoformat_enabled = 1
   autocmd FileType swift let b:autoformat_enabled = 1
         \ | let b:autoformat_remove_trailing_spaces = 0
         \ | let b:autoformat_retab = 0
