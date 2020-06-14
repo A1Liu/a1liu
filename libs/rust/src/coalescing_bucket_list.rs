@@ -4,11 +4,11 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use std::{cmp, mem, ptr, slice, str};
 
-const INITIAL_BUCKET_SIZE: usize = 2048;
+const INITIAL_BUCKET_SIZE: usize = 2048 - mem::size_of::<BucketListInner>();
 
 #[inline]
 pub fn grow_array(len: usize) -> usize {
-    return (1.5 * len as f32) as usize;
+    return len / 2 + len;
 }
 
 #[repr(C)]
@@ -235,8 +235,6 @@ fn test_bucket_list() {
     bucket_list.add_array(vec![12, 12, 31, 4123, 123, 5, 14, 5, 134, 5]);
     bucket_list.add_array(vec![12, 12, 31, 4123, 123, 5, 14, 5, 134, 5]);
     bucket_list.add_array(vec![12, 12, 31, 4123, 123, 5, 14, 5, 134, 5]);
-
-    vec.push(1);
 
     CoalescingBucketList::dealloc(bucket_list);
 }
