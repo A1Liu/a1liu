@@ -4,7 +4,11 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use std::{cmp, mem, ptr, slice, str};
 
+#[cfg(test)]
 const BUCKET_SIZE: usize = 128;
+
+#[cfg(not(test))]
+const BUCKET_SIZE: usize = 1024 * 1024;
 
 #[repr(C)]
 pub struct BucketListInner {
