@@ -8,6 +8,9 @@ const INITIAL_BUCKET_SIZE: usize = 2048 - mem::size_of::<BucketListInner>();
 
 #[inline]
 pub fn grow_array(len: usize) -> usize {
+    if len > usize::MAX / 3 * 2 {
+        panic!("length would probably overflow here");
+    }
     return len / 2 + len;
 }
 
