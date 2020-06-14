@@ -193,7 +193,7 @@ impl<'a> BucketList<'a> {
 #[test]
 fn test_bucket_list() {
     let bucket_list = BucketList::new();
-    let vec = bucket_list.add(Vec::<u64>::new());
+    let vec = bucket_list.add(Vec::<usize>::new());
     let num = bucket_list.add(12);
     vec.push(*num);
     bucket_list.add_array(vec![12, 12, 31, 4123, 123, 5, 14, 5, 134, 5]);
