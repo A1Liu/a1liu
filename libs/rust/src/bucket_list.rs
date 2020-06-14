@@ -1,4 +1,4 @@
-use std::alloc::{alloc, Layout};
+use std::alloc::{alloc, dealloc, Layout};
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicPtr, Ordering};
@@ -27,7 +27,6 @@ pub struct BucketList<'a> {
 impl BucketListInner {
     unsafe fn bump_size_align(bump: *const u8, end: *const u8, layout: Layout) -> Result<Bump, ()> {
         let required_offset = bump.align_offset(layout.align());
-        println!("required offset is: {}", required_offset);
         if required_offset == usize::MAX {
             return Err(());
         }
@@ -35,7 +34,6 @@ impl BucketListInner {
         let bump = bump.add(required_offset);
         let end_alloc = bump.add(layout.size());
         if end_alloc as usize > end as usize {
-            println!("bump failed: need to allocate new buffer");
             return Err(());
         }
 
@@ -67,8 +65,6 @@ impl BucketListInner {
         if !next.is_null() {
             return (&*next).alloc(layout);
         }
-
-        println!("allocating new buffer");
 
         let bucket_align = cmp::max(layout.align(), mem::align_of::<BucketListInner>());
         let inner_size = cmp::max(bucket_align, mem::size_of::<BucketListInner>());
@@ -168,6 +164,26 @@ impl<'a> BucketList<'a> {
 
         return unsafe { mem::transmute(buckets) };
     }
+
+    pub fn dealloc(buckets: &'a mut BucketList<'a>) {
+        let mut bucket = &mut buckets.data as *mut BucketListInner;
+
+        while !bucket.is_null() {
+            let current = unsafe { &mut *bucket };
+            let allocated_size = current.end.load(Ordering::SeqCst) as usize
+                - &mut current.array_begin as *mut () as usize;
+            let allocated_size = cmp::max(allocated_size, BUCKET_SIZE);
+            let allocated_size = allocated_size + mem::size_of::<BucketListInner>();
+            let next_bucket = current.next.load(Ordering::SeqCst);
+            unsafe {
+                dealloc(
+                    bucket as *mut u8,
+                    Layout::from_size_align_unchecked(allocated_size, 1),
+                );
+            }
+            bucket = next_bucket;
+        }
+    }
 }
 
 #[test]
@@ -187,5 +203,6 @@ fn test_bucket_list() {
     bucket_list.add_array(vec![12, 12, 31, 4123, 123, 5, 14, 5, 134, 5]);
 
     vec.push(1);
-    BucketList::clear(bucket_list);
+
+    BucketList::dealloc(bucket_list);
 }
