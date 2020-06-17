@@ -11,6 +11,10 @@ type flagString string
 type flagInt int
 type flagBool bool
 
+type FlagParser struct {
+	Value FlagValue
+}
+
 type FlagValue interface {
 	ParseFlag(string) error
 }
@@ -42,19 +46,19 @@ func (b *flagBool) ParseFlag(value string) error {
 	return fmt.Errorf("value '%v' could not be coerced to a boolean", value)
 }
 
-func ArgParse(parser interface{}, args ...string) error {
+func ParseArgParser(parser interface{}) (map[string]FlagParser, error) {
 	ptrValue := reflect.ValueOf(parser)
 	if ptrValue.Kind() != reflect.Ptr {
-		return fmt.Errorf("given type '%v' is not a pointer", ptrValue.Kind())
+		return nil, fmt.Errorf("given type '%v' is not a pointer", ptrValue.Kind())
 	}
 
 	value := reflect.Indirect(ptrValue)
 	if value.Kind() != reflect.Struct {
-		return fmt.Errorf("given type '%v' is not a struct", value.Kind())
+		return nil, fmt.Errorf("given type '%v' is not a struct", value.Kind())
 	}
 
 	valueType := value.Type()
-	flags := make(map[string]FlagValue)
+	flags := make(map[string]FlagParser)
 	fieldCount := valueType.NumField()
 	for i := 0; i < fieldCount; i++ {
 		fieldName := valueType.Field(i).Name
@@ -62,25 +66,34 @@ func ArgParse(parser interface{}, args ...string) error {
 
 		switch fieldPtr.(type) {
 		case **string:
-			flags[fieldName] = (*flagString)(fieldPtr.(*string))
+			flags[fieldName] = FlagParser{(*flagString)(fieldPtr.(*string))}
 			break
 		case *string:
-			flags[fieldName] = (*flagString)(fieldPtr.(*string))
+			flags[fieldName] = FlagParser{(*flagString)(fieldPtr.(*string))}
 			break
 		case *int:
-			flags[fieldName] = (*flagInt)(fieldPtr.(*int))
+			flags[fieldName] = FlagParser{(*flagInt)(fieldPtr.(*int))}
 			break
 		case *bool:
-			flags[fieldName] = (*flagBool)(fieldPtr.(*bool))
+			flags[fieldName] = FlagParser{(*flagBool)(fieldPtr.(*bool))}
 			break
 		default:
 			fieldPtrTyped, ok := fieldPtr.(FlagValue)
 			if !ok {
-				return fmt.Errorf("type '%v' doesn't implement FlagValue",
+				return nil, fmt.Errorf("type '%v' doesn't implement FlagValue",
 					valueType.Field(i).Type)
 			}
-			flags[fieldName] = fieldPtrTyped
+			flags[fieldName] = FlagParser{fieldPtrTyped}
 		}
+	}
+
+	return flags, nil
+}
+
+func ArgParse(parser interface{}, args ...string) error {
+	flagParsers, err := ParseArgParser(parser)
+	if err != nil {
+		return err
 	}
 
 	idx := 0
@@ -92,7 +105,7 @@ func ArgParse(parser interface{}, args ...string) error {
 		}
 
 		if strings.HasPrefix(arg, "-") {
-			setter, ok := flags[arg[1:]]
+			setter, ok := flagParsers[arg[1:]]
 			if !ok {
 				return fmt.Errorf("flag '%v' not recognized", arg)
 			}
@@ -103,12 +116,12 @@ func ArgParse(parser interface{}, args ...string) error {
 			}
 
 			value := args[idx]
-			err := setter.ParseFlag(value)
+			err := setter.Value.ParseFlag(value)
 			if err != nil {
 				return err
 			}
 		}
 
-		return nil
 	}
+	return nil
 }
