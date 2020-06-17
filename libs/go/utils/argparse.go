@@ -53,8 +53,8 @@ func ParseArgParser(parser interface{}) (map[string]FlagParser, error) {
 
 		switch fieldPtr.(type) {
 		case **string:
-			flagStringNull := FlagStringNull{fieldPtr.(**string)}
-			flags[fieldName] = FlagParser{flagStringNull}
+			flagString := FlagStringNull{fieldPtr.(**string)}
+			flags[fieldName] = FlagParser{flagString}
 			break
 		case *string:
 			flags[fieldName] = FlagParser{(*FlagString)(fieldPtr.(*string))}
