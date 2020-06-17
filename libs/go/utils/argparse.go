@@ -2,14 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
 )
-
-type flagString string
-type flagInt int
-type flagBool bool
 
 type FlagParser struct {
 	Value FlagValue
@@ -19,33 +16,23 @@ type FlagValue interface {
 	ParseFlag(string) error
 }
 
-func (b *flagString) ParseFlag(value string) error {
-	*b = flagString(value)
-	return nil
+type FlagString string
+type FlagInt int
+type FlagBool bool
+type FlagStructNull struct {
+	Value **interface{}
+}
+type FlagStringNull struct {
+	Value **string
+}
+type FlagIntNull struct {
+	Value **int
+}
+type FlagBoolNull struct {
+	Value **bool
 }
 
-func (b *flagInt) ParseFlag(value string) error {
-	i, err := strconv.Atoi(value)
-	if err != nil {
-		return err
-	}
-
-	*b = flagInt(i)
-	return nil
-}
-
-func (b *flagBool) ParseFlag(value string) error {
-	value = strings.ToLower(value)
-	if value == "true" {
-		*b = flagBool(true)
-		return nil
-	} else if value == "false" {
-		*b = flagBool(false)
-		return nil
-	}
-	return fmt.Errorf("value '%v' could not be coerced to a boolean", value)
-}
-
+// Creates an argparser from a given struct
 func ParseArgParser(parser interface{}) (map[string]FlagParser, error) {
 	ptrValue := reflect.ValueOf(parser)
 	if ptrValue.Kind() != reflect.Ptr {
@@ -66,16 +53,17 @@ func ParseArgParser(parser interface{}) (map[string]FlagParser, error) {
 
 		switch fieldPtr.(type) {
 		case **string:
-			flags[fieldName] = FlagParser{(*flagString)(fieldPtr.(*string))}
+			flagStringNull := FlagStringNull{fieldPtr.(**string)}
+			flags[fieldName] = FlagParser{flagStringNull}
 			break
 		case *string:
-			flags[fieldName] = FlagParser{(*flagString)(fieldPtr.(*string))}
+			flags[fieldName] = FlagParser{(*FlagString)(fieldPtr.(*string))}
 			break
 		case *int:
-			flags[fieldName] = FlagParser{(*flagInt)(fieldPtr.(*int))}
+			flags[fieldName] = FlagParser{(*FlagInt)(fieldPtr.(*int))}
 			break
 		case *bool:
-			flags[fieldName] = FlagParser{(*flagBool)(fieldPtr.(*bool))}
+			flags[fieldName] = FlagParser{(*FlagBool)(fieldPtr.(*bool))}
 			break
 		default:
 			fieldPtrTyped, ok := fieldPtr.(FlagValue)
@@ -90,6 +78,11 @@ func ParseArgParser(parser interface{}) (map[string]FlagParser, error) {
 	return flags, nil
 }
 
+func ArgParseGlobal(parser interface{}) error {
+	return ArgParse(parser, os.Args...)
+}
+
+// Parses the given arguments using the given struct
 func ArgParse(parser interface{}, args ...string) error {
 	flagParsers, err := ParseArgParser(parser)
 	if err != nil {
@@ -124,4 +117,36 @@ func ArgParse(parser interface{}, args ...string) error {
 
 	}
 	return nil
+}
+
+func (s FlagStringNull) ParseFlag(value string) error {
+	*s.Value = &value
+	return nil
+}
+
+func (b *FlagString) ParseFlag(value string) error {
+	*b = FlagString(value)
+	return nil
+}
+
+func (b *FlagInt) ParseFlag(value string) error {
+	i, err := strconv.Atoi(value)
+	if err != nil {
+		return err
+	}
+
+	*b = FlagInt(i)
+	return nil
+}
+
+func (b *FlagBool) ParseFlag(value string) error {
+	value = strings.ToLower(value)
+	if value == "true" {
+		*b = FlagBool(true)
+		return nil
+	} else if value == "false" {
+		*b = FlagBool(false)
+		return nil
+	}
+	return fmt.Errorf("value '%v' could not be coerced to a boolean", value)
 }
