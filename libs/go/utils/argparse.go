@@ -211,8 +211,6 @@ func ArgParse(parser interface{}, args ...string) error {
 				return fmt.Errorf("flag '%v' not recognized", arg)
 			}
 
-			idx++
-
 			if !setter.RequiresValue {
 				err := setter.Value.ParseFlag(flag)
 				if err != nil {
@@ -221,6 +219,7 @@ func ArgParse(parser interface{}, args ...string) error {
 				continue
 			}
 
+			idx++
 			if idx == len(args) {
 				return fmt.Errorf("flag '%v' requires a value", arg)
 			}
