@@ -61,6 +61,9 @@ func ArgParse(parser interface{}, args ...string) error {
 		fieldPtr := value.Field(i).Addr().Interface()
 
 		switch fieldPtr.(type) {
+		case **string:
+			flags[fieldName] = (*flagString)(fieldPtr.(*string))
+			break
 		case *string:
 			flags[fieldName] = (*flagString)(fieldPtr.(*string))
 			break
@@ -105,7 +108,7 @@ func ArgParse(parser interface{}, args ...string) error {
 				return err
 			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
