@@ -2,7 +2,7 @@ extern crate alloc;
 
 use alloc::alloc::{alloc, dealloc, realloc};
 use core::alloc::Layout;
-use core::ops::{Deref, DerefMut};
+use core::ops::*;
 use core::{mem, ptr, slice};
 
 pub const INITIAL_SIZE: usize = 16;
@@ -81,5 +81,31 @@ impl<T> Deref for Vec<T> {
 
     fn deref(&self) -> &[T] {
         unsafe { slice::from_raw_parts(self.begin, self.end) }
+    }
+}
+
+impl<T> Index<usize> for Vec<T> {
+    type Output = T;
+    fn index(&self, idx: usize) -> &T {
+        return &self.deref()[idx];
+    }
+}
+
+impl<T> IndexMut<usize> for Vec<T> {
+    fn index_mut(&mut self, idx: usize) -> &mut T {
+        return &mut self.deref_mut()[idx];
+    }
+}
+
+impl<T> Index<Range<usize>> for Vec<T> {
+    type Output = [T];
+    fn index(&self, idx: Range<usize>) -> &[T] {
+        return &self.deref()[idx];
+    }
+}
+
+impl<T> IndexMut<Range<usize>> for Vec<T> {
+    fn index_mut(&mut self, idx: Range<usize>) -> &mut [T] {
+        return &mut self.deref_mut()[idx];
     }
 }
