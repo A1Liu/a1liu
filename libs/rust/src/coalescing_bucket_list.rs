@@ -150,18 +150,16 @@ impl<'a> CoalescingBucketList<'a> {
     where
         T: Clone,
     {
-        unsafe {
-            let len = slice.len();
-            let layout =
-                Layout::from_size_align_unchecked(mem::size_of::<T>() * len, mem::align_of::<T>());
-            let block = self.data.alloc(layout) as *mut T;
-            let mut location = block;
-            for t in slice {
-                ptr::write(location, t.clone());
-                location = location.add(1);
-            }
-            return slice::from_raw_parts_mut(block, len);
+        let len = slice.len();
+        let (size, align) = (mem::size_of::<T>(), mem::align_of::<T>());
+        let layout = unsafe { Layout::from_size_align_unchecked(size * len, align) };
+        let block = unsafe { self.data.alloc(layout) as *mut T };
+        let mut location = block;
+        for t in slice {
+            unsafe { ptr::write(location, t.clone()) };
+            location = unsafe { location.add(1) };
         }
+        return unsafe { slice::from_raw_parts_mut(block, len) };
     }
 
     pub fn add_str(&'a self, values: &str) -> &'a mut str {
