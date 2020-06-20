@@ -7,8 +7,9 @@
 static AllocVec alloc_info = {NULL, 0, 0};
 
 void *alloc(size_t size, char *file, unsigned int line) {
-  fprintf(stderr, "%s:%u: allocating block of size %lu\n", file, line, size);
+  fprintf(stderr, "%s:%u: allocating block of size %lu...", file, line, size);
   char *allocation = malloc(size);
+  fprintf(stderr, "got 0x%lx\n", (size_t)allocation);
 
   if (alloc_info.begin == NULL) {
     alloc_info.begin = malloc(sizeof(AllocInfo) * 16);
@@ -33,7 +34,7 @@ void *alloc(size_t size, char *file, unsigned int line) {
 }
 
 void dealloc(void *ptr, char *file, unsigned int line) {
-  fprintf(stderr, "%s:%u: deallocating pointer at address 0x%lx...", file, line,
+  fprintf(stderr, "%s:%u: deallocating pointer at 0x%lx...", file, line,
           (size_t)ptr);
 
   for (size_t i = alloc_info.end - 1; i >= 0; i--) {
