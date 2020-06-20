@@ -20,7 +20,9 @@ where
             fridge: [0.into(); FRIDGE_LENGTH],
         };
     }
+}
 
+impl<BlockSize> Fridge<BlockSize> {
     pub fn init(&mut self) {
         for byte in self.bitset.iter_mut() {
             *byte = 0;
