@@ -9,17 +9,29 @@ pub struct Fridge<BlockSize> {
     fridge: [BlockSize; FRIDGE_LENGTH],
 }
 
-impl<BlockSize> Fridge<BlockSize> {
+impl<BlockSize> Fridge<BlockSize>
+where
+    BlockSize: From<usize> + Copy,
+{
+    #[cfg(test)]
+    pub fn new() -> Self {
+        return Self {
+            bitset: [0; BITSET_LENGTH],
+            fridge: [0.into(); FRIDGE_LENGTH],
+        };
+    }
+
     pub fn init(&mut self) {
         for byte in self.bitset.iter_mut() {
             *byte = 0;
         }
     }
 
+    #[inline]
     pub fn first_trailing_zero(mut byte: u8) -> i8 {
         byte = !byte;
         for i in 0..8 {
-            if byte | (1 << i) != 0 {
+            if byte & (1 << i) != 0 {
                 return i;
             }
         }
@@ -57,4 +69,15 @@ impl<BlockSize> Fridge<BlockSize> {
         let byte = &mut self.bitset[byte_idx];
         *byte = *byte & !(1 << bit_idx);
     }
+}
+
+#[test]
+fn test_fridge() {
+    let mut fridge = Box::new(Fridge::<usize>::new());
+    let layout = Layout::new::<usize>();
+    let ptr = fridge.alloc(layout);
+    fridge.dealloc(ptr, layout);
+
+    assert!(ptr == fridge.alloc(layout));
+    assert!(ptr != fridge.alloc(layout));
 }
