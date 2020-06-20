@@ -1,27 +1,67 @@
-#include <stddef.h>
+#include "debug_allocator.h"
+#undef malloc
+#undef free
 #include <stdio.h>
+#include <stdlib.h>
 
-#define malloc(size) alloc(size, __FILE__, __LINE__)
-#define free(ptr) dealloc(ptr, __FILE__, __LINE__)
+static AllocVec alloc_info = {NULL, 0, 0};
 
-typedef char bool;
-#define false 0
-#define true 1
+void *alloc(size_t size, char *file, unsigned int line) {
+  fprintf(stderr, "%s:%u: allocating block of size %lu\n", file, line, size);
+  char *allocation = malloc(size);
 
-void *alloc(size_t, char *, size_t);
-bool dealloc(void *, char *, size_t);
+  if (alloc_info.begin == NULL) {
+    alloc_info.begin = malloc(sizeof(AllocInfo) * 16);
+    alloc_info.capacity = 16;
+  }
 
-int main() {
-  void *hello = malloc(16);
-  free(hello);
+  if (alloc_info.end == alloc_info.capacity) {
+    alloc_info.capacity = alloc_info.capacity * 2;
+    size_t new_size = sizeof(AllocInfo) * alloc_info.capacity;
+    alloc_info.begin = realloc(alloc_info.begin, new_size);
+  }
+
+  AllocInfo *info = &alloc_info.begin[alloc_info.end];
+  alloc_info.end++;
+
+  info->begin = allocation;
+  info->len = size;
+  info->valid = true;
+  info->line_number = line;
+  info->file = file;
+  return allocation;
 }
 
-void *alloc(size_t size, char *file, size_t line) {
-  fprintf(stderr, "%s:%li: allocating block of size %li\n", file, line, size);
-  return NULL;
-}
-bool dealloc(void *ptr, char *file, size_t line) {
-  fprintf(stderr, "%s:%li: deallocating pointer at address %lx\n", file, line,
+void dealloc(void *ptr, char *file, unsigned int line) {
+  fprintf(stderr, "%s:%u: deallocating pointer at address 0x%lx...", file, line,
           (size_t)ptr);
-  return false;
+
+  for (size_t i = alloc_info.end - 1; i >= 0; i--) {
+    AllocInfo *info = &alloc_info.begin[i];
+    if (ptr < info->begin || ptr - info->begin >= info->len)
+      continue;
+
+    if (!info->valid) {
+      fprintf(stderr,
+              "FAILED (allocation came from %s:%u, but was already freed)\n",
+              info->file, info->line_number);
+      exit(1);
+    }
+
+    if (ptr != info->begin) {
+      fprintf(stderr,
+              "FAILED (allocation came from %s:%u, but dealloc was called on "
+              "0x%lx when it should've been called on 0x%lx)\n",
+              info->file, info->line_number, (size_t)ptr, (size_t)info->begin);
+      exit(1);
+    }
+
+    fprintf(stderr, "SUCCESS\n");
+    info->valid = false;
+    free(ptr);
+    return;
+  }
+
+  fprintf(stderr, "FAILED (couldn't find pointer)\n");
+  exit(1);
 }
