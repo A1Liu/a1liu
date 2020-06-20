@@ -43,14 +43,14 @@ void dealloc(void *ptr, char *file, unsigned int line) {
 
     if (!info->valid) {
       fprintf(stderr,
-              "FAILED (allocation came from %s:%u, but was already freed)\n",
+              "FAILED (alloc came from %s:%u, memory was already freed)\n",
               info->file, info->line_number);
       exit(1);
     }
 
     if (ptr != info->begin) {
       fprintf(stderr,
-              "FAILED (allocation came from %s:%u, but dealloc was called on "
+              "FAILED (alloc came from %s:%u, dealloc was called on "
               "0x%lx when it should've been called on 0x%lx)\n",
               info->file, info->line_number, (size_t)ptr, (size_t)info->begin);
       exit(1);
