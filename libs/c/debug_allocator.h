@@ -24,8 +24,3 @@ typedef struct {
 void *alloc(size_t, char *, unsigned int);
 void dealloc(void *, char *, unsigned int);
 AllocVec allocations(void);
-
-int main() {
-  void *hello = malloc(16);
-  free(hello);
-}
