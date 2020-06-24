@@ -1,12 +1,15 @@
 #include "debug_allocator.h"
 #undef malloc
 #undef free
+#undef check
 #include <stdio.h>
 #include <stdlib.h>
 
 static AllocVec alloc_info = {NULL, 0, 0};
 
-void *alloc(size_t size, char *file, unsigned int line) {
+AllocVec allocations(void) { return alloc_info; }
+
+void *__debug_alloc(size_t size, char *file, unsigned int line) {
   fprintf(stderr, "%s:%u: allocating block of size %lu...", file, line, size);
   char *allocation = malloc(size);
   fprintf(stderr, "got 0x%lx\n", (size_t)allocation);
@@ -22,8 +25,7 @@ void *alloc(size_t size, char *file, unsigned int line) {
     alloc_info.begin = realloc(alloc_info.begin, new_size);
   }
 
-  AllocInfo *info = &alloc_info.begin[alloc_info.end];
-  alloc_info.end++;
+  AllocInfo *info = &alloc_info.begin[alloc_info.end++];
 
   info->begin = allocation;
   info->len = size;
@@ -33,11 +35,11 @@ void *alloc(size_t size, char *file, unsigned int line) {
   return allocation;
 }
 
-void dealloc(void *ptr, char *file, unsigned int line) {
+void __debug_dealloc(void *ptr, char *file, unsigned int line) {
   fprintf(stderr, "%s:%u: deallocating pointer at 0x%lx...", file, line,
           (size_t)ptr);
 
-  for (size_t i = alloc_info.end - 1; i >= 0; i--) {
+  for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
     if (ptr < info->begin || ptr - info->begin >= info->len)
       continue;
@@ -60,6 +62,30 @@ void dealloc(void *ptr, char *file, unsigned int line) {
     fprintf(stderr, "SUCCESS\n");
     info->valid = false;
     free(ptr);
+    return;
+  }
+
+  fprintf(stderr, "FAILED (couldn't find pointer)\n");
+  exit(1);
+}
+
+void __debug_check_alloc(void *ptr, char *file, unsigned int line) {
+  fprintf(stderr, "%s:%u: checking pointer at 0x%lx...", file, line,
+          (size_t)ptr);
+
+  for (size_t i = alloc_info.end - 1; i != -1; i--) {
+    AllocInfo *info = &alloc_info.begin[i];
+    if (ptr < info->begin || ptr - info->begin >= info->len)
+      continue;
+
+    if (!info->valid) {
+      fprintf(stderr,
+              "FAILED (alloc came from %s:%u, memory was already freed)\n",
+              info->file, info->line_number);
+      exit(1);
+    }
+
+    fprintf(stderr, "SUCCESS\n");
     return;
   }
 
