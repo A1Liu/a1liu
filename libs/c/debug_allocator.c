@@ -2,12 +2,11 @@
 #undef malloc
 #undef free
 #undef check
+
 #include <stdio.h>
 #include <stdlib.h>
 
 static AllocVec alloc_info = {NULL, 0, 0};
-
-AllocVec allocations(void) { return alloc_info; }
 
 void *__debug_alloc(size_t size, char *file, unsigned int line) {
   fprintf(stderr, "%s:%u: allocating block of size %lu...", file, line, size);

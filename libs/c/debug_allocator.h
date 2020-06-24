@@ -27,4 +27,3 @@ typedef struct {
 void *__debug_alloc(size_t, char *, unsigned int);
 void __debug_dealloc(void *, char *, unsigned int);
 void __debug_check_alloc(void *, char *, unsigned int);
-AllocVec allocations(void);
