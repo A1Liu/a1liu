@@ -30,8 +30,10 @@ void *__debug_alloc(size_t size, char *file, unsigned int line) {
   info->begin = allocation;
   info->len = size;
   info->valid = true;
-  info->line_number = line;
-  info->file = file;
+  info->malloc_line = line;
+  info->malloc_file = file;
+  info->free_file = NULL;
+  info->free_line = 0;
   return allocation;
 }
 
@@ -45,22 +47,25 @@ void __debug_dealloc(void *ptr, char *file, unsigned int line) {
       continue;
 
     if (!info->valid) {
-      fprintf(stderr,
-              "FAILED (alloc came from %s:%u, memory was already freed)\n",
-              info->file, info->line_number);
+      fprintf(stderr, "FAILED (malloc at %s:%u, free at %s:%u)\n",
+              info->malloc_file, info->malloc_line, info->free_file,
+              info->free_line);
       exit(1);
     }
 
     if (ptr != info->begin) {
       fprintf(stderr,
-              "FAILED (alloc came from %s:%u, dealloc was called on "
-              "0x%lx when it should've been called on 0x%lx)\n",
-              info->file, info->line_number, (size_t)ptr, (size_t)info->begin);
+              "FAILED (malloc at %s:%u, free called on "
+              "0x%lx, should've been called on 0x%lx)\n",
+              info->malloc_file, info->malloc_line, (size_t)ptr,
+              (size_t)info->begin);
       exit(1);
     }
 
     fprintf(stderr, "SUCCESS\n");
     info->valid = false;
+    info->free_file = file;
+    info->free_line = line;
     free(ptr);
     return;
   }
@@ -79,9 +84,9 @@ void __debug_check_alloc(void *ptr, char *file, unsigned int line) {
       continue;
 
     if (!info->valid) {
-      fprintf(stderr,
-              "FAILED (alloc came from %s:%u, memory was already freed)\n",
-              info->file, info->line_number);
+      fprintf(stderr, "FAILED (malloc at %s:%u, freed at %s:%u)\n",
+              info->malloc_file, info->malloc_line, info->free_file,
+              info->free_line);
       exit(1);
     }
 

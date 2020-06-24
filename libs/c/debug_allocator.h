@@ -11,9 +11,11 @@ typedef char bool;
 typedef struct {
   void *begin;
   size_t len;
-  unsigned int line_number;
+  char *malloc_file;
+  unsigned int malloc_line;
+  unsigned int free_line;
+  char *free_file;
   bool valid;
-  char *file;
 } AllocInfo;
 
 typedef struct {
