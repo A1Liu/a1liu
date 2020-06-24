@@ -6,8 +6,65 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+typedef char bool;
+#define false 0
+#define true 1
+#define DEBUG false
+
+typedef struct {
+  void *begin;
+  size_t len;
+  char *malloc_file;
+  unsigned int malloc_line;
+  unsigned int free_line;
+  char *free_file;
+  bool valid;
+} AllocInfo;
+
+typedef struct {
+  AllocInfo *begin;
+  size_t end;
+  size_t capacity;
+} AllocVec;
 
 static AllocVec alloc_info = {NULL, 0, 0};
+
+bool __alloc_info_check_ptr(AllocInfo *info, void *ptr, char *file,
+                            unsigned int line) {
+  void *buffered_begin = info->begin - info->len * 2;
+  if (ptr < buffered_begin || ptr - buffered_begin >= info->len * 5)
+    return false;
+
+  if (ptr < info->begin || ptr - info->begin >= info->len) {
+    if (info->valid)
+      fprintf(stderr,
+              "%s:%u: checking pointer at 0x%lx FAILED (nearby malloc from "
+              "%s:%u at 0x%lx)\n",
+              file, line, (size_t)ptr, info->malloc_file, info->malloc_line,
+              (size_t)info->begin);
+    else
+      fprintf(stderr,
+              "%s:%u: checking pointer at 0x%lx FAILED (nearby malloc from "
+              "%s:%u at 0x%lx, free from %s:%u)\n",
+              file, line, (size_t)ptr, info->malloc_file, info->malloc_line,
+              (size_t)info->begin, info->free_file, info->free_line);
+
+    exit(1);
+  }
+
+  if (!info->valid) {
+    fprintf(stderr,
+            "%s:%u: checking pointer at 0x%lx FAILED (malloc at %s:%u, free at "
+            "%s:%u)\n",
+            file, line, (size_t)ptr, info->malloc_file, info->malloc_line,
+            info->free_file, info->free_line);
+    exit(1);
+  }
+
+  return true;
+}
 
 void __alloc_vec_append(void *ptr, size_t size, char *file, unsigned int line) {
   if (alloc_info.begin == NULL) {
@@ -38,113 +95,103 @@ void __alloc_info_free(AllocInfo *info, char *file, unsigned int line) {
 }
 
 void *__debug_alloc(size_t size, char *file, unsigned int line) {
-  fprintf(stderr, "%s:%u: allocating block of size %lu...", file, line, size);
-  char *allocation = malloc(size);
-  fprintf(stderr, "got 0x%lx\n", (size_t)allocation);
+  if (DEBUG)
+    fprintf(stderr, "%s:%u: allocating block of size %lu...", file, line, size);
+  char *allocation = malloc(size * 5) + size * 2;
+  if (DEBUG)
+    fprintf(stderr, "got 0x%lx\n", (size_t)allocation);
   __alloc_vec_append(allocation, size, file, line);
   return allocation;
 }
 
 void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
-  fprintf(stderr, "%s:%u: reallocating pointer at 0x%lx...", file, line,
-          (size_t)ptr);
-
-  if (alloc_info.begin == NULL) {
+  if (alloc_info.begin == NULL)
     fprintf(stderr, "FAILED (no allocations have been performed yet)\n");
-  }
 
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
-    if (ptr < info->begin || ptr - info->begin >= info->len)
+    if (!__alloc_info_check_ptr(info, ptr, file, line))
       continue;
-
-    if (!info->valid) {
-      fprintf(stderr, "FAILED (malloc at %s:%u, free at %s:%u)\n",
-              info->malloc_file, info->malloc_line, info->free_file,
-              info->free_line);
-      exit(1);
-    }
 
     if (ptr != info->begin) {
       fprintf(stderr,
-              "FAILED (malloc at %s:%u, realloc called on "
-              "0x%lx, should've been called on 0x%lx)\n",
-              info->malloc_file, info->malloc_line, (size_t)ptr,
-              (size_t)info->begin);
+              "%s:%u: checking pointer at 0x%lx FAILED (malloc at %s:%u, "
+              "realloc called on 0x%lx, should've been called on 0x%lx)\n",
+              file, line, (size_t)ptr, info->malloc_file, info->malloc_line,
+              (size_t)ptr, (size_t)info->begin);
       exit(1);
     }
 
-    fprintf(stderr, "SUCCESS\n");
     __alloc_info_free(info, file, line);
 
-    void *allocation = realloc(ptr, size);
+    char *buffer_begin = ((char *)ptr) - info->len * 2;
+    void *allocation = malloc(size * 5) + size * 2;
+    memcpy(allocation, ptr, info->len);
+    free(buffer_begin);
     __alloc_vec_append(allocation, size, file, line);
+
+    if (DEBUG)
+      fprintf(stderr, "%s:%u: realloc'ing pointer at 0x%lx...SUCCESS\n", file,
+              line, (size_t)ptr);
+
     return allocation;
   }
 
-  fprintf(stderr, "FAILED (couldn't find pointer)\n");
+  fprintf(
+      stderr,
+      "%s:%u: realloc'ing pointer at 0x%lx...FAILED (coulnd't find pointer)\n",
+      file, line, (size_t)ptr);
   exit(1);
 }
 
 void __debug_dealloc(void *ptr, char *file, unsigned int line) {
-  fprintf(stderr, "%s:%u: deallocating pointer at 0x%lx...", file, line,
-          (size_t)ptr);
-
   if (alloc_info.begin == NULL) {
     fprintf(stderr, "FAILED (no allocations have been performed yet)\n");
   }
 
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
-    if (ptr < info->begin || ptr - info->begin >= info->len)
+    if (!__alloc_info_check_ptr(info, ptr, file, line))
       continue;
-
-    if (!info->valid) {
-      fprintf(stderr, "FAILED (malloc at %s:%u, free at %s:%u)\n",
-              info->malloc_file, info->malloc_line, info->free_file,
-              info->free_line);
-      exit(1);
-    }
 
     if (ptr != info->begin) {
       fprintf(stderr,
-              "FAILED (malloc at %s:%u, free called on "
-              "0x%lx, should've been called on 0x%lx)\n",
-              info->malloc_file, info->malloc_line, (size_t)ptr,
-              (size_t)info->begin);
+              "%s:%u: checking pointer at 0x%lx FAILED (malloc at %s:%u, "
+              "free called on 0x%lx, should've been called on 0x%lx)\n",
+              file, line, (size_t)ptr, info->malloc_file, info->malloc_line,
+              (size_t)ptr, (size_t)info->begin);
       exit(1);
     }
 
-    fprintf(stderr, "SUCCESS\n");
     __alloc_info_free(info, file, line);
-    free(ptr);
+    free(((char *)ptr) - info->len * 2);
+    fprintf(stderr, "%s:%u: deallocating pointer at 0x%lx...SUCCESS\n", file,
+            line, (size_t)ptr);
     return;
   }
 
-  fprintf(stderr, "FAILED (couldn't find pointer)\n");
+  fprintf(stderr,
+          "%s:%u: freeing pointer at 0x%lx...FAILED (couldn't find pointer)\n",
+          file, line, (size_t)ptr);
   exit(1);
 }
 
 void __debug_check_alloc(void *ptr, char *file, unsigned int line) {
-  fprintf(stderr, "%s:%u: checking pointer at 0x%lx...", file, line,
-          (size_t)ptr);
-
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
-    if (ptr < info->begin || ptr - info->begin >= info->len)
+    if (!__alloc_info_check_ptr(info, ptr, file, line))
       continue;
 
-    if (!info->valid) {
-      fprintf(stderr, "FAILED (malloc at %s:%u, freed at %s:%u)\n",
-              info->malloc_file, info->malloc_line, info->free_file,
-              info->free_line);
-      exit(1);
-    }
-
-    fprintf(stderr, "SUCCESS\n");
+    if (DEBUG)
+      fprintf(stderr, "%s:%u: checking pointer at 0x%lx...SUCCESS", file, line,
+              (size_t)ptr);
     return;
   }
 
   fprintf(stderr, "FAILED (couldn't find pointer)\n");
+
+  fprintf(stderr,
+          "%s:%u: checking pointer at 0x%lx...FAILED (couldn't find pointer)\n",
+          file, line, (size_t)ptr);
   exit(1);
 }

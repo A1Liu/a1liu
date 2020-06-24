@@ -6,5 +6,5 @@ typedef struct {
   size_t len;
 } BumpList;
 
-void *bump_alloc(BumpList *list, size_t size);
+void *bump_alloc(BumpList *, size_t);
 BumpList *bump_new(void);

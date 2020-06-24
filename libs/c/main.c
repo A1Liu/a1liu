@@ -30,13 +30,13 @@ Vector vector_new(void) {
 
 void vector_add(Vector *vec, File file) {
   if (vec->begin == NULL) {
-    vec->begin = malloc(sizeof(AllocInfo) * 16);
+    vec->begin = malloc(sizeof(File) * 16);
     vec->capacity = 16;
   }
 
   if (vec->end == vec->capacity) {
     vec->capacity = vec->capacity * 2;
-    size_t new_size = sizeof(AllocInfo) * vec->capacity;
+    size_t new_size = sizeof(File) * vec->capacity;
     vec->begin = realloc(vec->begin, new_size);
   }
 
@@ -51,7 +51,10 @@ int main(int argc, char **argv) {
       vector_add(&vec, f);
   }
 
-  for (unsigned int i = vec.end - 1; i >= 0; i--) {
+  // This is the bug! we're checking whether i >= 0, but that will always be
+  // true since i is an unsigned integer! Luckily, the check macro informs us
+  // that this pointer is not allocated.
+  for (size_t i = vec.end - 1; i >= 0; i--) {
     printf("%s\n", check(&vec.begin[i])->path);
   }
 
