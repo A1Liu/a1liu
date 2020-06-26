@@ -95,12 +95,26 @@ void __alloc_info_free(AllocInfo *info, char *file, unsigned int line) {
   info->free_line = line;
 }
 
+void __debug_fill_deadbeef(char *ptr, size_t size) {
+  uint64_t *begin_1 = (uint64_t *)(ptr - 2 * size);
+  uint64_t *begin_2 = (uint64_t *)(ptr + size);
+  size_t beefs = size / 4;
+  for (size_t i = 0; i < beefs; i++)
+    begin_1[i] = 0xdeadbeef;
+  for (size_t i = 0; i < beefs; i++)
+    begin_2[i] = 0xdeadbeef;
+}
+
 void *__debug_alloc(size_t size, char *file, unsigned int line) {
-  if (DEBUG)
-    fprintf(stderr, "%s:%u: allocating block of size %lu...", file, line, size);
+  if (size == 0)
+    fprintf(stderr, "%s:%u: WARN malloc'ing a block of size 0\n", file, line);
+
+  size = ((size - 1) & ~7) + 8;
   char *allocation = malloc(size * 5) + size * 2;
   if (DEBUG)
-    fprintf(stderr, "got 0x%lx\n", (size_t)allocation);
+    fprintf(stderr, "%s:%u: requested block of size %lu, got 0x%lx\n", file,
+            line, size, (size_t)allocation);
+  __debug_fill_deadbeef(allocation, size);
   __alloc_vec_append(allocation, size, file, line);
   return allocation;
 }
@@ -108,6 +122,9 @@ void *__debug_alloc(size_t size, char *file, unsigned int line) {
 void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
   if (ptr == NULL)
     return __debug_alloc(size, file, line);
+
+  if (size == 0)
+    fprintf(stderr, "%s:%u: WARN realloc'ing a block of size 0\n", file, line);
 
   if (alloc_info.begin == NULL)
     fprintf(stderr,
@@ -132,9 +149,11 @@ void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
     __alloc_info_free(info, file, line);
 
     char *buffer_begin = ((char *)ptr) - info->len * 2;
+    size = ((size - 1) & ~7) + 8;
     void *allocation = malloc(size * 5) + size * 2;
     memcpy(allocation, ptr, info->len);
     free(buffer_begin);
+    __debug_fill_deadbeef(allocation, size);
     __alloc_vec_append(allocation, size, file, line);
 
     if (DEBUG)
@@ -195,7 +214,7 @@ void __debug_check_alloc(void *ptr, char *file, unsigned int line) {
       continue;
 
     if (DEBUG)
-      fprintf(stderr, "%s:%u: checking pointer at 0x%lx SUCCESS", file, line,
+      fprintf(stderr, "%s:%u: checking pointer at 0x%lx SUCCESS\n", file, line,
               (size_t)ptr);
     return;
   }
