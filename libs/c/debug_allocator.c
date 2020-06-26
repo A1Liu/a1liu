@@ -12,7 +12,6 @@ typedef char bool;
 #define false 0
 #define true 1
 #define DEBUG false
-#define RELEASE false
 
 typedef struct {
   void *begin;
@@ -120,8 +119,11 @@ void *__debug_alloc(size_t size, char *file, unsigned int line) {
 }
 
 void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
-  if (ptr == NULL)
+  if (ptr == NULL) {
+    if (DEBUG)
+      fprintf(stderr, "%s:%u: realloc'ing NULL, using malloc\n", file, line);
     return __debug_alloc(size, file, line);
+  }
 
   if (size == 0)
     fprintf(stderr, "%s:%u: WARN realloc'ing a block of size 0\n", file, line);
@@ -205,9 +207,6 @@ void __debug_dealloc(void *ptr, char *file, unsigned int line) {
 }
 
 void __debug_check_alloc(void *ptr, char *file, unsigned int line) {
-  if (RELEASE)
-    return;
-
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
     if (!__alloc_info_check_ptr(info, ptr, file, line))
