@@ -12,6 +12,7 @@ typedef char bool;
 #define false 0
 #define true 1
 #define DEBUG false
+#define RELEASE false
 
 typedef struct {
   void *begin;
@@ -105,8 +106,14 @@ void *__debug_alloc(size_t size, char *file, unsigned int line) {
 }
 
 void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
+  if (ptr == NULL)
+    return __debug_alloc(size, file, line);
+
   if (alloc_info.begin == NULL)
-    fprintf(stderr, "FAILED (no allocations have been performed yet)\n");
+    fprintf(stderr,
+            "%s:%u: realloc'ing pointer at 0x%lx FAILED (no "
+            "allocations have been performed yet)\n",
+            file, line, (size_t)ptr);
 
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
@@ -131,7 +138,7 @@ void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
     __alloc_vec_append(allocation, size, file, line);
 
     if (DEBUG)
-      fprintf(stderr, "%s:%u: realloc'ing pointer at 0x%lx...SUCCESS\n", file,
+      fprintf(stderr, "%s:%u: realloc'ing pointer at 0x%lx SUCCESS\n", file,
               line, (size_t)ptr);
 
     return allocation;
@@ -139,15 +146,17 @@ void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
 
   fprintf(
       stderr,
-      "%s:%u: realloc'ing pointer at 0x%lx...FAILED (coulnd't find pointer)\n",
+      "%s:%u: realloc'ing pointer at 0x%lx FAILED (coulnd't find pointer)\n",
       file, line, (size_t)ptr);
   exit(1);
 }
 
 void __debug_dealloc(void *ptr, char *file, unsigned int line) {
-  if (alloc_info.begin == NULL) {
-    fprintf(stderr, "FAILED (no allocations have been performed yet)\n");
-  }
+  if (alloc_info.begin == NULL)
+    fprintf(stderr,
+            "%s:%u: freeing pointer at 0x%lx FAILED (no allocations have been "
+            "performed yet)\n",
+            file, line, (size_t)ptr);
 
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
@@ -165,33 +174,34 @@ void __debug_dealloc(void *ptr, char *file, unsigned int line) {
 
     __alloc_info_free(info, file, line);
     free(((char *)ptr) - info->len * 2);
-    fprintf(stderr, "%s:%u: deallocating pointer at 0x%lx...SUCCESS\n", file,
+    fprintf(stderr, "%s:%u: deallocating pointer at 0x%lx SUCCESS\n", file,
             line, (size_t)ptr);
     return;
   }
 
   fprintf(stderr,
-          "%s:%u: freeing pointer at 0x%lx...FAILED (couldn't find pointer)\n",
+          "%s:%u: freeing pointer at 0x%lx FAILED (couldn't find pointer)\n",
           file, line, (size_t)ptr);
   exit(1);
 }
 
 void __debug_check_alloc(void *ptr, char *file, unsigned int line) {
+  if (RELEASE)
+    return;
+
   for (size_t i = alloc_info.end - 1; i != -1; i--) {
     AllocInfo *info = &alloc_info.begin[i];
     if (!__alloc_info_check_ptr(info, ptr, file, line))
       continue;
 
     if (DEBUG)
-      fprintf(stderr, "%s:%u: checking pointer at 0x%lx...SUCCESS", file, line,
+      fprintf(stderr, "%s:%u: checking pointer at 0x%lx SUCCESS", file, line,
               (size_t)ptr);
     return;
   }
 
-  fprintf(stderr, "FAILED (couldn't find pointer)\n");
-
   fprintf(stderr,
-          "%s:%u: checking pointer at 0x%lx...FAILED (couldn't find pointer)\n",
+          "%s:%u: checking pointer at 0x%lx FAILED (couldn't find pointer)\n",
           file, line, (size_t)ptr);
   exit(1);
 }
