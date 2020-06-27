@@ -19,8 +19,8 @@ typedef struct {
   char *malloc_file;
   unsigned int malloc_line;
   unsigned int free_line;
-  char *free_file;
   bool valid;
+  char *free_file;
 } AllocInfo;
 
 typedef struct {
