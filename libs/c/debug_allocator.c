@@ -101,7 +101,11 @@ void __alloc_vec_append(void *ptr, size_t size, char *file, unsigned int line) {
   info->free_line = 0;
 }
 
-void __debug_fill_region(uint64_t *, size_t, uint64_t);
+void __debug_fill_region(uint64_t *ptr, size_t size, uint64_t value) {
+  size_t blocs = size / 8;
+  for (size_t i = 0; i < blocs; i++)
+    ptr[i] = value;
+}
 
 void __alloc_info_free(AllocInfo *info, char *file, unsigned int line) {
   info->valid = false;
@@ -111,17 +115,10 @@ void __alloc_info_free(AllocInfo *info, char *file, unsigned int line) {
   size_t buffered_len = ((info->len - 1) & ~7) + 8;
   void *buffer_begin = ((char *)info->begin) - buffered_len * 2;
   void *allocation_end = ((char *)info->begin) + buffered_len;
-  __alloc_info_free(info, file, line);
   __debug_fill_region(buffer_begin, buffered_len * 2, DEBUG_NEARBY_FREED);
   __debug_fill_region(info->begin, buffered_len, DEBUG_FREED);
   __debug_fill_region(allocation_end, buffered_len * 2, DEBUG_NEARBY_FREED);
   free(buffer_begin);
-}
-
-void __debug_fill_region(uint64_t *ptr, size_t size, uint64_t value) {
-  size_t blocs = size / 8;
-  for (size_t i = 0; i < blocs; i++)
-    ptr[i] = value;
 }
 
 void *__debug_alloc(size_t size, char *file, unsigned int line) {
