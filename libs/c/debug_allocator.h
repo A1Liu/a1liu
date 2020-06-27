@@ -1,5 +1,10 @@
 #include <stddef.h>
 
+#define DEBUG_UNINIT 0xbadfaded
+#define DEBUG_FREED 0xdeadbeef
+#define DEBUG_NEARBY_FREED 0xdeaddead
+#define DEBUG_NEARBY_ALLOCATED 0xdeafdeaf
+
 #define malloc(size) __debug_alloc(size, __FILE__, __LINE__)
 #define realloc(ptr, size) __debug_realloc(ptr, size, __FILE__, __LINE__)
 #define free(ptr) __debug_dealloc(ptr, __FILE__, __LINE__)
