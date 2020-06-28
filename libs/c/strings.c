@@ -1,6 +1,5 @@
 #include "strings.h"
 
-typedef char bool;
 #define NULL ((void *)0)
 #define true 1
 #define false 0
