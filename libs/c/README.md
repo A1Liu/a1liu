@@ -20,4 +20,7 @@ Here's a set of helper files I wrote in C.
 
 - `dyn_array.h`/`dyn_array.c` - The equivalent of `std::vector` in C++, or `Vec`
   in Rust.
+- `dyn_array_ptr.h`/`dyn_array_ptr.c` - A version of `dyn_array` with the capacity
+  and length stored next to the data itself, which allows semi-genericity using
+  macros.
 - `bump_list.h`/`bump_list.c` - A linked list of bump allocators.
