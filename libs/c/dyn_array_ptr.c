@@ -17,7 +17,7 @@ void __dyn_array_ensure_add(void *arr_, size_t size) {
   void *buffer = *arr;
 
   if (buffer == NULL) {
-    uint64_t *buffer_begin = malloc(size * 16);
+    uint64_t *buffer_begin = malloc(size * 16 + sizeof(uint64_t) * 2);
     buffer = *arr = buffer_begin + 2;
     *__dyn_array_capacity_ptr(buffer) = 16;
     *__dyn_array_len_ptr(buffer) = 0;
@@ -31,7 +31,7 @@ void __dyn_array_ensure_add(void *arr_, size_t size) {
     return;
 
   capacity = capacity / 2 + capacity;
-  buffer_begin = realloc(buffer_begin, size * capacity);
+  buffer_begin = realloc(buffer_begin, size * capacity + +sizeof(uint64_t) * 2);
   *buffer_begin = capacity;
   *arr = buffer_begin + 2;
 }
@@ -44,7 +44,7 @@ uint64_t __dyn_array_add_from(void *arr_, size_t size, void *from, size_t len) {
 
   if (buffer == NULL) {
     initial_len = 0;
-    buf_begin = malloc(size * (16 + len));
+    buf_begin = malloc(size * (16 + len) + sizeof(uint64_t) * 2);
     buffer = *arr = buf_begin + 2;
     *__dyn_array_capacity_ptr(buffer) = 16 + len;
     *__dyn_array_len_ptr(buffer) = len;
@@ -55,15 +55,13 @@ uint64_t __dyn_array_add_from(void *arr_, size_t size, void *from, size_t len) {
 
     if (initial_len + len >= capacity) {
       uint64_t capa = capacity / 2 + capacity + len;
-      buf_begin = realloc(buf_begin, size * capa);
+      buf_begin = realloc(buf_begin, size * capa + sizeof(uint64_t) * 2);
       buffer = *arr = buf_begin + 2;
       *__dyn_array_capacity_ptr(buffer) = capa;
     }
 
     *__dyn_array_len_ptr(buffer) = initial_len + len;
   }
-
-  printf("%.*s\n", (uint32_t)len, from);
 
   memcpy(buffer + size * initial_len, from, size * len);
   return initial_len;

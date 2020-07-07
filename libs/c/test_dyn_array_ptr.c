@@ -24,13 +24,21 @@ int main() {
   dyn_array_add(&hello, 'm');
   dyn_array_add(&hello, 'n');
   dyn_array_add(&hello, 'o');
-  dyn_array_add_from(&hello2, hello, dyn_array_len(hello));
-  dyn_array_add_from(&hello2, hello, dyn_array_len(hello));
   printf("%llu\n", dyn_array_capacity(hello));
   printf("%llu\n", dyn_array_len(hello));
 
-  uint64_t len = dyn_array_len(hello2);
+  uint64_t len = dyn_array_len(hello);
   for (uint64_t i = 0; i < len; i++) {
+    printf("%c ", hello[i]);
+  }
+  printf("\n");
+
+  printf("main: %.*s\n", (uint32_t)dyn_array_len(hello), hello);
+
+  dyn_array_add_from(&hello2, hello, dyn_array_len(hello));
+  dyn_array_add_from(&hello2, hello, dyn_array_len(hello));
+  uint64_t len2 = dyn_array_len(hello2);
+  for (uint64_t i = 0; i < len2; i++) {
     printf("%c ", hello2[i]);
   }
   printf("\n");
