@@ -142,9 +142,8 @@ void *__debug_alloc(size_t size, char *file, unsigned int line) {
 }
 
 void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
-  void *allocation = __debug_alloc(size, file, line);
   if (ptr == NULL)
-    return allocation;
+    return __debug_alloc(size, file, line);
 
   AllocInfo *info = __alloc_vec_check_ptr(ptr, file, line);
   if (!info) {
@@ -164,6 +163,7 @@ void *__debug_realloc(void *ptr, size_t size, char *file, unsigned int line) {
     exit(1);
   }
 
+  void *allocation = __debug_alloc(size, file, line);
   if (info->len < size)
     memcpy(allocation, ptr, info->len);
   else
