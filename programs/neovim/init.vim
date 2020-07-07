@@ -110,6 +110,9 @@ set backspace=indent,eol,start
 " End of line in files
 set nofixendofline
 
+" Virtual Edit
+set virtualedit=all
+
 " Bell
 set belloff=all
 
