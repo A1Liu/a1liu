@@ -40,28 +40,31 @@ uint64_t __dyn_array_add_from(void *arr_, size_t size, void *from, size_t len) {
   void **arr = (void **)arr_;
   char *buffer = *arr;
   uint64_t *buf_begin;
-  uint64_t begin = buffer == NULL ? 0 : *__dyn_array_len_ptr(buffer);
+  uint64_t initial_len;
 
   if (buffer == NULL) {
+    initial_len = 0;
     buf_begin = malloc(size * (16 + len));
     buffer = *arr = buf_begin + 2;
     *__dyn_array_capacity_ptr(buffer) = 16 + len;
     *__dyn_array_len_ptr(buffer) = len;
   } else {
+    initial_len = *__dyn_array_len_ptr(buffer);
     buf_begin = __dyn_array_capacity_ptr(buffer);
-    uint64_t array_len = *__dyn_array_len_ptr(buffer);
     uint64_t capacity = *buf_begin;
 
-    if (array_len + len >= capacity) {
+    if (initial_len + len >= capacity) {
       uint64_t capa = capacity / 2 + capacity + len;
       buf_begin = realloc(buf_begin, size * capa);
       buffer = *arr = buf_begin + 2;
       *__dyn_array_capacity_ptr(buffer) = capa;
     }
 
-    *__dyn_array_len_ptr(buffer) = array_len + len;
+    *__dyn_array_len_ptr(buffer) = initial_len + len;
   }
 
-  memcpy(buffer + size * begin, from, size * len);
-  return begin;
+  printf("%.*s\n", (uint32_t)len, from);
+
+  memcpy(buffer + size * initial_len, from, size * len);
+  return initial_len;
 }
