@@ -123,7 +123,7 @@ impl<'a> CoalescingBucketList<'a> {
         }
     }
 
-    pub fn add<T>(&'a self, t: T) -> &'a mut T {
+    pub fn add<T>(&self, t: T) -> &'a mut T {
         unsafe {
             let location = self.data.alloc(Layout::new::<T>()) as *mut T;
             ptr::write(location, t);
@@ -131,7 +131,7 @@ impl<'a> CoalescingBucketList<'a> {
         }
     }
 
-    pub fn add_array<T>(&'a self, vec: Vec<T>) -> &'a mut [T] {
+    pub fn add_array<T>(&self, vec: Vec<T>) -> &'a mut [T] {
         unsafe {
             let len = vec.len();
             let layout =
@@ -146,7 +146,7 @@ impl<'a> CoalescingBucketList<'a> {
         }
     }
 
-    pub fn add_slice<T>(&'a self, slice: &[T]) -> &'a mut [T]
+    pub fn add_slice<T>(&self, slice: &[T]) -> &'a mut [T]
     where
         T: Clone,
     {
@@ -162,7 +162,7 @@ impl<'a> CoalescingBucketList<'a> {
         return unsafe { slice::from_raw_parts_mut(block, len) };
     }
 
-    pub fn add_str(&'a self, values: &str) -> &'a mut str {
+    pub fn add_str(&self, values: &str) -> &'a mut str {
         let values = values.as_bytes();
         return unsafe { str::from_utf8_unchecked_mut(self.add_slice(values)) };
     }
