@@ -3,8 +3,8 @@
 let s:plug_home = PathJoin(g:vim_home_path, 'plugged')
 let s:pathogen_home = PathJoin(g:vim_home_path, 'bundle')
 let s:autoload_path = PathJoin(g:vim_home_path, 'autoload')
-call DebugPrint('Plug home is: ' . s:plug_home)
-call DebugPrint('Pathogen home is: ' . s:pathogen_home)
+call DebugPrint('plug home is: ' . s:plug_home)
+call DebugPrint('pathogen home is: ' . s:pathogen_home)
 
 let s:plugins_list = []
 function! InstallPathogenPlugin(path)
@@ -33,8 +33,8 @@ function! ReinstallPathogenPlugins()
   execute pathogen#infect()
 endfunction
 
-if !g:plugins_installed
-  call DebugPrint('First run, installing package manager...')
+if !ReadFlag('vim-plugins-installed')
+  call DebugPrint('plugins not installed, installing package manager...')
   if g:os !=? 'Windows'
     let s:plug_install_path = PathJoin(s:autoload_path, 'plug.vim')
     execute 'silent !curl -fLo ' . s:plug_install_path
@@ -44,10 +44,7 @@ if !g:plugins_installed
     let s:pathogen_install_path = PathJoin(s:autoload_path, 'pathogen.vim')
     execute 'silent !curl -LSso ' . s:pathogen_install_path . ' https://tpo.pe/pathogen.vim'
   endif
-  execute "silent split " . g:plugins_installed_flag_path
-  execute "silent wq"
-else
-  call DebugPrint('Not first run.')
+  SetFlag('vim-plugins-installed', 1)
 endif
 
 if g:os !=? 'Windows'
