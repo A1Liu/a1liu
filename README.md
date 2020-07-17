@@ -35,6 +35,8 @@ between systems; things like application settings, file organizations, etc.
 - `installed-S` - Whether or not `S` has been run, where `S` is a script in the
   install folder. This includes Vim plugins.
 - `vim-light-mode` - Whether or not Vim is dark or light mode
+- `vim-plugins-enabled` - Whether or not plugins are installed
+- `vim-plugins-enabled` - Whether or not plugins are enabled
 
 ### Installation Scripts
 This repository includes multiple installation scripts for setting up a new computer,

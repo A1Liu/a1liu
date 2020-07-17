@@ -75,9 +75,22 @@ function! SynStack()
   echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
 endfunction
 
+command! ToggleBgFlag call ToggleFlag('vim-light-mode') | call ReadBgFlag()
+command! ToggleBg call ToggleFlag('vim-light-mode') | call ReadBgFlag()
+
+command! ReadBgFlag call ReadBgFlag()
+function! ReadBgFlag()
+  if ReadFlag('vim-light-mode')
+    set background=light
+  else
+    set background=dark
+  endif
+endfunction
+ReadBgFlag
+
 " Color Scheme
-if g:first_run
-  colorscheme apprentice
+if g:first_run || !g:plugins_enabled
+  colorscheme default
 else
   colorscheme solarized8_high
 endif
@@ -97,27 +110,3 @@ else
   endif
 endif
 
-let s:config_dir = fnamemodify(g:vim_home_path, ':h:h')
-let s:light_mode_flag = s:config_dir . '/local/flags/vim-light-mode'
-
-command! ToggleBgFlag call ToggleBg()
-command! ToggleBg call ToggleBg()
-function! ToggleBg()
-  if filereadable(s:light_mode_flag)
-    execute "call delete(fnameescape('" . s:light_mode_flag . "'))"
-    set background=dark
-  else
-    execute "call writefile([], '" . s:light_mode_flag . "')"
-    set background=light
-  endif
-endfunction
-
-command! ReadBgFlag call ReadBgFlag()
-function! ReadBgFlag()
-  if filereadable(s:light_mode_flag)
-    set background=light
-  else
-    set background=dark
-  endif
-endfunction
-ReadBgFlag

@@ -11,7 +11,7 @@ endfunction
 if $VIM_DEBUG != ''
   let g:autoformat_verbosemode=1
 endif
-call DebugPrint('Debug mode active')
+call DebugPrint('debug mode active')
 
 " Setting g:os flag
 if !exists('g:os')
@@ -38,21 +38,45 @@ endfunction
 
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-if g:os ==? 'Windows' && has('nvim') " Hack because neovim doesn't work
-  let g:vim_home_path = 'C:\Users\Alyer\code\config\programs\neovim'
-endif
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 let g:placeholder = '<++>'
 call DebugPrint('Vim Home path is: ' . g:vim_home_path)
 call DebugPrint('Config path is: ' . g:cfg_dir)
 
-" let g:plug_path = PathJoin(g:vim_home_path, 'autoload', 'plug.vim')
-let g:first_run_flag_path = PathJoin(g:cfg_dir,'local', 'flags', 'installed-vim')
-let g:first_run = empty(glob(g:first_run_flag_path))
+" Toggles flag and returns new value
+function ToggleFlag(flag)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
+  if filereadable(l:flag_path)
+    execute "call delete(fnameescape('" . l:flag_path . "'))"
+    return 0
+  else
+    execute "call writefile([], '" . l:flag_path . "')"
+    return 1
+  endif
+endfunction
+
+function SetFlag(flag, value)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
+  let l:prev_value = filereadable(l:flag_path)
+
+  if a:value
+    execute "call writefile([], '" . l:flag_path . "')"
+  else
+    execute "call delete(fnameescape('" . l:flag_path . "'))"
+  endif
+
+  return l:prev_value
+endfunction
+
+function ReadFlag(flag)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
+  return filereadable(l:flag_path)
+endfunction
+
+let g:first_run = !SetFlag('installed-vim', 1)
 
 if g:first_run
-  execute "silent split " . g:first_run_flag_path
-  execute "silent wq"
+  call DebugPrint('first run through')
 endif
 
 "" Security
@@ -74,8 +98,12 @@ endif
 
 
 "" Plugins
-let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
-execute 'source ' . s:temp
+let g:plugins_installed = ReadFlag('vim-plugins-installed')
+let g:plugins_enabled = ReadFlag('vim-plugins-enabled')
+if g:plugins_enabled
+  let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
+  execute 'source ' . s:temp
+endif
 
 "" Keybindings
 let s:temp = PathJoin(g:vim_home_path, 'keybindings.vim')

@@ -33,7 +33,7 @@ function! ReinstallPathogenPlugins()
   execute pathogen#infect()
 endfunction
 
-if g:first_run
+if !g:plugins_installed
   call DebugPrint('First run, installing package manager...')
   if g:os !=? 'Windows'
     let s:plug_install_path = PathJoin(s:autoload_path, 'plug.vim')
@@ -44,6 +44,8 @@ if g:first_run
     let s:pathogen_install_path = PathJoin(s:autoload_path, 'pathogen.vim')
     execute 'silent !curl -LSso ' . s:pathogen_install_path . ' https://tpo.pe/pathogen.vim'
   endif
+  execute "silent split " . g:plugins_installed_flag_path
+  execute "silent wq"
 else
   call DebugPrint('Not first run.')
 endif
