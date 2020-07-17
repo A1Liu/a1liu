@@ -40,8 +40,8 @@ endfunction
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 let g:placeholder = '<++>'
-call DebugPrint('Vim Home path is: ' . g:vim_home_path)
-call DebugPrint('Config path is: ' . g:cfg_dir)
+call DebugPrint('vim home path is: ' . g:vim_home_path)
+call DebugPrint('config path is: ' . g:cfg_dir)
 
 " Toggles flag and returns new value
 function ToggleFlag(flag)
@@ -74,7 +74,6 @@ function ReadFlag(flag)
 endfunction
 
 let g:first_run = !SetFlag('installed-vim', 1)
-
 if g:first_run
   call DebugPrint('first run through')
 endif
@@ -98,7 +97,6 @@ endif
 
 
 "" Plugins
-let g:plugins_installed = ReadFlag('vim-plugins-installed')
 let g:plugins_enabled = ReadFlag('vim-plugins-enabled')
 if g:plugins_enabled
   let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
@@ -204,7 +202,7 @@ set noswapfile
 set undofile
 let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
-call DebugPrint("Undo dir is: " . s:temp)
+call DebugPrint("undo dir is: " . s:temp)
 
 
 "" Commands
