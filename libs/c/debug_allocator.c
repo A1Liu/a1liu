@@ -11,7 +11,7 @@
 typedef char bool;
 #define false 0
 #define true 1
-#define DEBUG false
+#define DEBUG true
 
 typedef struct {
   void *begin;

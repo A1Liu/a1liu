@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <sys/stat.h>
-
 #include "debug_allocator.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
 typedef struct {
   char *path;

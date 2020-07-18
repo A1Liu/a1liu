@@ -2,6 +2,7 @@
 #define DEBUG_ALLOCATOR
 
 #include <stddef.h>
+#include <stdlib.h>
 
 // malloc fills its memory with this value before handing you a pointer to it
 #define DEBUG_UNINIT 0xdadfaded
@@ -12,20 +13,14 @@
 // The buffer memory of freed blocks gets set to this value by realloc and free
 #define DEBUG_NEARBY_FREED 0xbadadded
 
-#ifdef malloc
 #undef malloc
 #define malloc(size) __debug_alloc(size, __FILE__, __LINE__)
-#endif
 
-#ifdef realloc
 #undef realloc
 #define realloc(ptr, size) __debug_realloc(ptr, size, __FILE__, __LINE__)
-#endif
 
-#ifdef free
 #undef free
 #define free(ptr) __debug_dealloc(ptr, __FILE__, __LINE__)
-#endif
 
 #define check(ptr) (__debug_check_alloc(ptr, __FILE__, __LINE__), ptr)
 
