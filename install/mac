@@ -18,8 +18,6 @@ echo "Installing Firefox..."
 brew cask install firefox-developer-edition
 echo "Installing Vim"
 brew install vim
-echo "Setting up Zsh..."
-chsh -s /bin/zsh
 echo "Installing git-lfs"
 brew install git git-lfs
 
