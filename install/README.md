@@ -60,16 +60,15 @@ to have been saved in `local/preconf`.
 
 3. Clone the repository using `git clone https://github.com/a1liu/config`
 
-4. [Install Vim](https://github.com/vim/vim-win32-installer/releases)
+4. [Install Vim](https://github.com/vim/vim-win32-installer/releases). Make sure
+   it's the 64-bit version.
 
 5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
    the settings stored in this repository under `compat/windows/keybindings.skl`
 
-6. Download Windows Terminal from the Microsoft Store
+6. Run setup script `windows.ps1`.
 
-7. Run setup script `windows.ps1`.
-
-8. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
+7. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
    and customize the install by ensuring that it's installed for all users, adding
    python to the environment variables, and not precompiling the standard library.
 
