@@ -17,7 +17,12 @@ between systems; things like application settings, file organizations, etc.
 └── libs --------- Utility libraries that I've written over the years
 ```
 
-### Semantically Meaningful Environment Variables
+### Installation Scripts
+This repository includes multiple installation scripts for setting up a new computer,
+or just trying out some of my configurations. For more information about installation,
+please see `install/README.md`.
+
+### Environment Variables
 
 - `CFG_DIR` - Configuration directory (this repository)
 - `IS_INTERACTIVE_SHELL` - Whether or not the shell is interactive
@@ -25,21 +30,21 @@ between systems; things like application settings, file organizations, etc.
 - `CFG_ENV` - Guard variable for checking if environment variables are set
 
 ##### Install Scripts
+The install scripts respect these environment variables when installing:
+
 - `DEBUG` - Output debug information
 - `DRY_RUN` - Don't actually affect the outside environment
 
 ##### Vim
+My Vim config uses these environment variables at startup:
+
 - `VIM_DEBUG` - Debug flag for vim
 
 ### Flag Files
-- `installed-S` - Whether or not `S` has been run, where `S` is a script in the
-  install folder.
-- `vim-light-mode` - Whether or not Vim is dark or light mode
-- `vim-plugins-installed` - Whether or not plugins are installed; managed by scripts
-- `vim-plugins-enabled` - Whether or not plugins are enabled
-- `vim-lang-server-enabled` - Whether or not the lang server is enabled
-
-### Installation Scripts
-This repository includes multiple installation scripts for setting up a new computer,
-or just trying out some of my configurations. For more information about installation,
-please see `install/README.md`.
+- `installed-S` - Whether or not `S` has been run, where `S` is a Python script
+  in the install folder (e.g. `shell.py` is represented with `installed-shell`).
+- `vim-S` A Vim flag, where `S` is the name of the flag
+  - `light-mode` - Whether or not Vim is dark or light mode
+  - `plugins-installed` - Whether or not plugins are installed; managed by scripts
+  - `plugins-enabled` - Whether or not plugins are enabled
+  - `lang-server-enabled` - Whether or not the lang server is enabled
