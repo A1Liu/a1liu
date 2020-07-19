@@ -44,7 +44,7 @@ if !ReadFlag('vim-plugins-installed')
     let s:pathogen_install_path = PathJoin(s:autoload_path, 'pathogen.vim')
     execute 'silent !curl -LSso ' . s:pathogen_install_path . ' https://tpo.pe/pathogen.vim'
   endif
-  SetFlag('vim-plugins-installed', 1)
+  call SetFlag('vim-plugins-installed', 1)
 endif
 
 if g:os !=? 'Windows'
@@ -99,19 +99,21 @@ augroup AutoFormatting
 augroup END
 
 " Language server support because I have to I guess
-Plug 'autozimu/LanguageClient-neovim'
-let g:LanguageClient_serverCommands = {
-      \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-      \ 'go'   : ['gopls'],
-      \ 'swift': ['xcrun', 'sourcekit-ls'],
-      \ }
-command! LCRename :call LanguageClient#textDocument_rename()
-command! LCHover :call LanguageClient#textDocument_hover()
-command! LCAction :call LanguageClient_textDocument_codeAction()
-command! LCContext :call LanguageClient_contextMenu()
-command! LCStart LanguageClientStart
-command! LCStart LanguageClientStart
-command! LCStop LanguageClientStop
+if ReadFlag('vim-lang-server-enabled')
+  Plug 'autozimu/LanguageClient-neovim'
+  let g:LanguageClient_serverCommands = {
+        \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+        \ 'go'   : ['gopls'],
+        \ 'swift': ['xcrun', 'sourcekit-ls'],
+        \ }
+  command! LCRename :call LanguageClient#textDocument_rename()
+  command! LCHover :call LanguageClient#textDocument_hover()
+  command! LCAction :call LanguageClient_textDocument_codeAction()
+  command! LCContext :call LanguageClient_contextMenu()
+  command! LCStart LanguageClientStart
+  command! LCStart LanguageClientStart
+  command! LCStop LanguageClientStop
+endif
 
 
 "" Tim Pope Plugins <3

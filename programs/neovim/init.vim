@@ -44,7 +44,7 @@ call DebugPrint('vim home path is: ' . g:vim_home_path)
 call DebugPrint('config path is: ' . g:cfg_dir)
 
 " Toggles flag and returns new value
-function ToggleFlag(flag)
+function! ToggleFlag(flag)
   let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
   if filereadable(l:flag_path)
     execute "call delete(fnameescape('" . l:flag_path . "'))"
@@ -55,7 +55,7 @@ function ToggleFlag(flag)
   endif
 endfunction
 
-function SetFlag(flag, value)
+function! SetFlag(flag, value)
   let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
   let l:prev_value = filereadable(l:flag_path)
 
@@ -68,7 +68,7 @@ function SetFlag(flag, value)
   return l:prev_value
 endfunction
 
-function ReadFlag(flag)
+function! ReadFlag(flag)
   let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
   return filereadable(l:flag_path)
 endfunction
@@ -223,7 +223,9 @@ augroup TabContext
   autocmd!
   autocmd TabEnter * if exists("t:wd") | exe "cd " . t:wd | endif
   autocmd TabLeave * let t:wd = getcwd()
-  autocmd TabNew * try | exe "cd ". PathJoin('~', 'code') | catch | cd ~ | endtry
+  if exists('##TabNew')
+    autocmd TabNew * try | exe "cd ". PathJoin('~', 'code') | catch | cd ~ | endtry
+  endif
 augroup END
 
 
