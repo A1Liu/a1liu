@@ -4,11 +4,10 @@ All of these scripts should be run locally by cloning the repository first.
 ## Available Scripts
 The following scripts are usable:
 
-- `shell.py` - Installs editor/shell configurations for a working shell.
+- `shell.py` - Installs shell configurations for a working shell.
+- `vim.py` - Installs Vim configurations.
 - `integrations.py` installs Git and Tmux configurations.
-- `elementaryos` - Installs useful programs for ElementaryOS.
-- `mac` - Installs useful programs for MacOS.
-- `windows.ps1` - Sets up programs like Vim and Windows Terminal to work properly.
+- `setup/S` - Installs useful programs for an operating system called `S`
 
 ## Installation Instructions
 The instructions below supplement the installation scripts in this directory, and
@@ -19,16 +18,27 @@ This script depends on Python 3 being installed.
 
 1. Clone repository with `git clone https://github.com/A1Liu/config.git`
 2. Install environment using `python3 install/shell.py`. Replaced files will be
-2  stored in `local/preconf`, under their original name.
+   stored in `local/preconf`, under their original name.
 
 To undo, run `python3 install/undo/shell.py`. It'll reset your configuration to
+before the install script was run. Note that this requires the appropriate files
+to have been saved in `local/preconf`.
+
+###  Vim
+This script depends on Python 3 being installed.
+
+1. Clone repository with `git clone https://github.com/A1Liu/config.git`
+2. Install environment using `python3 install/vim.py`. Replaced files will be
+   stored in `local/preconf`, under their original name.
+
+To undo, run `python3 install/undo/vim.py`. It'll reset your configuration to
 before the install script was run. Note that this requires the appropriate files
 to have been saved in `local/preconf`.
 
 ### MacOS
 1. Install XCode tools using `xcode-select --install`
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-3. Install software using `. install/mac` (this will require admin access)
+3. Install software using `. setup/mac` (this will require admin access)
 4. Remove annoying Terminal stuff:
    1. Preferences > Profiles > Shell > When Shell Exits
    1. Preferences > Profiles > Advanced > Bell > Audible bell
@@ -37,7 +47,7 @@ to have been saved in `local/preconf`.
 ### ElementaryOS
 1. Install Git using `sudo apt-get install git`
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-2. Install software using `. install/elementaryos` (this will require admin access)
+2. Install software using `. setup/elementaryos` (this will require admin access)
 3. Install keybindings by going into `settings -> keyboard -> layout`
 4. Set up ssh stuff with `ssh-keygen`
 5. Remove bell sounds with `sudo vi /etc/inputrc`, uncommenting the line `set bell-style none`
@@ -64,9 +74,9 @@ to have been saved in `local/preconf`.
    it's the 64-bit version.
 
 5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
-   the settings stored in this repository under `compat/windows/keybindings.skl`
+   the settings stored in this repository under `compat\windows\keybindings.skl`
 
-6. Run setup script `windows.ps1`.
+6. Run setup script `setup\windows.ps1`.
 
 7. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
    and customize the install by ensuring that it's installed for all users, adding
