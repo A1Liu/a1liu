@@ -1,4 +1,3 @@
-
 " Print debugging information
 function! DebugPrint(message)
   if $VIM_DEBUG == '1'

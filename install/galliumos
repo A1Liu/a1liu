@@ -1,20 +1,34 @@
-#!/bin/sh
-# TODO Make this work better with cloning and stuff; i.e. make it
-# so that this works without needing to first install git and clone
+#!/bin/bash
+
+# Assumes Git has already been installed
 project="$(dirname $0)"
 export project="$(dirname "$project")"
 
+sudo echo
+
 # Updating, upgrading
-apt dist-upgrade -y
-apt update -y
-apt upgrade -y
+sudo apt dist-upgrade -y
+sudo apt update -y
+sudo apt upgrade -y
+
+sudo apt install -y firefox
 
 # Pretty useful software
-apt install -y \
+sudo apt install -y \
 software-properties-common snapd \
 exfat-utils exfat-fuse ntfs-3g \
 default-jre default-jdk \
-build-essential \
-conky-all gcalcli \
-python3.6 python2.7
+build-essential
 
+# install tmux, courtesy of https://gist.github.com/japrescott/aa15cb024fe38ea36849f5f62c3314a3
+sudo apt install -y libevent-dev libncurses-dev make
+wget https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz
+tar xvzf tmux-2.7.tar.gz
+cd tmux-2.7/
+./configure && make
+make install
+cd ..
+rm -rf ./tmux-2.7*
+
+tic -x "$project/programs/xterm-256color-italic.terminfo" \
+&& tic -x "$project/programs/tmux-256color.terminfo"
