@@ -17,18 +17,13 @@ if config.debug_mode():
     configure_logger(level=DEBUG)
     configure_logger(files.move_safe, level=DEBUG)
 
-debug(f"Config directory is:         {config.project_dir}")
-debug(f"Installation directory is:   {config.install_dir}")
-debug(f"Machine-local directory is:  {config.local_dir}")
-debug(f"Preconfig directory is:      {config.move_dir}")
-
 print_template = f"""#!/bin/sh
 
-export CFG_DIR="{project_dir}"
+export CFG_DIR="{config.project_dir}"
 CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"
 IS_INTERACTIVE_SHELL=%s
 
-. "{project_dir}/shells/dispatch"
+. "{config.project_dir}/shells/dispatch"
 """
 
 debug("print_template=",
@@ -44,11 +39,6 @@ config.add_safe("~/.bash_profile", "local/shell_interact_init")
 config.add_safe("~/.bashrc", "local/shell_interact_init")
 config.add_safe("~/.inputrc", "shells/inputrc")
 config.add_safe("~/.zshrc", "local/shell_interact_init")
-config.add_safe("~/.vimrc", "programs/neovim/init.vim")
-if platform.system() == "Windows":
-    config.add_safe("~/vimfiles", "programs/neovim")
-else:
-    config.add_safe("~/.vim", "programs/neovim")
 
 # Confirm install
 open(config.install_flag_filename("shell"), 'w').close()
