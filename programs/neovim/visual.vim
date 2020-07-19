@@ -75,12 +75,12 @@ function! SynStack()
   echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
 endfunction
 
-command! ToggleBgFlag call ToggleFlag('vim-light-mode') | call ReadBgFlag()
-command! ToggleBg call ToggleFlag('vim-light-mode') | call ReadBgFlag()
+command! ToggleBgFlag call ToggleFlag('light-mode') | call ReadBgFlag()
+command! ToggleBg call ToggleFlag('light-mode') | call ReadBgFlag()
 
 command! ReadBgFlag call ReadBgFlag()
 function! ReadBgFlag()
-  if ReadFlag('vim-light-mode')
+  if ReadFlag('light-mode')
     set background=light
   else
     set background=dark
@@ -89,10 +89,10 @@ endfunction
 ReadBgFlag
 
 " Color Scheme
-if g:first_run || !g:plugins_enabled
-  colorscheme default
-else
+if g:plugins_installed && g:plugins_enabled
   colorscheme solarized8_high
+else
+  colorscheme default
 endif
 
 " Font on GUI Programs

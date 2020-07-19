@@ -3,13 +3,14 @@
 let s:plug_home = PathJoin(g:vim_home_path, 'plugged')
 let s:pathogen_home = PathJoin(g:vim_home_path, 'bundle')
 let s:autoload_path = PathJoin(g:vim_home_path, 'autoload')
+let g:plugins_installed = ReadFlag('plugins-installed')
 call DebugPrint('plug home is: ' . s:plug_home)
 call DebugPrint('pathogen home is: ' . s:pathogen_home)
 
 let s:plugins_list = []
 function! InstallPathogenPlugin(path)
-  let s:plugins_list = s:plugins_list + [ a:path ]
-  if g:first_run
+  s:plugins_list = s:plugins_list + [ a:path ]
+  if s:plugins_installed
     let s:cwd = getcwd()
     execute 'cd ' . s:pathogen_home
     execute 'silent !git clone https://github.com/' . a:path
@@ -33,7 +34,7 @@ function! ReinstallPathogenPlugins()
   execute pathogen#infect()
 endfunction
 
-if !ReadFlag('vim-plugins-installed')
+if !g:plugins_installed
   call DebugPrint('plugins not installed, installing package manager...')
   if g:os !=? 'Windows'
     let s:plug_install_path = PathJoin(s:autoload_path, 'plug.vim')
@@ -44,7 +45,7 @@ if !ReadFlag('vim-plugins-installed')
     let s:pathogen_install_path = PathJoin(s:autoload_path, 'pathogen.vim')
     execute 'silent !curl -LSso ' . s:pathogen_install_path . ' https://tpo.pe/pathogen.vim'
   endif
-  call SetFlag('vim-plugins-installed', 1)
+  call SetFlag('plugins-installed', 1)
 endif
 
 if g:os !=? 'Windows'
@@ -99,7 +100,7 @@ augroup AutoFormatting
 augroup END
 
 " Language server support because I have to I guess
-if ReadFlag('vim-lang-server-enabled')
+if ReadFlag('lang-server-enabled')
   Plug 'autozimu/LanguageClient-neovim'
   let g:LanguageClient_serverCommands = {
         \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],

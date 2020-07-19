@@ -33,10 +33,11 @@ between systems; things like application settings, file organizations, etc.
 
 ### Flag Files
 - `installed-S` - Whether or not `S` has been run, where `S` is a script in the
-  install folder. This includes Vim plugins.
+  install folder.
 - `vim-light-mode` - Whether or not Vim is dark or light mode
-- `vim-plugins-enabled` - Whether or not plugins are installed
+- `vim-plugins-installed` - Whether or not plugins are installed; managed by scripts
 - `vim-plugins-enabled` - Whether or not plugins are enabled
+- `vim-lang-server-enabled` - Whether or not the lang server is enabled
 
 ### Installation Scripts
 This repository includes multiple installation scripts for setting up a new computer,

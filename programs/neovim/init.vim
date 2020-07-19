@@ -44,7 +44,7 @@ call DebugPrint('config path is: ' . g:cfg_dir)
 
 " Toggles flag and returns new value
 function! ToggleFlag(flag)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
   if filereadable(l:flag_path)
     execute "call delete(fnameescape('" . l:flag_path . "'))"
     return 0
@@ -55,7 +55,7 @@ function! ToggleFlag(flag)
 endfunction
 
 function! SetFlag(flag, value)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
   let l:prev_value = filereadable(l:flag_path)
 
   if a:value
@@ -68,14 +68,9 @@ function! SetFlag(flag, value)
 endfunction
 
 function! ReadFlag(flag)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', a:flag)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
   return filereadable(l:flag_path)
 endfunction
-
-let g:first_run = !SetFlag('installed-vim', 1)
-if g:first_run
-  call DebugPrint('first run through')
-endif
 
 "" Security
 set nomodeline modelines=0
@@ -96,7 +91,7 @@ endif
 
 
 "" Plugins
-let g:plugins_enabled = ReadFlag('vim-plugins-enabled')
+let g:plugins_enabled = ReadFlag('plugins-enabled')
 if g:plugins_enabled
   let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
   execute 'source ' . s:temp
