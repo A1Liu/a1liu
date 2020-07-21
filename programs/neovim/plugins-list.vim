@@ -9,7 +9,7 @@ call DebugPrint('pathogen home is: ' . s:pathogen_home)
 
 let s:plugins_list = []
 function! InstallPathogenPlugin(path)
-  call DebugPrint('adding plugin: ' . path)
+  call DebugPrint('adding plugin: ' . a:path)
   let s:plugins_list = s:plugins_list + [ a:path ]
   if !g:plugins_installed
     let s:cwd = getcwd()
