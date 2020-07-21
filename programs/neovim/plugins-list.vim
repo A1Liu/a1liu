@@ -9,8 +9,9 @@ call DebugPrint('pathogen home is: ' . s:pathogen_home)
 
 let s:plugins_list = []
 function! InstallPathogenPlugin(path)
-  s:plugins_list = s:plugins_list + [ a:path ]
-  if s:plugins_installed
+  call DebugPrint('adding plugin: ' . path)
+  let s:plugins_list = s:plugins_list + [ a:path ]
+  if !g:plugins_installed
     let s:cwd = getcwd()
     execute 'cd ' . s:pathogen_home
     execute 'silent !git clone https://github.com/' . a:path
@@ -84,6 +85,11 @@ let g:formatters_java = ['clangformat']
 let g:formatters_javascript = ['prettier', 'clangformat']
 let g:formatters_arduino = ['clangformat']
 let g:formatters_swift = ['swiftformat']
+if DebugPrint('autoformat in verbose mode')
+  let g:autoformat_verbosemode = 1
+else
+  let g:autoformat_verbosemode = 0
+endif
 
 augroup AutoFormatting
   autocmd!
