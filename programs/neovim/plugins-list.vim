@@ -71,20 +71,24 @@ endif
 Plug 'lifepillar/vim-solarized8'
 
 " Languages
-Plug 'sheerun/vim-polyglot'
-let g:rustfmt_autosave = 1
-let g:vim_markdown_math = 1
-let g:vim_markdown_frontmatter = 1
-let g:vim_markdown_folding_disabled = 1
-let g:vim_markdown_new_list_item_indent = 0
-let g:vim_markdown_auto_insert_bullets = 0
+if ReadFlag('polyglot-enabled')
+  Plug 'sheerun/vim-polyglot'
+  let g:rustfmt_autosave = 1
+  let g:vim_markdown_math = 1
+  let g:vim_markdown_frontmatter = 1
+  let g:vim_markdown_folding_disabled = 1
+  let g:vim_markdown_new_list_item_indent = 0
+  let g:vim_markdown_auto_insert_bullets = 0
+endif
 
 " Snippets
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-let g:UltiSnipsExpandTrigger="<C-N><C-N>"
-let g:UltiSnipsJumpForwardTrigger="<C-R>"
-let g:UltiSnipsJumpBackwardTrigger="<C-E>"
+if ReadFlag('snippets-enabled')
+  Plug 'SirVer/ultisnips'
+  Plug 'honza/vim-snippets'
+  let g:UltiSnipsExpandTrigger="<C-N><C-N>"
+  let g:UltiSnipsJumpForwardTrigger="<C-R>"
+  let g:UltiSnipsJumpBackwardTrigger="<C-E>"
+endif
 
 " Autoformatters
 Plug 'Chiel92/vim-autoformat'
