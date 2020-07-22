@@ -44,7 +44,6 @@ if !g:plugins_installed
     execute 'silent !curl -LSso ' . s:plug_script_path .
           \ ' https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     execute 'source ' . s:plug_script_path
-    PlugInstall
   else
     execute 'silent !curl -LSso ' . s:pathogen_script_path .
           \ ' https://tpo.pe/pathogen.vim'
@@ -143,6 +142,9 @@ Plug 'tpope/vim-fugitive'
 
 if g:os !=? 'Windows'
   call plug#end()
+  if !g:plugins_installed
+    PlugInstall
+  endif
 else
   execute pathogen#infect()
 endif

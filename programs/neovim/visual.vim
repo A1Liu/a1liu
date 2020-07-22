@@ -93,6 +93,7 @@ if g:plugins_enabled && g:plugins_installed
   try
     colorscheme solarized8_high
   catch
+    call DebugPrint('failed to load solarized8_high')
     colorscheme default
   endtry
 else
