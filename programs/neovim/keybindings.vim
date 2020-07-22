@@ -4,18 +4,30 @@
 let mapleader=" "
 nnoremap <SPACE> <Nop>
 
-" Mapping <C-H> to escape
 noremap <C-C> <Esc>
 noremap! <C-C> <Esc>
 snoremap <C-C> <Esc>
-snoremap <C-H> <Esc>
-noremap <C-H> <Esc>
-noremap! <C-H> <Esc>
-cnoremap <C-H> <C-C>
-nnoremap r<C-H> <Nop>
 nnoremap r<C-C> <Nop>
 cunmap <C-C>
 
+if !has('nvim')
+  " Mapping <C-H> to escape
+  snoremap <C-H> <Esc>
+  noremap <C-H> <Esc>
+  noremap! <C-H> <Esc>
+  cnoremap <C-H> <C-C>
+  nnoremap r<C-H> <Nop>
+
+  " Terminal keybindings
+  if exists(':terminal')
+    tnoremap <C-H> <C-\><C-N>
+    tnoremap <C-W><C-H> <C-W>h
+  endif
+endif
+
+noremap <C-C> <Esc>
+noremap! <C-C> <Esc>
+snoremap <C-C> <Esc>
 " Fixing C-Left and C-Right
 " https://unix.stackexchange.com/questions/1709/how-to-fix-ctrl-arrows-in-vim
 noremap <ESC>[1;5D <C-Left>
@@ -68,12 +80,6 @@ nnoremap <S-Q> <Nop>
 
 " Formatting with <Leader><S>
 nnoremap <Leader><C-S> :FormatCode<CR>
-
-" Terminal keybindings
-if exists(':terminal')
-  tnoremap <C-H> <C-\><C-N>
-  tnoremap <C-W><C-H> <C-W>h
-endif
 
 " Placeholder
 " function! NextPlaceholder()
