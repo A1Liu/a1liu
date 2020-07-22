@@ -41,9 +41,8 @@ endfunction
 if !g:plugins_installed
   call DebugPrint('plugins not installed, installing package manager...')
   if g:os !=? 'Windows'
-    execute 'silent !curl -fLo ' . s:plug_script_path .
+    execute 'silent !curl -LSso ' . s:plug_script_path .
           \ ' https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    " autocmd VimEnter * PlugInstall --sync | call RunInit()
   else
     execute 'silent !curl -LSso ' . s:pathogen_script_path .
           \ ' https://tpo.pe/pathogen.vim'
