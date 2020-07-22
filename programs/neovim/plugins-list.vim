@@ -43,18 +43,19 @@ if !g:plugins_installed
   if g:os !=? 'Windows'
     execute 'silent !curl -fLo ' . s:plug_script_path .
           \ ' https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    autocmd VimEnter * PlugInstall --sync | call RunInit()
+    " autocmd VimEnter * PlugInstall --sync | call RunInit()
   else
     execute 'silent !curl -LSso ' . s:pathogen_script_path .
           \ ' https://tpo.pe/pathogen.vim'
   endif
   call SetFlag('plugins-installed', 1)
-else " This forces the loading of the script, so that `sudo vim` can work nicely
-  if g:os !=? 'Windows'
-    execute 'source ' . s:plug_script_path
-  else
-    execute 'source ' . s:pathogen_script_path
-  endif
+endif
+
+" This forces the loading of the script, so that `sudo vim` can work nicely
+if g:os !=? 'Windows'
+  execute 'source ' . s:plug_script_path
+else
+  execute 'source ' . s:pathogen_script_path
 endif
 
 if g:os !=? 'Windows'
