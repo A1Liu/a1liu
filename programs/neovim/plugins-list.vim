@@ -2,10 +2,13 @@
 
 let s:plug_home = PathJoin(g:vim_home_path, 'plugged')
 let s:pathogen_home = PathJoin(g:vim_home_path, 'bundle')
-let s:autoload_path = PathJoin(g:vim_home_path, 'autoload')
+let s:plug_script_path = PathJoin(g:vim_home_path, 'plug.vim')
+let s:pathogen_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
 let g:plugins_installed = ReadFlag('plugins-installed')
 call DebugPrint('plug home is: ' . s:plug_home)
 call DebugPrint('pathogen home is: ' . s:pathogen_home)
+call DebugPrint('plug script is: ' . s:plug_script_path)
+call DebugPrint('pathogen script is: ' . s:pathogen_script_path)
 
 let s:plugins_list = []
 function! InstallPathogenPlugin(path)
@@ -38,15 +41,20 @@ endfunction
 if !g:plugins_installed
   call DebugPrint('plugins not installed, installing package manager...')
   if g:os !=? 'Windows'
-    let s:plug_install_path = PathJoin(s:autoload_path, 'plug.vim')
-    execute 'silent !curl -fLo ' . s:plug_install_path
-          \ . ' https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+    execute 'silent !curl -fLo ' . s:plug_script_path .
+          \ ' https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+    autocmd VimEnter * PlugInstall --sync | call RunInit()
   else
-    let s:pathogen_install_path = PathJoin(s:autoload_path, 'pathogen.vim')
-    execute 'silent !curl -LSso ' . s:pathogen_install_path . ' https://tpo.pe/pathogen.vim'
+    execute 'silent !curl -LSso ' . s:pathogen_script_path .
+          \ ' https://tpo.pe/pathogen.vim'
   endif
   call SetFlag('plugins-installed', 1)
+else " This forces the loading of the script, so that `sudo vim` can work nicely
+  if g:os !=? 'Windows'
+    execute 'source ' . s:plug_script_path
+  else
+    execute 'source ' . s:pathogen_script_path
+  endif
 endif
 
 if g:os !=? 'Windows'

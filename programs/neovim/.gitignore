@@ -1,5 +1,8 @@
 .netrwhist
 
+plug.vim
+pathogen.vim
+
 /autoload/*
 !/autoload/.gitkeep
 
@@ -16,12 +19,3 @@
 !/bundle/.gitkeep
 
 /plugged
-/view
-/indent
-/ftdetect
-/ftplugin
-/keymap
-/syntax
-/utilsnips
-/compiler
-/doc

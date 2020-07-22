@@ -89,8 +89,12 @@ endfunction
 ReadBgFlag
 
 " Color Scheme
-if g:plugins_enabled && g:plugins_installed 
-  colorscheme solarized8_high
+if g:plugins_enabled && g:plugins_installed
+  try
+    colorscheme solarized8_high
+  catch
+    colorscheme default
+  endtry
 else
   colorscheme default
 endif

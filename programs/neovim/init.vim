@@ -203,7 +203,7 @@ call DebugPrint("undo dir is: " . s:temp)
 try
   function! RunInit()
     let save_pos = getpos(".")
-    source $MYVIMRC
+    execute 'source ' . PathJoin(g:vim_home_path, 'init.vim')
     call setpos(".", save_pos)
   endfunction
   command RunInit call RunInit()
