@@ -123,11 +123,49 @@ augroup END
 " Language server support because I have to I guess
 if ReadFlag('lang-server-enabled')
   Plug 'autozimu/LanguageClient-neovim'
-  let g:LanguageClient_serverCommands = {
-        \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-        \ 'go'   : ['gopls'],
-        \ 'swift': ['xcrun', 'sourcekit-ls'],
-        \ }
+  if g:os !=? 'Windows'
+    let g:LanguageClient_serverCommands = {
+          \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+          \ 'go'   : ['gopls'],
+          \ }
+  else
+    let g:LanguageClient_serverCommands = {
+          \ 'rust' : ['~/.cargo/bin/rustup.exe', 'run', 'stable', 'rls'],
+          \ 'go'   : ['gopls'],
+          \ }
+
+    let g:LanguageClient_diagnosticsDisplay = {
+          \ 1: {
+          \     "name": "Error",
+          \     "texthl": "ALEError",
+          \     "signText": "x",
+          \     "signTexthl": "ALEErrorSign",
+          \     "virtualTexthl": "Error",
+          \ },
+          \ 2: {
+          \     "name": "Warning",
+          \     "texthl": "ALEWarning",
+          \     "signText": "!",
+          \     "signTexthl": "ALEWarningSign",
+          \     "virtualTexthl": "Todo",
+          \ },
+          \ 3: {
+          \     "name": "Information",
+          \     "texthl": "ALEInfo",
+          \     "signText": "i",
+          \     "signTexthl": "ALEInfoSign",
+          \     "virtualTexthl": "Todo",
+          \ },
+          \ 4: {
+          \     "name": "Hint",
+          \     "texthl": "ALEInfo",
+          \     "signText": "?",
+          \     "signTexthl": "ALEInfoSign",
+          \     "virtualTexthl": "Todo",
+          \ },
+          \  }
+
+  endif
   command! LCRename :call LanguageClient#textDocument_rename()
   command! LCHover :call LanguageClient#textDocument_hover()
   command! LCAction :call LanguageClient_textDocument_codeAction()
