@@ -109,7 +109,7 @@ endif
 augroup AutoFormatting
   autocmd!
   autocmd FileType * let b:autoformat_enabled = 0
-  autocmd FileType java,c,cpp,go,arduino let b:autoformat_enabled = 1
+  autocmd FileType rust,java,c,cpp,go,arduino let b:autoformat_enabled = 1
   autocmd FileType swift let b:autoformat_enabled = 1
         \ | let b:autoformat_remove_trailing_spaces = 0
         \ | let b:autoformat_retab = 0
