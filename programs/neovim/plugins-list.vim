@@ -28,18 +28,19 @@ else
   let s:plugins_list = []
   function! AddPathogenPlugin(plugin)
     call DebugPrint('adding plugin: ' . a:plugin)
-    let s:plugins_list = s:plugins_list + [ a:plugin ]
+    let l:plugin_path = PathJoin(s:manager_home, split(a:plugin,'/')[1])
+    let s:plugins_list = s:plugins_list + [ l:plugin_path ]
   endfunction
 
   function! InstallPathogenPlugins()
     let s:cwd = getcwd()
     for plugin in s:plugins_list
-      let s:plugin_path = PathJoin(s:manager_home, split(plugin,'/')[1])
-      if empty(glob(s:plugin_path))
+      let l:plugin_path = PathJoin(s:manager_home, split(plugin,'/')[1])
+      if empty(glob(l:plugin_path))
         execute "cd " . s:manager_home
         execute 'silent !git clone https://github.com/' . plugin
       else
-        execute "cd " . s:plugin_path
+        execute "cd " . l:plugin_path
         execute 'silent !git pull'
       endif
     endfor
@@ -168,5 +169,5 @@ endif
 if g:os !=? 'Windows'
   call plug#end()
 else
-  execute pathogen#infect()
+  call call('pathogen#infect', s:plugins_list)
 endif

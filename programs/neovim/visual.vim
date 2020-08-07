@@ -29,6 +29,15 @@ if has('gui_running')
   set guioptions=cs
 endif
 
+" Color Scheme
+try
+  colorscheme solarized8_high
+  call DebugPrint('succeeded in loading solarized8_high')
+catch
+  call DebugPrint('failed to load solarized8_high')
+  colorscheme default
+endtry
+
 command! SynStack call SynStack()
 
 command! ToggleBgFlag call ToggleFlag('light-mode') | call ReadBgFlag()
@@ -43,15 +52,6 @@ function! ReadBgFlag()
   endif
 endfunction
 ReadBgFlag
-
-" Color Scheme
-try
-  colorscheme solarized8_high
-  call DebugPrint('succeeded in loading solarized8_high')
-catch
-  call DebugPrint('failed to load solarized8_high')
-  colorscheme default
-endtry
 
 " Font on GUI Programs
 if g:os ==? 'Windows'
