@@ -29,6 +29,16 @@ function! SetFlag(flag, value)
   return l:prev_value
 endfunction
 
+function! ListFlags(flag_glob)
+  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag_glob)
+  let l:flags = []
+  for flag in glob(l:flag_path, 0, 1)
+    let l:flags = l:flags + [ fnamemodify(flag, ':t') ]
+  endfor
+
+  return l:flags
+endfunction
+
 function! GoToCurrentTag() " Go to definition of word under cursor
   return GoToTag(expand("<cword>"))
 endfunction
@@ -58,13 +68,11 @@ function! SynStack()
   echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
 endfunction
 
-"" Commands
 try
   function! RunInit()
     let save_pos = getpos(".")
     execute 'source ' . PathJoin(g:vim_home_path, 'init.vim')
     call setpos(".", save_pos)
   endfunction
-  command! RunInit :call RunInit()
 catch
 endtry
