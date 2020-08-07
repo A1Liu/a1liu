@@ -1,4 +1,14 @@
 "" Visual Changes
+
+" Getting terminal colors to work
+" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
+if exists('+termguicolors') && has("termguicolors") && $TERM_PROGRAM !=? "Apple_Terminal" && g:os ==? 'Darwin'
+  call DebugPrint("term gui colors enabled")
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 set number norelativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
 set cc=80
@@ -14,66 +24,12 @@ set statusline+=\ %p%%
 set statusline+=\ %c:%l
 set statusline+=\
 
-" Hiding the UI
-" https://unix.stackexchange.com/questions/140898/vim-hide-status-line-in-the-bottom
-let s:hidden_all = 0
-function! ToggleHiddenAll()
-  if s:hidden_all  == 0
-    let s:hidden_all = 1
-    set noshowmode
-    set noruler
-    set laststatus=0
-    set noshowcmd
-    set nocul
-    set cc=
-  else
-    let s:hidden_all = 0
-    set showmode
-    if &ft != 'netrw'
-      set ruler
-      set cul
-      set cc=80
-    endif
-    set laststatus=2
-    set showcmd
-  endif
-endfunction
-
 " GUI Mode
 if has('gui_running')
   set guioptions=cs
 endif
 
-" Split panes more obvious, terminal prettier
-augroup BgHighlight
-  autocmd!
-  autocmd BufWinEnter,WinEnter,BufEnter *
-        \ if &ft != 'netrw' && &buftype !='terminal' |
-        \ setlocal cul cc=80 |
-        \ let s:hidden_all = 1 | call ToggleHiddenAll() |
-        \ endif " Set color column
-  if exists(':terminal')
-    if has('nvim')
-      autocmd TermOpen * setlocal nonumber norelativenumber cc= wrap
-    elseif exists('##TerminalOpen')
-      autocmd TerminalOpen * setlocal nonumber norelativenumber cc= wrap
-    endif
-  endif
-  autocmd BufWinEnter,WinEnter * if &ft == 'netrw' | setlocal cc= | endif
-  autocmd BufWinLeave,WinLeave *
-        \ if &ft != 'netrw' && &buftype != 'terminal' |
-        \ setlocal nocul |
-        \ setlocal cc= |
-        \ endif
-augroup END
-
 command! SynStack call SynStack()
-function! SynStack()
-  if !exists("*synstack")
-    return
-  endif
-  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
-endfunction
 
 command! ToggleBgFlag call ToggleFlag('light-mode') | call ReadBgFlag()
 command! ToggleBg call ToggleFlag('light-mode') | call ReadBgFlag()
@@ -89,16 +45,13 @@ endfunction
 ReadBgFlag
 
 " Color Scheme
-if g:plugins_enabled && g:plugins_installed
-  try
-    colorscheme solarized8_high
-  catch
-    call DebugPrint('failed to load solarized8_high')
-    colorscheme default
-  endtry
-else
+try
+  colorscheme solarized8_high
+  call DebugPrint('succeeded in loading solarized8_high')
+catch
+  call DebugPrint('failed to load solarized8_high')
   colorscheme default
-endif
+endtry
 
 " Font on GUI Programs
 if g:os ==? 'Windows'

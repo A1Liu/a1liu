@@ -7,24 +7,7 @@ function! DebugPrint(message)
   return 0
 endfunction
 
-if $VIM_DEBUG != ''
-  let g:autoformat_verbosemode=1
-endif
 call DebugPrint('debug mode active')
-
-" Setting g:os flag
-if !exists('g:os')
-  let g:os = substitute(system('uname'), '\n', '', '')
-  if has('win64') || has('win32') || has('win16') " || g:os =~ '^MSYS_NT\.\+$'
-    let g:os = 'Windows'
-    " https://stackoverflow.com/questions/94382/vim-with-powershell
-    set shell=cmd.exe
-    " set shellcmdflag=/c\ powershell.exe\ -NoLogo\ -NoProfile\ -NonInteractive\ -ExecutionPolicy\ RemoteSigned
-    " set shellpipe=|
-    " set shellredir=>
-  endif
-endif
-call DebugPrint('OS is: ' . g:os)
 
 " Combine paths in a cross-platform way
 function! PathJoin(...)
@@ -35,42 +18,21 @@ function! PathJoin(...)
   endif
 endfunction
 
+" Setting g:os flag
+if !exists('g:os')
+  let g:os = substitute(system('uname'), '\n', '', '')
+  if has('win64') || has('win32') || has('win16') " || g:os =~ '^MSYS_NT\.\+$'
+    let g:os = 'Windows'
+    set shell=cmd.exe
+  endif
+endif
+call DebugPrint('OS is: ' . g:os)
+
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
-let g:placeholder = '<++>'
 call DebugPrint('vim home path is: ' . g:vim_home_path)
 call DebugPrint('config path is: ' . g:cfg_dir)
-
-" Toggles flag and returns new value
-function! ToggleFlag(flag)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
-  if filereadable(l:flag_path)
-    execute "call delete(fnameescape('" . l:flag_path . "'))"
-    return 0
-  else
-    execute "call writefile([], '" . l:flag_path . "')"
-    return 1
-  endif
-endfunction
-
-function! SetFlag(flag, value)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
-  let l:prev_value = filereadable(l:flag_path)
-
-  if a:value
-    execute "call writefile([], '" . l:flag_path . "')"
-  else
-    execute "call delete(fnameescape('" . l:flag_path . "'))"
-  endif
-
-  return l:prev_value
-endfunction
-
-function! ReadFlag(flag)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
-  return filereadable(l:flag_path)
-endfunction
 
 "" Security
 set nomodeline modelines=0
@@ -80,19 +42,12 @@ set guicursor= " Don't want unknown characters in Linux
 set t_ut= " Dont want background to do weird stuff
 set nocompatible
 
-" Getting terminal colors to work
-" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
-if exists('+termguicolors') && has("termguicolors") && $TERM_PROGRAM !=? "Apple_Terminal" && g:os ==? 'Darwin'
-  call DebugPrint("term gui colors enabled")
-  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-  set termguicolors
-endif
-
+"" Functions
+let s:temp = PathJoin(g:vim_home_path, 'functions.vim')
+execute 'source ' . s:temp
 
 "" Plugins
-let g:plugins_enabled = ReadFlag('plugins-enabled')
-if g:plugins_enabled
+if ReadFlag('plugins-*-enabled')
   let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
   execute 'source ' . s:temp
 endif
@@ -198,19 +153,7 @@ let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
 call DebugPrint("undo dir is: " . s:temp)
 
-
-"" Commands
-try
-  function! RunInit()
-    let save_pos = getpos(".")
-    execute 'source ' . PathJoin(g:vim_home_path, 'init.vim')
-    call setpos(".", save_pos)
-  endfunction
-  command RunInit call RunInit()
-catch
-endtry
-
-" Vim tab-local working directories
+"" Tab-local working directories
 " command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
 augroup TabContext
   " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
@@ -222,37 +165,15 @@ augroup TabContext
   endif
 augroup END
 
+"" Commands
+command! RunInit :call RunInit()
 
 "" File System/Navigation
-6
-" Rooter
-function! GitRoot()
-  return system('git rev-parse --show-toplevel')
-endfunction
-
 " Ctags
 " Code mostly from https://github.com/webastien/vim-ctags
 set tags=./tags,./TAGS,tags,TAGS
 
-function! GoToCurrentTag() " Go to definition of word under cursor
-  return GoToTag(expand("<cword>"))
-endfunction
-
-function! GoToTag(tagname) " Go to a tag
-  try
-    if a:tagname != ""
-      silent exe 'ts ' . a:tagname
-      let l:old_tags = &tags
-      let &tags = get(tagfiles(), 0) " Don't know why this is necessary but it is
-      exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
-      let &tags = l:old_tags
-    endif
-  catch
-  endtry
-endfunction
-
 command! Def :call LanguageClient#textDocument_definition()
-
 
 "" Netrw
 let g:netrw_banner = 0

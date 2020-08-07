@@ -78,21 +78,12 @@ nnoremap ; :
 " Disabling ex mode
 nnoremap <S-Q> <Nop>
 
-" Formatting with <Leader><S>
-nnoremap <Leader><C-S> :FormatCode<CR>
-
 " Placeholder
-" function! NextPlaceholder()
-"   execute 'normal /' . g:placeholder . '\<CR>'
-"   ". '<CR>df' . g:placeholder[-1:]
-"   " startinsert
-" endfunction
-" nnoremap <Leader><Tab> :call NextPlaceholder()<CR>
 nnoremap <Leader><Tab> /<++><CR>cf>
 nnoremap <Leader><S-Tab> ?<++><CR>cf>
 
 " Go to definition
-nnoremap gd :Def<CR>
+nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
 
 "" Tabs
 nnoremap <C-W><C-t> :tabnew<Enter>

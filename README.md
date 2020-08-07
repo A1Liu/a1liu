@@ -45,6 +45,8 @@ My Vim config uses these environment variables at startup:
   in the install folder (e.g. `shell.py` is represented with `installed-shell`).
 - `vim-S` A Vim flag, where `S` is the name of the flag
   - `light-mode` - Whether or not Vim is dark or light mode
-  - `plugins-installed` - Whether or not plugins are installed; managed by scripts
-  - `plugins-enabled` - Whether or not plugins are enabled
-  - `lang-server-enabled` - Whether or not the lang server is enabled
+  - `plugins-base-enabled` - Whether or not the default plugins are enabled
+  - `plugins-solarized-enabled` - Whether or not the color scheme plugin is enabled
+  - `plugins-lsc-enabled` - Whether or not the language server client is enabled
+  - `plugins-snippets-enabled` - Whether or not vim-snippets is enabled
+  - `plugins-polyglot-enabled` - Whether or not vim-polyglot is enabled

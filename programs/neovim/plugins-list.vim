@@ -1,77 +1,97 @@
 "" Plugins
 
-let s:plug_home = PathJoin(g:vim_home_path, 'plugged')
-let s:pathogen_home = PathJoin(g:vim_home_path, 'bundle')
-let s:plug_script_path = PathJoin(g:vim_home_path, 'plug.vim')
-let s:pathogen_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
-let g:plugins_installed = ReadFlag('plugins-installed')
-call DebugPrint('plug home is: ' . s:plug_home)
-call DebugPrint('pathogen home is: ' . s:pathogen_home)
-call DebugPrint('plug script is: ' . s:plug_script_path)
-call DebugPrint('pathogen script is: ' . s:pathogen_script_path)
-
-let s:plugins_list = []
-function! InstallPathogenPlugin(path)
-  call DebugPrint('adding plugin: ' . a:path)
-  let s:plugins_list = s:plugins_list + [ a:path ]
-  if !g:plugins_installed
-    let s:cwd = getcwd()
-    execute 'cd ' . s:pathogen_home
-    execute 'silent !git clone https://github.com/' . a:path
-    execute 'cd ' . s:cwd
-  endif
-endfunction
-
-function! ReinstallPathogenPlugins()
-  let s:cwd = getcwd()
-  for plugin in s:plugins_list
-    let s:plugin_path = PathJoin(s:pathogen_home, split(plugin,'/')[1])
-    if empty(glob(s:plugin_path))
-      execute "cd " . s:pathogen_home
-      execute 'silent !git clone https://github.com/' . plugin
-    else
-      execute "cd " . s:plugin_path
-      execute 'silent !git pull'
-    endif
-  endfor
-  execute "cd " . s:cwd
-  execute pathogen#infect()
-endfunction
-
-if !g:plugins_installed
-  call DebugPrint('plugins not installed, installing package manager...')
-  if g:os !=? 'Windows'
-    execute 'silent !curl -LSso ' . s:plug_script_path .
-          \ ' https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    execute 'source ' . s:plug_script_path
-  else
-    execute 'silent !curl -LSso ' . s:pathogen_script_path .
-          \ ' https://tpo.pe/pathogen.vim'
-    execute 'source ' . s:pathogen_script_path
-  endif
-  call SetFlag('plugins-installed', 1)
+if g:os !=? 'Windows'
+  let s:manager_home = PathJoin(g:vim_home_path, 'plugged')
+  let s:manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
+  let s:manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 else
-  " This forces the loading of the script, so that `sudo vim` can work nicely
-  if g:os !=? 'Windows'
-    execute 'source ' . s:plug_script_path
-  else
-    execute 'source ' . s:pathogen_script_path
-  endif
+  let s:manager_home = PathJoin(g:vim_home_path, 'bundle')
+  let s:manager_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
+  let s:manager_script_url = 'https://tpo.pe/pathogen.vim'
 endif
 
+call DebugPrint('package manager home is: ' . s:manager_home)
+call DebugPrint('package manager script is: ' . s:manager_script_path)
+call DebugPrint('package manager source URL is: ' . s:manager_script_url)
+
+if empty(glob(s:manager_script_path))
+  call DebugPrint('installing package manager...')
+  execute 'silent !curl -LSso ' . s:manager_script_path . ' ' . s:manager_script_url
+endif
+
+" This forces the loading of the script, so that `sudo vim` can work nicely
+execute 'source ' . s:manager_script_path
 
 if g:os !=? 'Windows'
   call plug#begin()
 else
-  command! -nargs=1 Plug call InstallPathogenPlugin(<args>)
-  command! PlugInstall call ReinstallPathogenPlugins()
+  let s:plugins_list = []
+  function! AddPathogenPlugin(plugin)
+    call DebugPrint('adding plugin: ' . a:plugin)
+    let s:plugins_list = s:plugins_list + [ a:plugin ]
+  endfunction
+
+  function! InstallPathogenPlugins()
+    let s:cwd = getcwd()
+    for plugin in s:plugins_list
+      let s:plugin_path = PathJoin(s:manager_home, split(plugin,'/')[1])
+      if empty(glob(s:plugin_path))
+        execute "cd " . s:manager_home
+        execute 'silent !git clone https://github.com/' . plugin
+      else
+        execute "cd " . s:plugin_path
+        execute 'silent !git pull'
+      endif
+    endfor
+    execute "cd " . s:cwd
+    execute pathogen#infect()
+  endfunction
+
+  command! -nargs=1 Plug call AddPathogenPlugin(<args>)
+  command! PlugInstall call InstallPathogenPlugins()
 endif
 
-" Color Schemes
-Plug 'lifepillar/vim-solarized8'
+if ReadFlag('plugins-base-enabled')
+  " Autoformatters
+  Plug 'Chiel92/vim-autoformat'
+  let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
+  let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\"'"
+  let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
+  let g:formatdef_swiftformat = "'swiftformat --quiet'"
+  let g:formatters_java = ['clangformat']
+  let g:formatters_javascript = ['prettier', 'clangformat']
+  let g:formatters_arduino = ['clangformat']
+  let g:formatters_swift = ['swiftformat']
+  if DebugPrint('autoformat in verbose mode')
+    let g:autoformat_verbosemode = 1
+  else
+    let g:autoformat_verbosemode = 0
+  endif
+
+  augroup AutoFormatting
+    autocmd!
+    autocmd FileType * let b:autoformat_enabled = 0
+    autocmd FileType rust,java,c,cpp,go,arduino let b:autoformat_enabled = 1
+    autocmd FileType swift let b:autoformat_enabled = 1
+          \ | let b:autoformat_remove_trailing_spaces = 0
+          \ | let b:autoformat_retab = 0
+    autocmd FileType vim let b:autoformat_enabled = 1
+    autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
+    autocmd FileType markdown,tex let b:autoformat_autoindent = 0
+          \ | let b:autoformat_remove_trailing_spaces = 0
+          \ | let b:autoformat_retab = 0
+  augroup END
+
+  Plug 'tpope/vim-eunuch'
+  Plug 'tpope/vim-fugitive'
+endif
+
+if ReadFlag('plugins-solarized-enabled')
+  Plug 'lifepillar/vim-solarized8'
+endif
 
 " Languages
-if ReadFlag('polyglot-enabled')
+if ReadFlag('plugins-polyglot-enabled')
   Plug 'sheerun/vim-polyglot'
   let g:rustfmt_autosave = 1
   let g:vim_markdown_math = 1
@@ -82,7 +102,7 @@ if ReadFlag('polyglot-enabled')
 endif
 
 " Snippets
-if ReadFlag('snippets-enabled')
+if ReadFlag('plugins-snippets-enabled')
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   let g:UltiSnipsExpandTrigger="<C-N><C-N>"
@@ -90,38 +110,8 @@ if ReadFlag('snippets-enabled')
   let g:UltiSnipsJumpBackwardTrigger="<C-E>"
 endif
 
-" Autoformatters
-Plug 'Chiel92/vim-autoformat'
-let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
-let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\"'"
-let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
-let g:formatdef_swiftformat = "'swiftformat --quiet'"
-let g:formatters_java = ['clangformat']
-let g:formatters_javascript = ['prettier', 'clangformat']
-let g:formatters_arduino = ['clangformat']
-let g:formatters_swift = ['swiftformat']
-if DebugPrint('autoformat in verbose mode')
-  let g:autoformat_verbosemode = 1
-else
-  let g:autoformat_verbosemode = 0
-endif
-
-augroup AutoFormatting
-  autocmd!
-  autocmd FileType * let b:autoformat_enabled = 0
-  autocmd FileType rust,java,c,cpp,go,arduino let b:autoformat_enabled = 1
-  autocmd FileType swift let b:autoformat_enabled = 1
-        \ | let b:autoformat_remove_trailing_spaces = 0
-        \ | let b:autoformat_retab = 0
-  autocmd FileType vim let b:autoformat_enabled = 1
-  autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
-  autocmd FileType markdown,tex let b:autoformat_autoindent = 0
-        \ | let b:autoformat_remove_trailing_spaces = 0
-        \ | let b:autoformat_retab = 0
-augroup END
-
 " Language server support because I have to I guess
-if ReadFlag('lang-server-enabled')
+if ReadFlag('plugins-lsc-enabled')
   Plug 'autozimu/LanguageClient-neovim'
   if g:os !=? 'Windows'
     let g:LanguageClient_serverCommands = {
@@ -175,18 +165,8 @@ if ReadFlag('lang-server-enabled')
   command! LCStop LanguageClientStop
 endif
 
-
-"" Tim Pope Plugins <3
-
-" Unix Commands
-Plug 'tpope/vim-eunuch'
-Plug 'tpope/vim-fugitive'
-
 if g:os !=? 'Windows'
   call plug#end()
-  if !g:plugins_installed
-    PlugInstall
-  endif
 else
   execute pathogen#infect()
 endif
