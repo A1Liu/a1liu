@@ -1,11 +1,10 @@
 "" Plugins
 
+let s:manager_home = PathJoin(g:vim_home_path, 'plugged')
 if g:os !=? 'Windows'
-  let s:manager_home = PathJoin(g:vim_home_path, 'plugged')
   let s:manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
   let s:manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 else
-  let s:manager_home = PathJoin(g:vim_home_path, 'bundle')
   let s:manager_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
   let s:manager_script_url = 'https://tpo.pe/pathogen.vim'
 endif
@@ -29,26 +28,25 @@ else
   let g:plugin_paths = []
   function! AddPathogenPlugin(plugin)
     call DebugPrint('adding plugin: ' . a:plugin)
-    let l:plugin_path = PathJoin(s:manager_home, split(a:plugin,'/')[1])
+    let plugin_path = PathJoin(s:manager_home, split(a:plugin,'/')[1])
     call add(g:plugins_list, a:plugin)
-    call add(g:plugin_paths, l:plugin_path)
+    call add(g:plugin_paths, plugin_path)
   endfunction
 
   function! InstallPathogenPlugins()
-    let s:cwd = getcwd()
-    for plugin in Zip(g:plugins_list, g:plugin_paths)
-      let l:name = plugin[0]
-      let l:path = plugin[1]
-      if empty(glob(l:path))
+    let cwd = Cwd()
+
+    for [name, path] in Zip(g:plugins_list, g:plugin_paths)
+      if empty(glob(path))
         execute "cd " . s:manager_home
-        execute 'silent !git clone https://github.com/' . l:name
+        execute 'silent !git clone https://github.com/' . name
       else
-        execute "cd " . l:path
+        execute "cd " . path
         execute 'silent !git pull'
       endif
     endfor
-    execute "cd " . s:cwd
-    execute pathogen#infect()
+    execute "cd " . cwd
+    call call('pathogen#infect', g:plugin_paths)
   endfunction
 
   command! -nargs=1 Plug call AddPathogenPlugin(<args>)

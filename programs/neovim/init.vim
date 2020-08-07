@@ -115,8 +115,8 @@ set foldlevelstart=4
 
 " Markdown and Jekyll Settings
 function! MdJekyllSettings()
-  let l:begin=getline(1)
-  if l:begin ==# "---"
+  let begin=getline(1)
+  if begin ==# "---"
     set tabstop=3 shiftwidth=3 softtabstop=3
   endif
 endfunction
@@ -159,7 +159,7 @@ augroup TabContext
   " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
   autocmd!
   autocmd TabEnter * if exists("t:wd") | exe "cd " . t:wd | endif
-  autocmd TabLeave * let t:wd = getcwd()
+  autocmd TabLeave * let t:wd = Cwd()
   if exists('##TabNew')
     autocmd TabNew * try | exe "cd ". PathJoin('~', 'code') | catch | cd ~ | endtry
   endif

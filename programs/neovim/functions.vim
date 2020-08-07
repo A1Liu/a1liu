@@ -1,42 +1,42 @@
 function! ReadFlag(flag)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
-  return !empty(glob(l:flag_path))
+  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
+  return !empty(glob(flag_path))
 endfunction
 
 " Toggles flag and returns new value
 function! ToggleFlag(flag)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
-  if filereadable(l:flag_path)
-    execute "call delete(fnameescape('" . l:flag_path . "'))"
+  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
+  if filereadable(flag_path)
+    execute "call delete(fnameescape('" . flag_path . "'))"
     return 0
   else
-    execute "call writefile([], '" . l:flag_path . "')"
+    execute "call writefile([], '" . flag_path . "')"
     return 1
   endif
 endfunction
 
 " Sets flag and returns previous value
 function! SetFlag(flag, value)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
-  let l:prev_value = filereadable(l:flag_path)
+  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
+  let prev_value = filereadable(flag_path)
 
   if a:value
-    execute "call writefile([], '" . l:flag_path . "')"
+    execute "call writefile([], '" . flag_path . "')"
   else
-    execute "call delete(fnameescape('" . l:flag_path . "'))"
+    execute "call delete(fnameescape('" . flag_path . "'))"
   endif
 
-  return l:prev_value
+  return prev_value
 endfunction
 
 function! ListFlags(flag_glob)
-  let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag_glob)
-  let l:flags = []
-  for flag in glob(l:flag_path, 0, 1)
-    call add(l:flags, fnamemodify(flag, ':t'))
+  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag_glob)
+  let flags = []
+  for flag in glob(flag_path, 0, 1)
+    call add(flags, fnamemodify(flag, ':t'))
   endfor
 
-  return l:flags
+  return flags
 endfunction
 
 function! GoToCurrentTag() " Go to definition of word under cursor
@@ -47,10 +47,10 @@ function! GoToTag(tagname) " Go to a tag
   try
     if a:tagname != ""
       silent exe 'ts ' . a:tagname
-      let l:old_tags = &tags
+      let old_tags = &tags
       let &tags = get(tagfiles(), 0) " Don't know why this is necessary but it is
       exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
-      let &tags = l:old_tags
+      let &tags = old_tags
     endif
   catch
   endtry
@@ -78,19 +78,27 @@ catch
 endtry
 
 function! Zip(l1, l2)
-  let l:len1 = len(a:l1)
-  let l:len2 = len(a:l2)
-  if l:len1 != l:len2
+  let len1 = len(a:l1)
+  let len2 = len(a:l2)
+  if len1 != len2
     throw "lists aren't the same length"
   endif
 
-  let l:current = 0
-  let l:new = []
-  while l:current < l:len1
-    call add(l:new, [a:l1[l:current], a:l2[l:current]])
-    let l:current += 1
+  let current = 0
+  let new = []
+  while current < len1
+    call add(new, [a:l1[current], a:l2[current]])
+    let current += 1
   endwhile
 
-  return l:new
+  return new
 endfunction
 
+
+function! Cwd()
+  try
+    return getcwd()
+  catch
+    return resolve('~')
+  endtry
+endfunction
