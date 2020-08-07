@@ -21,8 +21,11 @@ endfunction
 " Setting g:os flag
 if !exists('g:os')
   let g:os = substitute(system('uname'), '\n', '', '')
-  if has('win64') || has('win32') || has('win16') " || g:os =~ '^MSYS_NT\.\+$'
+  if has('win64') || has('win32') || has('win16')
     let g:os = 'Windows'
+    set shell=cmd.exe
+  elseif g:os =~ '^MSYS_NT-.\+$'
+    let g:os = 'WSL'
     set shell=cmd.exe
   endif
 endif
@@ -70,9 +73,9 @@ set ignorecase smartcase " Ignore case in searching except when including capita
 " Clipboard
 if g:os ==? 'Darwin'
   set clipboard=unnamed
-elseif g:os ==? 'Windows'
+elseif g:os ==? 'Windows' || g:os ==? 'WSL'
   set clipboard=unnamed
-else
+elseif g:os ==? 'Linux'
   set clipboard=unnamedplus
   if executable('xsel')
     autocmd VimLeave * call system("xsel -ib", getreg('+'))
@@ -101,9 +104,9 @@ set completefunc=LanguageClient#complete
 
 " Showing non-printing characters
 set list
-if g:os ==? 'Windows'
+if g:os ==? 'Windows' || g:os ==? 'WSL'
   set showbreak=>
-  set listchars=tab:>>,nbsp:-,trail:- " extends:›,precedes:‹,
+  set listchars=tab:>>,nbsp:-,trail:-
 else
   set showbreak=↳
   set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·

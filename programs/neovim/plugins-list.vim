@@ -1,12 +1,12 @@
 "" Plugins
 
 let s:manager_home = PathJoin(g:vim_home_path, 'plugged')
-if g:os !=? 'Windows'
-  let s:manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
-  let s:manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-else
+if g:os ==? 'Windows' || g:os ==? 'WSL'
   let s:manager_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
   let s:manager_script_url = 'https://tpo.pe/pathogen.vim'
+else
+  let s:manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
+  let s:manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 endif
 
 call DebugPrint('package manager home is: ' . s:manager_home)
@@ -21,7 +21,7 @@ endif
 " This forces the loading of the script, so that `sudo vim` can work nicely
 execute 'source ' . s:manager_script_path
 
-if g:os !=? 'Windows'
+if g:os !=? 'Windows' && g:os !=? 'WSL'
   call plug#begin()
 else
   let g:plugins_list = []
@@ -167,7 +167,7 @@ if ReadFlag('plugins-lsc-enabled')
   command! LCStop LanguageClientStop
 endif
 
-if g:os !=? 'Windows'
+if g:os !=? 'Windows' && g:os !=? 'WSL'
   call plug#end()
 else
   call call('pathogen#infect', g:plugin_paths)
