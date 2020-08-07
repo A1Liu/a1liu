@@ -78,6 +78,7 @@ if ReadFlag('plugins-base-enabled')
           \ | let b:autoformat_remove_trailing_spaces = 0
           \ | let b:autoformat_retab = 0
     autocmd FileType vim let b:autoformat_enabled = 1
+          \ | let b:autoformat_remove_trailing_spaces = 0
     autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
     autocmd FileType markdown,tex let b:autoformat_autoindent = 0
           \ | let b:autoformat_remove_trailing_spaces = 0
