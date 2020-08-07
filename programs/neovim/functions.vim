@@ -33,7 +33,7 @@ function! ListFlags(flag_glob)
   let l:flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag_glob)
   let l:flags = []
   for flag in glob(l:flag_path, 0, 1)
-    let l:flags = l:flags + [ fnamemodify(flag, ':t') ]
+    call add(l:flags, fnamemodify(flag, ':t'))
   endfor
 
   return l:flags
@@ -76,3 +76,21 @@ try
   endfunction
 catch
 endtry
+
+function! Zip(l1, l2)
+  let l:len1 = len(a:l1)
+  let l:len2 = len(a:l2)
+  if l:len1 != l:len2
+    throw "lists aren't the same length"
+  endif
+
+  let l:current = 0
+  let l:new = []
+  while l:current < l:len1
+    call add(l:new, [a:l1[l:current], a:l2[l:current]])
+    let l:current += 1
+  endwhile
+
+  return l:new
+endfunction
+
