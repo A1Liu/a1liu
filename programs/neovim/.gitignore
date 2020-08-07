@@ -18,5 +18,6 @@ pathogen.vim
 /bundle/*
 !/bundle/.gitkeep
 
-/plugged
+/plugged/*
+!/plugged/.gitkeep
 /view
