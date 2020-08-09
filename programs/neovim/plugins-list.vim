@@ -70,20 +70,23 @@ if ReadFlag('plugins-base-enabled')
     let g:autoformat_verbosemode = 0
   endif
 
-  augroup AutoFormatting
-    autocmd!
-    autocmd FileType * let b:autoformat_enabled = 0
-    autocmd FileType rust,java,c,cpp,go,arduino let b:autoformat_enabled = 1
-    autocmd FileType swift let b:autoformat_enabled = 1
-          \ | let b:autoformat_remove_trailing_spaces = 0
-          \ | let b:autoformat_retab = 0
-    autocmd FileType vim let b:autoformat_enabled = 1
-          \ | let b:autoformat_remove_trailing_spaces = 0
-    autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
-    autocmd FileType markdown,tex let b:autoformat_autoindent = 0
-          \ | let b:autoformat_remove_trailing_spaces = 0
-          \ | let b:autoformat_retab = 0
-  augroup END
+  if g:os !=? 'Windows' && g:os !=? 'WSL'
+    augroup AutoFormatting
+      autocmd!
+      autocmd FileType * let b:autoformat_enabled = 0
+      autocmd FileType rust,java,c,cpp,go,arduino,swift let b:autoformat_enabled = 1
+            \ | let b:autoformat_remove_trailing_spaces = 0
+            \ | let b:autoformat_retab = 0
+            \ | let b:autoformat_autoindent = 0
+      autocmd FileType vim let b:autoformat_enabled = 1
+            \ | let b:autoformat_remove_trailing_spaces = 0
+      autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
+      autocmd FileType markdown,tex let b:autoformat_autoindent = 0
+            \ | let b:autoformat_remove_trailing_spaces = 0
+            \ | let b:autoformat_retab = 0
+            \ | let b:autoformat_autoindent = 0
+    augroup END
+  endif
 
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
