@@ -41,6 +41,7 @@ set statusline+=\
 " GUI Mode
 if has('gui_running')
   set guioptions=cs
+  au! GUIEnter * simalt ~x
 endif
 
 command! SynStack call SynStack()

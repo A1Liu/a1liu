@@ -167,6 +167,9 @@ augroup TabContext
     autocmd TabNew * try | exe "cd ". PathJoin('~', 'code') | catch | cd ~ | endtry
   endif
 augroup END
+if has('gui_running')
+  exe 'cd ' . PathJoin('~', 'code')
+endif
 
 "" Commands
 command! RunInit :call RunInit()
