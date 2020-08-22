@@ -51,14 +51,20 @@ int main(int argc, char **argv) {
       vector_add(&vec, f);
   }
 
-  // This is the bug! we're checking whether i >= 0, but that will always be
-  // true since i is an unsigned integer! Luckily, the check macro informs us
-  // that this pointer is not allocated.
-  for (size_t i = vec.end - 1; i >= 0; i--) {
+  /* This code is all buggy
+
+  for (size_t i = vec.end - 1; i >= 0ul; i--) {
     printf("%s\n", check(&vec.begin[i])->path);
   }
 
-  free(vec.begin);
+  free(vec.begin + 1);
 
+  for (size_t i = vec.end - 1; i != ~0ul; i--) {
+    printf("%s\n", check(&vec.begin[i])->path);
+  }
+
+  */
+
+  free(vec.begin);
   return 0;
 }
