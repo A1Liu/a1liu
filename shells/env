@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # Takes as arguments:
 # 1. path to source
 # 2. command that should be available after source
@@ -43,5 +44,5 @@ if [[ $CFG_ENV != 1 ]]; then
   # export GOROOT="/usr/local/go"
   export GOPATH="$HOME/go"
   export PATH="${GOPATH}:${GOPATH}/bin:${PATH}"
+  export PATH="~/.rbenv/bin:${PATH}"
 fi
-
