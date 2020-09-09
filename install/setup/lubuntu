@@ -29,18 +29,10 @@ software-properties-common snapd \
 exfat-utils exfat-fuse ntfs-3g build-essential \
 libssl-dev libreadline-dev inotify-tools curl
 
-# Tmux
-echo "Installing tmux and related integrations..."
-sudo apt install -y tmux \
-&& tic -x "$project/programs/xterm-256color-italic.terminfo" \
-&& tic -x "$project/programs/tmux-256color.terminfo"
-
 # Install nvm
-echo "Installing Node version manager..."
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
-
 echo "Installing programming languages..."
 echo "  - JavaScript"
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 nvm install v12.13.0
 echo "  - Java"
 sudo apt install -y default-jre default-jdk
@@ -50,15 +42,27 @@ echo "  - C/C++"
 sudo apt install -y cmake make clang clang-format
 echo "  - Ruby"
 curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-installer | bash
-rbenv install 2.6.3 && rbenv global 2.6.3
+~/.rbenv/bin/rbenv install 2.6.3 && ~/.rbenv/bin/rbenv global 2.6.3
 
 echo "Installing tooling..."
 
 echo "  - Ctags"
 sudo apt install ctags
-
 echo "  - Ripgrep"
 sudo apt-get install ripgrep
 
-sudo cp "$project/compat/linux/x11-keyboard" "/usr/share/X11/xkb/symbols/pc"
+# Tmux
+echo "Installing tmux and related integrations..."
+sudo apt-get install -y libevent-dev libncurses-dev \
+&& wget https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz \
+&& tar -xvzf tmux-2.7.tar.gz \
+&& cd tmux-2.7/ \
+&& ./configure && make \
+&& sudo make install \
+&& cd .. \
+&& rm -rf ./tmux-2.7* \
+&& tic -x "$project/programs/xterm-256color-italic.terminfo" \
+&& tic -x "$project/programs/tmux-256color.terminfo"
 
+echo "Fixing keyboard... (will need to restart for changes to take effect)"
+sudo cp "$project/compat/linux/x11-keyboard" "/usr/share/X11/xkb/symbols/pc"
