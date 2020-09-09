@@ -49,6 +49,10 @@ cnoremap <C-A> <Home>
 cnoremap <C-K> <C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos()-2]<CR>
 cnoremap <C-B> <C-Left>
 cnoremap <C-F> <C-Right>
+cnoremap <C-J> <C-N>
+cnoremap <C-K> <C-P>
+cnoremap <Up> <C-P>
+cnoremap <Down> <C-N>
 
 " Screw that man pages stuff
 nnoremap <S-K> gk

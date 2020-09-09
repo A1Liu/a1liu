@@ -1,6 +1,14 @@
 # "\C-i": menu-complete
 $if Bash
 "\e[Z": "\e-1\C-i"
+"\e[3~": delete-char
+
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+"\e[5C": forward-word
+"\e[5D": backward-word
+"\e\e[C": forward-word
+"\e\e[D": backward-word
 
 # arrow up/down
 "\e[A":history-search-backward
