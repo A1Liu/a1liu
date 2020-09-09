@@ -89,15 +89,11 @@ function load_nvm() {
   alias load_nvm=true
 }
 
-# Node
-function nvm() {
-  load_nvm
-  nvm
-}
-
 alias gulp='npm run gulp'
+alias nvm='unalias nvm && load_nvm && nvm'
 alias node='unalias node && load_nvm && node'
 alias npm='unalias npm && load_nvm && npm'
+alias yarn='unalias yarn && load_nvm && yarn'
 alias prettier='unalias prettier && load_nvm && prettier'
 alias npx='unalias npx && load_nvm && npx'
 alias firebase='unalias firebase && load_nvm && firebase'
