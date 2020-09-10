@@ -90,7 +90,6 @@ function load_nvm() {
 }
 
 alias gulp='npm run gulp'
-alias nvm='unalias nvm && load_nvm && nvm'
 alias node='unalias node && load_nvm && node'
 alias npm='unalias npm && load_nvm && npm'
 alias yarn='unalias yarn && load_nvm && yarn'
