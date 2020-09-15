@@ -97,14 +97,22 @@ if ReadFlag('plugins-solarized-enabled')
 endif
 
 " Languages
-if ReadFlag('plugins-polyglot-enabled')
+let polyglot_enabled = ReadFlag('plugins-polyglot-enabled')
+let markdown_enabled = polyglot_enabled || ReadFlag('plugins-markdown-enabled')
+if polyglot_enabled
   Plug 'sheerun/vim-polyglot'
+endif
+if markdown_enabled && !polyglot_enabled
+  Plug 'plasticboy/vim-markdown'
+endif
+if markdown_enabled
   let g:vim_markdown_math = 1
   let g:vim_markdown_frontmatter = 1
   let g:vim_markdown_folding_disabled = 1
   let g:vim_markdown_new_list_item_indent = 0
   let g:vim_markdown_auto_insert_bullets = 0
 endif
+
 
 " Snippets
 if ReadFlag('plugins-snippets-enabled')
