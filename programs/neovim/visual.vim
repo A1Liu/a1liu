@@ -41,7 +41,9 @@ set statusline+=\
 " GUI Mode
 if has('gui_running')
   set guioptions=cs
-  au! GUIEnter * simalt ~x
+  if !has('gui_macvim')
+    au! GUIEnter * simalt ~x
+  endif
 endif
 
 command! SynStack call SynStack()

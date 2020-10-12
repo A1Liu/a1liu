@@ -117,7 +117,7 @@ endif
 
 
 " Snippets
-if ReadFlag('plugins-snippets-enabled')
+if ReadFlag('plugins-snippets-enabled') && !has("gui_macvim")
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   let g:UltiSnipsExpandTrigger="<C-N><C-N>"
