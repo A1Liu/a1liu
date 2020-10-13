@@ -14,17 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation(
-            "org.slf4j:slf4j-api:1.7.25", // Logging
-            "ch.qos.logback:logback-core:1.2.3", // Logging
-            "ch.qos.logback:logback-classic:1.2.3", // Logging
-
-            "junit:junit:4.12", // Testing
-
-            "com.fasterxml.jackson.core:jackson-core:2.4.1", // JSON
-            "com.fasterxml.jackson.core:jackson-annotations:2.4.1", // JSON
-            "com.fasterxml.jackson.core:jackson-databind:2.4.1", // JSON
-    )
+    implementation()
 }
 
 // The build directory should not begin with the same name as the script
@@ -32,29 +22,9 @@ allprojects {
     buildDir = ".build"
 }
 
-// https://github.com/jorgeejgonzalez/fermat/wiki/Creating-Standalone-Jar-Using-Gradle
-task fatJar(type: Jar, dependsOn: test) {
+jar {
+  manifest { attributes ('Main-Class': 'Main') }
 
-    archiveBaseName = project.name + '-with-dependencies'
-
-    manifest {
-        attributes("Main-Class": "com.cloakmarket.Main")
-    }
-
-    from {
-      duplicatesStrategy 'exclude'
-      configurations.runtimeClasspath.collect {
-        it.isDirectory() ? it : zipTree(it)
-      }
-    } {
-        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    }
-
-    with jar
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
-build.dependsOn fatJar
-
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8

@@ -1,3 +1,5 @@
+package datastruct;
+
 // First index denotes size of underlying heap. Queue always is a min-heap, to
 // use as a max-heap multiple input/output by negative 1
 class PriorityQueue {
@@ -20,28 +22,26 @@ class PriorityQueue {
     int rightIdx = leftIdx + 1;
 
     while (leftIdx <= size) {
-      int left = queue[leftIdx];
-      boolean changed = false;
-      int idx = -1;
-      int val = -1;
-
-      if (left < current) {
-        changed = true;
-        idx = leftIdx;
-        val = left;
-      }
+      int left = queue[leftIdx], idx, val;
 
       if (rightIdx < size) {
+        if (left >= current)
+          break;
+
+        idx = leftIdx;
+        val = left;
+      } else {
         int right = queue[rightIdx];
-        if (right < current && right < left) {
-          changed = true;
+        if (current <= right && current <= left)
+          break;
+
+        if (right < left) {
           idx = rightIdx;
           val = right;
+        } else {
+          idx = leftIdx;
+          val = left;
         }
-      }
-
-      if (!changed) {
-        break;
       }
 
       queue[currentIdx] = val;
