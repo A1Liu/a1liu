@@ -86,13 +86,19 @@ endif
 set backspace=indent,eol,start
 
 " End of line in files
-set nofixendofline
+try
+  set nofixendofline
+catch
+endtry
 
 " Virtual Edit
 set virtualedit=all
 
 " Bell
-set belloff=all
+try
+  set belloff=all
+catch
+endtry
 
 " Syntax Highlighting
 filetype plugin indent on " Filetype detection
