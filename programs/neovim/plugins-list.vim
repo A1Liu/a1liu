@@ -88,10 +88,13 @@ if ReadFlag('plugins-base-enabled')
     augroup END
   endif
 
-  Plug 'vim-scripts/EvalSelection.vim'
 
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
+endif
+
+if ReadFlag('plugins-eval-enabled')
+  Plug 'vim-scripts/EvalSelection.vim'
 endif
 
 if ReadFlag('plugins-solarized-enabled')
