@@ -30,6 +30,7 @@ set showmode ruler cul cc=80 laststatus=2 showcmd
 
 " https://shapeshed.com/vim-statuslines/
 set statusline=
+set statusline+=\ %{&bomb?'BOM':''}
 set statusline+=\ %f
 set statusline+=%m
 set statusline+=%=

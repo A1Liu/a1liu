@@ -162,6 +162,11 @@ let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
 call DebugPrint("undo dir is: " . s:temp)
 
+""" Handling special characters
+" set encoding=latin1
+" set isprint=
+" set display+=uhex
+
 "" Tab-local working directories
 " command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
 augroup TabContext
