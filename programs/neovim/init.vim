@@ -156,11 +156,13 @@ set autoread
 
 
 "" Saving my ass
-set noswapfile
-set undofile
+set noswapfile undofile backup
 let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
 call DebugPrint("undo dir is: " . s:temp)
+let s:temp = PathJoin(g:vim_home_path, 'backups')
+execute 'set backupdir=' . s:temp
+call DebugPrint("backup dir is: " . s:temp)
 
 """ Handling special characters
 " set encoding=latin1
