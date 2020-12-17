@@ -15,6 +15,9 @@ pathogen.vim
 /undohist/*
 !/undohist/.gitkeep
 
+/backups/*
+!/backups/.gitkeep
+
 /bundle/*
 !/bundle/.gitkeep
 
