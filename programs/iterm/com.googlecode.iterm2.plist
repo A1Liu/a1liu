@@ -183,9 +183,9 @@
 	<key>NSWindow Frame NSColorPanel</key>
 	<string>0 146 224 280 0 0 1680 1027 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 49 1680 978 0 0 1680 1027 </string>
+	<string>464 74 1216 880 0 0 1680 1027 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>0 52 1680 975 0 0 1680 1027 </string>
+	<string>0 44 1680 983 0 0 1680 1027 </string>
 	<key>NeverWarnAboutShortLivedSessions_B107C9C0-288B-492A-814A-F65076CAAF29</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_B107C9C0-288B-492A-814A-F65076CAAF29_selection</key>
@@ -1274,12 +1274,19 @@
 					<key>Text</key>
 					<string>0x1f</string>
 				</dict>
+				<key>0x31-0x40000</key>
+				<dict>
+					<key>Action</key>
+					<integer>40</integer>
+					<key>Text</key>
+					<string>Solarized Dark</string>
+				</dict>
 				<key>0x32-0x40000</key>
 				<dict>
 					<key>Action</key>
-					<integer>11</integer>
+					<integer>40</integer>
 					<key>Text</key>
-					<string>0x00</string>
+					<string>Solarized Light</string>
 				</dict>
 				<key>0x33-0x40000</key>
 				<dict>
@@ -2381,7 +2388,7 @@
 	<key>NoSyncInstallationId</key>
 	<string>CADE9F6E-6F49-4972-981F-704B183DA039</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>126</integer>
+	<integer>159</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
