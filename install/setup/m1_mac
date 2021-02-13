@@ -2,20 +2,16 @@
 
 # Assumes Git has already been installed
 project="$(dirname $0)"
-export project="$(dirname "$project")"
+project="$(dirname "$project")"
 
 sudo echo
 
-URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
-
 # Install Homebrew
+URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
 echo | /usr/bin/ruby -e "$(curl -fsSL $URL_BREW)"
 
 brew cleanup
 
-
-echo "Installing Firefox..."
-brew cask install firefox-developer-edition
 echo "Installing Vim"
 brew install vim
 echo "Installing git-lfs"
@@ -23,9 +19,7 @@ brew install git git-lfs
 
 echo "Installing miscellaneous software..."
 brew install fswatch
-curl -s https://get.sdkman.io | bash # SDKMan for groovy/gradle
-sdk install gradle 6.2.1
-brew cask install spotify slack iterm2
+brew cask install spotify slack
 
 # Tmux
 echo "Installing tmux and related integrations..."
@@ -48,10 +42,6 @@ echo "  - Java"
 brew cask install java
 echo "  - Rust"
 curl https://sh.rustup.rs -sSf | sh -s -- -y
-echo "  - Haskell"
-brew install ghc cabal-install haskell-stack
-echo "  - Kotlin"
-brew install kotlin
 echo "  - C"
 brew install cmake
 echo "  - C++"
@@ -61,9 +51,6 @@ brew install rbenv
 rbenv install 2.6.3
 
 echo "Installing tooling..."
-
-echo "  - Ctags"
-brew install ctags
 
 echo "  - Ripgrep"
 brew install ripgrep
