@@ -15,7 +15,19 @@ function! ReadBgFlag()
   endif
 endfunction
 
-if exists('+termguicolors') && has("termguicolors") && $TERM_PROGRAM !=? "Apple_Terminal" && g:os ==? 'Darwin'
+function! CheckTermGui()
+  if !exists('+termguicolors') || !has("termguicolors")
+    return 0
+  endif
+
+  if $TERM_PROGRAM ==? "Apple_Terminal"
+    return 0
+  endif
+
+  return g:os ==? 'Darwin'
+endfunction
+
+if CheckTermGui()
   call DebugPrint("term gui colors enabled")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
