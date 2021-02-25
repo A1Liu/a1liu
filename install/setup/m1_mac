@@ -5,10 +5,14 @@ project="$(dirname $0)"
 project="$(dirname "$project")"
 
 sudo echo
+sudo chsh -s /bin/bash
 
 # Install Homebrew
-URL_BREW='https://raw.githubusercontent.com/Homebrew/install/master/install'
-echo | /usr/bin/ruby -e "$(curl -fsSL $URL_BREW)"
+URL_BREW='https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh'
+/bin/bash -c "$(curl -fsSL $URL_BREW)"
+
+export PATH="/opt/homebrew/bin:$PATH"
+echo "\n/opt/homebrew/bin\n" | sudo tee -a /etc/paths
 
 brew cleanup
 
@@ -19,7 +23,7 @@ brew install git git-lfs
 
 echo "Installing miscellaneous software..."
 brew install fswatch
-brew cask install spotify slack
+brew install --cask spotify slack
 
 # Tmux
 echo "Installing tmux and related integrations..."
@@ -39,7 +43,7 @@ echo "Installing programming languages..."
 echo "  - JavaScript"
 nvm install v12.13.0
 echo "  - Java"
-brew cask install java
+brew install --cask java
 echo "  - Rust"
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 echo "  - C"
