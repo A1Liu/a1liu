@@ -38,7 +38,8 @@ to have been saved in `local/preconf`.
 ### MacOS
 1. Install XCode tools using `xcode-select --install`
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-3. Install software using `. setup/mac` (this will require admin access)
+3. Remove mission control keyboard shortcuts in System Preferences >
+   Keyboard > Shortcuts
 4. Remove annoying Terminal stuff:
    1. Preferences > Profiles > Shell > When Shell Exits
    1. Preferences > Profiles > Advanced > Bell > Audible bell

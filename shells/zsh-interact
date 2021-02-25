@@ -8,8 +8,6 @@ skip_global_compinit=1
 zstyle ':completion:*:*:git:*' script "$(dirname $0)/zsh/git-completions"
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
-bindkey \^U backward-kill-line
-
 # Stolen shamelessly from Oh-my-zsh
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
 #
@@ -17,7 +15,6 @@ bindkey \^U backward-kill-line
 [ -z "$HISTFILE" ] && HISTFILE="$CFG_DIR/local/.zsh_history"
 HISTSIZE=50000
 SAVEHIST=10000
-
 
 # Stolen shamelessly from Oh-my-zsh
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh

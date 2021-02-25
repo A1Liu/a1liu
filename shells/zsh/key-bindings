@@ -17,8 +17,11 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
 fi
 
 bindkey -e
-bindkey '^[[1;5C' forward-word
-bindkey '^[[1;5D' backward-word
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+bindkey \^U backward-kill-line
+bindkey "^[^[[D" forward-word
+bindkey "^[^[[C" backward-word
 
 autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
