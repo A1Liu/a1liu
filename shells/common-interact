@@ -85,7 +85,9 @@ alias bundle='ruby_setup && unalias bundle && bundle'
 alias jekyll='ruby_setup && unalias jekyll && jekyll'
 
 function load_nvm() {
-  export PATH="$PATH:$HOME/.nvm" && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  export PATH="$PATH:$HOME/.nvm" && export NVM_DIR="$HOME/.nvm" &&
+      [ -s "$NVM_DIR/nvm.sh" ] &&
+      . "$NVM_DIR/nvm.sh"
   alias load_nvm=true
 }
 
