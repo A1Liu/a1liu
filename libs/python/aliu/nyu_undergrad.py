@@ -42,6 +42,7 @@ def validate_course(course):
     validate_key('school', lambda school: isinstance(school, str))
 
 
+# add_grade("Special Topics: Applied Internet Technology", "A-", subject="CSCI-UA", credits=4, semester="sp2021")
 def add_grade(name, grade, subject='core-ua', credits=4, semester=None):
     grade_data = get_grades()
 
@@ -89,6 +90,12 @@ def grade_to_number(grade_letter):
         return 3
     if grade_letter == 'B-':
         return 2.666666
+    if grade_letter == 'C+':
+        return 2.333333
+    if grade_letter == 'C':
+        return 2
+    if grade_letter == 'C-':
+        return 1.666666
     if grade_letter == 'P':
         return -1
     if grade_letter == 'W':
