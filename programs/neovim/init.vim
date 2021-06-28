@@ -118,9 +118,10 @@ else
   set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:·
 endif
 
-"" Indenting
+"" Indenting and Simple formatting
 set tabstop=2 expandtab shiftwidth=2 softtabstop=2
 set foldlevelstart=4
+set textwidth=80
 
 " Markdown and Jekyll Settings
 function! MdJekyllSettings()
