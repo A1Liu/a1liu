@@ -106,6 +106,7 @@ let polyglot_enabled = ReadFlag('plugins-polyglot-enabled')
 let markdown_enabled = polyglot_enabled || ReadFlag('plugins-markdown-enabled')
 if polyglot_enabled
   Plug 'sheerun/vim-polyglot'
+  Plug 'jansedivy/jai.vim'
 endif
 if markdown_enabled && !polyglot_enabled
   Plug 'plasticboy/vim-markdown'
