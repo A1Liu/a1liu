@@ -26,7 +26,7 @@ if g:os !=? 'Windows' && g:os !=? 'WSL'
 else
   let g:plugins_list = []
   let g:plugin_paths = []
-  function! AddPathogenPlugin(plugin)
+  function! AddPathogenPlugin(plugin, opts)
     call DebugPrint('adding plugin: ' . a:plugin)
     let plugin_path = PathJoin(s:manager_home, split(a:plugin,'/')[1])
     call add(g:plugins_list, a:plugin)
@@ -131,7 +131,10 @@ endif
 
 " Language server support because I have to I guess
 if ReadFlag('plugins-lsc-enabled')
-  Plug 'autozimu/LanguageClient-neovim'
+  Plug 'autozimu/LanguageClient-neovim', {
+        \ 'branch': 'next',
+        \ 'do': 'bash install.sh',
+        \ }
   if g:os !=? 'Windows'
     let g:LanguageClient_serverCommands = {
           \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
