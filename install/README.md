@@ -62,14 +62,17 @@ to have been saved in `local/preconf`.
 1. Enable developer mode and associated features (Settings -&gt; Updates &amp; Security
    -&gt; For Developers)
 
-2. Install Chocolatey and Git:
+2. Install Chocolatey and Git (in PowerShell with admin privileges):
 
    ```
+   Set-ExecutionPolicy Unrestricted
    iex ((New-Object System.Net.WebClient).DownloadString("https://chocolatey.org/install.ps1"))
    choco install git.install --params "/GitAndUnixToolsOnPath /WindowsTerminal" -y
    ```
 
-3. Clone the repository using `git clone https://github.com/a1liu/config`
+2. Add ssh stuff with `ssh-keygen`
+
+3. Clone the repository using `git clone git@github.com:A1Liu/config`
 
 4. [Install Vim](https://github.com/vim/vim-win32-installer/releases). Make sure
    it's the 64-bit version.
@@ -82,6 +85,11 @@ to have been saved in `local/preconf`.
 7. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
    and customize the install by ensuring that it's installed for all users, adding
    python to the environment variables, and not precompiling the standard library.
+
+8. Windows is broken, so follow this to get debugging native files to work:
+   https://docs.microsoft.com/en-us/visualstudio/debugger/debug-using-the-just-in-time-debugger?view=vs-2019#jit_errors
+
+9. 
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
