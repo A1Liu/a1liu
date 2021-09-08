@@ -1,25 +1,25 @@
 "" Plugins
 
-let s:manager_home = PathJoin(g:vim_home_path, 'plugged')
+let g:plugin_manager_home = PathJoin(g:vim_home_path, 'plugged')
 if g:os ==? 'Windows' || g:os ==? 'WSL'
-  let s:manager_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
-  let s:manager_script_url = 'https://tpo.pe/pathogen.vim'
+  let g:plugin_manager_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
+  let g:plugin_manager_script_url = 'https://tpo.pe/pathogen.vim'
 else
-  let s:manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
-  let s:manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  let g:plugin_manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
+  let g:plugin_manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 endif
 
-call DebugPrint('package manager home is: ' . s:manager_home)
-call DebugPrint('package manager script is: ' . s:manager_script_path)
-call DebugPrint('package manager source URL is: ' . s:manager_script_url)
+Dbg 'plugins home is ' . g:plugin_manager_home
+Dbg 'plugin manager is ' . g:plugin_manager_script_path
+Dbg 'plugin manager URL is ' . g:plugin_manager_script_url
 
-if empty(glob(s:manager_script_path))
-  call DebugPrint('installing package manager...')
-  execute 'silent !curl -LSso ' . s:manager_script_path . ' ' . s:manager_script_url
+if empty(glob(g:plugin_manager_script_path))
+  Dbg 'installing package manager...'
+  execute 'silent !curl -LSso ' . g:plugin_manager_script_path . ' ' . g:plugin_manager_script_url
 endif
 
 " This forces the loading of the script, so that `sudo vim` can work nicely
-execute 'source ' . s:manager_script_path
+execute 'source ' . g:plugin_manager_script_path
 
 if g:os !=? 'Windows' && g:os !=? 'WSL'
   call plug#begin()
@@ -28,8 +28,8 @@ else
   let g:plugin_paths = []
   function! AddPathogenPlugin(...)
     let plugin = a:1
-    call DebugPrint('adding plugin: ' . plugin)
-    let plugin_path = PathJoin(s:manager_home, split(plugin,'/')[1])
+    Dbg 'adding plugin: ' . plugin)
+    let plugin_path = PathJoin(g:plugin_manager_home, split(plugin,'/')[1])
     call add(g:plugins_list, plugin)
     call add(g:plugin_paths, plugin_path)
   endfunction
@@ -39,7 +39,7 @@ else
 
     for [name, path] in Zip(g:plugins_list, g:plugin_paths)
       if empty(glob(path))
-        execute "cd " . s:manager_home
+        execute "cd " . g:plugin_manager_home
         execute 'silent !git clone https://github.com/' . name
       else
         execute "cd " . path
@@ -65,11 +65,8 @@ if ReadFlag('plugins-base-enabled')
   let g:formatters_javascript = ['prettier', 'clangformat']
   let g:formatters_arduino = ['clangformat']
   let g:formatters_swift = ['swiftformat']
-  if DebugPrint('autoformat in verbose mode')
-    let g:autoformat_verbosemode = 1
-  else
-    let g:autoformat_verbosemode = 0
-  endif
+  Dbg 'autoformat in verbose mode'
+  let g:autoformat_verbosemode = g:debug_mode
 
   if g:os !=? 'Windows' && g:os !=? 'WSL'
     augroup AutoFormatting
@@ -79,8 +76,7 @@ if ReadFlag('plugins-base-enabled')
             \ | let b:autoformat_remove_trailing_spaces = 0
             \ | let b:autoformat_retab = 0
             \ | let b:autoformat_autoindent = 0
-      autocmd FileType vim let b:autoformat_enabled = 1
-            \ | let b:autoformat_remove_trailing_spaces = 0
+      autocmd FileType vim let b:autoformat_enabled = 0
       autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
       autocmd FileType markdown,tex let b:autoformat_autoindent = 0
             \ | let b:autoformat_remove_trailing_spaces = 0

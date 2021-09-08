@@ -113,3 +113,7 @@ function! GetVisualSelection()
   return join(lines, "\\n")
 endfunction
 
+function! TryRelpath(base, path)
+    return substitute(a:path, a:base . "/" , "", "")
+    return s
+endfunction

@@ -1,15 +1,44 @@
-" Print debugging information
-function! DebugPrint(message)
-  if $VIM_DEBUG == '1'
-    echo 'DEBUG:' a:message
-    return 1
-  endif
-  return 0
-endfunction
+" https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
+let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 
-call DebugPrint('debug mode active')
+" Print debugging information
+if $VIM_DEBUG == '1'
+  let g:debug_mode = 1
+
+  function! INTERNAL_Dbg(file, line, ...)
+    echomsg '' . substitute(a:file, g:vim_home_path . "/", "", "") . ':' . a:line . ' - '
+    for message in a:000
+      echon message
+      echon ' '
+    endfor
+  endfunction
+
+  command! -nargs=* Dbg call INTERNAL_Dbg(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
+else
+  let g:debug_mode = 0
+
+  command! -nargs=* Dbg
+endif
+
+Dbg 'DEBUG MODE IS ACTIVE'
+Dbg 'vim home path is: ' . g:vim_home_path
+Dbg 'config path is: ' . g:cfg_dir
+
+" Setting g:os flag
+if !exists('g:os')
+  let g:os = substitute(system('uname'), '\n', '', '')
+  if has('win64') || has('win32') || has('win16')
+    let g:os = 'Windows'
+  elseif g:os =~ '^MSYS_NT-.\+$'
+    let g:os = 'WSL'
+  endif
+endif
+Dbg 'OS is: ' . g:os
 
 " Combine paths in a cross-platform way
+" TODO maybe this shouldn't care about OS? The '/' might work in Vim
+" regardless of OS.
 function! PathJoin(...)
   if g:os ==? 'Windows'
     return join(a:000, '\')
@@ -18,24 +47,6 @@ function! PathJoin(...)
   endif
 endfunction
 
-" Setting g:os flag
-if !exists('g:os')
-  let g:os = substitute(system('uname'), '\n', '', '')
-  if has('win64') || has('win32') || has('win16')
-    let g:os = 'Windows'
-    set shell=cmd.exe
-  elseif g:os =~ '^MSYS_NT-.\+$'
-    let g:os = 'WSL'
-    set shell=cmd.exe
-  endif
-endif
-call DebugPrint('OS is: ' . g:os)
-
-" https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
-let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
-call DebugPrint('vim home path is: ' . g:vim_home_path)
-call DebugPrint('config path is: ' . g:cfg_dir)
 
 "" Security
 set nomodeline modelines=0
@@ -44,6 +55,9 @@ set nomodeline modelines=0
 set guicursor= " Don't want unknown characters in Linux
 set t_ut= " Dont want background to do weird stuff
 set nocompatible
+if g:os ==? 'Windows'
+  set shell=cmd.exe
+endif
 
 "" Functions
 let s:temp = PathJoin(g:vim_home_path, 'functions.vim')
@@ -80,6 +94,8 @@ elseif g:os ==? 'Linux'
   if executable('xsel')
     autocmd VimLeave * call system("xsel -ib", getreg('+'))
   endif
+else
+  Dbg "didn't handle OS='" . g:os . "'"
 endif
 
 " Deleting in insert mode
@@ -160,10 +176,10 @@ set autoread
 set noswapfile undofile backup
 let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
-call DebugPrint("undo dir is: " . s:temp)
+Dbg "undo dir is: " . s:temp
 let s:temp = PathJoin(g:vim_home_path, 'backups')
 execute 'set backupdir=' . s:temp
-call DebugPrint("backup dir is: " . s:temp)
+Dbg "backup dir is: " . s:temp
 
 """ Handling special characters
 " set encoding=latin1
@@ -214,3 +230,5 @@ let g:netrw_sort_sequence.= '^\..*$,'
 let g:netrw_sort_sequence.= '\.o$,\.obj$,\.class$,'
 " Vim files? Text editor info files and dumb files
 let g:netrw_sort_sequence.= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
+
+Dbg "VIMRC COMPLETED"

@@ -28,7 +28,7 @@ function! CheckTermGui()
 endfunction
 
 if CheckTermGui()
-  call DebugPrint("term gui colors enabled")
+  Dbg "term gui colors enabled"
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
   set termguicolors
@@ -65,9 +65,9 @@ command! SynStack call SynStack()
 try
   colorscheme solarized8_high
   ReadBgFlag
-  call DebugPrint('succeeded in loading solarized8_high')
+  Dbg 'succeeded in loading solarized8_high'
 catch
-  call DebugPrint('failed to load solarized8_high')
+  Dbg 'failed to load solarized8_high'
   colorscheme default
   if has('gui_running')
     set background=light
