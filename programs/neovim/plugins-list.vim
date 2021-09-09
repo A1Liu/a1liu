@@ -50,8 +50,8 @@ else
     call call('pathogen#infect', g:plugin_paths)
   endfunction
 
-  command! -nargs=* Plug call AddPathogenPlugin(<args>)
-  command! PlugInstall call InstallPathogenPlugins()
+  command! -nargs=* Plug :call AddPathogenPlugin(<args>)
+  command! PlugInstall :call InstallPathogenPlugins()
 endif
 
 if ReadFlag('plugins-base-enabled')

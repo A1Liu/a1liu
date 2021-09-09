@@ -29,7 +29,7 @@ if $VIM_DEBUG == '1'
     echon a:message
   endfunction
 
-  command! -nargs=* Dbg call Dbg(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
+  command! -nargs=* Dbg :call Dbg(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
 else
   let g:debug_mode = 0
 
@@ -58,7 +58,7 @@ function! Import(file, line, path)
   call Dbg(a:file, a:line, 'import of ' . a:path . " DONE")
 endfunction
 
-command! -nargs=* Import call Import(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
+command! -nargs=* Import :call Import(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
 
 " Setting g:os flag
 if !exists('g:os')
@@ -130,7 +130,9 @@ set ignorecase smartcase " Ignore case in searching except when including capita
 " Clipboard
 if g:os ==? 'Darwin'
   set clipboard=unnamed
-elseif g:os ==? 'Windows' || g:os ==? 'WSL'
+elseif g:os ==? 'Windows'
+  set clipboard=unnamed
+elseif g:os ==? 'WSL'
   set clipboard=unnamed
 elseif g:os ==? 'Linux'
   set clipboard=unnamedplus
@@ -165,7 +167,7 @@ syntax enable " Actual highlighting
 
 " Completions
 " set omnifunc
-set completefunc=LanguageClient#complete
+" set completefunc=LanguageClient#complete
 
 " Showing non-printing characters
 set list
@@ -237,7 +239,7 @@ augroup TabContext
   autocmd TabEnter * if exists("t:wd") | exe "cd " . t:wd | endif
   autocmd TabLeave * let t:wd = Cwd()
   if exists('##TabNew')
-    autocmd TabNew * try | exe "cd ". PathJoin('~', 'code') | catch | cd ~ | endtry
+    autocmd TabNew * try | exe "cd " . PathJoin('~', 'code') | catch | cd ~ | endtry
   endif
 augroup END
 if has('gui_running')

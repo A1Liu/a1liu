@@ -3,10 +3,10 @@
 " Getting terminal colors to work
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 
-command! ToggleBgFlag call ToggleFlag('light-mode') | call ReadBgFlag()
-command! ToggleBg call ToggleFlag('light-mode') | call ReadBgFlag()
+command! ToggleBgFlag :call ToggleFlag('light-mode') | call ReadBgFlag()
+command! ToggleBg :call ToggleFlag('light-mode') | call ReadBgFlag()
 
-command! ReadBgFlag call ReadBgFlag()
+command! ReadBgFlag :call ReadBgFlag()
 function! ReadBgFlag()
   if ReadFlag('light-mode')
     set background=light
@@ -59,7 +59,7 @@ if has('gui_running')
   endif
 endif
 
-command! SynStack call SynStack()
+command! SynStack :call SynStack()
 
 " Color Scheme
 try
