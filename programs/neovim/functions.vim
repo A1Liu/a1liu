@@ -1,11 +1,13 @@
+let s:flag_prefix = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-')
+
 function! ReadFlag(flag)
-  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
+  let flag_path = s:flag_prefix . a:flag
   return !empty(glob(flag_path))
 endfunction
 
 " Toggles flag and returns new value
 function! ToggleFlag(flag)
-  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
+  let flag_path = s:flag_prefix . a:flag
   if filereadable(flag_path)
     execute "call delete(fnameescape('" . flag_path . "'))"
     return 0
@@ -17,7 +19,7 @@ endfunction
 
 " Sets flag and returns previous value
 function! SetFlag(flag, value)
-  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag)
+  let flag_path = s:flag_prefix . a:flag
   let prev_value = filereadable(flag_path)
 
   if a:value
@@ -30,7 +32,7 @@ function! SetFlag(flag, value)
 endfunction
 
 function! ListFlags(flag_glob)
-  let flag_path = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-' . a:flag_glob)
+  let flag_path = s:flag_prefix . a:flag_glob
   let flags = []
   for flag in glob(flag_path, 0, 1)
     call add(flags, fnamemodify(flag, ':t'))
@@ -111,9 +113,4 @@ function! GetVisualSelection()
   let lines[-1] = lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
   let lines[0] = lines[0][col1 - 1:]
   return join(lines, "\\n")
-endfunction
-
-function! TryRelpath(base, path)
-    return substitute(a:path, a:base . "/" , "", "")
-    return s
 endfunction

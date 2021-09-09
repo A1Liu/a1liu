@@ -9,9 +9,9 @@ else
   let g:plugin_manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 endif
 
-Dbg 'plugins home is ' . g:plugin_manager_home
-Dbg 'plugin manager is ' . g:plugin_manager_script_path
-Dbg 'plugin manager URL is ' . g:plugin_manager_script_url
+Dbg 'plugins home is ' . ShortPath(g:plugin_manager_home)
+Dbg 'plugin manager is ' . ShortPath(g:plugin_manager_script_path)
+Dbg 'plugin manager URL is ' . ShortPath(g:plugin_manager_script_url)
 
 if empty(glob(g:plugin_manager_script_path))
   Dbg 'installing package manager...'

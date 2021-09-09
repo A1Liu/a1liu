@@ -2,21 +2,45 @@
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 
+function! ShortPath(path)
+  let new_path = substitute(a:path, g:vim_home_path . "/", "", "")
+  if new_path != a:path
+    return 'VIM/' . new_path
+  endif
+
+  return a:path
+endfunction
+
 " Print debugging information
 if $VIM_DEBUG == '1'
   let g:debug_mode = 1
+  let g:debug_indent = ''
 
-  function! INTERNAL_Dbg(file, line, ...)
-    echomsg '' . substitute(a:file, g:vim_home_path . "/", "", "") . ':' . a:line . ' - '
-    for message in a:000
-      echon message
-      echon ' '
-    endfor
+  function! DbgIndent()
+    let g:debug_indent = g:debug_indent . '  '
   endfunction
 
-  command! -nargs=* Dbg call INTERNAL_Dbg(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
+  function! DbgUnindent()
+    let g:debug_indent = g:debug_indent[2:]
+  endfunction
+
+  function! Dbg(file, line, message)
+    echomsg g:debug_indent . '|' . substitute(a:file, g:vim_home_path . "/", "", "") . ':' . a:line . '| - '
+    echon a:message
+  endfunction
+
+  command! -nargs=* Dbg call Dbg(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
 else
   let g:debug_mode = 0
+
+  function! Dbg(file, line, message)
+  endfunction
+
+  function! DbgIndent()
+  endfunction
+
+  function! DbgUnindent()
+  endfunction
 
   command! -nargs=* Dbg
 endif
@@ -24,6 +48,17 @@ endif
 Dbg 'DEBUG MODE IS ACTIVE'
 Dbg 'vim home path is: ' . g:vim_home_path
 Dbg 'config path is: ' . g:cfg_dir
+
+function! Import(file, line, path)
+  let path = PathJoin(g:vim_home_path, a:path)
+  call Dbg(a:file, a:line, 'importing ' . a:path)
+  call DbgIndent()
+  execute 'source ' . path
+  call DbgUnindent()
+  call Dbg(a:file, a:line, 'import of ' . a:path . " DONE")
+endfunction
+
+command! -nargs=* Import call Import(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
 
 " Setting g:os flag
 if !exists('g:os')
@@ -60,20 +95,28 @@ if g:os ==? 'Windows'
 endif
 
 "" Functions
-let s:temp = PathJoin(g:vim_home_path, 'functions.vim')
-execute 'source ' . s:temp
+Import 'functions.vim'
 
 "" Plugins
 if ReadFlag('plugins-*-enabled')
-  let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
-  execute 'source ' . s:temp
+  Import 'plugins-list.vim'
 endif
 
 "" Keybindings
+Import 'keybindings.vim'
+
+"" Colors
+Import 'visual.vim'
+
+let s:temp = PathJoin(g:vim_home_path, 'functions.vim')
+execute 'source ' . s:temp
+
+  let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
+  execute 'source ' . s:temp
+
 let s:temp = PathJoin(g:vim_home_path, 'keybindings.vim')
 execute 'source ' . s:temp
 
-"" Colors
 let s:temp = PathJoin(g:vim_home_path, 'visual.vim')
 execute 'source ' . s:temp
 
@@ -176,10 +219,10 @@ set autoread
 set noswapfile undofile backup
 let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
-Dbg "undo dir is: " . s:temp
+Dbg "undo dir is: " . ShortPath(s:temp)
 let s:temp = PathJoin(g:vim_home_path, 'backups')
 execute 'set backupdir=' . s:temp
-Dbg "backup dir is: " . s:temp
+Dbg "backup dir is: " . ShortPath(s:temp)
 
 """ Handling special characters
 " set encoding=latin1
