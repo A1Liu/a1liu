@@ -182,7 +182,7 @@ endif
 "" Indenting and Simple formatting
 set tabstop=2 expandtab shiftwidth=2 softtabstop=2
 set foldlevelstart=4
-set textwidth=80
+" set textwidth=80      " Something like this might be good in theory, but it needs to be smarter than this is
 
 " Markdown and Jekyll Settings
 function! MdJekyllSettings()
