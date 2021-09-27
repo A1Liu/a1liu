@@ -6,6 +6,8 @@
    1. Turn OFF: Shortcuts -> Services -> Searching -> ALL
    1. Turn OFF: Shortcuts -> Services -> Text -> ALL
    1. (if present) Set to "Do Nothing": Keyboard -> Press `GLOBE ICON` to
+   1. (if present) Set to "Expanded Control Strip": Keyboard -> Touch bar shows
+   1. Customize: Keyboard -> Customize Control Strip
 2. Remove keyboard text
 2. Remove annoying Terminal stuff (Terminal -> Preferences)
    1. Set to "Close the Window": Profiles -> Shell -> When Shell Exits

@@ -21,6 +21,7 @@ endif
 " This forces the loading of the script, so that `sudo vim` can work nicely
 execute 'source ' . g:plugin_manager_script_path
 
+"" TODO try to use vim-plug instead of pathogen on Windows again
 if g:os !=? 'Windows' && g:os !=? 'WSL'
   call plug#begin()
 else
