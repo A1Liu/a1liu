@@ -14,7 +14,6 @@ source_if_necessary() {
 
 # Contains environment variables that should be present in all executions of
 # a shell.
-#
 
 # Guard prevents this from being sourced in environments that already have it.
 # Block focuses on shell variables.
