@@ -106,4 +106,6 @@ alias yarn='unalias yarn && a1liu_load_nvm && yarn'
 alias prettier='unalias prettier && a1liu_load_nvm && prettier'
 alias npx='unalias npx && a1liu_load_nvm && npx'
 alias firebase='unalias firebase && a1liu_load_nvm && firebase'
+alias oy='unalias oy && a1liu_load_nvm && oy'
+alias lerna='unalias lerna && a1liu_load_nvm && lerna'
 
