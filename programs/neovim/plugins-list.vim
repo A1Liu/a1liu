@@ -63,7 +63,9 @@ if ReadFlag('plugins-base-enabled')
   let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
   let g:formatdef_swiftformat = "'swiftformat --quiet'"
   let g:formatters_java = ['clangformat']
-  let g:formatters_javascript = ['prettier', 'clangformat']
+  let g:formatters_typescriptreact = ['prettier']
+  let g:formatters_typescript = ['prettier']
+  let g:formatters_javascript = ['prettier']
   let g:formatters_arduino = ['clangformat']
   let g:formatters_swift = ['swiftformat']
   Dbg 'autoformat in verbose mode'
