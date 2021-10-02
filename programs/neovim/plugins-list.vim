@@ -91,6 +91,7 @@ if ReadFlag('plugins-base-enabled')
 
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
+  Plug '~/code/liu/vim-liu'
 endif
 
 if ReadFlag('plugins-eval-enabled')
