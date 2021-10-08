@@ -108,18 +108,6 @@ Import 'keybindings.vim'
 "" Colors
 Import 'visual.vim'
 
-let s:temp = PathJoin(g:vim_home_path, 'functions.vim')
-execute 'source ' . s:temp
-
-  let s:temp = PathJoin(g:vim_home_path, 'plugins-list.vim')
-  execute 'source ' . s:temp
-
-let s:temp = PathJoin(g:vim_home_path, 'keybindings.vim')
-execute 'source ' . s:temp
-
-let s:temp = PathJoin(g:vim_home_path, 'visual.vim')
-execute 'source ' . s:temp
-
 if has('wildmenu')
   set wildmode=longest,full
   set wildignorecase wildmenu
