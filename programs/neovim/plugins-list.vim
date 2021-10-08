@@ -1,13 +1,8 @@
 "" Plugins
 
 let g:plugin_manager_home = PathJoin(g:vim_home_path, 'plugged')
-if g:os ==? 'Windows' || g:os ==? 'WSL'
-  let g:plugin_manager_script_path = PathJoin(g:vim_home_path, 'pathogen.vim')
-  let g:plugin_manager_script_url = 'https://tpo.pe/pathogen.vim'
-else
-  let g:plugin_manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
-  let g:plugin_manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-endif
+let g:plugin_manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
+let g:plugin_manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
 Dbg 'plugins home is ' . ShortPath(g:plugin_manager_home)
 Dbg 'plugin manager is ' . ShortPath(g:plugin_manager_script_path)
@@ -21,39 +16,7 @@ endif
 " This forces the loading of the script, so that `sudo vim` can work nicely
 execute 'source ' . g:plugin_manager_script_path
 
-"" TODO try to use vim-plug instead of pathogen on Windows again
-if g:os !=? 'Windows' && g:os !=? 'WSL'
-  call plug#begin()
-else
-  let g:plugins_list = []
-  let g:plugin_paths = []
-  function! AddPathogenPlugin(...)
-    let plugin = a:1
-    Dbg 'adding plugin: ' . plugin)
-    let plugin_path = PathJoin(g:plugin_manager_home, split(plugin,'/')[1])
-    call add(g:plugins_list, plugin)
-    call add(g:plugin_paths, plugin_path)
-  endfunction
-
-  function! InstallPathogenPlugins()
-    let cwd = Cwd()
-
-    for [name, path] in Zip(g:plugins_list, g:plugin_paths)
-      if empty(glob(path))
-        execute "cd " . g:plugin_manager_home
-        execute 'silent !git clone https://github.com/' . name
-      else
-        execute "cd " . path
-        execute 'silent !git pull'
-      endif
-    endfor
-    execute "cd " . cwd
-    call call('pathogen#infect', g:plugin_paths)
-  endfunction
-
-  command! -nargs=* Plug :call AddPathogenPlugin(<args>)
-  command! PlugInstall :call InstallPathogenPlugins()
-endif
+call plug#begin()
 
 if ReadFlag('plugins-base-enabled')
   " Autoformatters
@@ -68,26 +31,24 @@ if ReadFlag('plugins-base-enabled')
   let g:formatters_javascript = ['prettier']
   let g:formatters_arduino = ['clangformat']
   let g:formatters_swift = ['swiftformat']
+
   Dbg 'autoformat in verbose mode'
   let g:autoformat_verbosemode = g:debug_mode
 
-  if g:os !=? 'Windows' && g:os !=? 'WSL'
-    augroup AutoFormatting
-      autocmd!
-      autocmd FileType * let b:autoformat_enabled = 0
-      autocmd FileType rust,java,c,cpp,go,arduino,swift let b:autoformat_enabled = 1
-            \ | let b:autoformat_remove_trailing_spaces = 0
-            \ | let b:autoformat_retab = 0
-            \ | let b:autoformat_autoindent = 0
-      autocmd FileType vim let b:autoformat_enabled = 0
-      autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
-      autocmd FileType markdown,tex let b:autoformat_autoindent = 0
-            \ | let b:autoformat_remove_trailing_spaces = 0
-            \ | let b:autoformat_retab = 0
-            \ | let b:autoformat_autoindent = 0
-    augroup END
-  endif
-
+  augroup AutoFormatting
+    autocmd!
+    autocmd FileType * let b:autoformat_enabled = 0
+    autocmd FileType rust,java,c,cpp,go,arduino,swift let b:autoformat_enabled = 1
+          \ | let b:autoformat_remove_trailing_spaces = 0
+          \ | let b:autoformat_retab = 0
+          \ | let b:autoformat_autoindent = 0
+    autocmd FileType vim let b:autoformat_enabled = 0
+    autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
+    autocmd FileType markdown,tex let b:autoformat_autoindent = 0
+          \ | let b:autoformat_remove_trailing_spaces = 0
+          \ | let b:autoformat_retab = 0
+          \ | let b:autoformat_autoindent = 0
+  augroup END
 
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
@@ -119,7 +80,6 @@ if markdown_enabled
   let g:vim_markdown_new_list_item_indent = 0
   let g:vim_markdown_auto_insert_bullets = 0
 endif
-
 
 " Snippets
 if ReadFlag('plugins-snippets-enabled') && !has("gui_macvim")
@@ -178,8 +138,8 @@ if ReadFlag('plugins-lsc-enabled')
           \     "virtualTexthl": "Todo",
           \ },
           \  }
-
   endif
+
   command! LCRename :call LanguageClient#textDocument_rename()
   command! LCHover :call LanguageClient#textDocument_hover()
   command! LCAction :call LanguageClient_textDocument_codeAction()
@@ -189,8 +149,4 @@ if ReadFlag('plugins-lsc-enabled')
   command! LCStop LanguageClientStop
 endif
 
-if g:os !=? 'Windows' && g:os !=? 'WSL'
-  call plug#end()
-else
-  call call('pathogen#infect', g:plugin_paths)
-endif
+call plug#end()
