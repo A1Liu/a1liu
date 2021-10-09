@@ -94,11 +94,11 @@ if g:os ==? 'Windows'
   set shell=cmd.exe
 endif
 
-"" Functions
-Import 'functions.vim'
+"" Utilities
+Import 'utils.vim'
 
 "" Plugins
-if ReadFlag('plugins-*-enabled')
+if GlobFlag('plugins-*-enabled')
   Import 'plugins-list.vim'
 endif
 

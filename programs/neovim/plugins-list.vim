@@ -18,7 +18,7 @@ execute 'source ' . g:plugin_manager_script_path
 
 call plug#begin()
 
-if ReadFlag('plugins-base-enabled')
+if PlugFlag('base')
   " Autoformatters
   Plug 'Chiel92/vim-autoformat'
   let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
@@ -52,20 +52,39 @@ if ReadFlag('plugins-base-enabled')
 
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
+
+  " Plug 'mileszs/ack.vim'
+  " if executable('rg')
+  "   let g:ackprg = 'rg --vimgrep --smart-case'
+  " endif
+  " let g:ack_autoclose = 1
+  " let g:ack_use_cword_for_empty_search = 1
+
+  " " Maps <leader>/ so we're ready to type the search keyword
+  " nnoremap <C-_> :Ack!<Space>
+endif
+
+if PlugFlag('liu')
   Plug '~/code/liu/vim-liu'
 endif
 
-if ReadFlag('plugins-eval-enabled')
+if PlugFlag('fzf')
+  Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+  Plug 'junegunn/fzf.vim'
+endif
+
+
+if PlugFlag('eval')
   Plug 'vim-scripts/EvalSelection.vim'
 endif
 
-if ReadFlag('plugins-solarized-enabled')
+if PlugFlag('solarized')
   Plug 'lifepillar/vim-solarized8'
 endif
 
 " Languages
-let polyglot_enabled = ReadFlag('plugins-polyglot-enabled')
-let markdown_enabled = polyglot_enabled || ReadFlag('plugins-markdown-enabled')
+let polyglot_enabled = PlugFlag('polyglot')
+let markdown_enabled = polyglot_enabled || PlugFlag('markdown')
 if polyglot_enabled
   Plug 'sheerun/vim-polyglot'
   Plug 'jansedivy/jai.vim'
@@ -82,7 +101,7 @@ if markdown_enabled
 endif
 
 " Snippets
-if ReadFlag('plugins-snippets-enabled') && !has("gui_macvim")
+if PlugFlag('snippets') && !has("gui_macvim")
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   let g:UltiSnipsExpandTrigger="<C-N><C-N>"
@@ -91,7 +110,7 @@ if ReadFlag('plugins-snippets-enabled') && !has("gui_macvim")
 endif
 
 " Language server support because I have to I guess
-if ReadFlag('plugins-lsc-enabled')
+if PlugFlag('lsc')
   Plug 'autozimu/LanguageClient-neovim', {
         \ 'branch': 'next',
         \ 'do': 'bash install.sh',

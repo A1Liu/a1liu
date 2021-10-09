@@ -8,7 +8,7 @@ command! ToggleBg :call ToggleFlag('light-mode') | call ReadBgFlag()
 
 command! ReadBgFlag :call ReadBgFlag()
 function! ReadBgFlag()
-  if ReadFlag('light-mode')
+  if Flag('light-mode')
     set background=light
   else
     set background=dark
@@ -49,7 +49,7 @@ set statusline+=%=
 set statusline+=\ %y
 set statusline+=\ %p%%
 set statusline+=\ %c:%l
-set statusline+=\  
+set statusline+=\ 
 
 " GUI Mode
 if has('gui_running')
