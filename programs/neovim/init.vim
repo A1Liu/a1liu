@@ -94,18 +94,9 @@ if g:os ==? 'Windows'
   set shell=cmd.exe
 endif
 
-"" Utilities
 Import 'utils.vim'
-
-"" Plugins
-if GlobFlag('plugins-*-enabled')
-  Import 'plugins-list.vim'
-endif
-
-"" Keybindings
+Import 'plugins-list.vim'
 Import 'keybindings.vim'
-
-"" Colors
 Import 'visual.vim'
 
 if has('wildmenu')

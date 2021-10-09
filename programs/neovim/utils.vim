@@ -40,7 +40,7 @@ endfunction
 function! ListFlags(flag_glob)
   let flag_path = s:flag_prefix . a:flag_glob
   let flags = []
-  for flag in glob(flag_path, false, true)
+  for flag in glob(flag_path, g:false, g:true)
     call add(flags, fnamemodify(flag, ':t'))
   endfor
 
@@ -56,7 +56,7 @@ function! GoToTag(tagname) " Go to a tag
     if a:tagname != ""
       silent exe 'ts ' . a:tagname
       let old_tags = &tags
-      let &tags = get(tagfiles(), false) " Don't know why this is necessary but it is
+      let &tags = get(tagfiles(), g:false) " Don't know why this is necessary but it is
       exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
       let &tags = old_tags
     endif

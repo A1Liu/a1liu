@@ -1,5 +1,8 @@
-"" Plugins
+if !GlobFlag('plugins-*-enabled')
+  finish
+endif
 
+"" Plugins
 let g:plugin_manager_home = PathJoin(g:vim_home_path, 'plugged')
 let g:plugin_manager_script_path = PathJoin(g:vim_home_path, 'plug.vim')
 let g:plugin_manager_script_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
@@ -68,28 +71,25 @@ if PlugFlag('solarized')
 endif
 
 " Languages
-let polyglot_enabled = PlugFlag('polyglot')
-let markdown_enabled = polyglot_enabled || PlugFlag('markdown')
-if polyglot_enabled
+if PlugFlag('polyglot')
   Plug 'sheerun/vim-polyglot'
   Plug 'jansedivy/jai.vim'
   Plug '~/code/liu/vim-liu'
-endif
-if markdown_enabled && !polyglot_enabled
+elseif PlugFlag('markdown')
   Plug 'plasticboy/vim-markdown'
 endif
-if markdown_enabled
-  let g:vim_markdown_math = 1
-  let g:vim_markdown_frontmatter = 1
-  let g:vim_markdown_folding_disabled = 1
-  let g:vim_markdown_new_list_item_indent = 0
-  let g:vim_markdown_auto_insert_bullets = 0
-endif
+
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_new_list_item_indent = 0
+let g:vim_markdown_auto_insert_bullets = 0
 
 " Snippets
 if PlugFlag('snippets') && !has("gui_macvim")
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
+
   let g:UltiSnipsExpandTrigger="<C-N><C-N>"
   let g:UltiSnipsJumpForwardTrigger="<C-R>"
   let g:UltiSnipsJumpBackwardTrigger="<C-E>"
