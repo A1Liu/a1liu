@@ -52,27 +52,12 @@ if PlugFlag('base')
 
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
-
-  " Plug 'mileszs/ack.vim'
-  " if executable('rg')
-  "   let g:ackprg = 'rg --vimgrep --smart-case'
-  " endif
-  " let g:ack_autoclose = 1
-  " let g:ack_use_cword_for_empty_search = 1
-
-  " " Maps <leader>/ so we're ready to type the search keyword
-  " nnoremap <C-_> :Ack!<Space>
-endif
-
-if PlugFlag('liu')
-  Plug '~/code/liu/vim-liu'
 endif
 
 if PlugFlag('fzf')
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
 endif
-
 
 if PlugFlag('eval')
   Plug 'vim-scripts/EvalSelection.vim'
@@ -88,6 +73,7 @@ let markdown_enabled = polyglot_enabled || PlugFlag('markdown')
 if polyglot_enabled
   Plug 'sheerun/vim-polyglot'
   Plug 'jansedivy/jai.vim'
+  Plug '~/code/liu/vim-liu'
 endif
 if markdown_enabled && !polyglot_enabled
   Plug 'plasticboy/vim-markdown'
