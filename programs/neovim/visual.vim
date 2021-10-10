@@ -64,15 +64,13 @@ command! SynStack :call SynStack()
 " Color Scheme
 try
   colorscheme solarized8_high
-  ReadBgFlag
   Dbg 'succeeded in loading solarized8_high'
 catch
   Dbg 'failed to load solarized8_high'
-  colorscheme default
-  if has('gui_running')
-    set background=light
-  endif
+  Import 'colors/apprentice.vim'
+  colorscheme apprentice
 endtry
+ReadBgFlag
 
 " Font on GUI Programs
 if g:os ==? 'Windows'
