@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # Takes as arguments:
 # 1. path to source
 # 2. command that should be available after source
@@ -32,6 +31,15 @@ fi
 
 # Guard prevents this from being sourced in environments that already have it.
 # Block focuses on environment variables.
+
+# TODO for some godawful reason this shit gets kinda ruined on rerun, because of
+# "system configs". Some idiot thought it would be smart to just, tack on the
+# system paths in front of everything else, unconditionally, at shell startup,
+# so now I have no idea which ones of these will get repeated, and also have no
+# idea which order they'll come in. For now this can be ignored, but it's really
+# stupid, so if PATH gets fucked up this is the first thing to blame. Look in
+# /etc/zshenv, /etc/zprofile, /etc/zlogin and make sure they don't screw up
+# the configs
 if [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
   export EDITOR='vim'
@@ -40,8 +48,12 @@ if [[ $CFG_ENV != 1 ]]; then
 
   # Adding stuff to python path
   export PYTHONPATH="${CFG_DIR}/libs/python:${PYTHONPATH}"
+
   # export GOROOT="/usr/local/go"
   export GOPATH="$HOME/go"
   export PATH="${GOPATH}:${GOPATH}/bin:${PATH}"
+
   export PATH="~/.rbenv/bin:${PATH}"
+
+  export HOMEBREW_NO_AUTO_UPDATE=1
 fi
