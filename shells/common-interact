@@ -15,6 +15,7 @@ alias ssh='TERM=xterm-256color ssh'
 
 # Tmux
 alias aliu='tmux attach -t aliu || tmux new -s aliu'
+alias work='tmux attach -t work || tmux new -s work'
 
 # Disable <C-s> behavior
 stty -ixon
@@ -95,7 +96,7 @@ function a1liu_load_nvm() {
     [ -s "$NVM_COMPLETIONS" ] && . "$NVM_COMPLETIONS"
 
     alias a1liu_load_nvm='true'
-    nvm use
+    nvm use 2>/dev/null || true
 }
 
 alias nvm='a1liu_load_nvm && nvm'
