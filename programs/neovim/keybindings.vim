@@ -71,6 +71,12 @@ inoremap <expr> <C-U> pumvisible() ? "\<C-P>\<C-P>\<C-P>\<C-P>\<C-P>" : "\<C-U>"
 inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"
 inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
 
+" Using <C-T> to put in a lil thing with my name and stuff in it
+if Flag('aliu')
+  nnoremap <C-T> i<C-R>=strftime("- Albert Liu, %b %d, %Y %a %H:%M %Z")<CR><Esc>
+  inoremap <C-T> <C-R>=strftime("- Albert Liu, %b %d, %Y %a %I:%M %Z")<CR>
+endif
+
 " Unmapping <C-Q>
 nnoremap <C-Q> <Nop>
 
