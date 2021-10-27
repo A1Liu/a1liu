@@ -14,12 +14,12 @@
 	oneline = true
 [alias]
 	l = log --graph --oneline
-	co = commit -m
+	co = commit -anm
   fwd =  "!f() { \
             git checkout $(git rev-list --topo-order HEAD..\"$*\" | tail -1); \
           }; f"
   back = checkout HEAD~1
-	ca = commit --amend -m
+	ca = commit --amend -anm
   s = status
   root = rev-parse --show-toplevel
 [push]
