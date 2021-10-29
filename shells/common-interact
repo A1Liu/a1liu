@@ -15,7 +15,11 @@ alias ssh='TERM=xterm-256color ssh'
 
 # Tmux
 alias aliu='tmux attach -t aliu || tmux new -s aliu'
-alias work='tmux attach -t work || tmux new -s work'
+function work() {
+    cd "$HOME/code/orthly$1"
+    tmux attach -t "work$1" || tmux new -s "work$1"
+
+}
 
 # Disable <C-s> behavior
 stty -ixon
