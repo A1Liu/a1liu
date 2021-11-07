@@ -36,3 +36,5 @@
 	clean = git-lfs clean -- %f
 [pull]
 	ff = only
+[init]
+	defaultBranch = main
