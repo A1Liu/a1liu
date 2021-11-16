@@ -87,6 +87,7 @@ endfunction
 set nomodeline modelines=0
 
 "" Compatibility
+set mouse=a
 set guicursor= " Don't want unknown characters in Linux
 set t_ut= " Dont want background to do weird stuff
 set nocompatible
