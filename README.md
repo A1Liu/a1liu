@@ -2,6 +2,11 @@
 My configurations! This repo contains the things that I like to keep constant
 between systems; things like application settings, file organizations, etc.
 
+### Installation Scripts
+This repository includes multiple installation scripts for setting up a new computer,
+or just trying out some of my configurations. For more information about installation,
+please see `install/README.md`.
+
 ### Structure
 
 ```
@@ -16,11 +21,6 @@ between systems; things like application settings, file organizations, etc.
 ├── public ======= Next.js Assets folder
 └── shells ------- Configurations used by shell sessions
 ```
-
-### Installation Scripts
-This repository includes multiple installation scripts for setting up a new computer,
-or just trying out some of my configurations. For more information about installation,
-please see `install/README.md`.
 
 ### Environment Variables
 
