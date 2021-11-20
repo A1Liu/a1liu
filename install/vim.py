@@ -17,11 +17,11 @@ if config.debug_mode():
     configure_logger(level=DEBUG)
     configure_logger(files.move_safe, level=DEBUG)
 
-config.add_safe("~/.vimrc", "programs/neovim/init.vim")
+config.add_safe("~/.vimrc", "programs/vim/init.vim")
 if platform.system() == "Windows":
-    config.add_safe("~/vimfiles", "programs/neovim")
+    config.add_safe("~/vimfiles", "programs/vim")
 else:
-    config.add_safe("~/.vim", "programs/neovim")
+    config.add_safe("~/.vim", "programs/vim")
 
 # Confirm install
 open(config.install_flag_filename("vim"), 'w').close()
