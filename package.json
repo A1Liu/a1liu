@@ -2,8 +2,8 @@
   "name": "A1Liu",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
-    "start": "next start",
+    "build": "next build",
+    "export": "next export",
     "lint": "next lint --fix",
     "deploy": "git push origin main:production"
   },
