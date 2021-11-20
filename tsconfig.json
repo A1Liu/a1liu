@@ -29,7 +29,6 @@
     "./programs",
     "./local",
     "./public",
-    "./install",
-    "./python"
+    "./install"
   ]
 }
