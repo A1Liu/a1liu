@@ -768,6 +768,10 @@
 			</dict>
 			<key>Mouse Reporting</key>
 			<true/>
+			<key>Mouse Reporting allow clicks and drags</key>
+			<true/>
+			<key>Mouse Reporting allow mouse wheel</key>
+			<true/>
 			<key>Name</key>
 			<string>Default</string>
 			<key>Non Ascii Font</key>
@@ -1513,6 +1517,10 @@
 			<real>0.0</real>
 			<key>Mouse Reporting</key>
 			<true/>
+			<key>Mouse Reporting allow clicks and drags</key>
+			<true/>
+			<key>Mouse Reporting allow mouse wheel</key>
+			<true/>
 			<key>Name</key>
 			<string>Guake</string>
 			<key>Non Ascii Font</key>
@@ -2229,6 +2237,10 @@
 				<real>0.0</real>
 			</dict>
 			<key>Mouse Reporting</key>
+			<true/>
+			<key>Mouse Reporting allow clicks and drags</key>
+			<true/>
+			<key>Mouse Reporting allow mouse wheel</key>
 			<true/>
 			<key>Name</key>
 			<string>Safe</string>
