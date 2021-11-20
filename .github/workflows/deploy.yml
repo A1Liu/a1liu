@@ -1,4 +1,4 @@
-name: Deploy to Github Pages
+name: Build and Deploy to Github Pages
 
 on:
   push:
@@ -21,18 +21,8 @@ jobs:
           node-version: 16.10.0
           cache: yarn
 
-      - run: yarn install --frozen-lockfile
-      - run: yarn build
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@4.1.6
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          publish_dir: ./out
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@3.6.2
-        with:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: .next # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch
+          branch: gh-pages # The branch the action should deploy to.
+          folder: .next # The folder the action should deploy.
