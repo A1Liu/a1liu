@@ -2,9 +2,8 @@ import os, subprocess
 import aliu.files as files
 
 __aliu_dir = os.path.dirname(os.path.realpath(__file__))
-__python_dir = os.path.dirname(__aliu_dir)
-libs_dir = os.path.dirname(__python_dir)
-project_dir = os.path.dirname(libs_dir)
+programs_dir = os.path.dirname(__aliu_dir)
+project_dir = os.path.dirname(programs_dir)
 install_dir = os.path.join(project_dir, 'install')
 local_dir = os.path.join(project_dir, 'local')
 flags_dir = os.path.join(local_dir, 'flags')
