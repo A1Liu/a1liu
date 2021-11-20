@@ -77,16 +77,12 @@ The remainder of the settings are described in `install/MacOS.md`.
 5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
    the settings stored in this repository under `compat\windows\keybindings.skl`
 
-6. Run setup script `setup\windows.ps1`.
-
-7. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
+6. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
    and customize the install by ensuring that it's installed for all users, adding
    python to the environment variables, and not precompiling the standard library.
 
-8. Windows is broken, so follow this to get debugging native files to work:
+7. Windows is broken, so follow this to get debugging native files to work:
    https://docs.microsoft.com/en-us/visualstudio/debugger/debug-using-the-just-in-time-debugger?view=vs-2019#jit_errors
-
-9. 
 
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
