@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
+}
+const isProd = process.env.NODE_ENV === 'production'
+
+module.exports = {
+  assetPrefix: isProd ? '/config/' : ''
   reactStrictMode: true,
 }
