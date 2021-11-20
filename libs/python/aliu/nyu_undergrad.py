@@ -1,16 +1,17 @@
 from aliu import config
+import os
 import json
 
 
 def get_grades(ignore=set()):
-    with config.data_file('nyu-undergrad-transcript.json') as transcript:
+    with open(os.path.join(os.path.dirname(__file__), 'nyu-undergrad-transcript.json')) as transcript:
         return [{k: v
                  for k, v in course.items() if k not in ignore}
                 for course in json.load(transcript)]
 
 
 def set_grades(grades):
-    with config.data_file('nyu-undergrad-transcript.json', 'w') as transcript:
+    with open(os.path.join(os.path.dirname(__file__), 'nyu-undergrad-transcript.json'), 'w') as transcript:
         json.dump(grades, transcript)
 
 
