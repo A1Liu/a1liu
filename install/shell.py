@@ -23,7 +23,7 @@ export CFG_DIR="{config.project_dir}"
 CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"
 IS_INTERACTIVE_SHELL=%s
 
-. "{config.project_dir}/shells/dispatch"
+. "{config.project_dir}/programs/shells/dispatch"
 """
 
 debug("print_template=",
@@ -37,7 +37,7 @@ with open(os.path.join(config.local_dir, "shell_interact_init"), 'w') as f:
 
 config.add_safe("~/.bash_profile", "local/shell_interact_init")
 config.add_safe("~/.bashrc", "local/shell_interact_init")
-config.add_safe("~/.inputrc", "shells/inputrc")
+config.add_safe("~/.inputrc", "programs/shells/inputrc")
 config.add_safe("~/.zshrc", "local/shell_interact_init")
 
 # Confirm install
