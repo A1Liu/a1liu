@@ -6,15 +6,15 @@ between systems; things like application settings, file organizations, etc.
 
 ```
 .
-├── local -------- Machine-specific configuration settings
+├── local -------- Machine-specific files
 │   ├── flags ==== Persistent configuration flags, e.g. whether a config has been run
 │   └── preconf -- Files that my configurations replaced
 ├── install ====== Scripts to install this configuration on a new machine
 │   └── undo ----- Scripts that undo their counterpart in `install`
 ├── programs ===== Configurations used by programs that I use
-├── shells ------- Configurations used by shell sessions
-├── compat ======= Configurations that need to be different for each OS
-└── libs --------- Utility libraries that I've written over the years
+├── pages -------- Next.js routes
+├── public ======= Next.js Assets folder
+└── shells ------- Configurations used by shell sessions
 ```
 
 ### Installation Scripts
