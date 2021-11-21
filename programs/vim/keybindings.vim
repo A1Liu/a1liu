@@ -21,6 +21,7 @@ if !has('nvim')
   " Terminal keybindings
   if exists(':terminal')
     tnoremap <C-H> <C-\><C-N>
+    tnoremap <C-W><C-H> <C-W>h
   endif
 endif
 
@@ -52,9 +53,9 @@ cnoremap <Up> <C-P>
 cnoremap <Down> <C-N>
 
 " Screw that man pages stuff
-nnoremap <S-K> gj
-vnoremap <S-K> gj
-vnoremap <S-L> gk
+nnoremap <S-K> gk
+vnoremap <S-K> gk
+vnoremap <S-J> gj
 
 " What the heck is Select mode?
 nnoremap <silent> gh :call LanguageClient#textDocument_hover()<CR>
@@ -78,6 +79,9 @@ endif
 
 " Unmapping <C-Q>
 nnoremap <C-Q> <Nop>
+
+" Mapping semicolon to colon
+nnoremap ; :
 
 " Disabling ex mode
 nnoremap <S-Q> <Nop>
@@ -112,17 +116,6 @@ nnoremap <C-W><S-N> :aboveleft :split<CR>:enew<CR>
 " Pressing j and k go up and down the sections of a soft-wrapped line
 " https://statico.github.io/vim.html
 " https://statico.github.io/vim2.html
-noremap j h
-onoremap j h
-
-noremap k gj
-onoremap k j
-
-noremap l gk
-onoremap l k
-
-noremap ; l
-onoremap ; l
-
-noremap ' :
+nnoremap j gj
+nnoremap k gk
 
