@@ -26,9 +26,7 @@
   ],
   "exclude": [
     "node_modules",
-    "./programs",
-    "./local",
     "./public",
-    "./install"
+    "./config"
   ]
 }
