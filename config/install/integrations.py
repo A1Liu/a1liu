@@ -3,7 +3,7 @@ import os, sys
 from pathlib import Path
 install_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(install_dir)
-sys.path.insert(0, os.path.join(project_dir, 'libs', 'python'))
+sys.path.insert(0, os.path.join(project_dir, 'programs'))
 from aliu import files
 from aliu import config
 from aliu.logging import *

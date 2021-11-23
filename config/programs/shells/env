@@ -40,6 +40,9 @@ fi
 # stupid, so if PATH gets fucked up this is the first thing to blame. Look in
 # /etc/zshenv, /etc/zprofile, /etc/zlogin and make sure they don't screw up
 # the configs
+
+# TODO This also breaks when TMUX runs things. I think I'm going to rewrite this stuff
+# to just not append ever, but on install it copies the existing environment.
 if [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
   export EDITOR='vim'
@@ -47,7 +50,7 @@ if [[ $CFG_ENV != 1 ]]; then
   export BASH_SILENCE_DEPRECATION_WARNING=1
 
   # Adding stuff to python path
-  export PYTHONPATH="${CFG_DIR}/programs:${PYTHONPATH}"
+  export PYTHONPATH="${CFG_DIR}/programs"
 
   # export GOROOT="/usr/local/go"
   export GOPATH="$HOME/go"

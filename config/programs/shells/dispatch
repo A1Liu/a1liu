@@ -6,6 +6,7 @@
 # and 'IS_INTERACTIVE_SHELL'.
 export SHELL_DIR="$CFG_DIR/programs/shells"
 
+
 # Set environment variables that should exist for all calls of a shell
 . "$SHELL_DIR/env"
 
