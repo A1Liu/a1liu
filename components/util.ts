@@ -1,4 +1,10 @@
-import React from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 
 export const timeout = (ms: number): Promise<void> =>
   new Promise((res) => setTimeout(res, ms));
@@ -25,31 +31,29 @@ export function useAsync<T>(
   _fn: () => Promise<T>,
   deps: any[] = []
 ): AsyncValue<T> {
-  const [_, fetchFinished] = React.useState(0);
-  const [fetches, setRefetchCount] = React.useState(0);
-  const started = React.useRef(0);
-  const done = React.useRef(0);
-  const data = React.useRef<T | null>(null);
-  const error = React.useRef<any | null>(null);
+  const [_, fetchFinished] = useState(0);
+  const [fetches, incFetch] = useState(0);
+  const started = useRef(0);
+  const done = useRef(0);
+  const data = useRef<T | null>(null);
+  const error = useRef<any | null>(null);
+
+  const refetch = useCallback(() => incFetch((s) => ++s % 4096), [incFetch]);
 
   // Missing the _fn dependency so that the callback only changes when the provided
   // deps change.
   //
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fn = React.useCallback(_fn, deps);
+  const fn = useCallback(_fn, deps);
 
-  const refetch = React.useCallback(
-    () => setRefetchCount((s) => (s + 1) % 4096),
-    [setRefetchCount]
-  );
 
   // Extra dependencies here allow us to force a refetch when someone calls
   // refetch.
   //
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const index = React.useMemo(() => ++started.current, [started, fn, fetches]);
+  const index = useMemo(() => ++started.current, [started, fn, fetches]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
 
     const doCall = async () => {
