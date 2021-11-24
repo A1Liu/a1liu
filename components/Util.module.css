@@ -10,3 +10,5 @@
 @value max-lg: (max-width: 992px);
 @value max-xl: (max-width: 1200px);
 
+@value baby-blue: #61afef;
+@value light-gray: #828997;

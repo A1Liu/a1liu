@@ -24,11 +24,10 @@
 }
 
 .navLink {
-  color: #828997;
-  transition: 0.4s;
+  color: var(--gray);
 
   &:hover {
-    color: #61afef;
+    color: var(--blue);
   }
 }
 

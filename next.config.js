@@ -1,5 +1,10 @@
-const isProd = process.env.NODE_ENV === 'production';
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx$/,
+});
 
-module.exports = {
+const config = {
   reactStrictMode: true,
-};
+  pageExtensions: ['tsx', 'mdx'],
+}
+
+module.exports = withMDX(config);
