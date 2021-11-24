@@ -1,0 +1,12 @@
+@value min-xs: (min-width: 0px);
+@value min-sm: (min-width: 576px);
+@value min-md: (min-width: 768px);
+@value min-lg: (min-width: 992px);
+@value min-xl: (min-width: 1200px);
+
+@value max-xs: (max-width: 0px);
+@value max-sm: (max-width: 576px);
+@value max-md: (max-width: 768px);
+@value max-lg: (max-width: 992px);
+@value max-xl: (max-width: 1200px);
+

@@ -8,7 +8,10 @@
     "deploy": "git push origin main:production"
   },
   "dependencies": {
+    "classnames": "2.3.1",
     "next": "12.0.4",
+    "postcss-flexbugs-fixes": "5.0.2",
+    "postcss-preset-env": "7.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
@@ -26,6 +29,21 @@
         1,
         "always"
       ]
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "postcss-flexbugs-fixes": {},
+      "postcss-preset-env": {
+        "autoprefixer": {
+          "flexbox": "no-2009"
+        },
+        "stage": 3,
+        "features": {
+          "nesting-rules": true,
+          "custom-properties": false
+        }
+      }
     }
   }
 }
