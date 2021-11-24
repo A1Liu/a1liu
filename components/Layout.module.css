@@ -1,15 +1,21 @@
 @value min-lg from './Util.module.css';
 
 .fullscreen {
+  background-color: #e6e6e6;
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
   width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-items: space-between;
+  align-items: center;
 }
 
 .topNav {
   width: 100%;
+  min-height: 90px;
   height: 90px;
   background: #121417;
   display: flex;
@@ -26,7 +32,7 @@
   }
 }
 
-.col8 {
+.navContent {
   height: 100%;
   display: flex;
   justify-content: space-between;
@@ -37,11 +43,10 @@
 
   @media min-lg {
     padding: 0;
-    flex: 0 0 66.666667%;
+    flex-basis: 66.666667%;
     width: 66.666667%;
   }
 }
-
 
 .logo {
   composes: navLink;
@@ -53,4 +58,16 @@
   composes: navLink;
   margin-left: 10px;
   font-size: 20px;
+}
+
+.main {
+  flex-grow: 1;
+  background-color: #fff;
+  width: 100%;
+  padding: 50px;
+  box-shadow: inset -15px 0 15px -15px #282C34,inset 15px 0 15px -15px #282C34;
+
+  @media min-lg {
+    width: 66.666667%;
+  }
 }

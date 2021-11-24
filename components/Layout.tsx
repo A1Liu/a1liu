@@ -2,10 +2,10 @@ import styles from "./Layout.module.css";
 import cx from 'classnames';
 import React from "react";
 
-const TopNav: React.FC = () => {
+const TopNav: React.VFC = () => {
   return (
     <div className={styles.topNav}>
-      <div className={styles.col8}>
+      <div className={styles.navContent}>
         <a className={styles.logo} href={"/"}>
           Albert Liu
         </a>
@@ -29,10 +29,15 @@ const TopNav: React.FC = () => {
   );
 };
 
-export default (props) => {
+const Layout: React.FC = props => {
   return (
     <div className={styles.fullscreen}>
       <TopNav />
+      <div className={styles.main} >
+        {props.children}
+      </div>
     </div>
   );
 };
+
+export default Layout;
