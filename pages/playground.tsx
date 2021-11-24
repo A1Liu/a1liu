@@ -1,19 +1,21 @@
-import { useAsync, timeout } from "../components/util";
+import { useAsyncLazy, useAsync, timeout } from "../components/util";
 import React from "react";
 
 const ShowData: React.VFC = () => {
   const [counter, setCounter] = React.useState(0);
   const [ignored, setIgnored] = React.useState(0);
+  const fetchCounter = React.useRef(0);
   const { data, isLoaded, refetch, isLoading } = useAsync(async () => {
-    await timeout(2000);
+    console.log("Running...");
+    await timeout(250);
     return fetch("https://jsonplaceholder.typicode.com/todos/1")
       .then((r) => r.text())
-      .then((t) => t + counter);
+      .then((t) => t + 'f: ' + (fetchCounter.current++) + ' c: ' + counter);
   }, [counter]);
 
   return (
     <div>
-      <h1>{isLoading ? "loading" : "done"}</h1>
+      <h1>{isLoading ? "loading" : isLoaded ? "done" : "lazy"}</h1>
       <pre>{data}</pre>
       <button onClick={refetch}>Refetch</button>
       <button onClick={() => setCounter((c) => c + 1)}>

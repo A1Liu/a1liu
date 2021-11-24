@@ -27,48 +27,47 @@ export type AsyncValueLoaded<T> = {
 
 export type AsyncValue<T> = AsyncValueLoaded<T> | AsyncValueMissing<T>;
 
-export function useAsync<T>(
-  _fn: () => Promise<T>,
-  deps: any[] = []
+function useAsyncHelper<T>(
+  fn: () => Promise<T>,
+  _deps: any[] | null
 ): AsyncValue<T> {
-  const [_, fetchFinished] = useState(0);
   const [fetches, incFetch] = useState(0);
-  const started = useRef(0);
-  const done = useRef(0);
-  const data = useRef<T | null>(null);
-  const error = useRef<any | null>(null);
 
-  const refetch = useCallback(() => incFetch((s) => ++s % 4096), [incFetch]);
+  const [active, setActive] = useState(0);
+  const startedRef = useRef(0);
+  const doneRef = useRef(0);
 
-  // Missing the _fn dependency so that the callback only changes when the provided
-  // deps change.
-  //
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fn = useCallback(_fn, deps);
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<any | null>(null);
 
+  const refetch = useCallback(() => incFetch((s) => s + 1), [incFetch]);
+  const deps = [fetches].concat(_deps ?? []);
 
-  // Extra dependencies here allow us to force a refetch when someone calls
-  // refetch.
-  //
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const index = useMemo(() => ++started.current, [started, fn, fetches]);
-
+  // Intentionally removing most stuff from the dependencies. This effect should
+  // only trigger when the dependencies change or when the refetch is called.
+  /* eslint-disable */
   useEffect(() => {
+    const started = startedRef.current++;
+    if (_deps === null && started === 0) return;
+
     let mounted = true;
 
     const doCall = async () => {
       let newValue = null;
       let newError = null;
 
+      setActive((a) => a + 1);
+
       await fn()
         .then((v) => (newValue = v))
         .catch((e) => (newError = e));
 
-      if (mounted && done.current < index) {
-        done.current = index;
-        data.current = newValue;
-        error.current = newError;
-        fetchFinished((s) => (s + 1) % 4096);
+      setActive((a) => a - 1);
+
+      if (mounted && doneRef.current <= started) {
+        doneRef.current = started + 1;
+        setData(newValue);
+        setError(newError);
       }
     };
 
@@ -77,14 +76,15 @@ export function useAsync<T>(
     return () => {
       mounted = false;
     };
-  }, [fn, index, data, error, done, fetchFinished]);
+  }, deps);
+  /* eslint-enable */
 
-  if (error.current === null && done.current > 0) {
+  if (error === null && doneRef.current > 0) {
     return {
       refetch,
       isLoaded: true,
-      isLoading: index > done.current,
-      data: data.current!,
+      isLoading: active > 0,
+      data: data!,
       error: null,
     };
   }
@@ -92,8 +92,19 @@ export function useAsync<T>(
   return {
     refetch,
     isLoaded: false,
-    isLoading: index > done.current,
+    isLoading: active > 0,
     data: null,
-    error: error.current,
+    error: error,
   };
+}
+
+export function useAsyncLazy<T>(fn: () => Promise<T>): AsyncValue<T> {
+  return useAsyncHelper(fn, null);
+}
+
+export function useAsync<T>(
+  fn: () => Promise<T>,
+  deps: any[] = []
+): AsyncValue<T> {
+  return useAsyncHelper(fn, deps);
 }
