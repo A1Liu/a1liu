@@ -99,12 +99,12 @@ function a1liu_load_nvm() {
     [ -s "$NVM_SCRIPT" ] && . "$NVM_SCRIPT"
     [ -s "$NVM_COMPLETIONS" ] && . "$NVM_COMPLETIONS"
 
+    unset -f a1liu_load_nvm
     alias a1liu_load_nvm='true'
     nvm use 2>/dev/null || true
 }
 
 alias nvm='a1liu_load_nvm && nvm'
-alias gulp='npm run gulp'
 alias node='unalias node && a1liu_load_nvm && node'
 alias npm='unalias npm && a1liu_load_nvm && npm'
 alias yarn='unalias yarn && a1liu_load_nvm && yarn'
@@ -112,5 +112,6 @@ alias prettier='unalias prettier && a1liu_load_nvm && prettier'
 alias npx='unalias npx && a1liu_load_nvm && npx'
 alias firebase='unalias firebase && a1liu_load_nvm && firebase'
 alias oy='unalias oy && a1liu_load_nvm && oy'
-alias lerna='unalias lerna && a1liu_load_nvm && lerna'
 
+alias infra='yarn run infra'
+alias lerna='yarn run lerna'
