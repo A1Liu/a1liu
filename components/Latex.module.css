@@ -24,7 +24,10 @@
   max-width: 740px;
   margin: 60px auto;
   padding: 0px 60px;
+
   font-family: "Computer Modern";
+  font-size: 0.8rem;
+  line-height: 1.5;
   font-weight: 400;
   font-feature-settings: "kern";
   font-kerning: normal;
@@ -35,5 +38,7 @@
     font-weight: 400;
     font-size: 2rem;
     line-height: 1.2;
+    margin-bottom: 0.75rem;
   }
+
 }
