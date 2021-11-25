@@ -34,11 +34,20 @@
   font-size-adjust: none;
   color: rgb(17, 17, 17);
 
+  & p {
+    margin-bottom: 0.75rem;
+  }
+
   & h1 {
     font-weight: 400;
     font-size: 2rem;
     line-height: 1.2;
     margin-bottom: 0.75rem;
+  }
+
+  & h3 {
+    font-size: 1.4rem;
+    line-height: 1.2;
   }
 
 }
