@@ -1,0 +1,39 @@
+@font-face {
+    font-family: "Computer Modern";
+    src: url('/fonts/latex/cmunrm.ttf');
+}
+
+@font-face {
+  font-family: "Computer Modern";
+  src: url('/fonts/latex/cmunbx.ttf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "Computer Modern";
+  src: url('/fonts/latex/cmunti.ttf');
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Computer Modern Typewriter";
+  src: url('/fonts/latex/cmuntb.ttf');
+}
+
+.wrapper {
+  max-width: 740px;
+  margin: 60px auto;
+  padding: 0px 60px;
+  font-family: "Computer Modern";
+  font-weight: 400;
+  font-feature-settings: "kern";
+  font-kerning: normal;
+  font-size-adjust: none;
+  color: rgb(17, 17, 17);
+
+  & h1 {
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+}

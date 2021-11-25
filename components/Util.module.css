@@ -12,3 +12,17 @@
 
 @value baby-blue: #61afef;
 @value light-gray: #828997;
+
+.fullscreen {
+  background-color: #e6e6e6;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-items: space-between;
+  align-items: center;
+}
+

@@ -1,4 +1,5 @@
 import styles from "./Layout.module.css";
+import css from './Util.module.css';
 import cx from 'classnames';
 import React from "react";
 
@@ -31,7 +32,7 @@ const TopNav: React.VFC = () => {
 
 const Layout: React.FC = props => {
   return (
-    <div className={styles.fullscreen}>
+    <div className={css.fullscreen}>
       <TopNav />
       <div className={styles.main} >
         {props.children}
