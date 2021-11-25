@@ -71,12 +71,19 @@ a {
 code {
   font-family: monospace;
   font-size: 1rem;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 4;
+  hyphens: none;
 }
 
 pre {
   margin-bottom: 1rem;
   overflow: auto;
-  -ms-overflow-style: scrollbar;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 4;
+  hyphens: none;
 }
 
 figure {
