@@ -1,16 +1,20 @@
-import Layout from "../../components/Layout";
-import { dir } from "../../components/util";
+import { GetStaticProps, NextPage } from "next";
+import Layout from "components/Layout";
 import { readdir } from "fs/promises";
 
-export async function getStaticProps({ params }) {
+interface Props {
+  readonly files: string[];
+}
+
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const allFiles = await readdir("./pages/docs");
   const files = allFiles.filter((f) => f !== "index.tsx");
 
   const props = { files };
   return { props };
-}
+};
 
-const Documents = ({ files }) => {
+const Documents: NextPage<Props> = ({ files }) => {
   const urls = files.map((f) => `/docs/${f.replace(/\.[^/.]+$/, "")}`);
 
   return (
