@@ -2,28 +2,19 @@
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
 
-function! ShortPath(path)
-  let new_path = substitute(a:path, g:vim_home_path . "/", "", "")
-  if new_path != a:path
-    return 'VIM/' . new_path
-  endif
+" Print debugging information
+let g:debug_mode = $VIM_DEBUG == '1'
+let g:debug_indent = ''
 
-  return a:path
+function! DbgIndent()
+  let g:debug_indent = g:debug_indent . '  '
 endfunction
 
-" Print debugging information
-if $VIM_DEBUG == '1'
-  let g:debug_mode = 1
-  let g:debug_indent = ''
+function! DbgUnindent()
+  let g:debug_indent = g:debug_indent[2:]
+endfunction
 
-  function! DbgIndent()
-    let g:debug_indent = g:debug_indent . '  '
-  endfunction
-
-  function! DbgUnindent()
-    let g:debug_indent = g:debug_indent[2:]
-  endfunction
-
+if g:debug_mode
   function! Dbg(file, line, message)
     echomsg g:debug_indent . '|' . substitute(a:file, g:vim_home_path . "/", "", "") . ':' . a:line . '| - '
     echon a:message
@@ -31,15 +22,7 @@ if $VIM_DEBUG == '1'
 
   command! -nargs=* Dbg :call Dbg(resolve(expand('<sfile>:p')), expand('<slnum>'), <args>)
 else
-  let g:debug_mode = 0
-
   function! Dbg(file, line, message)
-  endfunction
-
-  function! DbgIndent()
-  endfunction
-
-  function! DbgUnindent()
   endfunction
 
   command! -nargs=* Dbg
@@ -71,16 +54,25 @@ if !exists('g:os')
 endif
 Dbg 'OS is: ' . g:os
 
-" Combine paths in a cross-platform way
-" TODO maybe this shouldn't care about OS? The '/' might work in Vim
-" regardless of OS.
+let g:pathsep = '/'
+if g:os ==? 'Windows'
+  let g:pathsep = '\'
+endif
+
+" TODO maybe this shouldn't care about OS? The '/' might work in Vim regardless of OS.
 function! PathJoin(...)
-  if g:os ==? 'Windows'
-    return join(a:000, '\')
-  else
-    return join(a:000, '/')
-  endif
+  return join(a:000, g:pathsep)
 endfunction
+
+function! ShortPath(path)
+  let new_path = substitute(a:path, g:vim_home_path . g:pathsep, "", "")
+  if new_path != a:path
+    return 'VIM/' . new_path
+  endif
+
+  return a:path
+endfunction
+
 
 
 "" Security
@@ -160,23 +152,7 @@ else
 endif
 
 "" Indenting and Simple formatting
-set tabstop=2 expandtab shiftwidth=2 softtabstop=2
-set foldlevelstart=4
-" set textwidth=80      " Something like this might be good in theory, but it needs to be smarter than this is
-
-" Markdown and Jekyll Settings
-function! MdJekyllSettings()
-  let begin=getline(1)
-  if begin ==# "---"
-    set tabstop=3 shiftwidth=3 softtabstop=3
-  endif
-endfunction
-
-augroup KramdownHighlighting
-  autocmd!
-  autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown call MdJekyllSettings()
-  autocmd BufLeave *.md,*.markdown set tabstop=2 | set shiftwidth=2 | set softtabstop=2
-augroup END
+set tabstop=2 expandtab shiftwidth=2 softtabstop=2 foldlevelstart=4
 
 
 
@@ -188,17 +164,8 @@ augroup END
 
 
 
-"" Warnings and Error Messages
-set autoread
-" augroup WarningMessages
-"   autocmd!
-"   autocmd FileChangedShell * echo 'File was changed'
-" augroup END
-
-
-
 "" Saving my ass
-set noswapfile undofile backup
+set noswapfile undofile backup autoread
 let s:temp = PathJoin(g:vim_home_path, 'undohist')
 execute 'set undodir=' . s:temp
 Dbg "undo dir is: " . ShortPath(s:temp)
@@ -206,13 +173,7 @@ let s:temp = PathJoin(g:vim_home_path, 'backups')
 execute 'set backupdir=' . s:temp
 Dbg "backup dir is: " . ShortPath(s:temp)
 
-""" Handling special characters
-" set encoding=latin1
-" set isprint=
-" set display+=uhex
-
 "" Tab-local working directories
-" command! -nargs=1 -complete=dir Cd let t:wd=fnamemodify(<q-args>, ':p:h') | exe "cd" t:wd
 augroup TabContext
   " http://vim.1045645.n5.nabble.com/Different-working-directories-in-different-tabs-td4441751.html
   autocmd!
@@ -222,23 +183,31 @@ augroup TabContext
     autocmd TabNew * try | exe "cd " . PathJoin('~', 'code') | catch | cd ~ | endtry
   endif
 augroup END
+
 if has('gui_running')
   exe 'cd ' . PathJoin('~', 'code')
 endif
 
 "" Commands
 command! RunInit :call RunInit()
+try
+  function! RunInit()
+    let save_pos = getpos(".")
+    execute 'source ' . PathJoin(g:vim_home_path, 'init.vim')
+    call setpos(".", save_pos)
+  endfunction
+catch
+endtry
+
+
 
 "" File System/Navigation
 " Ctags
 " Code mostly from https://github.com/webastien/vim-ctags
 set tags=./tags,./TAGS,tags,TAGS
 
-command! Def :call LanguageClient#textDocument_definition()
-
 "" Netrw
 let g:netrw_banner = 0
-
 " Folders n stuff
 let g:netrw_sort_sequence ='[\/]$,\<core\%(\.\d\+\)\=\>,'
 " Docs

@@ -35,6 +35,10 @@ nnoremap <SPACE> <Nop>
 nnoremap <Leader>r :!
 nnoremap <Leader>R :read !
 
+" Placeholder
+nnoremap <Leader><Tab> /<++><CR>cf>
+nnoremap <Leader><S-Tab> ?<++><CR>cf>
+
 " Setting up Ctrl-K in normal mode
 " https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142
 cnoremap <C-A> <Home>
@@ -77,10 +81,6 @@ nnoremap ; :
 
 " Disabling ex mode
 nnoremap <S-Q> <Nop>
-
-" Placeholder
-nnoremap <Leader><Tab> /<++><CR>cf>
-nnoremap <Leader><S-Tab> ?<++><CR>cf>
 
 " Go to definition
 nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>

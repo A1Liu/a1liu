@@ -1,6 +1,3 @@
-let true = 1
-let false = 0
-
 let s:flag_prefix = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-')
 
 function! GlobFlag(flag)
@@ -40,7 +37,7 @@ endfunction
 function! ListFlags(flag_glob)
   let flag_path = s:flag_prefix . a:flag_glob
   let flags = []
-  for flag in glob(flag_path, g:false, g:true)
+  for flag in glob(flag_path, 0, 1)
     call add(flags, fnamemodify(flag, ':t'))
   endfor
 
@@ -48,20 +45,10 @@ function! ListFlags(flag_glob)
 endfunction
 
 function! SynStack()
-  if !exists("*synstack")
-    return
+  if exists("*synstack")
+    echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
   endif
-  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")')
 endfunction
-
-try
-  function! RunInit()
-    let save_pos = getpos(".")
-    execute 'source ' . PathJoin(g:vim_home_path, 'init.vim')
-    call setpos(".", save_pos)
-  endfunction
-catch
-endtry
 
 function! Cwd()
   try
