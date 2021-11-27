@@ -15,12 +15,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 const Documents: NextPage<Props> = ({ files }) => {
-  const urls = files.map((f) => `/docs/${f.replace(/\.[^/.]+$/, "")}`);
-
   return (
     <Layout>
       <h1>Documents</h1>
-      {urls.map((url) => {
+      {files.map((file) => {
+        const url = `/docs/${file.replace(/\.[^/.]+$/, "")}`;
+
         return (
           <>
             <a href={url}>{url}</a>
