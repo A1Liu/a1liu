@@ -5,9 +5,21 @@ project_dir = os.path.dirname(install_dir)
 sys.path.insert(0, os.path.join(project_dir, 'programs'))
 from aliu import config
 
-if config.already_installed("shell"):
-    print("Already installed.")
+should_undo = len(sys.argv) == 2 and sys.argv[1] == '--undo'
+if config.already_installed("shell") != should_undo:
+    print("Nothing to do.")
     exit(0)
+
+if should_undo:
+    config.remove_replace("~/.bashrc")
+    config.remove_replace("~/.bash_profile")
+    config.remove_replace("~/.inputrc")
+    config.remove_replace("~/.zshrc")
+
+    os.remove(config.install_flag_filename("shell"))
+    print("Shell config uninstalled successfully.")
+    exit(0)
+
 
 print_template = f"""#!/bin/sh
 
@@ -34,3 +46,4 @@ config.add_safe("~/.zshrc", "local/shell_interact_init")
 
 # Confirm install
 open(config.install_flag_filename("shell"), 'w').close()
+print("Shell config installed successfully.")

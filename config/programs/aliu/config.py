@@ -6,7 +6,6 @@ project_dir = os.path.dirname(programs_dir)
 install_dir = os.path.join(project_dir, 'install')
 local_dir = os.path.join(project_dir, 'local')
 flags_dir = os.path.join(local_dir, 'flags')
-data_dir = os.path.join(project_dir, 'data')
 move_dir = os.path.join(local_dir, 'preconf')
 
 
@@ -16,6 +15,7 @@ def debug_mode():
 
 def dry_run():
     return 'DRY_RUN' in os.environ and os.environ['DRY_RUN'] == 'true'
+
 
 def debug(*args, sep=' '):
     if not debug_mode():
@@ -41,10 +41,6 @@ def move_safe(src, dest, prefix='_'):
         move_safe(dest, replace_dest, prefix)
 
     os.rename(src, dest)
-
-
-def run_command(*args):
-    return subprocess.run(args, check=True)
 
 
 def flag_filename(flag):
@@ -99,9 +95,3 @@ def local_file(path, mode='r'):
         open(file_path, 'w').close()
     return open(file_path, mode)
 
-
-def data_file(path, mode='r'):
-    file_path = os.path.join(data_dir, path)
-    if not os.path.exists(file_path) and mode == 'r':
-        open(file_path, 'w').close()
-    return open(file_path, mode)
