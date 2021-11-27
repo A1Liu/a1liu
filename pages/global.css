@@ -41,15 +41,22 @@ body {
   background-color: #fff;
 }
 
-h1, h3, h4, h5, h6 {
+h3, h4, h5, h6 {
   font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.2;
   margin-bottom: 0.4rem;
 }
 
 h2 {
   font-size: 1.6rem;
-  line-height: 1.2;
   font-weight: 500;
+  line-height: 1.2;
   margin-bottom: 0.4rem;
 }
 

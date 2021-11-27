@@ -1,12 +1,12 @@
-import styles from "./docgen/Latex.module.css";
+import styles from "./docgen/Default.module.css";
 import css from "./docgen/Base.module.css";
 import cx from "classnames";
 import React from "react";
 
-const LatexLayout: React.FC = (props) => {
+const DocgenLayout: React.FC = (props) => {
   return (
     <>
-      <div className={css.navBar}>
+      <div className={styles.navBar}>
         <button>Hello</button>
       </div>
       <main className={styles.wrapper}>{props.children}</main>
@@ -14,4 +14,4 @@ const LatexLayout: React.FC = (props) => {
   );
 };
 
-export default LatexLayout;
+export default DocgenLayout;
