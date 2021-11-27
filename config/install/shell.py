@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
 import os, sys
-import platform
-from pathlib import Path
 install_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = os.path.dirname(install_dir)
 sys.path.insert(0, os.path.join(project_dir, 'programs'))
-from aliu import files
 from aliu import config
-from aliu.logging import *
 
 if config.already_installed("shell"):
     print("Already installed.")
     exit(0)
-
-if config.debug_mode():
-    configure_logger(level=DEBUG)
-    configure_logger(files.move_safe, level=DEBUG)
 
 print_template = f"""#!/bin/sh
 
@@ -26,9 +18,9 @@ IS_INTERACTIVE_SHELL=%s
 . "{config.project_dir}/programs/shells/dispatch"
 """
 
-debug("print_template=",
-      print_template.strip().replace('\n', '\n' + ' ' * 14 + '='),
-      sep='')
+config.debug("print_template=",
+             print_template.strip().replace('\n', '\n' + ' ' * 14 + '='),
+             sep='')
 
 with open(os.path.join(config.local_dir, "shell_init"), 'w') as f:
     f.write(print_template % "false")

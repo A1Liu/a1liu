@@ -1,5 +1,4 @@
 import os, subprocess
-import aliu.files as files
 
 __aliu_dir = os.path.dirname(os.path.realpath(__file__))
 programs_dir = os.path.dirname(__aliu_dir)
@@ -17,6 +16,31 @@ def debug_mode():
 
 def dry_run():
     return 'DRY_RUN' in os.environ and os.environ['DRY_RUN'] == 'true'
+
+def debug(*args, sep=' '):
+    if not debug_mode():
+        return
+
+    prefix = '%s ~ ' % inspect.getframeinfo(
+        inspect.currentframe().f_back).lineno
+    message = sep.join([str(arg) for arg in args])
+    for line in message.split('\n'):
+        print(prefix + line)
+
+
+def move_safe(src, dest, prefix='_'):
+    debug("move_safe(src={}, dest={})".format(src, dest))
+    if not os.path.exists(src) and not os.path.islink(src):
+        debug("Source doesn't exist! (src={})".format(src))
+        return
+
+    if os.path.islink(dest) or os.path.exists(dest):
+        debug("Destination exists! (dest={})".format(dest))
+        replace_dest = os.path.join(os.path.dirname(dest),
+                                    prefix + os.path.basename(dest))
+        move_safe(dest, replace_dest, prefix)
+
+    os.rename(src, dest)
 
 
 def run_command(*args):
@@ -54,7 +78,7 @@ def add_safe(output_path, src):
         return
 
     if os.path.islink(output_path) or os.path.exists(output_path):
-        files.move_safe(output_path, move_path)
+        move_safe(output_path, move_path)
 
     os.symlink(link_path, output_path, os.path.isdir(src))
 
