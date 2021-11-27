@@ -1,9 +1,5 @@
 "" Keybindings
 
-" Change Leader key
-let mapleader=" "
-nnoremap <SPACE> <Nop>
-
 noremap <C-C> <Esc>
 noremap! <C-C> <Esc>
 snoremap <C-C> <Esc>
@@ -25,23 +21,19 @@ if !has('nvim')
   endif
 endif
 
-noremap <C-C> <Esc>
-noremap! <C-C> <Esc>
-snoremap <C-C> <Esc>
-" Fixing C-Left and C-Right
 " https://unix.stackexchange.com/questions/1709/how-to-fix-ctrl-arrows-in-vim
 noremap <ESC>[1;5D <C-Left>
 noremap <ESC>[1;5C <C-Right>
 noremap! <ESC>[1;5D <C-Left>
 noremap! <ESC>[1;5C <C-Right>
 
+" Change Leader key
+let mapleader=" "
+nnoremap <SPACE> <Nop>
+
 " Leader Mappings
 nnoremap <Leader>r :!
 nnoremap <Leader>R :read !
-
-" Taken from vim-rsi
-" cnoremap <C-B> <C-Left>
-" cnoremap <C-F> <C-Right>
 
 " Setting up Ctrl-K in normal mode
 " https://github.com/tpope/vim-rsi/issues/15#issuecomment-198632142

@@ -21,12 +21,14 @@ execute 'source ' . g:plugin_manager_script_path
 
 call plug#begin()
 
+Plug '~/code/liu/vim-liu'
+
 if PlugFlag('base')
   " Autoformatters
   Plug 'Chiel92/vim-autoformat'
-  let s:configfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file'"
-  let s:noconfigfile_def = "'clang-format -lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\"'"
-  let g:formatdef_clangformat = "g:ClangFormatConfigFileExists() ? (" . s:configfile_def . ") : (" . s:noconfigfile_def . ")"
+
+  let s:clangfmt = "-lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file"
+  let g:formatdef_clangformat = "'clang-format " . s:clangfmt . "'"
   let g:formatdef_swiftformat = "'swiftformat --quiet'"
   let g:formatters_java = ['clangformat']
   let g:formatters_typescriptreact = ['prettier']
@@ -47,10 +49,6 @@ if PlugFlag('base')
           \ | let b:autoformat_autoindent = 0
     autocmd FileType vim let b:autoformat_enabled = 0
     autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
-    autocmd FileType markdown,tex let b:autoformat_autoindent = 0
-          \ | let b:autoformat_remove_trailing_spaces = 0
-          \ | let b:autoformat_retab = 0
-          \ | let b:autoformat_autoindent = 0
   augroup END
 
   Plug 'tpope/vim-eunuch'
@@ -62,10 +60,6 @@ if PlugFlag('fzf')
   Plug 'junegunn/fzf.vim'
 endif
 
-if PlugFlag('eval')
-  Plug 'vim-scripts/EvalSelection.vim'
-endif
-
 if PlugFlag('solarized')
   Plug 'lifepillar/vim-solarized8'
 endif
@@ -74,7 +68,6 @@ endif
 if PlugFlag('polyglot')
   Plug 'sheerun/vim-polyglot'
   Plug 'jansedivy/jai.vim'
-  Plug '~/code/liu/vim-liu'
 elseif PlugFlag('markdown')
   Plug 'plasticboy/vim-markdown'
 endif
@@ -102,47 +95,42 @@ if PlugFlag('lsc')
         \ 'do': 'bash install.sh',
         \ }
 
-  if g:os !=? 'Windows'
-    let g:LanguageClient_serverCommands = {
-          \ 'rust' : ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-          \ 'go'   : ['gopls'],
-          \ }
-  else
-    let g:LanguageClient_serverCommands = {
-          \ 'rust' : ['~/.cargo/bin/rustup.exe', 'run', 'stable', 'rls'],
-          \ 'go'   : ['gopls'],
-          \ }
+  let g:LanguageClient_serverCommands = {
+        \ 'rust' : ['rustup', 'run', 'stable', 'rls'],
+        \ 'go'   : ['gopls'],
+        \ }
 
+  if g:os ==? 'Windows'
     let g:LanguageClient_diagnosticsDisplay = {
-          \ 1: {
+          \   1: {
           \     "name": "Error",
           \     "texthl": "ALEError",
           \     "signText": "x",
           \     "signTexthl": "ALEErrorSign",
           \     "virtualTexthl": "Error",
-          \ },
-          \ 2: {
+          \   },
+          \   2: {
           \     "name": "Warning",
           \     "texthl": "ALEWarning",
           \     "signText": "!",
           \     "signTexthl": "ALEWarningSign",
           \     "virtualTexthl": "Todo",
-          \ },
-          \ 3: {
+          \   },
+          \   3: {
           \     "name": "Information",
           \     "texthl": "ALEInfo",
           \     "signText": "i",
           \     "signTexthl": "ALEInfoSign",
           \     "virtualTexthl": "Todo",
-          \ },
-          \ 4: {
+          \   },
+          \   4: {
           \     "name": "Hint",
           \     "texthl": "ALEInfo",
           \     "signText": "?",
           \     "signTexthl": "ALEInfoSign",
           \     "virtualTexthl": "Todo",
-          \ },
-          \  }
+          \   },
+          \ }
   endif
 
   command! LCRename :call LanguageClient#textDocument_rename()

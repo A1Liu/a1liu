@@ -1,8 +1,3 @@
-"" Visual Changes
-
-" Getting terminal colors to work
-" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
-
 command! ToggleBgFlag :call ToggleFlag('light-mode') | call ReadBgFlag()
 command! ToggleBg :call ToggleFlag('light-mode') | call ReadBgFlag()
 
@@ -27,6 +22,7 @@ function! CheckTermGui()
   return g:os ==? 'Darwin'
 endfunction
 
+" https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
 if CheckTermGui()
   Dbg "term gui colors enabled"
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -48,8 +44,7 @@ set statusline+=%m
 set statusline+=%=
 set statusline+=\ %y
 set statusline+=\ %p%%
-set statusline+=\ %c:%l
-set statusline+=\ 
+set statusline+=\ %c:%l\ 
 
 " GUI Mode
 if has('gui_running')
@@ -64,11 +59,8 @@ command! SynStack :call SynStack()
 " Color Scheme
 try
   colorscheme solarized8_high
-  Dbg 'succeeded in loading solarized8_high'
 catch
-  Dbg 'failed to load solarized8_high'
-  Import 'colors/apprentice.vim'
-  colorscheme apprentice
+  colorscheme default
 endtry
 ReadBgFlag
 

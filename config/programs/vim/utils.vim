@@ -47,28 +47,6 @@ function! ListFlags(flag_glob)
   return flags
 endfunction
 
-function! GoToCurrentTag() " Go to definition of word under cursor
-  return GoToTag(expand("<cword>"))
-endfunction
-
-function! GoToTag(tagname) " Go to a tag
-  try
-    if a:tagname != ""
-      silent exe 'ts ' . a:tagname
-      let old_tags = &tags
-      let &tags = get(tagfiles(), g:false) " Don't know why this is necessary but it is
-      exe 'new' | exe 'tjump ' . a:tagname | exe 'norm zz'
-      let &tags = old_tags
-    endif
-  catch
-  endtry
-endfunction
-
-" Rooter
-function! GitRoot()
-  return system('git rev-parse --show-toplevel')
-endfunction
-
 function! SynStack()
   if !exists("*synstack")
     return
@@ -84,24 +62,6 @@ try
   endfunction
 catch
 endtry
-
-function! Zip(l1, l2)
-  let len1 = len(a:l1)
-  let len2 = len(a:l2)
-  if len1 != len2
-    throw "lists aren't the same length"
-  endif
-
-  let current = 0
-  let new = []
-  while current < len1
-    call add(new, [a:l1[current], a:l2[current]])
-    let current += 1
-  endwhile
-
-  return new
-endfunction
-
 
 function! Cwd()
   try

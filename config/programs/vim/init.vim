@@ -240,20 +240,18 @@ command! Def :call LanguageClient#textDocument_definition()
 let g:netrw_banner = 0
 
 " Folders n stuff
-let g:netrw_sort_sequence='[\/]$,\<core\%(\.\d\+\)\=\>,'
+let g:netrw_sort_sequence ='[\/]$,\<core\%(\.\d\+\)\=\>,'
 " Docs
-let g:netrw_sort_sequence.= 'README,LICENSE,*.md$,*.markdown$,'
-" C and C++ Files
-let g:netrw_sort_sequence.= '\.h$,\.c$,\.cpp$,'
-" Java files
-let g:netrw_sort_sequence.= '\.java$,'
+let g:netrw_sort_sequence .= 'README,LICENSE,*.md$,*.markdown$,'
+" Header files
+let g:netrw_sort_sequence .= '\.h$,'
 " The vast majority of files
-let g:netrw_sort_sequence.= '\~\=\*$,*,'
+let g:netrw_sort_sequence .= '\~\=\*$,*,'
 " Files that begin with the '.' character, and other mildly hidden files
-let g:netrw_sort_sequence.= '^\..*$,'
+let g:netrw_sort_sequence .= '^\..*$,'
 " Compiled files
-let g:netrw_sort_sequence.= '\.o$,\.obj$,\.class$,'
+let g:netrw_sort_sequence .= '\.o$,\.obj$,\.class$,'
 " Vim files? Text editor info files and dumb files
-let g:netrw_sort_sequence.= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
+let g:netrw_sort_sequence .= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
 
 Dbg "VIMRC COMPLETED"

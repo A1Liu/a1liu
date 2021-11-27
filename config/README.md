@@ -47,7 +47,6 @@ My Vim config uses these environment variables at startup:
   - `light-mode` - Whether or not Vim is dark or light mode
   - `plugins-base-enabled` - Whether or not the default plugins are enabled
   - `plugins-fzf-enabled` - Whether or not fzf is enabled
-  - `plugins-eval-enabled` - Whether or not EvalSelection is enabled
   - `plugins-solarized-enabled` - Whether or not the color scheme plugin is enabled
   - `plugins-polyglot-enabled` - Whether or not vim-polyglot is enabled
   - `plugins-snippets-enabled` - Whether or not vim-snippets is enabled
