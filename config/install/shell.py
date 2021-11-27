@@ -20,7 +20,6 @@ if should_undo:
     print("Shell config uninstalled successfully.")
     exit(0)
 
-
 print_template = f"""#!/bin/sh
 
 export CFG_DIR="{config.project_dir}"
