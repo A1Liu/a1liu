@@ -115,3 +115,9 @@ alias oy='unalias oy && a1liu_load_nvm && oy'
 
 alias infra='yarn run infra'
 alias lerna='yarn run lerna'
+
+if ! test -e "$HOME/.karim-dotfiles"; then
+    git clone https://github.com/karimsa/dotfiles ~/.karim-dotfiles
+fi
+
+alias karimify="source ~/.karim-dotfiles/.rc"
