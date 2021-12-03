@@ -21,12 +21,6 @@ if !has('nvim')
   endif
 endif
 
-" https://unix.stackexchange.com/questions/1709/how-to-fix-ctrl-arrows-in-vim
-noremap <ESC>[1;5D <C-Left>
-noremap <ESC>[1;5C <C-Right>
-noremap! <ESC>[1;5D <C-Left>
-noremap! <ESC>[1;5C <C-Right>
-
 " Change Leader key
 let mapleader=" "
 nnoremap <SPACE> <Nop>
