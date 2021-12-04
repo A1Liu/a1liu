@@ -1,4 +1,5 @@
-import { useAsyncLazy, useAsync, timeout } from "../components/util";
+import { useAsyncLazy, useAsync } from "../components/hooks";
+import { timeout } from "../components/util";
 import React from "react";
 
 const ShowData: React.VFC = () => {
