@@ -53,7 +53,8 @@ const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
     <div>
       <h3>Debugger for {title}</h3>
       <pre>
-        Renders: {renders.current}{'\n'}
+        Renders: {renders.current}
+        {"\n"}
         Dependency Changes: {depChanges.current}
       </pre>
     </div>
@@ -63,8 +64,17 @@ const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
 const ShowContextData: React.VFC = () => {
   return (
     <DataProvider url={DATA_URL}>
-      <ShowContextDataInner />
-      <ShowContextDataTest />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flexWrap: "nowrap",
+          gap: "16px",
+        }}
+      >
+        <ShowContextDataInner />
+        <ShowContextDataTest />
+      </div>
     </DataProvider>
   );
 };
@@ -80,7 +90,7 @@ const ShowContextDataTest: React.VFC = () => {
 
   return (
     <div>
-      <DebugRender title={"Context Data Test"} deps={[ignored]} />
+      <DebugRender title={"Context Data"} deps={[ignored]} />
       <h3>Ignored is: {ignored}</h3>
     </div>
   );
@@ -89,7 +99,22 @@ const ShowContextDataTest: React.VFC = () => {
 const ShowData: React.VFC = () => {
   const data = useData({ url: DATA_URL });
 
-  return <DisplayData {...data} />;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flexWrap: "nowrap",
+        gap: "16px",
+      }}
+    >
+      <DisplayData {...data} />
+      <div>
+        <DebugRender title={"Data"} deps={[data.ignored]} />
+        <h3>Ignored is: {data.ignored}</h3>
+      </div>
+    </div>
+  );
 };
 
 const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
