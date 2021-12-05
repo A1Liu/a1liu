@@ -1,9 +1,10 @@
 import { useAsyncLazy, useAsync } from "components/hooks";
+import { createContext } from "components/constate";
 import { timeout } from "components/util";
 import css from "components/Util.module.css";
 import React from "react";
 
-function useData(url: string) {
+function useData({ url }: { url: string }) {
   const [counter, setCounter] = React.useState(0);
   const [ignored, setIgnored] = React.useState(0);
   const [fetches, setFetches] = React.useState(0);
@@ -26,19 +27,41 @@ function useData(url: string) {
   };
 }
 
-const ShowData: React.VFC = () => {
-  const {
-    fetches,
-    counter,
-    setCounter,
-    ignored,
-    setIgnored,
-    data,
-    isLoading,
-    isLoaded,
-    refetch,
-  } = useData("https://jsonplaceholder.typicode.com/todos/1");
+const DATA_URL = "https://jsonplaceholder.typicode.com/todos/1";
 
+const [DataProvider, useDataContext] = createContext(useData);
+
+const ShowContextData: React.VFC = () => {
+  return (
+    <DataProvider url={DATA_URL}>
+      <ShowContextDataInner />
+    </DataProvider>
+  );
+};
+
+const ShowContextDataInner: React.VFC = () => {
+  const data = useDataContext();
+
+  return <DisplayData {...data} />;
+};
+
+const ShowData: React.VFC = () => {
+  const data = useData({ url: DATA_URL });
+
+  return <DisplayData {...data} />;
+};
+
+const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
+  fetches,
+  counter,
+  setCounter,
+  ignored,
+  setIgnored,
+  data,
+  isLoading,
+  isLoaded,
+  refetch,
+}) => {
   return (
     <div>
       <h1>{isLoading ? "loading" : isLoaded ? "done" : "lazy"}</h1>

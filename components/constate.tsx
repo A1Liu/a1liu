@@ -40,7 +40,7 @@ function createContextHook(context: React.Context<any>): any {
   };
 }
 
-export function groupedContextHook<Props, Value extends object>(
+export function createContext<Props, Value extends object>(
   useValue: (props: Props) => Value
 ): ConstateResult<Props, Value> {
   const hookName = useValue.name ? useValue.name : "??";
