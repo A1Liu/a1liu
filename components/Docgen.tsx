@@ -11,7 +11,7 @@ export const DocgenNav: React.VFC = () => {
   );
 };
 
-const DocgenLayout: React.FC = (props) => {
+export const Docgen: React.FC = (props) => {
   return (
     <>
       <DocgenNav />
@@ -20,4 +20,12 @@ const DocgenLayout: React.FC = (props) => {
   );
 };
 
-export default DocgenLayout;
+
+export const Latex: React.FC = (props) => {
+  return (
+    <>
+      <DocgenNav />
+      <main className={styles.wrapper}>{props.children}</main>
+    </>
+  );
+};
