@@ -7,6 +7,8 @@
 :root {
   --blue: #61afef;
   --gray: #828997;
+  --light-gray: #e8e8e8;
+  --white: #fcfcfc;
 }
 
 html {
@@ -38,10 +40,13 @@ html {
 }
 
 body {
-  background-color: #fff;
+  background-color: var(--white);
 }
 
-h3, h4, h5, h6 {
+h3,
+h4,
+h5,
+h6 {
   font-weight: 500;
   margin-bottom: 0.4rem;
 }
@@ -141,4 +146,3 @@ input {
   font-size: inherit;
   line-height: inherit;
 }
-

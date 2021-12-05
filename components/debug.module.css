@@ -1,0 +1,12 @@
+@value scrollCol from './util.module.css';
+
+.renderWrapper {
+  composes: scrollCol;
+  background-color: var(--light-gray);
+}
+
+.renderItem {
+  background-color: var(--white);
+  border-radius: 4px;
+  padding: 4px;
+}
