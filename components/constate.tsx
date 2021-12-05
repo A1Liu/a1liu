@@ -1,4 +1,5 @@
 import React from "react";
+import { useStable } from "components/hooks";
 
 type HookResult<
   Value,
@@ -6,7 +7,7 @@ type HookResult<
   Props extends P[]
 > = Props["length"] extends 0 ? Value : Pick<Value, P>;
 
-interface ConstateHook<Value extends object> {
+interface ConstateHook<Value> {
   <P extends keyof Value, Props extends P[]>(...props: Props): HookResult<
     Value,
     P,
@@ -14,17 +15,15 @@ interface ConstateHook<Value extends object> {
   >;
 }
 
-type ConstateResult<Props, Value extends object> = [
-  React.FC<Props>,
-  ConstateHook<Value>
-];
+type ConstateResult<Props, Value> = [React.FC<Props>, ConstateHook<Value>];
 
 const isDev = process.env.NODE_ENV !== "production";
 const NO_PROVIDER = {};
 
-// TODO figure out how to get keys to work with generics
-export function createContext<Props, Value extends object>(
-  useValue: (props: Props) => Value
+// Required<Value> is used here to prevent the number of fields detected at runtime
+// from changing.
+export function createContext<Props, Value>(
+  useValue: (props: Props) => Required<Value>
 ): ConstateResult<Props, Value> {
   const hookName = `Context(${useValue.name ? useValue.name : "??"})`;
 
@@ -37,44 +36,59 @@ export function createContext<Props, Value extends object>(
   const baseCtx = React.createContext<typeof NO_PROVIDER | null>(NO_PROVIDER);
   baseCtx.displayName = hookName;
 
+  let ranFirst = false;
   const getFieldInfo = (keyString: number | string | symbol): Field => {
     const key = keyString as keyof Value;
     const field = fieldMap[key];
     if (field) return field;
+    if (ranFirst) {
+      throw new Error(
+        `prop count changed for ${hookName}, which will result in runtime errors`
+      );
+    }
 
     const ctx = React.createContext(undefined);
     if (isDev) ctx.displayName = `${hookName}.context("${key}")`;
-    const hook = () => React.useContext(ctx);
+    const useCtx = () => React.useContext(ctx);
 
-    return (fieldMap[key] = { ctx, hook });
+    return (fieldMap[key] = { ctx, hook: useCtx });
   };
 
   const Provider: React.FC<Props> = ({ children, ...props }) => {
     const hookValue = useValue(props as Props);
 
-    return Object.entries(hookValue).reduce((agg, [key, value]) => {
+    const element = Object.entries(hookValue).reduce((agg, [key, value]) => {
       const Provider = getFieldInfo(key).ctx.Provider;
+
       return <Provider value={value}>{agg}</Provider>;
     }, <baseCtx.Provider value={null}>{children}</baseCtx.Provider>);
+
+    ranFirst = true;
+
+    return element;
   };
 
   const useProps = function <P extends keyof Value, Props extends P[]>(
     ...props: Props
   ): HookResult<Value, P, Props> {
     const base = React.useContext(baseCtx);
-    const propKeys =
-      props.length === 0 ? (Object.keys(fieldMap) as P[]) : props;
-    const outputValue: Partial<Record<keyof Value, any>> = {};
-    propKeys.forEach(
-      (key) => (outputValue[key as keyof Value] = getFieldInfo(key).hook())
-    );
-
     if (base === NO_PROVIDER) {
-      const message = `The consumer of ${hookName} must be wrapped with its Provider`;
-      console.warn(message);
+      throw new Error(
+        `The consumer of ${hookName} must be wrapped with its Provider`
+      );
     }
 
-    return outputValue as HookResult<Value, P, Props>;
+    ranFirst = true;
+
+    const propKeys =
+      props.length === 0 ? (Object.keys(fieldMap) as P[]) : props;
+    const partialValue: Partial<Record<keyof Value, any>> = {};
+    propKeys.forEach(
+      (key) => (partialValue[key as keyof Value] = getFieldInfo(key).hook())
+    );
+    const output = useStable(partialValue);
+
+    return output as HookResult<Value, P, Props>;
   };
 
   if (isDev) {
