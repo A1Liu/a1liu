@@ -36,15 +36,9 @@ export function createContext<Props, Value>(
   const baseCtx = React.createContext<typeof NO_PROVIDER | null>(NO_PROVIDER);
   baseCtx.displayName = hookName;
 
-  let ranFirst = false;
   const getFieldInfo = (key: keyof Value): Field => {
     const field = fieldMap[key];
     if (field) return field;
-    if (ranFirst) {
-      throw new Error(
-        `prop count changed for ${hookName}, which will result in runtime errors`
-      );
-    }
 
     const ctx = React.createContext(undefined);
     if (isDev) ctx.displayName = `${hookName}.context("${key}")`;
@@ -53,18 +47,28 @@ export function createContext<Props, Value>(
     return (fieldMap[key] = { ctx, hook: useCtx });
   };
 
+  let propCount: number | null = null;
   const Provider: React.FC<Props> = ({ children, ...props }) => {
     const hookValue = useValue(props as Props);
 
-    const element = Object.entries(hookValue).reduce((agg, [key, value]) => {
+    const valueEntries = Object.entries(hookValue);
+    const element = valueEntries.reduce((agg, [key, value]) => {
       const Provider = getFieldInfo(key as keyof Value).ctx.Provider;
+      count += 1;
 
       return <Provider value={value}>{agg}</Provider>;
     }, <baseCtx.Provider value={null}>{children}</baseCtx.Provider>);
 
-    ranFirst = true;
+    let count = valueEntries.length;
+    if (propCount === count) return element;
 
-    return element;
+    if (propCount === null) {
+      propCount = count;
+      return element;
+    }
+
+    const msg = `prop count changed for ${hookName}, which will result in runtime errors`;
+    throw new Error(msg);
   };
 
   const useProps = function <P extends keyof Value, Props extends P[]>(
@@ -77,14 +81,10 @@ export function createContext<Props, Value>(
       );
     }
 
-    ranFirst = true;
-
     const propKeys =
       props.length === 0 ? (Object.keys(fieldMap) as P[]) : props;
     const partialValue: Partial<Record<keyof Value, any>> = {};
-    propKeys.forEach(
-      (key) => (partialValue[key] = getFieldInfo(key).hook())
-    );
+    propKeys.forEach((key) => (partialValue[key] = getFieldInfo(key).hook()));
     const output = useStable(partialValue);
 
     return output as HookResult<Value, P, Props>;
