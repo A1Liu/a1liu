@@ -1,11 +1,15 @@
 import { useAsyncLazy, useAsync } from "components/hooks";
-import { DebugRender } from 'components/debug';
+import { DebugRender } from "components/debug";
 import { createContext } from "components/constate";
-import { timeout } from "components/util";
+import { timeout, Scroll, Btn } from "components/util";
 import css from "components/util.module.css";
 import React from "react";
 
-function useData({ url }: { url: string }) {
+interface DataProps {
+  url: string;
+}
+
+function useData({ url }: DataProps) {
   const [counter, setCounter] = React.useState(0);
   const [ignored, setIgnored] = React.useState(0);
   const [fetches, setFetches] = React.useState(0);
@@ -29,99 +33,43 @@ function useData({ url }: { url: string }) {
 }
 
 const DATA_URL = "https://jsonplaceholder.typicode.com/todos/1";
-
 const [DataProvider, useDataContext] = createContext(useData);
-
-const ShowContextData: React.VFC = () => {
-  return (
-    <DataProvider url={DATA_URL}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flexWrap: "nowrap",
-          gap: "16px",
-        }}
-      >
-        <ShowContextDataInner />
-        <ShowContextDataTest />
-      </div>
-    </DataProvider>
-  );
-};
 
 const ShowContextDataInner: React.VFC = () => {
   const data = useDataContext();
-
   return <DisplayData {...data} />;
 };
 
 const ShowContextDataTest: React.VFC = () => {
   const { ignored } = useDataContext("ignored");
-
-  return (
-    <div>
-      <DebugRender title={"Context Data"} deps={[ignored]} />
-      <h3>Ignored is: {ignored}</h3>
-    </div>
-  );
+  return <DebugRender title={"Context Data"} deps={[ignored]} />;
 };
 
 const ShowData: React.VFC = () => {
   const data = useData({ url: DATA_URL });
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flexWrap: "nowrap",
-        gap: "16px",
-      }}
-    >
+    <div className={css.col}>
       <DisplayData {...data} />
-      <div>
-        <DebugRender title={"Data"} deps={[data.ignored]} />
-        <h3>Ignored is: {data.ignored}</h3>
-      </div>
+      <DebugRender title={"Data"} deps={[data.ignored]} />
     </div>
   );
 };
 
-const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
-  fetches,
-  counter,
-  setCounter,
-  ignored,
-  setIgnored,
-  data,
-  isLoading,
-  isLoaded,
-  refetch,
-}) => {
+const DisplayData: React.VFC<ReturnType<typeof useData>> = (props) => {
   return (
     <div>
-      <h2>{isLoading ? "loading" : isLoaded ? "done" : "lazy"}</h2>
-      <h4>Raw fetch count: {fetches}</h4>
-      <h4>Refetch Counter: {counter}</h4>
-      <h4>Ignored Counter: {ignored}</h4>
-      <pre>{data}</pre>
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button className={css.muiButton} onClick={refetch}>
-          Refetch
-        </button>
-        <button
-          className={css.muiButton}
-          onClick={() => setCounter((c) => c + 1)}
-        >
-          Refetch + 1
-        </button>
-        <button
-          className={css.muiButton}
-          onClick={() => setIgnored((i) => i + 1)}
-        >
-          Ignored + 1
-        </button>
+      <h2>{props.isLoading ? "loading" : props.isLoaded ? "done" : "lazy"}</h2>
+      <h4>Raw fetch count: {props.fetches}</h4>
+      <h4>Refetch Counter: {props.counter}</h4>
+      <h4>Ignored Counter: {props.ignored}</h4>
+      <Scroll tag={"pre"} height={200}>
+        {props.data}
+      </Scroll>
+      <div className={css.row}>
+        <Btn onClick={props.refetch}>Refetch</Btn>
+        <Btn onClick={() => props.setCounter((c) => c + 1)}>Refetch + 1</Btn>
+        <Btn onClick={() => props.setIgnored((i) => i + 1)}>Ignored + 1</Btn>
       </div>
     </div>
   );
@@ -129,9 +77,14 @@ const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
 
 const Playground: React.VFC = () => {
   return (
-    <div style={{ display: "flex", flexDirection: "row", gap: "32px" }}>
+    <div className={css.row} style={{ gap: "32px" }}>
       <ShowData />
-      <ShowContextData />
+      <DataProvider url={DATA_URL}>
+        <div className={css.col}>
+          <ShowContextDataInner />
+          <ShowContextDataTest />
+        </div>
+      </DataProvider>
     </div>
   );
 };

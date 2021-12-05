@@ -9,6 +9,7 @@
 
 .renderWrapper {
   composes: scrollCol;
+  height: 300px;
   background-color: var(--light-gray);
 }
 

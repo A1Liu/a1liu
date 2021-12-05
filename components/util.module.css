@@ -26,16 +26,26 @@
   align-items: center;
 }
 
-.scrollCol {
-  overflow-x: scroll;
-  height: 300px;
-  border-radius: 4px;
-  padding: 8px;
-
+.col {
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   gap: 8px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.scrollCol {
+  composes: col;
+
+  overflow-x: scroll;
+  border-radius: 4px;
+  padding: 8px;
 }
 
 .muiButton {
