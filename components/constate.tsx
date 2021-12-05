@@ -51,12 +51,11 @@ export function createContext<Props, Value extends object>(
 
   const Provider: React.FC<Props> = ({ children, ...props }) => {
     const hookValue = useValue(props as Props);
-    const BaseProvider = baseCtx.Provider;
 
     return Object.entries(hookValue).reduce((agg, [key, value]) => {
       const Provider = getFieldInfo(key).ctx.Provider;
       return <Provider value={value}>{agg}</Provider>;
-    }, <BaseProvider value={null}>{children}</BaseProvider>);
+    }, <baseCtx.Provider value={null}>{children}</baseCtx.Provider>);
   };
 
   const useProps = function <P extends keyof Value, Props extends P[]>(
