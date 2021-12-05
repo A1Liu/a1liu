@@ -1,6 +1,6 @@
 import React from "react";
 import css from "./util.module.css";
-import styles from './debug.module.css';
+import styles from "./debug.module.css";
 
 interface DebugRenderProps {
   title: string;
@@ -9,42 +9,38 @@ interface DebugRenderProps {
 
 enum RenderKind {
   Mount = "Mount",
-  DependencyChange = "DependencyChange",
-  SpuriousRerender = "SpuriousRerender",
+  DepChange = "DepChange",
+  Spurious = "Spurious",
 }
 
-interface DebugRenderInfo {
+interface RenderInfo {
   kind: RenderKind;
 }
 
 export const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
   const renderRef = React.useRef(1);
   const depChangeRef = React.useRef(0);
-  const renderListRef = React.useRef<DebugRenderInfo[]>([
-    { kind: RenderKind.Mount },
-  ]);
+  const infoRef = React.useRef([{ kind: RenderKind.Mount } as RenderInfo]);
 
   const depChanges = depChangeRef.current + 1;
   const incrementDepChanges = React.useCallback(() => {
-    const shouldPush = renderListRef.current.length < renderRef.current;
+    const shouldPush = infoRef.current.length < renderRef.current;
     if (shouldPush && depChangeRef.current < depChanges) {
-      renderListRef.current.push({ kind: RenderKind.DependencyChange });
+      infoRef.current.push({ kind: RenderKind.DepChange });
       depChangeRef.current = depChanges;
     }
-  }, [depChangeRef, renderListRef, renderRef, ...deps]); // eslint-disable-line
+  }, [depChangeRef, infoRef, renderRef, ...deps]); // eslint-disable-line
 
   const incrementRenders = React.useCallback(() => {
-    if (renderListRef.current.length < renderRef.current) {
-      renderListRef.current.push({ kind: RenderKind.SpuriousRerender });
+    if (infoRef.current.length < renderRef.current) {
+      infoRef.current.push({ kind: RenderKind.Spurious });
     }
-  }, [renderRef, renderListRef]);
-
-  React.useEffect(() => {
-    renderRef.current += 1;
-  });
+  }, [renderRef, infoRef]);
 
   incrementDepChanges();
   incrementRenders();
+
+  React.useEffect(() => void (renderRef.current += 1));
 
   return (
     <div>
@@ -55,7 +51,7 @@ export const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
         <b>Dependency Changes:</b> {depChangeRef.current}
       </p>
       <div className={styles.renderWrapper}>
-        {renderListRef.current.reduceRight((out: JSX.Element[], render, idx) => {
+        {infoRef.current.reduceRight((out: JSX.Element[], render, idx) => {
           out.push(
             <div key={idx} className={styles.renderItem}>
               <h5>{render.kind}</h5>
