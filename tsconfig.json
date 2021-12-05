@@ -18,7 +18,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "allowJs": false
+    "allowJs": false,
+    "plugins": [
+      { "transform": "ts-transformer-keys/transformer" }
+    ]
   },
   "include": [
     "next-env.d.ts",

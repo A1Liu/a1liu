@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React from "react";
 
 export type AsyncValueMissing<T> = {
   readonly refetch: () => void;
@@ -22,22 +22,22 @@ function useAsyncHelper<T>(
   fn: () => Promise<T>,
   _deps: any[] | null
 ): AsyncValue<T> {
-  const [fetches, incFetch] = useState(0);
+  const [fetches, setFetches] = React.useState(0);
 
-  const [active, setActive] = useState(0);
-  const startedRef = useRef(0);
-  const doneRef = useRef(0);
+  const [active, setActive] = React.useState(0);
+  const startedRef = React.useRef(0);
+  const doneRef = React.useRef(0);
 
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<any | null>(null);
+  const [data, setData] = React.useState<T | null>(null);
+  const [error, setError] = React.useState<any | null>(null);
 
-  const refetch = useCallback(() => incFetch((s) => s + 1), [incFetch]);
+  const refetch = React.useCallback(() => setFetches((s) => ++s), [setFetches]);
   const deps = [fetches].concat(_deps ?? []);
 
   // Intentionally removing most stuff from the dependencies. This effect should
   // only trigger when the dependencies change or when the refetch is called.
   /* eslint-disable */
-  useEffect(() => {
+  React.useEffect(() => {
     const started = startedRef.current++;
     if (_deps === null && started === 0) return;
 
@@ -99,3 +99,4 @@ export function useAsync<T>(
 ): AsyncValue<T> {
   return useAsyncHelper(fn, deps);
 }
+
