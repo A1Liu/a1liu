@@ -2,11 +2,6 @@ import React from "react";
 import css from "./util.module.css";
 import styles from "./debug.module.css";
 
-interface DebugRenderProps {
-  title: string;
-  deps: any[];
-}
-
 enum RenderKind {
   Mount = "Mount",
   DepChange = "Dependency Change",
@@ -15,6 +10,11 @@ enum RenderKind {
 
 interface RenderInfo {
   kind: RenderKind;
+}
+
+interface DebugRenderProps {
+  title: string;
+  deps: any[];
 }
 
 export const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {

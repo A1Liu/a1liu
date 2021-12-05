@@ -5,13 +5,6 @@ import { timeout } from "components/util";
 import css from "components/util.module.css";
 import React from "react";
 
-function useBoi(): { a: string|undefined } {
-  const b = {a: "", b: 12};
-  return b;
-}
-
-const [BoiProvider, useBoiCtx] = createContext(useBoi);
-
 function useData({ url }: { url: string }) {
   const [counter, setCounter] = React.useState(0);
   const [ignored, setIgnored] = React.useState(0);

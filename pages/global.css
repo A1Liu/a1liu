@@ -14,10 +14,9 @@
 html {
   line-height: 1.5rem;
   font-size: 1.25rem;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  -ms-overflow-style: scrollbar;
-  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  overflow-style: scrollbar;
+  tap-highlight-color: transparent;
   font-family: Georgia, Times, "Times New Roman";
   font-weight: 400;
   color: #212529;
@@ -31,79 +30,18 @@ html {
 *,
 ::after,
 ::before {
-  text-decoration: none;
-  background-color: transparent;
   box-sizing: border-box;
-  border-style: none;
   padding: 0;
   margin: 0;
+
+  background-color: transparent;
+  text-decoration: none;
+  border-radius: 0;
+  border-style: none;
 }
 
 body {
   background-color: var(--white);
-}
-
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 500;
-  margin-bottom: 0.4rem;
-}
-
-h1 {
-  font-size: 2rem;
-  font-weight: 500;
-  line-height: 1.2;
-  margin-bottom: 0.4rem;
-}
-
-h2 {
-  font-size: 1.6rem;
-  font-weight: 500;
-  line-height: 1.2;
-  margin-bottom: 0.4rem;
-}
-
-p {
-  margin-bottom: 0.8rem;
-}
-
-a {
-  -webkit-text-decoration-skip: objects;
-
-  color: var(--blue);
-  transition: 0.4s;
-
-  &:hover {
-    color: var(--gray);
-  }
-}
-
-code {
-  font-family: monospace;
-  font-size: 1rem;
-  word-spacing: normal;
-  word-break: normal;
-  tab-size: 4;
-  hyphens: none;
-}
-
-pre {
-  margin-bottom: 1rem;
-  overflow: auto;
-  word-spacing: normal;
-  word-break: normal;
-  tab-size: 4;
-  hyphens: none;
-}
-
-figure {
-  margin: 0 0 1rem;
-}
-
-img {
-  vertical-align: middle;
 }
 
 svg:not(:root) {
@@ -132,7 +70,6 @@ label {
 }
 
 button {
-  border-radius: 0;
   overflow: visible;
   font-family: inherit;
   font-size: inherit;

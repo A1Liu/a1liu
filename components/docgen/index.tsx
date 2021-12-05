@@ -1,5 +1,5 @@
-import styles from "./docgen/Default.module.css";
-import css from "./docgen/Base.module.css";
+import styles from "./default.module.css";
+import css from "./base.module.css";
 import cx from "classnames";
 import React from "react";
 

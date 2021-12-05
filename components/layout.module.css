@@ -51,9 +51,76 @@
   background-color: #fff;
   width: 100%;
   padding: 50px;
-  box-shadow: inset -15px 0 15px -15px #282C34,inset 15px 0 15px -15px #282C34;
+  box-shadow: inset -15px 0 15px -15px #282c34, inset 15px 0 15px -15px #282c34;
 
   @media min-lg {
     width: 66.666667%;
   }
+
+  & p {
+    margin-bottom: 0.8rem;
+  }
+
+  & a {
+    -webkit-text-decoration-skip: objects;
+
+    color: var(--blue);
+    transition: 0.4s;
+
+    &:hover {
+      color: var(--gray);
+    }
+  }
+
+  & h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+
+  & h2 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+
+  & h3 {
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  & h4 {
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  & h5 {
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  & h6 {
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  & code {
+  font-family: monospace;
+  font-size: 1rem;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 4;
+  hyphens: none;
+}
+& pre {
+  margin-bottom: 1rem;
+  overflow: auto;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 4;
+  hyphens: none;
+}
+
 }
