@@ -37,8 +37,7 @@ export function createContext<Props, Value>(
   baseCtx.displayName = hookName;
 
   let ranFirst = false;
-  const getFieldInfo = (keyString: number | string | symbol): Field => {
-    const key = keyString as keyof Value;
+  const getFieldInfo = (key: keyof Value): Field => {
     const field = fieldMap[key];
     if (field) return field;
     if (ranFirst) {
@@ -58,7 +57,7 @@ export function createContext<Props, Value>(
     const hookValue = useValue(props as Props);
 
     const element = Object.entries(hookValue).reduce((agg, [key, value]) => {
-      const Provider = getFieldInfo(key).ctx.Provider;
+      const Provider = getFieldInfo(key as keyof Value).ctx.Provider;
 
       return <Provider value={value}>{agg}</Provider>;
     }, <baseCtx.Provider value={null}>{children}</baseCtx.Provider>);
@@ -84,7 +83,7 @@ export function createContext<Props, Value>(
       props.length === 0 ? (Object.keys(fieldMap) as P[]) : props;
     const partialValue: Partial<Record<keyof Value, any>> = {};
     propKeys.forEach(
-      (key) => (partialValue[key as keyof Value] = getFieldInfo(key).hook())
+      (key) => (partialValue[key] = getFieldInfo(key).hook())
     );
     const output = useStable(partialValue);
 
