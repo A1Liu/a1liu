@@ -9,8 +9,8 @@ interface DebugRenderProps {
 
 enum RenderKind {
   Mount = "Mount",
-  DepChange = "DepChange",
-  Spurious = "Spurious",
+  DepChange = "Dependency Change",
+  Spurious = "Spurious Render",
 }
 
 interface RenderInfo {
@@ -43,13 +43,13 @@ export const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
   React.useEffect(() => void (renderRef.current += 1));
 
   return (
-    <div>
-      <h3>Debugger for {title}</h3>
-      <p>
+    <div className={styles.debugWrapper}>
+      <h3 style={{ margin: "0px" }}>Debugger for {title}</h3>
+      <div>
         <b>Renders:</b> {renderRef.current}
-        {"\n"}
+        <br />
         <b>Dependency Changes:</b> {depChangeRef.current}
-      </p>
+      </div>
       <div className={styles.renderWrapper}>
         {infoRef.current.reduceRight((out: JSX.Element[], render, idx) => {
           out.push(

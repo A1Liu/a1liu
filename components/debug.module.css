@@ -1,5 +1,12 @@
 @value scrollCol from './util.module.css';
 
+.debugWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
 .renderWrapper {
   composes: scrollCol;
   background-color: var(--light-gray);
