@@ -1,6 +1,5 @@
 import { useAsyncLazy, useAsync } from "components/hooks";
 import { DebugRender } from 'components/debug';
-import { keys } from "ts-transformer-keys";
 import { createContext } from "components/constate";
 import { timeout } from "components/util";
 import css from "components/util.module.css";
@@ -30,9 +29,8 @@ function useData({ url }: { url: string }) {
 }
 
 const DATA_URL = "https://jsonplaceholder.typicode.com/todos/1";
-const dataKeys = keys<ReturnType<typeof useData>>();
 
-const [DataProvider, useDataContext] = createContext(useData, dataKeys);
+const [DataProvider, useDataContext] = createContext(useData);
 
 const ShowContextData: React.VFC = () => {
   return (
