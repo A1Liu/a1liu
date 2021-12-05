@@ -1,5 +1,4 @@
 import React from "react";
-import { keys } from "ts-transformer-keys";
 
 type HookResult<
   Value,
@@ -40,12 +39,13 @@ function createContextHook(context: React.Context<any>): any {
   };
 }
 
+// TODO figure out how to get keys to work with generics
 export function createContext<Props, Value extends object>(
-  useValue: (props: Props) => Value
+  useValue: (props: Props) => Value,
+  valKeys: (keyof Value)[]
 ): ConstateResult<Props, Value> {
-  const hookName = useValue.name ? useValue.name : "??";
+  const hookName = `Context(${useValue.name ? useValue.name : "??"})`;
 
-  const valKeys: (keyof Value)[] = keys<Value>();
   const selectors = valKeys.map((k: keyof Value) => {
     return (v: Value): any => v[k];
   });
@@ -55,7 +55,7 @@ export function createContext<Props, Value extends object>(
 
   valKeys.forEach((key, idx) => {
     const context = React.createContext(NO_PROVIDER);
-    if (isDev) context.displayName = `Constate(${hookName}).context("${key}")`;
+    if (isDev) context.displayName = `${hookName}.context("${key}")`;
 
     contextMap[key] = context;
     hookMap[key] = createContextHook(context);
@@ -70,7 +70,7 @@ export function createContext<Props, Value extends object>(
     }, children as React.ReactElement);
   };
 
-  function useProps<P extends keyof Value, Props extends P[]>(
+  const useProps = function <P extends keyof Value, Props extends P[]>(
     ...props: Props
   ): HookResult<Value, P, Props> {
     const propKeys = props.length === 0 ? valKeys : props;
@@ -79,11 +79,14 @@ export function createContext<Props, Value extends object>(
     propKeys.forEach((key) => (outputValue[key] = hookMap[key]()));
 
     return outputValue as HookResult<Value, P, Props>;
-  }
+  };
 
   if (isDev) {
-    Provider.displayName = `Constate(${hookName}).Provider`;
-    useProps.name = `Constate(${hookName}).useProps`;
+    Provider.displayName = `${hookName}.Provider`;
+    Object.defineProperty(useProps, "name", {
+      value: `${hookName}.useProps`,
+      writable: false,
+    });
   }
 
   return [Provider, useProps];

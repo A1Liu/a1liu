@@ -1,4 +1,5 @@
 import { useAsyncLazy, useAsync } from "components/hooks";
+import { keys } from "ts-transformer-keys";
 import { createContext } from "components/constate";
 import { timeout } from "components/util";
 import css from "components/Util.module.css";
@@ -28,13 +29,42 @@ function useData({ url }: { url: string }) {
 }
 
 const DATA_URL = "https://jsonplaceholder.typicode.com/todos/1";
+const dataKeys = keys<ReturnType<typeof useData>>();
 
-const [DataProvider, useDataContext] = createContext(useData);
+const [DataProvider, useDataContext] = createContext(useData, dataKeys);
+
+interface DebugRenderProps {
+  title: string;
+  deps: any[];
+}
+const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
+  const renders = React.useRef(1);
+  const depChanges = React.useRef(0);
+
+  React.useEffect(() => {
+    renders.current += 1;
+  });
+
+  React.useEffect(() => {
+    depChanges.current += 1;
+  }, deps);
+
+  return (
+    <div>
+      <h3>Debugger for {title}</h3>
+      <pre>
+        Renders: {renders.current}{'\n'}
+        Dependency Changes: {depChanges.current}
+      </pre>
+    </div>
+  );
+};
 
 const ShowContextData: React.VFC = () => {
   return (
     <DataProvider url={DATA_URL}>
       <ShowContextDataInner />
+      <ShowContextDataTest />
     </DataProvider>
   );
 };
@@ -43,6 +73,17 @@ const ShowContextDataInner: React.VFC = () => {
   const data = useDataContext();
 
   return <DisplayData {...data} />;
+};
+
+const ShowContextDataTest: React.VFC = () => {
+  const { ignored } = useDataContext("ignored");
+
+  return (
+    <div>
+      <DebugRender title={"Context Data Test"} deps={[ignored]} />
+      <h3>Ignored is: {ignored}</h3>
+    </div>
+  );
 };
 
 const ShowData: React.VFC = () => {
@@ -64,11 +105,10 @@ const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
 }) => {
   return (
     <div>
-      <h1>{isLoading ? "loading" : isLoaded ? "done" : "lazy"}</h1>
+      <h2>{isLoading ? "loading" : isLoaded ? "done" : "lazy"}</h2>
       <h4>Raw fetch count: {fetches}</h4>
       <h4>Refetch Counter: {counter}</h4>
       <h4>Ignored Counter: {ignored}</h4>
-      <h4> </h4>
       <pre>{data}</pre>
       <div style={{ display: "flex", gap: "8px" }}>
         <button className={css.muiButton} onClick={refetch}>
@@ -78,13 +118,13 @@ const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
           className={css.muiButton}
           onClick={() => setCounter((c) => c + 1)}
         >
-          Increment Refetch Counter
+          Refetch + 1
         </button>
         <button
           className={css.muiButton}
           onClick={() => setIgnored((i) => i + 1)}
         >
-          Increment Ignored Counter
+          Ignored + 1
         </button>
       </div>
     </div>
@@ -92,7 +132,12 @@ const DisplayData: React.VFC<ReturnType<typeof useData>> = ({
 };
 
 const Playground: React.VFC = () => {
-  return <ShowData />;
+  return (
+    <div style={{ display: "flex", flexDirection: "row", gap: "32px" }}>
+      <ShowData />
+      <ShowContextData />
+    </div>
+  );
 };
 
 export default Playground;

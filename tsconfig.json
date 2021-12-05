@@ -1,4 +1,5 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
     "target": "es5",
     "baseUrl": ".",
@@ -9,8 +10,8 @@
     ],
     "strict": true,
     "skipLibCheck": true,
+    "noEmit": false,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -20,8 +21,10 @@
     "incremental": true,
     "allowJs": false,
     "plugins": [
-      { "transform": "ts-transformer-keys/transformer" }
-    ]
+      {
+        "transform": "ts-transformer-keys/transformer"
+      }
+    ],
   },
   "include": [
     "next-env.d.ts",
