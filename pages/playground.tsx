@@ -1,8 +1,9 @@
 import { useAsyncLazy, useAsync } from "components/hooks";
+import { DebugRender } from 'components/debug';
 import { keys } from "ts-transformer-keys";
 import { createContext } from "components/constate";
 import { timeout } from "components/util";
-import css from "components/Util.module.css";
+import css from "components/util.module.css";
 import React from "react";
 
 function useData({ url }: { url: string }) {
@@ -32,34 +33,6 @@ const DATA_URL = "https://jsonplaceholder.typicode.com/todos/1";
 const dataKeys = keys<ReturnType<typeof useData>>();
 
 const [DataProvider, useDataContext] = createContext(useData, dataKeys);
-
-interface DebugRenderProps {
-  title: string;
-  deps: any[];
-}
-const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
-  const renders = React.useRef(1);
-  const depChanges = React.useRef(0);
-
-  React.useEffect(() => {
-    renders.current += 1;
-  });
-
-  React.useEffect(() => {
-    depChanges.current += 1;
-  }, deps);
-
-  return (
-    <div>
-      <h3>Debugger for {title}</h3>
-      <pre>
-        Renders: {renders.current}
-        {"\n"}
-        Dependency Changes: {depChanges.current}
-      </pre>
-    </div>
-  );
-};
 
 const ShowContextData: React.VFC = () => {
   return (

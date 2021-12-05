@@ -1,5 +1,5 @@
 import { GetStaticProps, NextPage } from "next";
-import Layout from "components/Layout";
+import Layout from "components/layout";
 import { readdir } from "fs/promises";
 
 interface Props {

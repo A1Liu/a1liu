@@ -1,4 +1,4 @@
-@value min-lg from './Util.module.css';
+@value min-lg from './util.module.css';
 
 .topNav {
   width: 100%;

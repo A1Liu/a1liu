@@ -1,5 +1,5 @@
-import styles from "./Layout.module.css";
-import css from './Util.module.css';
+import styles from "./layout.module.css";
+import css from './util.module.css';
 import cx from 'classnames';
 import React from "react";
 
