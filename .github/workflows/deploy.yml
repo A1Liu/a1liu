@@ -26,8 +26,7 @@ jobs:
         run: |
           yarn build
           yarn export
-
-      - run: touch .nojekyll
+          touch out/.nojekyll
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.6
