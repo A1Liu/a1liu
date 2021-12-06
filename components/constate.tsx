@@ -54,7 +54,6 @@ export function createContext<Props, Value>(
     const valueEntries = Object.entries(hookValue);
     const element = valueEntries.reduce((agg, [key, value]) => {
       const Provider = getFieldInfo(key as keyof Value).ctx.Provider;
-      count += 1;
 
       return <Provider value={value}>{agg}</Provider>;
     }, <baseCtx.Provider value={null}>{children}</baseCtx.Provider>);
