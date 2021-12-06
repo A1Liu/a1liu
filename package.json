@@ -5,8 +5,7 @@
     "build": "next build",
     "export": "next export",
     "lint": "next lint --fix",
-    "deploy": "git push origin main:production",
-    "prepare": "ts-patch install -s"
+    "deploy": "git push origin main:production"
   },
   "dependencies": {
     "classnames": "2.3.1",
@@ -24,7 +23,7 @@
     "eslint-config-next": "12.0.4",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-preset-env": "7.0.1",
-    "typescript": "4.5.2"
+    "typescript": "4.4.4"
   },
   "eslintConfig": {
     "extends": "next/core-web-vitals",
