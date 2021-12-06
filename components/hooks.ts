@@ -19,7 +19,10 @@ export function useStable<T extends object>(o: T): T {
 
 export function useCounter(n: number): [number, () => void] {
   const [counter, setCounter] = React.useState(n);
-  const increment = React.useCallback(() => setCounter(c => ++c), [setCounter]);
+  const increment = React.useCallback(
+    () => setCounter((c) => ++c),
+    [setCounter]
+  );
 
   return [counter, increment];
 }
@@ -114,12 +117,18 @@ function useAsyncHelper<T>(
 }
 
 export function useAsyncLazy<T>(fn: () => Promise<T>): AsyncValue<T> {
-  return useAsyncHelper(fn, null);
+  const result = useAsyncHelper(fn, null);
+  const stableResult = useStable(result);
+
+  return stableResult;
 }
 
 export function useAsync<T>(
   fn: () => Promise<T>,
   deps: any[] = []
 ): AsyncValue<T> {
-  return useAsyncHelper(fn, deps);
+  const result = useAsyncHelper(fn, deps);
+  const stableResult = useStable(result);
+
+  return stableResult;
 }
