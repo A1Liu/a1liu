@@ -1,3 +1,5 @@
+const withPreact = require("next-plugin-preact");
+
 const withMDX = require("@next/mdx")({
   extension: /\.mdx$/,
   options: {
@@ -10,4 +12,7 @@ const config = {
   pageExtensions: ["tsx", "mdx"],
 };
 
-module.exports = withMDX(config);
+const mdxConfig = withMDX(config);
+const preactConfig = withPreact(mdxConfig);
+
+module.exports = preactConfig;

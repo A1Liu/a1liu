@@ -59,7 +59,7 @@ interface BtnProps {
 export const Btn: React.FC<BtnProps> = ({ children, ...props }) => {
   const className = cx(css.muiButton, backgroundColor(props.background));
 
-  const clickHandler = (evt: React.SyntheticEvent) => {
+  const clickHandler = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (!props.propagate) evt.stopPropagation();
     if (!props.preventDefault) evt.preventDefault();
 
