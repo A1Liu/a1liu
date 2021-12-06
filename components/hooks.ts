@@ -17,6 +17,13 @@ export function useStable<T extends object>(o: T): T {
   return React.useMemo(() => o, Object.values(o)); // eslint-disable-line
 }
 
+export function useCounter(n: number): [number, () => void] {
+  const [counter, setCounter] = React.useState(n);
+  const increment = React.useCallback(() => setCounter(c => ++c), [setCounter]);
+
+  return [counter, increment];
+}
+
 export type AsyncValueMissing<T> = {
   readonly refetch: () => void;
   readonly isLoaded: false;
