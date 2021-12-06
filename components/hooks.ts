@@ -27,7 +27,7 @@ export function useCounter(n: number): [number, () => void] {
   return [counter, increment];
 }
 
-export type AsyncValueMissing<T> = {
+type AsyncValueMissing<T> = {
   readonly refetch: () => void;
   readonly isLoaded: false;
   readonly isLoading: boolean;
@@ -35,7 +35,7 @@ export type AsyncValueMissing<T> = {
   readonly error: any | null;
 };
 
-export type AsyncValueLoaded<T> = {
+type AsyncValueLoaded<T> = {
   readonly refetch: () => void;
   readonly isLoaded: true;
   readonly isLoading: boolean;
@@ -43,7 +43,7 @@ export type AsyncValueLoaded<T> = {
   readonly error: null;
 };
 
-export type AsyncValue<T> = AsyncValueLoaded<T> | AsyncValueMissing<T>;
+type AsyncValue<T> = AsyncValueLoaded<T> | AsyncValueMissing<T>;
 
 function useAsyncHelper<T>(
   fn: () => Promise<T>,
