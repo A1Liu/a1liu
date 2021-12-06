@@ -1,6 +1,7 @@
 import React from "react";
+import { Scroll } from "./util";
+import cx from "classnames";
 import css from "./util.module.css";
-import styles from "./debug.module.css";
 
 enum RenderKind {
   Mount = "Mount",
@@ -43,24 +44,24 @@ export const DebugRender: React.VFC<DebugRenderProps> = ({ title, deps }) => {
   React.useEffect(() => void (renderRef.current += 1));
 
   return (
-    <div className={styles.debugWrapper}>
-      <h3 style={{ margin: "0px" }}>Debugger for {title}</h3>
+    <div className={css.col}>
+      <h3>Debugger for {title}</h3>
       <div>
         <b>Renders:</b> {renderRef.current}
         <br />
         <b>Dependency Changes:</b> {depChangeRef.current}
       </div>
-      <div className={styles.renderWrapper}>
+      <Scroll height={300} background={"lightGray"} flexBox={true}>
         {infoRef.current.reduceRight((out: JSX.Element[], render, idx) => {
           out.push(
-            <div key={idx} className={styles.renderItem}>
+            <div key={idx} className={cx(css.rounded, css.bgWhite)}>
               <h5>{render.kind}</h5>
             </div>
           );
 
           return out;
         }, [])}
-      </div>
+      </Scroll>
     </div>
   );
 };

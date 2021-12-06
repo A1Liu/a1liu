@@ -2,6 +2,7 @@ import { useAsyncLazy, useAsync, useCounter } from "components/hooks";
 import { DebugRender } from "components/debug";
 import { createContext } from "components/constate";
 import { timeout, Scroll, Btn } from "components/util";
+import cx from "classnames";
 import css from "components/util.module.css";
 import React from "react";
 
@@ -78,7 +79,7 @@ const DisplayData: React.VFC<ReturnType<typeof useData>> = (props) => {
 
 const Playground: React.VFC = () => {
   return (
-    <div className={css.row} style={{ gap: "32px" }}>
+    <div className={cx(css.row, css.padded)} style={{ gap: "32px" }}>
       <ShowData />
       <DataProvider url={DATA_URL}>
         <div className={css.col}>
