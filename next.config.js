@@ -7,6 +7,10 @@ const withMDX = require("@next/mdx")({
   },
 });
 
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
 const config = {
   reactStrictMode: true,
   pageExtensions: ["tsx", "mdx"],
@@ -14,5 +18,6 @@ const config = {
 
 const mdxConfig = withMDX(config);
 const preactConfig = withPreact(mdxConfig);
+const analyzedConfig = withBundleAnalyzer(preactConfig);
 
-module.exports = preactConfig;
+module.exports = analyzedConfig;

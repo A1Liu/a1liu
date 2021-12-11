@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@mdx-js/loader": "1.6.22",
+    "@next/bundle-analyzer": "12.0.7",
     "@next/mdx": "12.0.3",
     "@types/node": "16.11.9",
     "@types/react": "17.0.35",
@@ -59,19 +60,5 @@
         }
       }
     }
-  },
-  "babel": {
-    "presets": [
-      [
-        "next/babel",
-        {
-          "preset-env": {
-            "useBuiltIns": "entry",
-            "corejs": "3.6"
-          }
-        }
-      ]
-    ],
-    "plugins": []
   }
 }
