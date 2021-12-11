@@ -1,42 +1,41 @@
 import styles from "./layout.module.css";
-import css from './util.module.css';
-import cx from 'classnames';
+import Link from "next/link";
+import css from "./util.module.css";
+import cx from "classnames";
 import React from "react";
 
 const TopNav: React.VFC = () => {
   return (
     <div className={styles.topNav}>
       <div className={styles.navContent}>
-        <a className={styles.logo} href={"/"}>
-          Albert Liu
-        </a>
+        <Link href="/">
+          <a className={styles.logo}>Albert Liu</a>
+        </Link>
 
         <nav>
-          <a href={"/"} className={styles.navItem}>
-            Home
-          </a>
-          <a href="/blog" className={styles.navItem}>
-            Blog
-          </a>
-          <a href="/career" className={styles.navItem}>
-            CV
-          </a>
-          <a href="/resources" className={styles.navItem}>
-            Resources
-          </a>
+          <Link href="/">
+            <a className={styles.navItem}>Home</a>
+          </Link>
+          <Link href="/blog">
+            <a className={styles.navItem}>Blog</a>
+          </Link>
+          <Link href="/career">
+            <a className={styles.navItem}>CV</a>
+          </Link>
+          <Link href="/resources">
+            <a className={styles.navItem}>Resources</a>
+          </Link>
         </nav>
       </div>
     </div>
   );
 };
 
-const Layout: React.FC = props => {
+const Layout: React.FC = (props) => {
   return (
     <div className={css.fullscreen}>
       <TopNav />
-      <div className={styles.main} >
-        {props.children}
-      </div>
+      <div className={styles.main}>{props.children}</div>
     </div>
   );
 };

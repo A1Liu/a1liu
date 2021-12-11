@@ -38,6 +38,13 @@
       ]
     }
   },
+  "browserslist": [
+    "last 2 versions",
+    "> 0.25%",
+    "not dead",
+    "not ie 11",
+    "not op_mini all"
+  ],
   "postcss": {
     "plugins": {
       "postcss-flexbugs-fixes": {},
@@ -52,5 +59,19 @@
         }
       }
     }
+  },
+  "babel": {
+    "presets": [
+      [
+        "next/babel",
+        {
+          "preset-env": {
+            "useBuiltIns": "entry",
+            "corejs": "3.6"
+          }
+        }
+      ]
+    ],
+    "plugins": []
   }
 }
