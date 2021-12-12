@@ -35,6 +35,7 @@ jobs:
           yarn build
           yarn export
           touch out/.nojekyll
+          echo config.a1liu.com >> out/CNAME
 
       - name: Deploy
         run: |
