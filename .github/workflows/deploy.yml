@@ -29,7 +29,9 @@ jobs:
           touch out/.nojekyll
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.6
-        with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: out # The folder the action should deploy.
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git --work-tree out add --all
+          git commit -m "Automatic Deploy action run by github-actions"
+          git push origin HEAD:gh-pages --force
