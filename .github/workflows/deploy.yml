@@ -19,6 +19,14 @@ jobs:
           node-version: 16.10.0
           cache: yarn
 
+      - name: Next.js Cache
+        uses: actions/cache@v2
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.ts', '**.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
