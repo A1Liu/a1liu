@@ -19,6 +19,14 @@ This script depends on Python 3 being installed.
 1. Clone repository with `git clone https://github.com/A1Liu/config.git`
 2. Install environment using `python3 install/shell.py`. Replaced files will be
    stored in `local/preconf`, under their original name.
+3. Some stuff doesn't work unless you use these commands from the project root:
+
+   ```
+   tic -x config/programs/tmux-256color.terminfo
+   tic -x config/programs/xterm-256color-italic.terminfo
+   ```
+
+   Not sure what they do. They also don't always work.
 
 To undo, run `python3 install/undo/shell.py`. It'll reset your configuration to
 before the install script was run. Note that this requires the appropriate files

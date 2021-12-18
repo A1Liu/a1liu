@@ -135,7 +135,7 @@
 	<array>
 		<dict>
 			<key>ASCII Anti Aliased</key>
-			<true/>
+			<false/>
 			<key>ASCII Ligatures</key>
 			<true/>
 			<key>AWDS Pane Directory</key>
@@ -779,7 +779,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>Menlo-Regular 11</string>
+			<string>Menlo-Regular 14</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<false/>
 			<key>Option Key Sends</key>
