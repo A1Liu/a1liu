@@ -24,6 +24,12 @@ call plug#begin()
 Plug '~/code/liu/vim-liu'
 
 if PlugFlag('base')
+  Plug 'tpope/vim-eunuch'
+  Plug 'tpope/vim-fugitive'
+  Plug 'machakann/vim-swap'
+endif
+
+if PlugFlag('format')
   " Autoformatters
   Plug 'Chiel92/vim-autoformat'
 
@@ -50,9 +56,6 @@ if PlugFlag('base')
     autocmd FileType vim let b:autoformat_enabled = 0
     autocmd BufWrite * if exists('b:autoformat_enabled') && b:autoformat_enabled | Autoformat | endif
   augroup END
-
-  Plug 'tpope/vim-eunuch'
-  Plug 'tpope/vim-fugitive'
 endif
 
 if PlugFlag('fzf')

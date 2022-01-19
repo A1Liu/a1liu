@@ -46,6 +46,7 @@ My Vim config uses these environment variables at startup:
 - `vim-S` A Vim flag, where `S` is the name of the flag
   - `light-mode` - Whether or not Vim is dark or light mode
   - `plugins-base-enabled` - Whether or not the default plugins are enabled
+  - `plugins-format-enabled` - Whether or not vim-autoformat is enabled
   - `plugins-fzf-enabled` - Whether or not fzf is enabled
   - `plugins-solarized-enabled` - Whether or not the color scheme plugin is enabled
   - `plugins-polyglot-enabled` - Whether or not vim-polyglot is enabled
