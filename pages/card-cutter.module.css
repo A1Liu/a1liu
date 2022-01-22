@@ -84,9 +84,10 @@
 .cardContent {
   height: 100%;
   width: 100%;
+  font-size: 1rem;
 }
 
 .suffixLabel {
   font-weight: bold;
-  font-size: 1.25em;
+  font-size: 1.25rem;
 }

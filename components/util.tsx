@@ -17,11 +17,15 @@ export async function post(url: string, data: any): Promise<any> {
   return resp.json();
 }
 
-export async function get(urlString: string, query: any): Promise<any> {
-  const url = new URL(urlString);
-  url.search = new URLSearchParams(query).toString();
+const domain = "http://localhost:1337";
 
-  const resp = await fetch(url.toString());
+export async function get(urlString: string, query: any): Promise<any> {
+  const queryString = new URLSearchParams(query).toString();
+  if (queryString) {
+    urlString += "?" + queryString;
+  }
+
+  const resp = await fetch(urlString);
 
   return resp.json();
 }

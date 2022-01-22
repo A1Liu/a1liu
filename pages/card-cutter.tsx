@@ -1,4 +1,5 @@
 import { useAsyncLazy, useAsync, useCounter } from "components/hooks";
+import Head from "next/head";
 import { DebugRender } from "components/debug";
 import { createContext } from "components/constate";
 import { post, get, Scroll, Btn } from "components/util";
@@ -55,7 +56,6 @@ const Cutter: React.VFC = () => {
     // query parameter" thing
     setTitle(`${router.query.title ?? ""}`);
     setText(`${router.query.text ?? ""}`);
-    console.log(router.query.text);
 
     const urlString = `${router.query.url ?? ""}`;
     if (urlString) {
@@ -71,6 +71,10 @@ const Cutter: React.VFC = () => {
 
   return (
     <div className={cx(css.col, styles.fullscreen)}>
+      <Head>
+        <title key="title">Card Cutter</title>
+      </Head>
+
       <div className={styles.inputRow}>
         <div className={styles.inputWrapper}>
           <input
