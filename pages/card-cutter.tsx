@@ -23,16 +23,16 @@ const Cutter: React.VFC = () => {
     const url = new URL("http://localhost:1337/api/suggest-card-files");
     url.search = new URLSearchParams({ text: file }).toString();
 
-    const response = await fetch(url);
+    const response = await fetch(url.toString());
     return response.json();
   }, [file]);
 
   const suggestions = suggestionsData ?? [];
 
   React.useEffect(() => {
-    setTitle(router.query.title);
-    setUrl(router.query.url);
-    setText(router.query.text);
+    setTitle(`${router.query.title ?? ""}`);
+    setUrl(`${router.query.url ?? ""}`);
+    setText(`${router.query.text ?? ""}`);
   }, [router.query]);
 
   return (
@@ -55,7 +55,7 @@ const Cutter: React.VFC = () => {
               showSuggestions && styles.suggestionsVisible
             )}
           >
-            {suggestions.map((suggest) => (
+            {suggestions.map((suggest: string) => (
               <button
                 key={suggest}
                 className={styles.suggestion}
@@ -107,7 +107,6 @@ const Cutter: React.VFC = () => {
         </div>
 
         <textarea
-          type="text"
           className={cx(styles.inputBox, styles.cardContent)}
           value={text}
           onChange={(evt) => setText(evt?.target?.value)}

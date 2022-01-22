@@ -5,12 +5,12 @@ import path from "path";
 const readdir = fs.promises.readdir;
 const resolve = path.resolve;
 
-async function getFiles(dir: string): string[] {
-  const dirents = await readdir(dir, { withFileTypes: true });
+async function getFiles(dir: string): Promise<string[]> {
+  const dirents: fs.Dirent[] = await readdir(dir, { withFileTypes: true });
   const files = await Promise.all(
-    dirents.map((dirent) => {
+    dirents.map((dirent): Promise<string[]> | string[] => {
       const res = resolve(dir, dirent.name);
-      return dirent.isDirectory() ? getFiles(res) : res;
+      return dirent.isDirectory() ? getFiles(res) : [res];
     })
   );
 
@@ -18,7 +18,7 @@ async function getFiles(dir: string): string[] {
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const text = req.query.text ?? "";
+  const text = `${req.query.text}`;
 
   const index = text.indexOf("/");
 
