@@ -33,7 +33,7 @@ const TopNav: React.VFC = () => {
 
 const Layout: React.FC = (props) => {
   return (
-    <div className={css.fullscreen}>
+    <div className={styles.fullscreen}>
       <TopNav />
       <div className={styles.main}>{props.children}</div>
     </div>

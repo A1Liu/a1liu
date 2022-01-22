@@ -13,7 +13,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 
 const config = {
   reactStrictMode: true,
-  pageExtensions: ["tsx", "mdx"],
+  pageExtensions: ["ts", "tsx", "mdx"],
 };
 
 const mdxConfig = withMDX(config);

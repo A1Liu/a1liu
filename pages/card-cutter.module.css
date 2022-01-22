@@ -1,0 +1,58 @@
+.fitContent {
+  width: fit-content;
+}
+
+.fullscreen {
+  background: var(--blue);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+
+  gap: 16px;
+
+  padding-top: 50px;
+  padding-bottom: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.cutCardRow {
+  align-items: center;
+}
+
+.inputBox {
+  background: var(--white);
+  border-radius: 4px;
+  padding: 2px;
+  padding-left: 4px;
+}
+
+.suggestions {
+  visibility: hidden;
+  position: absolute;
+  gap: 0px;
+  z-index: 1;
+}
+
+.suggestionsVisible {
+  visibility: visible;
+}
+
+.suggestion {
+  background: var(--white);
+  border: 1px solid black;
+}
+
+.cardArea {
+  border-radius: 8px;
+  background: var(--white);
+  padding: 16px;
+
+  gap: 16px;
+}
+
+.cardContent {
+  white-space: pre-wrap;
+}
