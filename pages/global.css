@@ -53,8 +53,6 @@ table {
 }
 
 caption {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
   color: #6c757d;
   text-align: left;
   caption-side: bottom;
@@ -66,7 +64,6 @@ th {
 
 label {
   display: inline-block;
-  margin-bottom: 0.5rem;
 }
 
 button {

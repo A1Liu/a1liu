@@ -18,22 +18,36 @@
   padding-right: 50px;
 }
 
-.cutCardRow {
+.inputRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
   align-items: center;
+  width: 100%;
+}
+
+.inputWrapper {
+  width: 100%;
 }
 
 .inputBox {
   background: var(--white);
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 2px;
   padding-left: 4px;
+  border: 2px solid var(--gray);
+  width: 100%;
 }
 
 .suggestions {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 0px;
+
   visibility: hidden;
   position: absolute;
-  gap: 0px;
-  z-index: 1;
 }
 
 .suggestionsVisible {
@@ -43,16 +57,31 @@
 .suggestion {
   background: var(--white);
   border: 1px solid black;
+  border-top: none;
+  z-index: 2;
+
+  &:hover {
+    background: var(--blue);
+  }
 }
 
 .cardArea {
+  height: 100%;
+
   border-radius: 8px;
   background: var(--white);
-  padding: 16px;
 
+  padding: 16px;
   gap: 16px;
 }
 
+.cardLabel {
+  font-weight: bold;
+  font-size: 1.25em;
+  width: 100px;
+}
+
 .cardContent {
-  white-space: pre-wrap;
+  height: 100%;
+  width: 100%;
 }

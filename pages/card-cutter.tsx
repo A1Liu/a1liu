@@ -12,7 +12,12 @@ const bookmarkValue = `javascript:void(function(s){s.src='http://localhost:1337/
 
 const Cutter: React.VFC = () => {
   const router = useRouter();
-  const [file, setFile] = React.useState<string>("");
+
+  const [title, setTitle] = React.useState("");
+  const [url, setUrl] = React.useState("");
+  const [text, setText] = React.useState("");
+  const [file, setFile] = React.useState("");
+
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const { data: suggestionsData, isLoaded } = useAsync(async () => {
     const url = new URL("http://localhost:1337/api/suggest-card-files");
@@ -24,14 +29,21 @@ const Cutter: React.VFC = () => {
 
   const suggestions = suggestionsData ?? [];
 
+  React.useEffect(() => {
+    setTitle(router.query.title);
+    setUrl(router.query.url);
+    setText(router.query.text);
+  }, [router.query]);
+
   return (
     <div className={cx(css.col, styles.fullscreen)}>
-      <div className={cx(css.row, styles.cutCardRow)}>
-        <div>
+      <div className={styles.inputRow}>
+        <div className={styles.inputWrapper}>
           <input
             type="text"
             className={styles.inputBox}
             value={file}
+            placeholder={"file to store the card in"}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setShowSuggestions(false)}
             onChange={(evt) => setFile(evt?.target?.value)}
@@ -39,15 +51,18 @@ const Cutter: React.VFC = () => {
 
           <div
             className={cx(
-              css.col,
               styles.suggestions,
               showSuggestions && styles.suggestionsVisible
             )}
           >
-            {suggestions.map((file) => (
-              <div key={file} className={styles.suggestion}>
-                {file}
-              </div>
+            {suggestions.map((suggest) => (
+              <button
+                key={suggest}
+                className={styles.suggestion}
+                onMouseDown={() => setFile(suggest)}
+              >
+                {suggest}
+              </button>
             ))}
           </div>
         </div>
@@ -55,17 +70,12 @@ const Cutter: React.VFC = () => {
         <button
           className={css.muiButton}
           onClick={async () => {
-            const body = {
-              ...router.query,
-              file,
-            };
-
             await fetch("/api/card-cutter", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(body),
+              body: JSON.stringify({ title, url, text, file }),
             });
 
             window.close();
@@ -91,10 +101,32 @@ const Cutter: React.VFC = () => {
 
         {router.query.url && (
           <>
-            <h3>Title: {router.query.title}</h3>
-            <h3>Source: {router.query.url}</h3>
+            <div className={styles.inputRow}>
+              <label className={styles.cardLabel}>Title</label>
+              <input
+                type="text"
+                className={styles.inputBox}
+                value={title}
+                onChange={(evt) => setTitle(evt?.target?.value)}
+              />
+            </div>
 
-            <pre className={styles.cardContent}>{router.query.text}</pre>
+            <div className={styles.inputRow}>
+              <label className={styles.cardLabel}>Source</label>
+              <input
+                type="text"
+                className={styles.inputBox}
+                value={url}
+                onChange={(evt) => setUrl(evt?.target?.value)}
+              />
+            </div>
+
+            <textarea
+              type="text"
+              className={cx(styles.inputBox, styles.cardContent)}
+              value={text}
+              onChange={(evt) => setText(evt?.target?.value)}
+            />
           </>
         )}
       </div>
