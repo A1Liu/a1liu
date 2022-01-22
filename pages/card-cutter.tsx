@@ -86,9 +86,38 @@ const Cutter: React.VFC = () => {
       </div>
 
       <div className={cx(css.col, styles.cardArea)}>
+        <div className={styles.inputRow}>
+          <label className={styles.cardLabel}>Title</label>
+          <input
+            type="text"
+            className={styles.inputBox}
+            value={title}
+            onChange={(evt) => setTitle(evt?.target?.value)}
+          />
+        </div>
+
+        <div className={styles.inputRow}>
+          <label className={styles.cardLabel}>Source</label>
+          <input
+            type="text"
+            className={styles.inputBox}
+            value={url}
+            onChange={(evt) => setUrl(evt?.target?.value)}
+          />
+        </div>
+
+        <textarea
+          type="text"
+          className={cx(styles.inputBox, styles.cardContent)}
+          value={text}
+          onChange={(evt) => setText(evt?.target?.value)}
+        />
+
         {!router.query.url && (
-          <>
-            <h3>Add the Card Cutter bookmark to start cutting cards!</h3>
+          <div className={styles.inputRow}>
+            <label className={styles.suffixLabel}>
+              Add the Card Cutter bookmark to start cutting cards!
+            </label>
 
             <button
               className={cx(css.muiButton, styles.fitContent)}
@@ -96,38 +125,7 @@ const Cutter: React.VFC = () => {
             >
               Copy to clipboard
             </button>
-          </>
-        )}
-
-        {router.query.url && (
-          <>
-            <div className={styles.inputRow}>
-              <label className={styles.cardLabel}>Title</label>
-              <input
-                type="text"
-                className={styles.inputBox}
-                value={title}
-                onChange={(evt) => setTitle(evt?.target?.value)}
-              />
-            </div>
-
-            <div className={styles.inputRow}>
-              <label className={styles.cardLabel}>Source</label>
-              <input
-                type="text"
-                className={styles.inputBox}
-                value={url}
-                onChange={(evt) => setUrl(evt?.target?.value)}
-              />
-            </div>
-
-            <textarea
-              type="text"
-              className={cx(styles.inputBox, styles.cardContent)}
-              value={text}
-              onChange={(evt) => setText(evt?.target?.value)}
-            />
-          </>
+          </div>
         )}
       </div>
     </div>
