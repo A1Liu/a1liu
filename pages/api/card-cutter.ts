@@ -5,16 +5,9 @@ import path from "path";
 const { mkdir, appendFile } = fs.promises;
 const { resolve } = path;
 
-const visualDivider = `
---------------------------------------------------------------------------------
-  `;
-
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { file: inputFilePath, url, title, text } = req.body;
   if (!inputFilePath || !url || !title || !text) {
-    console.log({ inputFilePath, url, title, text });
-    console.log(req.body);
-    console.log(req.body.title);
     return res.status(400).json({ error: "path wasn't valid" });
   }
 

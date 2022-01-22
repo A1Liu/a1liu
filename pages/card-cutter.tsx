@@ -1,14 +1,38 @@
 import { useAsyncLazy, useAsync, useCounter } from "components/hooks";
 import { DebugRender } from "components/debug";
 import { createContext } from "components/constate";
-import { timeout, Scroll, Btn } from "components/util";
+import { post, get, Scroll, Btn } from "components/util";
 import { useRouter } from "next/router";
 import cx from "classnames";
 import css from "components/util.module.css";
 import styles from "./card-cutter.module.css";
 import React from "react";
 
-const bookmarkValue = `javascript:void(function(s){s.src='http://localhost:1337/open-card-cutter.js';document.body.appendChild(s)}(document.createElement('script')))`;
+// 1. Needs to be inline with the bookmark so that e.g. Twitter content blocking
+//    won't block it
+// 2. The void means the browser won't change the content of the page to the value
+//    of the bookmark
+const bookmarkValue = `javascript:void (function() {
+  var text = "";
+  var activeEl = document.activeElement;
+  var activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
+  if (
+    activeElTagName == "textarea" ||
+    (activeElTagName == "input" &&
+      /^(?:text|search|password|tel|url)$/i.test(activeEl.type) &&
+      typeof activeEl.selectionStart == "number")
+  ) {
+    text = activeEl.value.slice(activeEl.selectionStart, activeEl.selectionEnd);
+  } else if (window.getSelection) {
+    text = window.getSelection().toString();
+  }
+
+  text = encodeURIComponent(text);
+  var url = window.location;
+  var title = document.title;
+
+  window.open("http://localhost:1337/card-cutter?text="+text+"&url="+url+"&title="+title);
+})();`;
 
 const Cutter: React.VFC = () => {
   const router = useRouter();
@@ -19,20 +43,30 @@ const Cutter: React.VFC = () => {
   const [file, setFile] = React.useState("");
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
-  const { data: suggestionsData, isLoaded } = useAsync(async () => {
-    const url = new URL("http://localhost:1337/api/suggest-card-files");
-    url.search = new URLSearchParams({ text: file }).toString();
-
-    const response = await fetch(url.toString());
-    return response.json();
-  }, [file]);
+  const { data: suggestionsData, isLoaded } = useAsync(
+    () => get("http://localhost:1337/api/suggest-card-files", { text: file }),
+    [file]
+  );
 
   const suggestions = suggestionsData ?? [];
 
   React.useEffect(() => {
+    // Using this pattern here to get out of the whole "multiple values for a
+    // query parameter" thing
     setTitle(`${router.query.title ?? ""}`);
-    setUrl(`${router.query.url ?? ""}`);
     setText(`${router.query.text ?? ""}`);
+    console.log(router.query.text);
+
+    const urlString = `${router.query.url ?? ""}`;
+    if (urlString) {
+      const url = new URL(urlString);
+
+      const params = url.searchParams;
+      params.delete("fbclid");
+
+      url.search = params.toString();
+      setUrl(url.toString());
+    }
   }, [router.query]);
 
   return (
@@ -46,7 +80,7 @@ const Cutter: React.VFC = () => {
             placeholder={"file to store the card in"}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setShowSuggestions(false)}
-            onChange={(evt) => setFile(evt?.target?.value)}
+            onChange={(evt) => setFile(evt.target.value)}
           />
 
           <div
@@ -70,15 +104,15 @@ const Cutter: React.VFC = () => {
         <button
           className={css.muiButton}
           onClick={async () => {
-            await fetch("/api/card-cutter", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ title, url, text, file }),
-            });
+            const body = { title, url, text, file };
+            await post("/api/card-cutter", body);
 
             window.close();
+
+            setTitle("");
+            setUrl("");
+            setText("");
+            setFile("");
           }}
         >
           Cut
