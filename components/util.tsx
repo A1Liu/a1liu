@@ -17,8 +17,6 @@ export async function post(url: string, data: any): Promise<any> {
   return resp.json();
 }
 
-const domain = "http://localhost:1337";
-
 export async function get(urlString: string, query: any): Promise<any> {
   const queryString = new URLSearchParams(query).toString();
   if (queryString) {
