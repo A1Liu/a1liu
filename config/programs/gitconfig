@@ -15,13 +15,14 @@
 [alias]
 	l = log --graph --oneline
 	co = commit -anm
-  fwd =  "!f() { \
-            git checkout $(git rev-list --topo-order HEAD..\"$*\" | tail -1); \
-          }; f"
-  back = checkout HEAD~1
+	fwd =  "!f() { \
+	          git checkout $(git rev-list --topo-order HEAD..\"$*\" | tail -1); \
+	        }; f"
+	back = checkout HEAD~1
 	ca = commit --amend -anm
-  s = status
-  root = rev-parse --show-toplevel
+	s = status
+	root = rev-parse --show-toplevel
+	pu = push -u origin HEAD
 [push]
 	default = simple
 [color "status"]
