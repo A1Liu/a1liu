@@ -1,4 +1,5 @@
 if !GlobFlag('plugins-*-enabled')
+  Dbg 'No plugins enabled'
   finish
 endif
 
@@ -19,7 +20,7 @@ endif
 " This forces the loading of the script, so that `sudo vim` can work nicely
 execute 'source ' . g:plugin_manager_script_path
 
-call plug#begin()
+call plug#begin(g:plugin_manager_home)
 
 Plug '~/code/liu/vim-liu'
 
