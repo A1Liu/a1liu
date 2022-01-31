@@ -19,7 +19,11 @@ function! CheckTermGui()
     return 0
   endif
 
-  return g:os ==? 'Darwin'
+  if g:os ==? 'Windows'
+    return 0
+  endif
+
+  return 1
 endfunction
 
 " https://medium.com/@dubistkomisch/how-to-actually-get-italics-and-true-colour-to-work-in-iterm-tmux-vim-9ebe55ebc2be
