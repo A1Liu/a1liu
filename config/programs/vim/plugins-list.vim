@@ -37,10 +37,14 @@ if PlugFlag('format')
   let s:clangfmt = "-lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file"
   let g:formatdef_clangformat = "'clang-format " . s:clangfmt . "'"
   let g:formatdef_swiftformat = "'swiftformat --quiet'"
+
   let g:formatters_java = ['clangformat']
+
   let g:formatters_typescriptreact = ['prettier']
+  let g:formatters_javascriptreact = ['prettier']
   let g:formatters_typescript = ['prettier']
   let g:formatters_javascript = ['prettier']
+
   let g:formatters_arduino = ['clangformat']
   let g:formatters_swift = ['swiftformat']
 
