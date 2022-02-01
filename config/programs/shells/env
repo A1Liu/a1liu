@@ -45,9 +45,12 @@ fi
 # to just not append ever, but on install it copies the existing environment.
 if [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
+
   export EDITOR='vim'
   export VISUAL='vim'
+
   export BASH_SILENCE_DEPRECATION_WARNING=1
+  export HOMEBREW_NO_AUTO_UPDATE=1
 
   # Adding stuff to python path
   export PYTHONPATH="${CFG_DIR}/programs"
@@ -57,6 +60,4 @@ if [[ $CFG_ENV != 1 ]]; then
   export PATH="${GOPATH}:${GOPATH}/bin:${PATH}"
 
   export PATH="~/.rbenv/bin:${PATH}"
-
-  export HOMEBREW_NO_AUTO_UPDATE=1
 fi
