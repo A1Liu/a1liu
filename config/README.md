@@ -45,6 +45,7 @@ My Vim config uses these environment variables at startup:
   in the install folder (e.g. `shell.py` is represented with `installed-shell`).
 - `vim-S` A Vim flag, where `S` is the name of the flag
   - `light-mode` - Whether or not Vim is dark or light mode
+  - `aliu` - Whether or not `<C-T>` is bound to a timestamped signature
   - `plugins-base-enabled` - Whether or not the default plugins are enabled
   - `plugins-format-enabled` - Whether or not vim-autoformat is enabled
   - `plugins-fzf-enabled` - Whether or not fzf is enabled

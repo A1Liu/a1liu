@@ -89,29 +89,42 @@ alias gem='ruby_setup && unalias gem && gem'
 alias bundle='ruby_setup && unalias bundle && bundle'
 alias jekyll='ruby_setup && unalias jekyll && jekyll'
 
-function a1liu_load_nvm() {
-    unalias nvm
-    export NVM_DIR="$HOME/.nvm"
-    export PATH="$PATH:$NVM_DIR"
-    NVM_SCRIPT="/usr/local/opt/nvm/nvm.sh"
-    NVM_COMPLETIONS="/usr/local/opt/nvm/etc/bash_completion.d/nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_SCRIPT" ] && . "$NVM_SCRIPT"
-    [ -s "$NVM_COMPLETIONS" ] && . "$NVM_COMPLETIONS"
+export A1LIU_NVM_LOADED=0
 
-    unset -f a1liu_load_nvm
-    alias a1liu_load_nvm='true'
-    nvm use 2>/dev/null || true
+a1liu_load_nvm () {
+    if [ $A1LIU_NVM_LOADED -eq 0 ]; then
+        export A1LIU_NVM_LOADED=1
+        # The NVM setup script creates a shell function, and having the alias
+        # around interferes with that function. We destroy the alias here to
+        # prevent any craziness.
+        #                           - Albert Liu, Feb 01, 2022 Tue 02:19 EST
+        unalias nvm
+
+        export NVM_DIR="$HOME/.nvm"
+        export PATH="$PATH:$NVM_DIR"
+
+        NVM_SCRIPT="/usr/local/opt/nvm/nvm.sh"
+        NVM_COMPLETIONS="/usr/local/opt/nvm/etc/bash_completion.d/nvm"
+
+        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_SCRIPT" ] && . "$NVM_SCRIPT"
+        [ -s "$NVM_COMPLETIONS" ] && . "$NVM_COMPLETIONS"
+    fi
+
+    nvm use || true
 }
 
+# The unalias happens above, so it's unnecessary here.
+#                       - Albert Liu, Feb 01, 2022 Tue 02:20 EST
 alias nvm='a1liu_load_nvm && nvm'
+
 alias node='unalias node && a1liu_load_nvm && node'
 alias npm='unalias npm && a1liu_load_nvm && npm'
 alias yarn='unalias yarn && a1liu_load_nvm && yarn'
 alias prettier='unalias prettier && a1liu_load_nvm && prettier'
 alias npx='unalias npx && a1liu_load_nvm && npx'
 alias firebase='unalias firebase && a1liu_load_nvm && firebase'
-alias oy='unalias oy && a1liu_load_nvm && oy'
 
+alias oy='unalias oy && a1liu_load_nvm && oy'
 alias infra='yarn run infra'
 alias lerna='yarn run lerna'
