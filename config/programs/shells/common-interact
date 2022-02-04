@@ -93,7 +93,7 @@ export A1LIU_NVM_LOADED=0
 
 a1liu_load_nvm () {
     if [ $A1LIU_NVM_LOADED -eq 0 ]; then
-        export A1LIU_NVM_LOADED=1
+        A1LIU_NVM_LOADED=1
         # The NVM setup script creates a shell function, and having the alias
         # around interferes with that function. We destroy the alias here to
         # prevent any craziness.
@@ -124,6 +124,7 @@ alias yarn='unalias yarn && a1liu_load_nvm && yarn'
 alias prettier='unalias prettier && a1liu_load_nvm && prettier'
 alias npx='unalias npx && a1liu_load_nvm && npx'
 alias firebase='unalias firebase && a1liu_load_nvm && firebase'
+alias zx='unalias zx && a1liu_load_nvm && zx'
 
 alias oy='unalias oy && a1liu_load_nvm && oy'
 alias infra='yarn run infra'
