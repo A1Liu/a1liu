@@ -75,6 +75,11 @@ endif
 " Languages
 if PlugFlag('polyglot')
   Plug 'sheerun/vim-polyglot'
+
+  " Polyglot uses yats, which is 'advanced' (aka overengineered and idiotic).
+  " We use this plugin instead.
+  Plug 'leafgarland/typescript-vim'
+
   Plug 'jansedivy/jai.vim'
 elseif PlugFlag('markdown')
   Plug 'plasticboy/vim-markdown'
