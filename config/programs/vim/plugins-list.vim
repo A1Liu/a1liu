@@ -76,8 +76,11 @@ endif
 if PlugFlag('polyglot')
   Plug 'sheerun/vim-polyglot'
 
-  " Polyglot uses yats, which is 'advanced' (aka overengineered and idiotic).
-  " We use this plugin instead.
+  " Polyglot uses yats, which is 'advanced', i.e. overengineered and idiotic.
+  " We use this plugin instead. Because, you can write all the stupid fucking
+  " colors of the rainbow into your highlighter, it doesn't make the
+  " experience any better.
+  "                                 - Albert Liu, Feb 04, 2022 Fri 22:46 EST
   Plug 'leafgarland/typescript-vim'
 
   Plug 'jansedivy/jai.vim'
