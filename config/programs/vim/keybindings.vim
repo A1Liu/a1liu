@@ -80,7 +80,8 @@ nnoremap <S-Q> <Nop>
 nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
 
 " Control left/right in command mode
-map <Esc>[1;5d
+cnoremap <Esc>[1;5D <C-Left>
+cnoremap <Esc>[1;5C <C-Right>
 
 "" Tabs
 nnoremap <C-W><C-t> :tabnew<Enter>
