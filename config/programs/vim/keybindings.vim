@@ -79,6 +79,9 @@ nnoremap <S-Q> <Nop>
 " Go to definition
 nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
 
+" Control left/right in command mode
+map <Esc>[1;5d
+
 "" Tabs
 nnoremap <C-W><C-t> :tabnew<Enter>
 nnoremap <C-W><C-e> :tabNext<Enter>

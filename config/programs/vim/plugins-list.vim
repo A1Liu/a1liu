@@ -28,6 +28,7 @@ if PlugFlag('base')
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-fugitive'
   Plug 'machakann/vim-swap'
+  Plug 'tpope/vim-rsi'
 endif
 
 if PlugFlag('format')
