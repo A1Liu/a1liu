@@ -1,4 +1,4 @@
-if !GlobFlag('plugins-*-enabled')
+if !GlobFlag('plug-*')
   Dbg 'No plugins enabled'
   finish
 endif

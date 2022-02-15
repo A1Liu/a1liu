@@ -6,7 +6,7 @@ function! GlobFlag(flag)
 endfunction
 
 function! PlugFlag(plug, ...)
-  let forwarded_args = ["plugins-" . a:plug . "-enabled"] + a:000
+  let forwarded_args = ['plug-' . a:plug] + a:000
   return call('Flag', forwarded_args)
 endfunction
 
