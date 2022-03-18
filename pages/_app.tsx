@@ -1,14 +1,41 @@
 import "./global.css";
 import Head from "next/head";
+import { post, get } from "components/util";
 import type { AppProps } from "next/app";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: async ({ queryKey }) => {
+        if (queryKey.length < 2) {
+          throw new Error("wtf");
+        }
+
+        const url = queryKey[1] as string;
+
+        if (queryKey[0] === "get") {
+          return get(url, queryKey[2] ?? {});
+        }
+
+        if (queryKey[0] === "post") {
+          return post(url, {});
+        }
+      },
+    },
+  },
+});
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title key="title">Albert's Site</title>
+        <title key="title">Albert&apos;s Site</title>
       </Head>
-      <Component {...pageProps} />
+
+      <QueryClientProvider client={queryClient}>
+        <Component {...pageProps} />
+      </QueryClientProvider>
     </>
   );
 }
