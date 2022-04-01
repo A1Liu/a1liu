@@ -1,7 +1,7 @@
-import { useAsyncLazy, useAsync, useCounter } from "components/hooks";
+import { useCounter } from "components/hooks";
+import { useQuery } from "react-query";
 import Head from "next/head";
 import { DebugRender } from "components/debug";
-import { createContext } from "components/constate";
 import { post, get, Scroll, Btn } from "components/util";
 import { useRouter } from "next/router";
 import cx from "classnames";
@@ -44,12 +44,13 @@ const Cutter: React.VFC = () => {
   const [file, setFile] = React.useState("");
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
-  const { data: suggestionsData, isLoaded } = useAsync(
-    () => get("/api/suggest-card-files", { text: file }),
-    [file]
-  );
+  const { data: suggestionsData } = useQuery([
+    "get",
+    "/api/suggest-card-files",
+    { text: file },
+  ]);
 
-  const suggestions = suggestionsData ?? [];
+  const suggestions = (suggestionsData ?? []) as any[];
 
   React.useEffect(() => {
     // Using this pattern here to get out of the whole "multiple values for a
