@@ -34,6 +34,7 @@ endif
 if PlugFlag('format')
   " Autoformatters
   Plug 'Chiel92/vim-autoformat'
+  Plug 'ziglang/zig.vim'
 
   let s:clangfmt = "-lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file"
   let g:formatdef_clangformat = "'clang-format " . s:clangfmt . "'"
