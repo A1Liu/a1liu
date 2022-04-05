@@ -116,6 +116,7 @@ if PlugFlag('lsc')
   let g:LanguageClient_serverCommands = {
         \ 'rust' : ['rustup', 'run', 'stable', 'rls'],
         \ 'go'   : ['gopls'],
+        \ 'zig'   : ['zls'],
         \ }
 
   if g:os ==? 'Windows'
