@@ -15,7 +15,7 @@ alias ssh='TERM=xterm-256color ssh'
 
 # Tmux
 function aliu() {
-    if tmux attach -t "aliu"; then
+    if tmux attach -d -t "aliu"; then
         return 0
     fi
 
@@ -23,11 +23,13 @@ function aliu() {
 }
 
 function work() {
-    if tmux attach -t "work$1"; then
+    if tmux attach -d -t "work$1"; then
         return 0
     fi
 
-    tmux new -s "work$1" -c "$HOME/code/orthly$1"
+    tmux new-session -d -s "work$1" -c "$HOME/code/orthly$1"
+    tmux split-window -h -c "$HOME/code/hygenist"
+    tmux attach -d -t "work$1"
 }
 
 # Disable <C-s> behavior
