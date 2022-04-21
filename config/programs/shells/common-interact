@@ -7,6 +7,8 @@ alias :ex=vim
 alias vi=vim
 alias di='VIM_DEBUG=1 vim'
 
+alias rmbranch='git branch | grep -v "master" | xargs git branch -D'
+
 # Eclim
 export ECLIM_SERVER_SCRIPT="${CFG_DIR}/programs/vim/eclimd"
 
