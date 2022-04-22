@@ -34,7 +34,6 @@ endif
 if PlugFlag('format')
   " Autoformatters
   Plug 'Chiel92/vim-autoformat'
-  Plug 'ziglang/zig.vim'
 
   let s:clangfmt = "-lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file"
   let g:formatdef_clangformat = "'clang-format " . s:clangfmt . "'"
@@ -77,6 +76,7 @@ endif
 " Languages
 if PlugFlag('polyglot')
   Plug 'sheerun/vim-polyglot'
+  Plug 'ziglang/zig.vim'
 
   " Polyglot uses yats, which is 'advanced', i.e. overengineered and idiotic.
   " We use this plugin instead. Because, you can write all the stupid fucking
