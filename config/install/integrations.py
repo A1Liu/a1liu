@@ -21,6 +21,10 @@ if should_undo:
     config.remove_replace("~/.gitconfig")
     config.remove_replace("~/.gitignore_global")
 
+    config.remove_replace("~/.ssh/config")
+    config.remove_replace("~/.ssh/id_aliu")
+    config.remove_replace("~/.ssh/id_tangym")
+
     os.remove(config.install_flag_filename("integrations"))
     print("Integration configs uninstalled.")
     exit(0)
@@ -28,6 +32,9 @@ if should_undo:
 config.add_safe("~/.tmux.conf", "programs/tmux.conf")
 config.add_safe("~/.gitconfig", "programs/gitconfig")
 config.add_safe("~/.gitignore_global", "programs/gitignore_global")
+
+# SSH stuffs
+config.add_safe("~/.ssh/config", "programs/ssh/config")
 
 open(config.install_flag_filename("integrations"), 'w').close()
 print("Installed successfully.")
