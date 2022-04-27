@@ -1,14 +1,14 @@
-import dynamic from "next/dynamic";
+import React from "react";
 
 // https://github.com/vercel/next.js/tree/canary/examples/with-web-worker
 
-let wasmInstance = null;
-let wasmExports = null;
+let wasmInstance: any = null;
+let wasmExports: any = null;
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const sendString = (str) => {
+const sendString = (str: string) => {
   const encodedString = encoder.encode(str);
 
   const u8 = new Uint8Array(exports.mem);
@@ -17,11 +17,11 @@ const sendString = (str) => {
   u8.set(encodedString);
 };
 
-const objectBuffer = [];
+const objectBuffer: any[] = [];
 
 const imports = {
   env: {
-    stringObjExt: (location, size) => {
+    stringObjExt: (location: number, size: number): number => {
       const buffer = new Uint8Array(
         wasmInstance.exports.memory.buffer,
         location,
@@ -36,14 +36,14 @@ const imports = {
       return length;
     },
 
-    clearObjBufferForObjAndAfter: (objIndex) => {
+    clearObjBufferForObjAndAfter: (objIndex: number) => {
       objectBuffer.length = objIndex;
     },
     clearObjBuffer: () => {
       objectBuffer.length = 0;
     },
 
-    logObj: (objIndex) => {
+    logObj: (objIndex: number) => {
       const value = objectBuffer[objIndex];
 
       if (typeof value === "string") {
@@ -56,25 +56,27 @@ const imports = {
     //   terminalText.innerText = "";
     // },
 
-    exitExt: (objIndex) => {
+    exitExt: (objIndex: number) => {
       const value = objectBuffer[objIndex];
 
       throw new Error(`Crashed: ${value}`);
     },
   },
-};
-
-fetch("/kilordle.wasm")
-  .then((resp) => WebAssembly.instantiateStreaming(resp, imports))
-  .then((wasm) => {
-    wasmInstance = wasm.instance;
-    wasmExports = wasmInstance.exports;
-
-    const result = wasmExports.add(1, 2);
-    console.log(result);
-  });
+} as const;
 
 export const Kilordle = () => {
+  React.useEffect(() => {
+    fetch("/kilordle.wasm")
+      .then((resp) => WebAssembly.instantiateStreaming(resp, imports))
+      .then((wasm) => {
+        wasmInstance = wasm.instance;
+        wasmExports = wasmInstance.exports;
+
+        const result = wasmExports.add(1, 2);
+        console.log(result);
+      });
+  }, []);
+
   return null;
 };
 

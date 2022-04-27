@@ -3,7 +3,7 @@
   "scripts": {
     "start": "next start -p 1337",
     "dev": "next dev -p 1337",
-    "build": "next build",
+    "build": "zig build -Drelease-fast && cp zig-out/lib/*.wasm public/ && next build",
     "export": "next export",
     "lint": "next lint --fix",
     "deploy": "git push origin main:production"
