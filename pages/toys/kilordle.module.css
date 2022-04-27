@@ -1,0 +1,36 @@
+.wrapper {
+  height: 100vh;
+  width: 100vw;
+}
+
+.topBar {
+  height: 4rem;
+  font-size: 2rem;
+  font-family: "Dank Mono", "Fira Code", monospace;
+
+  border-bottom: 4px solid gray;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.letterBox {
+  border-radius: 8px;
+  border: 1px solid gray;
+  width: 1em;
+  height: 1.5em;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.guessesArea {
+}
+
+.keyboard {
+}
