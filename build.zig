@@ -15,6 +15,7 @@ pub fn build(b: *Builder) void {
     const vers = b.version(0, 0, 0);
 
     const kilordle = b.addSharedLibrary("kilordle", "src/kilordle.zig", vers);
+    kilordle.addPackagePath("assets", "components/assets.zig");
     // kilordle.addPackagePath("liu", "liu/lib.zig");
     kilordle.setBuildMode(mode);
     kilordle.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
