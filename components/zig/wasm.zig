@@ -4,21 +4,23 @@ const liu = @import("./lib.zig");
 const ArrayList = std.ArrayList;
 const builtin = std.builtin;
 
-const assert = std.debug.assert;
-const cast = std.math.cast;
-const debug = std.log.debug;
-const info = std.log.info;
-const err = std.log.err;
-
 pub const Obj = u32;
 
 extern fn stringObjExt(message: [*]const u8, length: usize) Obj;
-pub extern fn logObj(id: Obj) void;
+pub extern fn pushCopy(idx: u32) u32;
 
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 
-extern fn exitExt(objIndex: Obj) noreturn;
+pub extern fn logObj(id: Obj) void;
+
+pub extern fn exitExt(objIndex: Obj) noreturn;
+
+// export fn allocateArray(len: u32) [*]u8 {
+//     _ = len;
+//
+//
+// }
 
 pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
     var _temp = liu.Temp.init();

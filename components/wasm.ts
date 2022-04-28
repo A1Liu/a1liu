@@ -45,8 +45,10 @@ const env = (ref: WasmRef) => {
 
       return length;
     },
-    pushCopy: (idx: number) => {
+    pushCopy: (idx: number): number => {
+      const length = objectBuffer.length;
       objectBuffer.push(objectBuffer[idx]);
+      return length;
     },
 
     // TODO some kind of pop stack operation that makes full objects or arrays
