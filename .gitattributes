@@ -1,1 +1,1 @@
-/components/data text=false
+/components/data/** -text
