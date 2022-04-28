@@ -41,7 +41,7 @@ alias gs="ls && echo && git s"
 
 # The open command
 if command -v 'xdg-open' >/dev/null 2>&1 ; then
-  alias open=xdg-open
+    alias open=xdg-open
 fi
 
 # tree and ls using exa instead
@@ -71,7 +71,7 @@ function branch() {
 
 # https://stackoverflow.com/questions/6759791/how-do-i-move-forward-and-backward-between-commits-in-git
 function git_gofwd() {
-  git checkout $(git rev-list --topo-order HEAD.."$*" | tail -1)
+    git checkout $(git rev-list --topo-order HEAD.."$*" | tail -1)
 }
 
 # PYTHON
@@ -142,3 +142,10 @@ alias zx='unalias zx && a1liu_load_nvm && zx'
 alias oy='unalias oy && a1liu_load_nvm && oy'
 alias infra='yarn run infra'
 alias lerna='yarn run lerna'
+
+function karimify() {
+    if ! test -e "$HOME/.karim-dotfiles"; then
+        git clone https://github.com/karimsa/dotfiles ~/.karim-dotfiles
+    fi
+    source ~/.karim-dotfiles/.rc
+}
