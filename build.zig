@@ -20,7 +20,7 @@ pub fn build(b: *Builder) void {
     kilordle.setBuildMode(mode);
     kilordle.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
     if (mode == .Debug) {
-        kilordle.setOutputDir("public");
+        kilordle.setOutputDir("./public/assets");
     }
 
     kilordle.install();

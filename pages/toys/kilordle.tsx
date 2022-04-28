@@ -95,7 +95,7 @@ export const Kilordle: React.VFC = () => {
   }, [pressKey]);
 
   React.useEffect(() => {
-    wasm.fetchWasm("/kilordle.wasm", wasmRef).then((ref) => {
+    wasm.fetchWasm("/assets/kilordle.wasm", wasmRef).then((ref) => {
       const result = ref.abiExports.add(1, 2);
       console.log(result);
     });
