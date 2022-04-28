@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+
+/local/*
+!/local/.gitkeep
+!/local/preconf
+/local/preconf/*
+!/local/preconf/.gitkeep
+!/local/flags
+/local/flags/*
+!/local/flags/.gitkeep
