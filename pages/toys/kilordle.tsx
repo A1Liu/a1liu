@@ -1,6 +1,7 @@
 import React from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
+import cx from "classnames";
 
 // https://github.com/vercel/next.js/tree/canary/examples/with-web-worker
 
@@ -10,57 +11,95 @@ const wasmRef: wasm.WasmRef = {
   postMessage: console.log,
 };
 
+const KEYROWS = [
+  "qwertyuiop".split(""),
+  "asdfghjkl".split(""),
+  ["Enter", ..."zxcvbnm".split(""), "Delete"],
+];
+
+const Puzzle: React.VFC<{ index: number }> = ({ index }) => {
+  return null;
+};
+
 export const Kilordle: React.VFC = () => {
-  React.useEffect(() => {
-    wasm.fetchWasm("/kilordle.wasm", wasmRef).then((ref) => {
-      const result = ref.abiExports.add(1, 2);
-      console.log(result);
-    });
-  }, []);
-
   const [word, setWord] = React.useState("");
+  const [guesses, setGuesses] = React.useState<string[]>([]);
+  const [puzzles, setPuzzles] = React.useState<string[]>([]);
 
-  React.useEffect(() => {
-    window.addEventListener("keydown", (evt) => {
-      if (evt.ctrlKey || evt.metaKey || evt.altKey) {
-        return;
-      }
-
-      switch (evt.key) {
+  const pressKey = React.useCallback(
+    (key: string): boolean => {
+      switch (key) {
         case "Shift":
         case "Control":
         case " ":
+          return false;
+
+        case "Enter":
+          setWord((word) => {
+            if (word.length < 5) {
+              return word;
+            }
+
+            // dispatch to zig here
+
+            return "";
+          });
           break;
 
         case "Backspace":
         case "Delete":
-          evt.preventDefault();
-
           setWord((word) => word.slice(0, -1));
           break;
 
         default:
-          if (!evt.key.match(/^[a-zA-Z]$/)) {
-            return;
+          if (!key.match(/^[a-zA-Z]$/)) {
+            return false;
           }
-
-          evt.preventDefault();
-          const key = evt.key.toUpperCase();
 
           setWord((word) => {
             if (word.length > 4) {
               return word;
             }
 
-            return word + key;
+            return word + key.toUpperCase();
           });
           break;
       }
 
+      console.log(key);
+
+      return true;
+    },
+    [setWord]
+  );
+
+  React.useEffect(() => {
+    const listener = (evt: KeyboardEvent) => {
+      if (evt.ctrlKey || evt.metaKey || evt.altKey) {
+        return;
+      }
+
+      if (pressKey(evt.key)) {
+        evt.preventDefault();
+      }
+
       console.log(evt);
-      console.log(evt.keyCode);
+    };
+
+    window.addEventListener("keydown", listener);
+
+    return () => {
+      console.log("deleting");
+      window.removeEventListener("keydown", listener);
+    };
+  }, [pressKey]);
+
+  React.useEffect(() => {
+    wasm.fetchWasm("/kilordle.wasm", wasmRef).then((ref) => {
+      const result = ref.abiExports.add(1, 2);
+      console.log(result);
     });
-  }, [setWord]);
+  }, []);
 
   return (
     <div className={css.wrapper}>
@@ -77,7 +116,25 @@ export const Kilordle: React.VFC = () => {
       <div className={css.guessesArea}></div>
 
       {/* keyboard */}
-      <div className={css.keyboard}></div>
+      <div className={css.keyboard}>
+        {KEYROWS.map((row, idx) => {
+          return (
+            <div key={idx} className={css.keyboardRow}>
+              {row.map((key) => {
+                return (
+                  <button
+                    key={key}
+                    className={css.keyBox}
+                    onClick={() => pressKey(key)}
+                  >
+                    {key}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

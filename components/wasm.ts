@@ -1,6 +1,8 @@
 export const encoder = new TextEncoder();
 export const decoder = new TextDecoder();
 
+export const LOG = "log";
+
 // WasmAbi should be
 // allocate string
 // allocate bytes
@@ -13,7 +15,7 @@ export interface WasmRef {
   instance: any;
   abiExports: any;
 
-  postMessage: (data: string) => void;
+  postMessage: (kind: string, data: any) => void;
 }
 
 const sendString = (str: string) => {
@@ -36,32 +38,31 @@ const env = (ref: WasmRef) => {
         size
       );
 
-      const string = decoder.decode(buffer);
+      const str = decoder.decode(buffer);
 
       const length = objectBuffer.length;
-      objectBuffer.push(string);
+      objectBuffer.push(str);
 
       return length;
     },
+    pushCopy: (idx: number) => {
+      objectBuffer.push(objectBuffer[idx]);
+    },
 
-    clearObjBufferForObjAndAfter: (objIndex: number) => {
-      objectBuffer.length = objIndex;
+    // TODO some kind of pop stack operation that makes full objects or arrays
+    // or whatever
+
+    clearObjBufferForObjAndAfter: (idx: number) => {
+      objectBuffer.length = idx;
     },
     clearObjBuffer: () => {
       objectBuffer.length = 0;
     },
 
-    logObj: (objIndex: number) => {
-      const value = objectBuffer[objIndex];
+    logObj: (idx: number) => ref.postMessage(LOG, objectBuffer[idx]),
 
-      ref.postMessage(value);
-    },
-    // clearTerminal: () => {
-    //   terminalText.innerText = "";
-    // },
-
-    exitExt: (objIndex: number) => {
-      const value = objectBuffer[objIndex];
+    exitExt: (idx: number) => {
+      const value = objectBuffer[idx];
 
       throw new Error(`Crashed: ${value}`);
     },
