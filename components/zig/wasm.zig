@@ -1,4 +1,5 @@
 const std = @import("std");
+const root = @import("root");
 const liu = @import("./lib.zig");
 
 const ArrayList = std.ArrayList;
@@ -15,12 +16,6 @@ pub extern fn clearObjBuffer() void;
 pub extern fn logObj(id: Obj) void;
 
 pub extern fn exitExt(objIndex: Obj) noreturn;
-
-// export fn allocateArray(len: u32) [*]u8 {
-//     _ = len;
-//
-//
-// }
 
 pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
     var _temp = liu.Temp.init();
@@ -96,4 +91,31 @@ pub fn panic(msg: []const u8, error_return_trace: ?*builtin.StackTrace) noreturn
     _ = error_return_trace;
 
     exit(msg);
+}
+
+const CommandBuffer = liu.RingBuffer(root.WasmCommand, 64);
+var initialized: bool = false;
+
+var cmd_bump: liu.Bump = undefined;
+var commands: CommandBuffer = undefined;
+
+const CmdAlloc = cmd_bump.allocator();
+
+pub fn initIfNecessary() void {
+    if (!initialized) {
+        cmd_bump = liu.Bump.init(4096, liu.Pages);
+        commands = CommandBuffer.init();
+
+        initialized = true;
+    }
+}
+
+export fn commandArrayAllocate(len: u32) [*c]u8 {
+    initIfNecessary();
+
+    if (CmdAlloc.alloc(u8, len)) |range| {
+        return range.ptr;
+    } else |_| {
+        return null;
+    }
 }

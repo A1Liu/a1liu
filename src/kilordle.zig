@@ -5,8 +5,21 @@ const liu = @import("liu");
 const wasm = liu.wasm;
 usingnamespace wasm;
 
-export fn add(a: u32, b: u32) u32 {
-    std.log.info("Hello!", .{});
+const WordSubmission = struct {
+    word: [5]u8,
+};
 
-    return a + b;
+pub const WasmCommand = WordSubmission;
+
+export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
+    const word = [_]u8{ l0, l1, l2, l3, l4 };
+
+    std.log.info("Submitted word {s}!", .{word});
+    _ = word;
+}
+
+export fn init() void {
+    wasm.initIfNecessary();
+
+    std.log.info("Hello!", .{});
 }

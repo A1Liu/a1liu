@@ -32,7 +32,7 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
             const Alloc = Allocator;
 
             fn init(size: usize, alloc: Allocator) !Self {
-                const data = try alloc.alloc(T, size);
+                const data = try alloc.allocAdvanced(T, null, size, .at_least);
 
                 return Self{
                     .data = data,
@@ -59,7 +59,7 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
 
                 // since the container is empty, we can just free previous buffer
                 self.alloc.free(self.data);
-                self.data = self.alloc.alloc(T, new_len);
+                self.data = try self.alloc.allocAdvanced(T, null, new_len, .at_least);
             }
         };
 
@@ -106,7 +106,9 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
         }
 
         pub fn pushMany(self: *Self, data: []const T) usize {
-            const allocs = self.allocPush(data.len);
+            const end = std.math.min(self.last + self.data.len, self.next + data.len);
+            const allocs = circularIndex(self.next, end, &self.data);
+            self.next += allocs.len;
 
             const split_point = allocs.first.len;
             mem.copy(T, allocs.first, data[0..split_point]);
@@ -116,7 +118,9 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
         }
 
         pub fn popMany(self: *Self, data: []T) []T {
-            const allocs = self.allocPop(data.len);
+            const end = std.math.min(self.next, self.last + data.len);
+            const allocs = circularIndex(self.last, end, &self.data);
+            self.last += allocs.len;
 
             const split_point = allocs.first.len;
             mem.copy(T, data[0..split_point], allocs.first);
@@ -125,27 +129,23 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
             return data[0..allocs.len];
         }
 
+        pub fn allocPush(self: *Self, count: usize) ?[]T {
+            const end = std.math.min(self.last + self.data.len, self.next + count);
+            const allocs = circularIndex(self.next, end, &self.data);
+            if (allocs.len > allocs.first) {
+                return null;
+            }
+
+            self.next += allocs.len;
+
+            return allocs.first;
+        }
+
         pub const SplitBuffer = struct {
             first: []T = &.{},
             second: []T = &.{},
             len: usize = 0,
         };
-
-        pub fn allocPush(self: *Self, count: usize) SplitBuffer {
-            const end = std.math.min(self.last + self.data.len, self.next + count);
-            const out = circularIndex(self.next, end, &self.data);
-            self.next += out.len;
-
-            return out;
-        }
-
-        pub fn allocPop(self: *Self, count: usize) SplitBuffer {
-            const end = std.math.min(self.next, self.last + count);
-            const out = circularIndex(self.last, end, &self.data);
-            self.last += out.len;
-
-            return out;
-        }
 
         fn circularIndex(begin: usize, end: usize, data: []T) SplitBuffer {
             assert(begin <= end);

@@ -41,6 +41,13 @@ export const Kilordle: React.VFC = () => {
             }
 
             // dispatch to zig here
+            wasmRef.abiExports.submitWord(
+              word.charCodeAt(0),
+              word.charCodeAt(1),
+              word.charCodeAt(2),
+              word.charCodeAt(3),
+              word.charCodeAt(4)
+            );
 
             return "";
           });
@@ -66,8 +73,6 @@ export const Kilordle: React.VFC = () => {
           break;
       }
 
-      console.log(key);
-
       return true;
     },
     [setWord]
@@ -82,8 +87,6 @@ export const Kilordle: React.VFC = () => {
       if (pressKey(evt.key)) {
         evt.preventDefault();
       }
-
-      console.log(evt);
     };
 
     window.addEventListener("keydown", listener);
@@ -96,8 +99,7 @@ export const Kilordle: React.VFC = () => {
 
   React.useEffect(() => {
     wasm.fetchWasm("/assets/kilordle.wasm", wasmRef).then((ref) => {
-      const result = ref.abiExports.add(1, 2);
-      console.log(result);
+      const result = ref.abiExports.init();
     });
   }, []);
 
@@ -116,7 +118,7 @@ export const Kilordle: React.VFC = () => {
       <div className={css.guessesArea}></div>
 
       {/* keyboard */}
-      <div className={css.keyboard}>
+      <div className={css.keyboard} autofocus>
         {KEYROWS.map((row, idx) => {
           return (
             <div key={idx} className={css.keyboardRow}>
