@@ -16,15 +16,15 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     _ = word;
 
     if (std.mem.eql(u8, word, "BLUEY")) {
-        std.log.info("Blue!", .{});
+        wasm.postFmt(.info, "Blue!", .{});
     } else if (std.mem.eql(u8, word, "REDDY")) {
-        std.log.err("Red!", .{});
+        wasm.postFmt(.err, "Red!", .{});
     } else if (std.mem.eql(u8, word, "TANGY")) {
-        std.log.warn("Orange!", .{});
+        wasm.postFmt(.warn, "Orange!", .{});
     } else if (std.mem.eql(u8, word, "GREEN")) {
         wasm.postFmt(.success, "Green!", .{});
     } else {
-        std.log.debug("Submitted {s}!", .{word});
+        wasm.postFmt(.info, "Submitted {s}!", .{word});
     }
 }
 
