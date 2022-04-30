@@ -3,10 +3,21 @@ import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
 import cx from "classnames";
+import create from "zustand";
 import { useAddToast } from "components/errors";
 
-// https://github.com/vercel/next.js/tree/canary/examples/with-web-worker
+interface KilordleCb {
+  submit: () => void;
+  addChar: (c: string) => void;
+  deleteChar: () => void;
+}
 
+interface KilordleState {
+  word: string;
+  callbacks: KilordleCb;
+}
+
+// https://github.com/vercel/next.js/tree/canary/examples/with-web-worker
 const wasmRef: wasm.WasmRef = wasm.ref();
 
 const KEYROWS = [
@@ -15,10 +26,7 @@ const KEYROWS = [
   ["Enter", ..."zxcvbnm".split(""), "Delete"],
 ];
 
-const pressKey = (
-  key: string,
-  setWord: Dispatch<SetStateAction<string>>
-): boolean => {
+const pressKey = (key: string, cb: KilordleCb): boolean => {
   switch (key) {
     case "Shift":
     case "Control":
@@ -26,30 +34,12 @@ const pressKey = (
       return false;
 
     case "Enter":
-      setWord((word) => {
-        if (word.length < 5) {
-          return word;
-        }
-
-        console.log("DEBUG: submit");
-        // dispatch to zig here; Since the zig code might do setState operations,
-        // We dispatch it to happen on the next iteration, instead of doing it
-        // right now
-        wasmRef.abi.submitWord(
-          word.charCodeAt(0),
-          word.charCodeAt(1),
-          word.charCodeAt(2),
-          word.charCodeAt(3),
-          word.charCodeAt(4)
-        );
-
-        return "";
-      });
+      cb.submit();
       break;
 
     case "Backspace":
     case "Delete":
-      setWord((word) => word.slice(0, -1));
+      cb.deleteChar();
       break;
 
     default:
@@ -57,27 +47,56 @@ const pressKey = (
         return false;
       }
 
-      setWord((word) => {
-        if (word.length > 4) {
-          return word;
-        }
-
-        return word + key.toUpperCase();
-      });
+      cb.addChar(key);
       break;
   }
 
   return true;
 };
 
+const useStore = create<KilordleState>((set, get) => {
+  const deleteChar = () => set((state) => ({ word: state.word.slice(0, -1) }));
+  const addChar = (c: string) =>
+    set((state) => {
+      if (state.word.length > 4) {
+        return { word: state.word };
+      }
+
+      return { word: state.word + c.toUpperCase() };
+    });
+
+  const submit = () => {
+    const word = get().word;
+
+    if (word.length < 5) {
+      return;
+    }
+
+    wasmRef.defer.submitWord(
+      word.charCodeAt(0),
+      word.charCodeAt(1),
+      word.charCodeAt(2),
+      word.charCodeAt(3),
+      word.charCodeAt(4)
+    );
+
+    set({ word: "" });
+  };
+
+  return {
+    word: "",
+    callbacks: { submit, addChar, deleteChar },
+  };
+});
+
 const Puzzle: React.VFC<{ index: number }> = ({ index }) => {
   return null;
 };
 
 export const Kilordle: React.VFC = () => {
-  const [word, setWord] = React.useState("");
-  const [guesses, setGuesses] = React.useState<string[]>([]);
-  const [puzzles, setPuzzles] = React.useState<string[]>([]);
+  const word = useStore((state) => state.word);
+  const cb = useStore((state) => state.callbacks);
+
   const keyboardRef = React.useRef<HTMLInputElement>(null);
   const addToast = useAddToast();
 
@@ -87,7 +106,7 @@ export const Kilordle: React.VFC = () => {
         return;
       }
 
-      if (pressKey(evt.key, setWord)) {
+      if (pressKey(evt.key, cb)) {
         evt.preventDefault();
       }
     };
@@ -98,15 +117,15 @@ export const Kilordle: React.VFC = () => {
       console.log("deleting");
       window.removeEventListener("keydown", listener);
     };
-  }, [setWord]);
+  }, [cb]);
 
   React.useEffect(() => {
     const postMessage = (tag: string, data: any) => {
       console.log(tag, data);
 
-      // if (typeof data === "string") {
-      //   addToast(data);
-      // }
+      if (typeof data === "string") {
+        addToast(data);
+      }
     };
 
     wasm
@@ -144,7 +163,7 @@ export const Kilordle: React.VFC = () => {
                   <button
                     key={key}
                     className={css.keyBox}
-                    onClick={() => pressKey(key, setWord)}
+                    onClick={() => pressKey(key, cb)}
                   >
                     {key}
                   </button>
