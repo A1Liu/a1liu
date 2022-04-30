@@ -21,6 +21,8 @@ jobs:
 
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1
+        with:
+          version: 0.9.1
 
       - name: Next.js Cache
         uses: actions/cache@v2
