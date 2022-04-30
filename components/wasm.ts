@@ -1,8 +1,6 @@
 export const encoder = new TextEncoder();
 export const decoder = new TextDecoder();
 
-export const LOG = "log";
-
 // WasmAbi should be
 // allocate bytes
 //
@@ -45,7 +43,8 @@ const sendString = (str: string) => {
 
 const env = (ref: WasmRef, imports: Imports) => {
   const { postMessage, ...extra } = imports;
-  const objectBuffer: any[] = [];
+  const objectBuffer: any[] = ["log", "info", "warn", "error", "success"];
+  const initialLen = objectBuffer.length;
 
   return {
     stringObjExt: (location: number, size: number): number => {
@@ -71,10 +70,11 @@ const env = (ref: WasmRef, imports: Imports) => {
       objectBuffer.length = idx;
     },
     clearObjBuffer: () => {
-      objectBuffer.length = 0;
+      objectBuffer.length = initialLen;
     },
 
-    logObj: (idx: number) => postMessage(LOG, objectBuffer[idx]),
+    postObj: (tagIdx: number, idx: number) =>
+      postMessage(`${objectBuffer[tagIdx]}`, objectBuffer[idx]),
 
     exitExt: (idx: number) => {
       const value = objectBuffer[idx];

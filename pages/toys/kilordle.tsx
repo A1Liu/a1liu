@@ -4,7 +4,7 @@ import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
 import cx from "classnames";
 import create from "zustand";
-import { useAddToast } from "components/errors";
+import { useAddToast, ToastColors } from "components/errors";
 
 interface KilordleCb {
   submit: () => void;
@@ -124,7 +124,7 @@ export const Kilordle: React.VFC = () => {
       console.log(tag, data);
 
       if (typeof data === "string") {
-        addToast(data);
+        addToast(ToastColors[tag] ?? "green", data);
       }
     };
 

@@ -13,9 +13,18 @@ pub extern fn pushCopy(idx: u32) u32;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 
-pub extern fn logObj(id: Obj) void;
+pub extern fn postObj(tagIdx: Obj, id: Obj) void;
 
 pub extern fn exitExt(objIndex: Obj) noreturn;
+
+// Kept up to date
+pub const BuiltinObj = enum(u32) {
+    log,
+    info,
+    warn,
+    err,
+    success,
+};
 
 pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
     var _temp = liu.Temp.init();
@@ -53,34 +62,28 @@ pub const have_error_return_tracing = false;
 pub fn log(
     comptime message_level: std.log.Level,
     comptime scope: @Type(.EnumLiteral),
-    comptime input_format: []const u8,
+    comptime fmt: []const u8,
     args: anytype,
 ) void {
+    _ = scope;
+
     if (@enumToInt(message_level) > @enumToInt(std.log.level)) {
         return;
     }
 
-    var _temp = liu.Temp.init();
-    const temp = _temp.allocator();
-    defer _temp.deinit();
-
-    const prefix = comptime prefix: {
-        const prefix = "[" ++ message_level.asText() ++ "]: ";
-
-        if (scope == .default) {
-            break :prefix prefix;
-        } else {
-            break :prefix @tagName(scope) ++ prefix;
-        }
+    const level_obj: BuiltinObj = switch (message_level) {
+        .debug => .info,
+        .info => .info,
+        .warn => .warn,
+        .err => .err,
     };
 
-    const fmt = prefix ++ input_format ++ "\n";
+    postFmt(level_obj, fmt ++ "\n", args);
+}
 
-    const allocResult = std.fmt.allocPrint(temp, fmt, args);
-    const s = allocResult catch @panic("failed to print");
-
-    const obj = stringObjExt(s.ptr, s.len);
-    logObj(obj);
+pub fn postFmt(level: BuiltinObj, comptime fmt: []const u8, args: anytype) void {
+    const obj = stringFmtObj(fmt, args);
+    postObj(@enumToInt(level), obj);
 
     clearObjBufferForObjAndAfter(obj);
 }

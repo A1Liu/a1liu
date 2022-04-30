@@ -15,10 +15,25 @@
 .toast {
   min-height: 1.5rem;
   max-width: 300px;
-  background-color: green;
 
   color: white;
   font-weight: bold;
 
   padding: 8px 4px 8px 16px;
+}
+
+.green {
+  background-color: green;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: blue;
+}
+
+.orange {
+  background-color: orange;
 }
