@@ -15,7 +15,7 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     const word = [_]u8{ l0, l1, l2, l3, l4 };
     _ = word;
 
-    std.log.info("Submitted word {s}!", .{word});
+    std.log.info("Submitted {s}!", .{word});
 }
 
 export fn init() void {
