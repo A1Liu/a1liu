@@ -4,7 +4,6 @@ export const decoder = new TextDecoder();
 export const LOG = "log";
 
 // WasmAbi should be
-// allocate string
 // allocate bytes
 //
 // later
@@ -13,9 +12,26 @@ export const LOG = "log";
 
 export interface WasmRef {
   instance: any;
-  abiExports: any;
+  abi: any;
+  defer: any;
+}
 
+export function ref(): WasmRef {
+  return {
+    instance: null,
+    abi: null,
+    defer: null,
+  };
+}
+
+interface Imports {
   postMessage: (kind: string, data: any) => void;
+
+  // Keys can be strings, numbers, or symbols.
+  // If you know it to be strings only, you can also restrict it to that.
+  // For the value you can use any or unknown,
+  // with unknown being the more defensive approach.
+  [x: string | number | symbol]: unknown;
 }
 
 const sendString = (str: string) => {
@@ -27,16 +43,13 @@ const sendString = (str: string) => {
   u8.set(encodedString);
 };
 
-const env = (ref: WasmRef) => {
+const env = (ref: WasmRef, imports: Imports) => {
+  const { postMessage, ...extra } = imports;
   const objectBuffer: any[] = [];
 
   return {
     stringObjExt: (location: number, size: number): number => {
-      const buffer = new Uint8Array(
-        ref.abiExports.memory.buffer,
-        location,
-        size
-      );
+      const buffer = new Uint8Array(ref.abi.memory.buffer, location, size);
 
       const str = decoder.decode(buffer);
 
@@ -61,31 +74,39 @@ const env = (ref: WasmRef) => {
       objectBuffer.length = 0;
     },
 
-    logObj: (idx: number) => ref.postMessage(LOG, objectBuffer[idx]),
+    logObj: (idx: number) => postMessage(LOG, objectBuffer[idx]),
 
     exitExt: (idx: number) => {
       const value = objectBuffer[idx];
 
       throw new Error(`Crashed: ${value}`);
     },
+
+    ...extra,
   };
 };
 
 export const fetchWasm = async (
   path: string,
-  ref: WasmRef
+  ref: WasmRef,
+  imports: Imports
 ): Promise<WasmRef> => {
   const responsePromise = fetch(path);
-  const imports = {
-    env: env(ref),
+  const importObject = {
+    env: env(ref, imports),
   };
 
   const result = await WebAssembly.instantiateStreaming(
     responsePromise,
-    imports
+    importObject
   );
   ref.instance = result.instance;
-  ref.abiExports = result.instance.exports;
+  ref.abi = result.instance.exports;
+  ref.defer = {};
+
+  Object.entries(ref.abi).forEach(([key, value]: [string, any]) => {
+    ref.defer[key] = (...t: any[]) => setTimeout(() => value(...t), 0);
+  });
 
   return ref;
 };

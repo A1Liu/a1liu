@@ -1,5 +1,6 @@
 import "./global.css";
 import Head from "next/head";
+import { ToastCorner } from "components/errors";
 import { post, get } from "components/util";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -36,6 +37,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       <QueryClientProvider client={queryClient}>
         <Component {...pageProps} />
       </QueryClientProvider>
+
+      <ToastCorner></ToastCorner>
     </>
   );
 }

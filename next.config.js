@@ -1,4 +1,4 @@
-const withPreact = require("next-plugin-preact");
+// const withPreact = require("next-plugin-preact");
 
 const withMDX = require("@next/mdx")({
   extension: /\.mdx$/,
@@ -26,7 +26,7 @@ const config = {
 };
 
 const mdxConfig = withMDX(config);
-const preactConfig = withPreact(mdxConfig);
-const analyzedConfig = withBundleAnalyzer(preactConfig);
+// const preactConfig = withPreact(mdxConfig);
+const analyzedConfig = withBundleAnalyzer(mdxConfig);
 
 module.exports = analyzedConfig;
