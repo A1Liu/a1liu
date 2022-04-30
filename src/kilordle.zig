@@ -9,9 +9,16 @@ const WordSubmission = struct {
     word: [5]u8,
 };
 
-pub const WasmCommand = WordSubmission;
+const Wordle = struct {
+    text: [5]u8,
+    letters_found: u3,
+    places_found: u3,
+};
 
+pub const WasmCommand = WordSubmission;
 const Letters = std.bit_set.IntegerBitSet(26);
+
+var wordles_left: std.ArrayList(Wordle) = undefined;
 var found_letters: [5]Letters = [_]Letters{Letters.initEmpty()} ** 5;
 
 fn searchList(word: []const u8, dict: []const u8) bool {
@@ -42,16 +49,76 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     }
 
     const is_wordle = searchList(&lowercased, assets.wordles);
-    const is_extra = searchList(&lowercased, assets.wordle_words);
-    if (!is_wordle and !is_extra) {
+    if (!is_wordle and !searchList(&lowercased, assets.wordle_words)) {
         wasm.postFmt(.err, "{s} doesn't exist", .{word});
         return;
     }
 
-    // wasm.postFmt(.info, "{s} was found!", .{word});
-
     for (word) |letter, idx| {
         found_letters[idx].set(letter - 'A');
+    }
+
+    var write_head: u32 = 0;
+    var read_head: u32 = 0;
+    const arena_len = wordles_left.items.len;
+
+    wasm.postFmt(.info, "got here", .{});
+
+    while (read_head < arena_len) : (read_head += 1) {
+        const wordle = &wordles_left.items[read_head];
+        wordle.places_found = 0;
+        wordle.letters_found = 0;
+
+        var is_taken: [5]bool = [_]bool{false} ** 5;
+
+        for (wordle.text) |c, idx| {
+            if (found_letters[idx].isSet(c - 'a')) {
+                wordle.letters_found += 1;
+                wordle.places_found += 1;
+                is_taken[idx] = true;
+            }
+        }
+
+        for (wordle.text) |c, c_idx| {
+            if (is_taken[c_idx]) {
+                continue;
+            }
+
+            for (found_letters) |letters, idx| {
+                if (is_taken[idx]) {
+                    continue;
+                }
+
+                if (letters.isSet(c - 'a')) {
+                    wordle.letters_found += 1;
+                }
+            }
+        }
+
+        // wordle is done, so we don't write it
+        if (wordle.places_found >= 5) {
+            wasm.postFmt(.info, "solved {s}", .{wordle.text});
+            continue;
+        }
+
+        // write would be no-op
+        if (read_head == write_head) {
+            write_head += 1;
+            continue;
+        }
+
+        wordles_left.items[write_head] = wordle.*;
+        write_head += 1;
+    }
+
+    wordles_left.items.len = write_head;
+
+    std.sort.sort(Wordle, wordles_left.items, {}, compareWordles);
+
+    if (wordles_left.items.len > 0) {
+        wasm.postFmt(.info, "still left: {s}", .{wordles_left.items[0].text});
+    } else {
+        wasm.postFmt(.success, "done!", .{});
     }
 
     if (std.mem.eql(u8, &word, "BLUEY")) {
@@ -71,8 +138,39 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     }
 }
 
+fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
+    _ = context;
+
+    if (left.places_found > right.places_found) {
+        return true;
+    }
+
+    if (left.letters_found > right.letters_found) {
+        return true;
+    }
+
+    return false;
+}
+
 export fn init() void {
     wasm.initIfNecessary();
+
+    wordles_left = std.ArrayList(Wordle).init(liu.Pages);
+
+    const wordle_count = (assets.wordles.len - 1) / 6 + 1;
+    wordles_left.ensureUnusedCapacity(wordle_count) catch @panic("failed to allocate room for wordles");
+
+    var word_index: u32 = 0;
+    while ((word_index + 5) < assets.wordles.len) : (word_index += 6) {
+        var wordle = Wordle{
+            .text = undefined,
+            .letters_found = 0,
+            .places_found = 0,
+        };
+
+        std.mem.copy(u8, &wordle.text, assets.wordles[word_index..(word_index + 5)]);
+        wordles_left.appendAssumeCapacity(wordle);
+    }
 
     std.log.info("WASM initialized!", .{});
 }
