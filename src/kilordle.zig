@@ -48,7 +48,7 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
         return;
     }
 
-    wasm.postFmt(.info, "{s} was found!", .{word});
+    // wasm.postFmt(.info, "{s} was found!", .{word});
 
     for (word) |letter, idx| {
         found_letters[idx].set(letter - 'A');
@@ -56,7 +56,11 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
     if (std.mem.eql(u8, &word, "BLUEY")) {
         wasm.postFmt(.info, "Blue!", .{});
+    } else if (std.mem.eql(u8, &word, "AZURE")) {
+        wasm.postFmt(.info, "Blue!", .{});
     } else if (std.mem.eql(u8, &word, "REDDY")) {
+        wasm.postFmt(.err, "Red!", .{});
+    } else if (std.mem.eql(u8, &word, "READY")) {
         wasm.postFmt(.err, "Red!", .{});
     } else if (std.mem.eql(u8, &word, "TANGY")) {
         wasm.postFmt(.warn, "Orange!", .{});
