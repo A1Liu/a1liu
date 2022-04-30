@@ -1,1 +1,2 @@
 /components/data/** -text
+*.zig text eol=lf
