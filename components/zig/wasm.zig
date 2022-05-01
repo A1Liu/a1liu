@@ -1,9 +1,9 @@
 const std = @import("std");
 const root = @import("root");
 const liu = @import("./lib.zig");
+const builtin = @import("builtin");
 
 const ArrayList = std.ArrayList;
-const builtin = std.builtin;
 
 pub const Obj = u32;
 
@@ -65,6 +65,11 @@ pub fn log(
     comptime fmt: []const u8,
     args: anytype,
 ) void {
+    if (builtin.target.cpu.arch != .wasm32) {
+        std.log.defaultLog(message_level, scope, fmt, args);
+        return;
+    }
+
     _ = scope;
 
     if (@enumToInt(message_level) > @enumToInt(std.log.level)) {
@@ -82,13 +87,17 @@ pub fn log(
 }
 
 pub fn postFmt(level: BuiltinObj, comptime fmt: []const u8, args: anytype) void {
-    const obj = stringFmtObj(fmt, args);
-    postObj(@enumToInt(level), obj);
+    if (builtin.target.cpu.arch == .wasm32) {
+        const obj = stringFmtObj(fmt, args);
+        postObj(@enumToInt(level), obj);
 
-    clearObjBufferForObjAndAfter(obj);
+        clearObjBufferForObjAndAfter(obj);
+    } else {
+        std.log.info(fmt, args);
+    }
 }
 
-pub fn panic(msg: []const u8, error_return_trace: ?*builtin.StackTrace) noreturn {
+pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) noreturn {
     @setCold(true);
 
     _ = error_return_trace;
@@ -105,6 +114,10 @@ var commands: CommandBuffer = undefined;
 const CmdAlloc = cmd_bump.allocator();
 
 pub fn initIfNecessary() void {
+    if (builtin.target.cpu.arch != .wasm32) {
+        return;
+    }
+
     if (!initialized) {
         cmd_bump = liu.Bump.init(4096, liu.Pages);
         commands = CommandBuffer.init();

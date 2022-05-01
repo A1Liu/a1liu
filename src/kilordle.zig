@@ -34,7 +34,7 @@ fn searchList(word: []const u8, dict: []const u8) bool {
     return false;
 }
 
-export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
+pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     const word = [_]u8{ l0, l1, l2, l3, l4 };
     var lowercased: [5]u8 = undefined;
 
@@ -113,7 +113,7 @@ export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
     wordles_left.items.len = write_head;
 
-    std.sort.sort(Wordle, wordles_left.items, {}, compareWordles);
+    std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
 
     if (wordles_left.items.len > 0) {
         wasm.postFmt(.info, "still left: {s}", .{wordles_left.items[0].text});
@@ -152,23 +152,25 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
     return false;
 }
 
-export fn init() void {
+pub export fn init() void {
     wasm.initIfNecessary();
 
     wordles_left = std.ArrayList(Wordle).init(liu.Pages);
 
-    const wordle_count = (assets.wordles.len - 1) / 6 + 1;
+    const wordles = assets.wordles;
+
+    const wordle_count = (wordles.len - 1) / 6 + 1;
     wordles_left.ensureUnusedCapacity(wordle_count) catch @panic("failed to allocate room for wordles");
 
     var word_index: u32 = 0;
-    while ((word_index + 5) < assets.wordles.len) : (word_index += 6) {
+    while ((word_index + 5) < wordles.len) : (word_index += 6) {
         var wordle = Wordle{
             .text = undefined,
             .letters_found = 0,
             .places_found = 0,
         };
 
-        std.mem.copy(u8, &wordle.text, assets.wordles[word_index..(word_index + 5)]);
+        std.mem.copy(u8, &wordle.text, wordles[word_index..(word_index + 5)]);
         wordles_left.appendAssumeCapacity(wordle);
     }
 
