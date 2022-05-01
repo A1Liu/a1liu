@@ -44,12 +44,16 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: center;
+
+  padding: 8px;
   gap: 1rem;
 }
 
 .puzzle {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .filledBox {
@@ -109,4 +113,8 @@
 
 .green {
   background-color: lightgreen;
+}
+
+.gray {
+  background-color: gray;
 }

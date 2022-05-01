@@ -81,7 +81,7 @@ fn searchList(word: []const u8, dict: []const u8) bool {
     return false;
 }
 
-pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
+pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
     var _temp = liu.Temp.init();
     const temp = _temp.allocator();
     defer _temp.deinit();
@@ -93,7 +93,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     for (word) |letter, idx| {
         if (letter < 'A' or letter > 'Z') {
             wasm.postFmt(.err, "invalid string {s}", .{word});
-            return;
+            return false;
         }
 
         lowercased[idx] = letter - 'A' + 'a';
@@ -102,7 +102,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     const is_wordle = searchList(&lowercased, assets.wordles);
     if (!is_wordle and !searchList(&lowercased, assets.wordle_words)) {
         wasm.postFmt(.err, "{s} doesn't exist", .{word});
-        return;
+        return false;
     }
 
     submissions.append(lowercased) catch @panic("failed to save submission");
@@ -113,9 +113,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
     var write_head: u32 = 0;
     var read_head: u32 = 0;
-
     var solved = ArrayList([5]u8).init(temp);
-
     const arena_len = wordles_left.items.len;
 
     while (read_head < arena_len) : (read_head += 1) {
@@ -167,7 +165,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
     wordles_left.items.len = write_head;
 
-    std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
+    std.sort.sort(Wordle, wordles_left.items, {}, compareWordles);
 
     for (solved.items) |solved_word| {
         wasm.postFmt(.info, "solved {s}", .{solved_word});
@@ -238,17 +236,19 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     }
 
     setPuzzles(puzzles.items);
+
+    return true;
 }
 
 fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
     _ = context;
 
-    if (left.places_found > right.places_found) {
-        return true;
+    if (left.places_found != right.places_found) {
+        return left.places_found > right.places_found;
     }
 
-    if (left.letters_found > right.letters_found) {
-        return true;
+    if (left.letters_found != right.letters_found) {
+        return left.letters_found > right.letters_found;
     }
 
     return false;

@@ -26,6 +26,7 @@ interface KilordleCb {
 }
 
 interface KilordleState {
+  foundLetters: Record<string, true>;
   word: string;
   puzzles: PuzzleData[];
   callbacks: KilordleCb;
@@ -81,19 +82,40 @@ const useStore = create<KilordleState>((set, get) => {
     });
 
   const submit = () => {
-    const word = get().word;
+    const state = get();
+    const { word, foundLetters } = get();
 
     if (word.length < 5) {
       return;
     }
 
-    wasmRef.defer.submitWord(
-      word.charCodeAt(0),
-      word.charCodeAt(1),
-      word.charCodeAt(2),
-      word.charCodeAt(3),
-      word.charCodeAt(4)
-    );
+    wasmRef.defer
+      .submitWord(
+        word.charCodeAt(0),
+        word.charCodeAt(1),
+        word.charCodeAt(2),
+        word.charCodeAt(3),
+        word.charCodeAt(4)
+      )
+      .then((success) => {
+        if (!success) {
+          return;
+        }
+
+        const newFounds: Record<string, true> = {};
+        const foundCount = 0;
+
+        word.toLowerCase().split("").forEach((letter) => {
+          if (!foundLetters[letter]) {
+            newFounds[letter] = true;
+            foundCount += 1;
+          }
+        });
+
+        if (foundCount > 0) {
+          set({ foundLetters: { ...foundLetters, ...newFounds } });
+        }
+      });
 
     set({ word: "" });
   };
@@ -112,6 +134,7 @@ const useStore = create<KilordleState>((set, get) => {
 
   return {
     word: "",
+    foundLetters: {},
     puzzles: [],
     callbacks: { submit, addChar, deleteChar, setPuzzles },
   };
@@ -133,6 +156,7 @@ const TopBar: React.VFC = () => {
 
 const Keyboard: React.VFC = () => {
   const keyboardRef = React.useRef<HTMLInputElement>(null);
+  const foundLetters = useStore((state) => state.foundLetters);
   const cb = useStore((state) => state.callbacks);
 
   React.useEffect(() => {
@@ -167,7 +191,7 @@ const Keyboard: React.VFC = () => {
               return (
                 <button
                   key={key}
-                  className={css.keyBox}
+                  className={cx(css.keyBox, foundLetters[key] && css.gray)}
                   onClick={() => pressKey(key, cb)}
                 >
                   {key}
@@ -185,21 +209,13 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
   return (
     <div className={css.puzzle}>
       <div className={css.filledBox}>
-        {puzzle.solution.split("").map((letter) => (
-          <div key={letter} className={css.letterBox}>
-            {letter}
-          </div>
-        ))}
-      </div>
-
-      <div className={css.filledBox}>
-        {puzzle.filled.split("").map((letter) => {
+        {puzzle.filled.split("").map((letter, idx) => {
           const upper = letter.toUpperCase();
           const isUpper = letter === upper;
 
           return (
             <div
-              key={letter}
+              key={idx}
               className={cx(css.letterBox, letter !== " " && css.green)}
             >
               {upper}
@@ -210,13 +226,13 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
 
       {puzzle.submits.map((submit) => (
         <div key={submit} className={css.submitBox}>
-          {submit.split("").map((letter) => {
+          {submit.split("").map((letter, idx) => {
             const upper = letter.toUpperCase();
             const isUpper = letter === upper;
 
             return (
               <div
-                key={letter}
+                key={idx}
                 className={cx(css.letterBox, isUpper && css.yellow)}
               >
                 {upper}

@@ -134,7 +134,8 @@ export const fetchWasm = async (
   ref.defer = {};
 
   Object.entries(ref.abi).forEach(([key, value]: [string, any]) => {
-    ref.defer[key] = (...t: any[]) => setTimeout(() => value(...t), 0);
+    ref.defer[key] = (...t: any[]) =>
+      new Promise((resolve) => setTimeout(() => resolve(value(...t)), 0));
   });
 
   return ref;
