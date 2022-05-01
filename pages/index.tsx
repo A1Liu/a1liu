@@ -13,6 +13,7 @@ const Index: NextPage<Props> = ({ files }) => {
         style={{ width: "200px", marginLeft: "15px", float: "right" }}
         src="/assets/pfp.jpg"
       />
+
       <h2>About Me</h2>
       <p>
         {`Hi, I'm Albert, and this is my website! I'm a Senior at NYU majoring `}
@@ -20,6 +21,7 @@ const Index: NextPage<Props> = ({ files }) => {
         {`but feel free to use the stuff on here or copy the source code into `}
         {`your own project!  (Please read and follow the license though.)`}
       </p>
+
       <h2>What I'm Doing Now</h2>
       <p>
         {`Right now I'm working on `}
@@ -30,6 +32,7 @@ const Index: NextPage<Props> = ({ files }) => {
         easier to debug programs.
       </p>
 
+      <h2>Blog</h2>
       <BlogContent files={files} />
     </Layout>
   );
