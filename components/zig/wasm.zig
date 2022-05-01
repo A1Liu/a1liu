@@ -100,6 +100,10 @@ pub fn postFmt(level: BuiltinObj, comptime fmt: []const u8, args: anytype) void 
 pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) noreturn {
     @setCold(true);
 
+    if (builtin.target.cpu.arch != .wasm32) {
+        std.builtin.default_panic(msg, error_return_trace);
+    }
+
     _ = error_return_trace;
 
     exit(msg);

@@ -3,6 +3,7 @@
   left: 8px;
   bottom: 8px;
   z-index: 10000;
+  overflow-y: scroll;
 
   display: flex;
   flex-direction: column;

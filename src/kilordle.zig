@@ -3,7 +3,7 @@ const assets = @import("assets");
 const liu = @import("liu");
 
 const wasm = liu.wasm;
-usingnamespace wasm;
+pub usingnamespace wasm;
 
 const WordSubmission = struct {
     word: [5]u8,
@@ -11,8 +11,8 @@ const WordSubmission = struct {
 
 const Wordle = struct {
     text: [5]u8,
-    letters_found: u3,
-    places_found: u3,
+    letters_found: u8,
+    places_found: u8,
 };
 
 pub const WasmCommand = WordSubmission;
@@ -58,11 +58,10 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
         found_letters[idx].set(letter - 'A');
     }
 
+    var solved: u32 = 0;
     var write_head: u32 = 0;
     var read_head: u32 = 0;
     const arena_len = wordles_left.items.len;
-
-    wasm.postFmt(.info, "got here", .{});
 
     while (read_head < arena_len) : (read_head += 1) {
         const wordle = &wordles_left.items[read_head];
@@ -98,6 +97,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
         // wordle is done, so we don't write it
         if (wordle.places_found >= 5) {
             wasm.postFmt(.info, "solved {s}", .{wordle.text});
+            solved += 1;
             continue;
         }
 
@@ -115,26 +115,12 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
     std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
 
+    wasm.postFmt(.info, "{s} solved {}", .{ word, solved });
+
     if (wordles_left.items.len > 0) {
-        wasm.postFmt(.info, "still left: {s}", .{wordles_left.items[0].text});
+        wasm.postFmt(.info, "{} words left", .{wordles_left.items.len});
     } else {
         wasm.postFmt(.success, "done!", .{});
-    }
-
-    if (std.mem.eql(u8, &word, "BLUEY")) {
-        wasm.postFmt(.info, "Blue!", .{});
-    } else if (std.mem.eql(u8, &word, "AZURE")) {
-        wasm.postFmt(.info, "Blue!", .{});
-    } else if (std.mem.eql(u8, &word, "REDDY")) {
-        wasm.postFmt(.err, "Red!", .{});
-    } else if (std.mem.eql(u8, &word, "READY")) {
-        wasm.postFmt(.err, "Red!", .{});
-    } else if (std.mem.eql(u8, &word, "TANGY")) {
-        wasm.postFmt(.warn, "Orange!", .{});
-    } else if (std.mem.eql(u8, &word, "GREEN")) {
-        wasm.postFmt(.success, "Green!", .{});
-    } else {
-        wasm.postFmt(.info, "Submitted {s}!", .{word});
     }
 }
 
