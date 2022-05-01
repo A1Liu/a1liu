@@ -1,4 +1,5 @@
 import { GetStaticProps, NextPage } from "next";
+import { removeExtension, cleanJekyllSlug } from "components/util";
 import Link from "next/link";
 import Layout from "components/layout";
 import { readdir } from "fs/promises";
@@ -19,18 +20,23 @@ const Documents: NextPage<Props> = ({ files }) => {
   return (
     <Layout>
       <h1>Documents</h1>
-      {files.map((file) => {
-        const url = `/docs/${file.replace(/\.[^/.]+$/, "")}`;
 
-        return (
-          <>
-            <Link href={url}>
-              <a>{url}</a>
-            </Link>
-            <br />
-          </>
-        );
-      })}
+      <ul>
+        {files.map((file) => {
+          const slug = removeExtension(file);
+          const url = `/docs/${slug}`;
+          const title = cleanJekyllSlug(slug);
+
+          return (
+            <li key={url}>
+              <Link href={url}>
+                <a>{title}</a>
+              </Link>
+              <br />
+            </li>
+          );
+        })}
+      </ul>
     </Layout>
   );
 };

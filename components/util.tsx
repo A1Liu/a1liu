@@ -5,6 +5,28 @@ import css from "./util.module.css";
 export const timeout = (ms: number): Promise<void> =>
   new Promise((res) => setTimeout(res, ms));
 
+export const removeExtension = (filename: string): string => {
+  return filename.replace(/\.[^/.]+$/, "");
+};
+
+export const cleanJekyllSlug = (slug: string): string => {
+  const titleSlug = slug.split("-").slice(3);
+
+  const titleWords = titleSlug.map((word) => {
+    if (word.length <= 1) {
+      return word;
+    }
+
+    if (["the", "an", "is", "of", "this"].includes(word)) {
+      return word;
+    }
+
+    return word.substring(0, 1).toUpperCase() + word.substring(1);
+  });
+
+  return titleWords.join(" ");
+};
+
 export async function post(url: string, data: any): Promise<any> {
   const resp = await fetch(url, {
     method: "POST",

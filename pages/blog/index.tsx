@@ -1,10 +1,11 @@
 import { GetStaticProps, NextPage } from "next";
+import { removeExtension, cleanJekyllSlug } from "components/util";
 import Link from "next/link";
 import { readdir } from "fs/promises";
 import Layout from "components/layout";
 import React from "react";
 
-interface Props {
+export interface Props {
   readonly files: string[];
 }
 
@@ -23,28 +24,16 @@ export const BlogContent: React.VFC<Props> = ({ files }) => {
 
       <ul style={{ display: "flex", flexDirection: "column-reverse" }}>
         {files.map((file, idx) => {
-          const slug = file.replace(/\.[^/.]+$/, "");
+          const slug = removeExtension(file);
           const url = `/blog/${slug}`;
-          const titleSlug = slug.split("-").slice(3);
-
-          const titleWords = titleSlug.map((word) => {
-            if (word.length <= 1) {
-              return word;
-            }
-
-            if (["the", "an", "is", "of", "this"].includes(word)) {
-              return word;
-            }
-
-            return word.substring(0, 1).toUpperCase() + word.substring(1);
-          });
+          const title = cleanJekyllSlug(slug);
 
           return (
             <li key={url}>
               <p>
                 <Link href={url}>
                   <a>
-                    Entry {idx + 1}: {titleWords.join(" ")}
+                    Entry {idx + 1}: {title}
                   </a>
                 </Link>
               </p>
