@@ -26,7 +26,7 @@ const BumpState = struct {
         };
     }
 
-    fn allocate(bump: *Self, mark: *Mark, alloc: Allocator, len: usize, ptr_align: u29, len_align: u29, ret_addr: usize) Allocator.Error![]u8 {
+    fn allocate(bump: *Self, mark: *Mark, alloc: Allocator, len: usize, ptr_align: u29, ret_addr: usize) Allocator.Error![]u8 {
         if (mark.range < bump.ranges.items.len) {
             const range = bump.ranges.items[mark.range];
 
@@ -44,7 +44,18 @@ const BumpState = struct {
 
         const size = @maximum(len, bump.next_size);
 
-        const slice = try alloc.rawAlloc(size, ptr_align, len_align, ret_addr);
+        // Holy crap if you mess up the alignment, boyo the Zig UB detector
+        // will come for you with an assertion failure 10 frames deep into
+        // the standard library.
+        //
+        // In this case, since we're returning exactly the requested length every
+        // time, the len_align parameter is 1, so that we can get extra if
+        // our parent allocator so deigns it, but we don't care about the alignment
+        // we get from them. We still require pointer alignment, so we can
+        // safely return the allocation we're given to the caller.
+        //
+        // https://github.com/ziglang/zig/blob/master/lib/std/mem/Allocator.zig
+        const slice = try alloc.rawAlloc(size, ptr_align, 1, ret_addr);
         try bump.ranges.append(alloc, slice);
 
         // grow the next arena, but keep it to at most 1GB please
@@ -129,12 +140,13 @@ pub const Bump = struct {
         len_align: u29,
         ret_addr: usize,
     ) Allocator.Error![]u8 {
+        _ = len_align;
+
         return self.bump.allocate(
             &self.mark,
             self.alloc,
             len,
             ptr_align,
-            len_align,
             ret_addr,
         );
     }
@@ -199,7 +211,9 @@ pub const Temp = struct {
         len_align: u29,
         ret_addr: usize,
     ) Allocator.Error![]u8 {
-        return bump.allocate(&self.mark, Pages, len, ptr_align, len_align, ret_addr);
+        _ = len_align;
+
+        return bump.allocate(&self.mark, Pages, len, ptr_align, ret_addr);
     }
 };
 
@@ -226,6 +240,8 @@ const FrameAlloc = struct {
         len_align: u29,
         ret_addr: usize,
     ) Allocator.Error![]u8 {
-        return bump.allocate(&mark, Pages, len, ptr_align, len_align, ret_addr);
+        _ = len_align;
+
+        return bump.allocate(&mark, Pages, len, ptr_align, ret_addr);
     }
 };
