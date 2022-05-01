@@ -13,19 +13,13 @@ const ext = struct {
     extern fn setWordsLeft(count: usize) void;
 };
 
-// 1. which letters have been used overall? (keyboard)
-// 2. which puzzles are most solved? (center)
-// 3. what are the greens for those puzzles? (center)
-// 4. what are the unfound letters for those puzzles? (center)
-// 5. what are the historical submissions? (right, put in React)
-
 const WordSubmission = struct {
     word: [5]u8,
 };
 
 const Wordle = struct {
     text: [5]u8,
-    matches: [5]?u8,
+    matches: [5]Match,
     letters_found: u8,
     places_found: u8,
 };
@@ -38,8 +32,14 @@ const Puzzle = struct {
     submits: []u8,
 };
 
+const MatchKind = enum(u8) { none, letter, exact };
+const Match = union(MatchKind) {
+    none: void,
+    exact: void,
+    letter: u8,
+};
+
 var wordles_left: ArrayList(Wordle) = undefined;
-var found_letters: [5]Letters = [_]Letters{Letters.initEmpty()} ** 5;
 var submissions: ArrayList([5]u8) = undefined;
 
 fn setWordsLeft(count: usize) void {
@@ -91,25 +91,25 @@ fn searchList(word: []const u8, dict: []const u8) bool {
 
 // Returns array of matches. Value v at index i is a match between wordle[i]
 // and submission[v], or null if that match doesn't exist.
-fn matchWordle(wordle: [5]u8, submission: [5]u8) [5]?u8 {
+fn matchWordle(wordle: [5]u8, submission: [5]u8) [5]Match {
     var text = submission;
-    var match = [_]?u8{null} ** 5;
+    var match = [_]Match{.none} ** 5;
 
     for (wordle) |c, idx| {
         if (submission[idx] == c) {
-            match[idx] = @truncate(u8, idx);
+            match[idx] = .exact;
             text[idx] = 0;
         }
     }
 
     for (wordle) |c, idx| {
-        if (match[idx] != null) {
+        if (match[idx] == .exact) {
             continue;
         }
 
         for (text) |*slot, text_idx| {
             if (slot.* == c) {
-                match[idx] = @truncate(u8, text_idx);
+                match[idx] = .{ .letter = @truncate(u8, text_idx) };
                 slot.* = 0;
             }
         }
@@ -141,51 +141,26 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
     submissions.append(word) catch @panic("failed to save submission");
 
-    for (word) |letter, idx| {
-        found_letters[idx].set(letter - 'a');
-    }
-
     var write_head: u32 = 0;
     var read_head: u32 = 0;
     var solved = ArrayList([5]u8).init(temp);
-    const arena_len = wordles_left.items.len;
 
+    const arena_len = wordles_left.items.len;
     while (read_head < arena_len) : (read_head += 1) {
         const wordle = &wordles_left.items[read_head];
-        wordle.places_found = 0;
-        wordle.letters_found = 0;
 
-        var is_taken: [5]bool = [_]bool{false} ** 5;
+        const new_matches = matchWordle(wordle.text, word);
+        for (new_matches) |new_match, idx| {
+            const old_match = wordle.matches[idx];
+            if (@enumToInt(old_match) >= @enumToInt(new_match)) continue;
 
-        // Exact matches (position + letter)
-        for (wordle.text) |c, idx| {
-            if (found_letters[idx].isSet(c - 'a')) {
-                wordle.letters_found += 1;
-                wordle.places_found += 1;
-                is_taken[idx] = true;
-            }
+            wordle.matches[idx] = new_match;
+
+            if (old_match == .none) wordle.letters_found += 1;
+            if (new_match == .exact) wordle.places_found += 1;
         }
 
-        // Matches for just letter
-        for (wordle.text) |c, c_idx| {
-            if (is_taken[c_idx]) {
-                continue;
-            }
-
-            for (found_letters) |letters, idx| {
-                if (is_taken[idx] and c == wordle.text[idx]) {
-                    // We've already used this letter in this spot for an exact
-                    // match, so let's skip it here
-                    continue;
-                }
-
-                if (letters.isSet(c - 'a')) {
-                    wordle.letters_found += 1;
-                }
-            }
-        }
-
-        // wordle is done, so we don't write it
+        // wordle is done, so we "delete" it by not writing it back to the buffer
         if (wordle.places_found >= 5) {
             solved.append(wordle.text) catch @panic("failed to append to arraylist");
             continue;
@@ -209,17 +184,18 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
     var puzzles = ArrayList(Puzzle).init(temp);
     for (wordles_left.items[0..top_count]) |wordle| {
         var relevant_submits = ArrayList(u8).init(temp);
-        var filled = [_]u8{' '} ** 5;
-        var match = [_]?u8{null} ** 5;
+        var matches = [_]Match{.none} ** 5;
+
+        // This gets displayed in the app; in debug mode, we output the lowercase
+        // letter so we can see it in the UI to spot-check math. In release,
+        // we don't do that, because tha'd be bad.
+        var filled = if (builtin.mode == .Debug) wordle.text else [_]u8{' '} ** 5;
 
         var found: u32 = 0;
-        for (wordle.text) |c, idx| {
-            const letter_index = c - 'a';
-            if (found_letters[idx].isSet(letter_index)) {
-                filled[idx] = c;
-                match[idx] = @truncate(u8, idx);
-                found += 1;
-                continue;
+        for (wordle.matches) |match, idx| {
+            if (match == .exact) {
+                matches[idx] = .exact;
+                filled[idx] = wordle.text[idx] - 'a' + 'A';
             }
         }
 
@@ -230,16 +206,23 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
             const found_before = found;
             var submit_letters = submit;
-            const new_match = matchWordle(wordle.text, submit);
-            for (match) |*slot, idx| {
-                if (slot.* != null) {
-                    continue;
+            const new_matches = matchWordle(wordle.text, submit);
+            for (matches) |*slot, idx| {
+                switch (slot.*) {
+                    .exact => continue,
+                    .letter => continue,
+                    .none => {},
                 }
 
-                if (new_match[idx]) |submit_idx| {
-                    submit_letters[submit_idx] = submit[submit_idx] - 'a' + 'A';
-                    slot.* = submit_idx;
-                    found += 1;
+                switch (new_matches[idx]) {
+                    .none => continue,
+                    .exact => unreachable,
+                    .letter => |submit_idx| {
+                        // Uppercase means the output text should be orange.
+                        submit_letters[submit_idx] = submit[submit_idx] - 'a' + 'A';
+                        slot.* = .{ .letter = submit_idx };
+                        found += 1;
+                    },
                 }
             }
 
@@ -299,7 +282,7 @@ pub export fn init() void {
     while ((word_index + 5) < wordles.len) : (word_index += 6) {
         var wordle = Wordle{
             .text = undefined,
-            .matches = [_]?u8{null} ** 5,
+            .matches = .{.none} ** 5,
             .letters_found = 0,
             .places_found = 0,
         };

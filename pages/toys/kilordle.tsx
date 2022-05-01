@@ -120,7 +120,6 @@ const useStore = create<KilordleState>((set, get) => {
   };
 
   const setPuzzles = (puzzles: PuzzleWasmData[]) => {
-    console.log(puzzles);
     set({
       puzzles: puzzles.map((puzzle) => {
         return {
@@ -226,15 +225,20 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
     <div className={css.puzzle}>
       <div className={css.filledBox}>
         {puzzle.filled.split("").map((letter, idx) => {
-          const upper = letter.toUpperCase();
-          const isUpper = letter === upper;
+          const lower = letter.toLowerCase();
+          const isLower = letter === lower;
 
+          // We use the isLower test here instead of checking against space
+          // so that in debug builds we can see the actual solution and
+          // double-check that everything is kosher. This logic ensures that
+          // lowercase letters and space are output as white and uppercase
+          // are green.
           return (
             <div
               key={idx}
-              className={cx(css.letterBox, letter !== " " && css.green)}
+              className={cx(css.letterBox, isLower || css.green)}
             >
-              {upper}
+              {letter.toUpperCase()}
             </div>
           );
         })}
