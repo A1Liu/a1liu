@@ -170,9 +170,14 @@ const TopBar: React.VFC = () => {
   const wordsLeft = useStore((state) => state.wordsLeft);
   const cb = useStore((state) => state.callbacks);
 
+  const timeoutRef = React.useRef<any>();
+
   React.useEffect(() => {
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = undefined;
+
     if (submitError) {
-      setTimeout(() => cb.clearError(), 1000);
+      timeoutRef.current = setTimeout(() => cb.clearError(), 1000);
     }
   }, [cb, submitError]);
 
@@ -291,11 +296,21 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
 
 const PuzzleArea: React.VFC = () => {
   const puzzles = useStore((state) => state.puzzles);
+  const wordsLeft = useStore((state) => state.wordsLeft);
+  const submissionCount = useStore((state) => state.submissionCount);
 
-  if (puzzles.length === 0) {
+  if (submissionCount === 0) {
     return (
       <div className={css.centerMessage}>
         {"No submissions yet. Try typing a word and hitting 'Enter'!"}
+      </div>
+    );
+  }
+
+  if (wordsLeft === 0) {
+    return (
+      <div className={css.centerMessage}>
+        {"You won! Refresh to play again."}
       </div>
     );
   }
