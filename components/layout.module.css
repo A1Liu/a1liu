@@ -123,21 +123,33 @@
     margin-bottom: 0.4rem;
   }
 
-  & code {
-  font-family: monospace;
-  font-size: 1rem;
-  word-spacing: normal;
-  word-break: normal;
-  tab-size: 4;
-  hyphens: none;
-}
-& pre {
-  margin-bottom: 1rem;
-  overflow: auto;
-  word-spacing: normal;
-  word-break: normal;
-  tab-size: 4;
-  hyphens: none;
-}
+  & :not(pre) > code:not(.no-style) {
+    padding: 3px 5px 3px 5px;
+    border-radius: 5px;
+    white-space: nowrap;
+    background: #282c34;
+  }
 
+  & div.highlight > pre,
+  & :not(pre) > code:not(.no-style) {
+    color: #98c379;
+  }
+
+  & code {
+    font-family: monospace;
+    font-size: 0.875rem;
+    word-spacing: normal;
+    word-break: normal;
+    tab-size: 4;
+    hyphens: none;
+  }
+
+  & pre {
+    margin-bottom: 1rem;
+    overflow: auto;
+    word-spacing: normal;
+    word-break: normal;
+    tab-size: 4;
+    hyphens: none;
+  }
 }

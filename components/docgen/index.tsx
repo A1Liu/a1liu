@@ -1,4 +1,5 @@
 import styles from "./default.module.css";
+import latexStyles from "./latex.module.css";
 import css from "./base.module.css";
 import cx from "classnames";
 import React from "react";
@@ -25,7 +26,7 @@ export const Latex: React.FC = (props) => {
   return (
     <>
       <DocgenNav />
-      <main className={styles.wrapper}>{props.children}</main>
+      <main className={latexStyles.wrapper}>{props.children}</main>
     </>
   );
 };
