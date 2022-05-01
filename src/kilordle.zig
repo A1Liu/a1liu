@@ -4,6 +4,7 @@ const builtin = @import("builtin");
 const liu = @import("liu");
 
 const wasm = liu.wasm;
+pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 const ArrayList = std.ArrayList;
@@ -28,10 +29,6 @@ comptime {
     @export(ext.submitWordExt, .{ .name = "submitWord", .linkage = .Strong });
 }
 
-const WordSubmission = struct {
-    word: [5]u8,
-};
-
 const Wordle = struct {
     text: [5]u8,
     matches: [5]Match,
@@ -39,7 +36,6 @@ const Wordle = struct {
     places_found: u8,
 };
 
-pub const WasmCommand = WordSubmission;
 const Puzzle = struct {
     solution: [5]u8,
     filled: [5]u8,
@@ -147,7 +143,6 @@ pub fn submitWord(word: [5]u8) !bool {
 
     const is_wordle = searchList(&word, assets.wordles);
     if (!is_wordle and !searchList(&word, assets.wordle_words)) {
-        wasm.postFmt(.err, "{s} doesn't exist", .{word});
         return false;
     }
 

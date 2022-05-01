@@ -24,12 +24,14 @@ interface KilordleCb {
   deleteChar: () => void;
   setPuzzles: (puzzles: PuzzleWasmData[]) => void;
   setWordsLeft: (wordsLeft: number) => void;
+  clearError: () => void;
 }
 
 interface KilordleState {
   foundLetters: Record<string, true>;
   submissionCount: number;
   wordsLeft: number;
+  submitError: boolean;
   word: string;
   puzzles: PuzzleData[];
   callbacks: KilordleCb;
@@ -76,14 +78,14 @@ const pressKey = (key: string, cb: KilordleCb): boolean => {
 
 const useStore = create<KilordleState>((set, get) => {
   const deleteChar = () => set((state) => ({ word: state.word.slice(0, -1) }));
-  const addChar = (c: string) =>
-    set((state) => {
-      if (state.word.length > 4) {
-        return { word: state.word };
-      }
+  const addChar = (c: string) => {
+    const word = get().word;
+    if (word.length > 4) {
+      return;
+    }
 
-      return { word: state.word + c.toLowerCase() };
-    });
+    set({ word: word + c.toLowerCase(), submitError: false });
+  };
 
   const submit = () => {
     const state = get();
@@ -98,6 +100,7 @@ const useStore = create<KilordleState>((set, get) => {
 
     wasmRef.defer.submitWord(...codes).then((success: boolean) => {
       if (!success) {
+        set({ submitError: true });
         return;
       }
 
@@ -112,11 +115,17 @@ const useStore = create<KilordleState>((set, get) => {
       });
 
       if (foundCount > 0) {
-        set({ foundLetters: { ...foundLetters, ...newFounds } });
+        set({
+          foundLetters: { ...foundLetters, ...newFounds },
+        });
       }
-    });
 
-    set({ word: "", submissionCount: submissionCount + 1 });
+      set({
+        word: "",
+        submissionCount: submissionCount + 1,
+        submitError: false,
+      });
+    });
   };
 
   const setPuzzles = (puzzles: PuzzleWasmData[]) => {
@@ -134,26 +143,44 @@ const useStore = create<KilordleState>((set, get) => {
     set({ wordsLeft });
   };
 
+  const clearError = () => set({ submitError: false });
+
   return {
     word: "",
     submissionCount: 0,
+    submitError: false,
     wordsLeft: 0,
     foundLetters: {},
     puzzles: [],
-    callbacks: { submit, addChar, deleteChar, setPuzzles, setWordsLeft },
+    callbacks: {
+      submit,
+      addChar,
+      deleteChar,
+      setPuzzles,
+      setWordsLeft,
+      clearError,
+    },
   };
 });
 
 const TopBar: React.VFC = () => {
   const word = useStore((state) => state.word.toUpperCase());
+  const submitError = useStore((state) => state.submitError);
   const submissionCount = useStore((state) => state.submissionCount);
   const wordsLeft = useStore((state) => state.wordsLeft);
+  const cb = useStore((state) => state.callbacks);
+
+  React.useEffect(() => {
+    if (submitError) {
+      setTimeout(() => cb.clearError(), 1000);
+    }
+  }, [cb, submitError]);
 
   return (
     <div className={css.topBar}>
       <div></div>
 
-      <div className={css.submitWindow}>
+      <div className={cx(css.submitWindow, submitError && css.shake)}>
         <div className={css.letterBox}>{word[0]}</div>
         <div className={css.letterBox}>{word[1]}</div>
         <div className={css.letterBox}>{word[2]}</div>
@@ -234,10 +261,7 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
           // lowercase letters and space are output as white and uppercase
           // are green.
           return (
-            <div
-              key={idx}
-              className={cx(css.letterBox, isLower || css.green)}
-            >
+            <div key={idx} className={cx(css.letterBox, isLower || css.green)}>
               {letter.toUpperCase()}
             </div>
           );
