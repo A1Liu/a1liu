@@ -1,5 +1,7 @@
-@value min-md from 'components/util.module.css';
-@value max-md from 'components/util.module.css';
+@value min-sm from 'components/util.module.css';
+@value max-sm from 'components/util.module.css';
+@value min-lg from 'components/util.module.css';
+@value lg from 'components/util.module.css';
 
 .wrapper {
   height: 100vh;
@@ -11,17 +13,30 @@
 }
 
 .topBar {
-  height: 4rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid gray;
+
+  padding: 4px 16px 4px 16px;
+}
+
+.submitWindow {
   font-size: 2rem;
   font-family: "Dank Mono", "Fira Code", monospace;
-
-  border-bottom: 4px solid gray;
 
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
   gap: 4px;
+}
+
+.statsBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .letterBox {
@@ -36,18 +51,38 @@
   justify-content: center;
 }
 
-.guessesArea {
+.centerArea {
   overflow-y: scroll;
+  flex: 1;
+  max-height: inherit;
 
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.guessesArea {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  @media min-lg {
+    max-width: lg;
+  }
+
+  padding: 8px;
+  gap: 1rem;
+}
+
+.centerMessage {
   flex: 1;
 
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-
-  padding: 8px;
-  gap: 1rem;
+  text-align: center;
 }
 
 .puzzle {
@@ -75,14 +110,14 @@
   align-items: center;
   gap: 16px;
 
-  @media max-md {
-    font-size: 1.25em;
+  @media max-sm {
+    font-size: 30px;
   }
-  @media min-md {
+  @media min-sm {
     font-size: 2em;
   }
 
-  padding-bottom: 1em;
+  padding: 1em 0px 1em 0px;
 }
 
 .keyboardRow {

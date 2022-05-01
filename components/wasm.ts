@@ -24,6 +24,7 @@ export function ref(): WasmRef {
 
 interface Imports {
   postMessage: (kind: string, data: any) => void;
+  raw?: any;
 
   // Keys can be strings, numbers, or symbols.
   // If you know it to be strings only, you can also restrict it to that.
@@ -44,13 +45,13 @@ const sendString = (str: string) => {
 const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
 
 const env = (ref: WasmRef, imports: Imports) => {
-  const { postMessage, ...extra } = imports;
+  const { raw, ...functions } = imports;
 
   const objectBuffer = [...initialObjectBuffer];
   const initialLen = objectBuffer.length;
 
   const wasmImports = {} as any;
-  Object.entries(imports).forEach(([key, value]: [string, any]) => {
+  Object.entries(functions).forEach(([key, value]: [string, any]) => {
     wasmImports[key] = (...args: number[]) =>
       value(...args.map((idx) => objectBuffer[idx]));
   });
@@ -112,6 +113,7 @@ const env = (ref: WasmRef, imports: Imports) => {
     },
 
     ...wasmImports,
+    ...raw,
   };
 };
 

@@ -1,3 +1,9 @@
+@value xs: 0px;
+@value sm: 576px;
+@value md: 768px;
+@value lg: 992px;
+@value xl: 1200px;
+
 @value min-xs: (min-width: 0px);
 @value min-sm: (min-width: 576px);
 @value min-md: (min-width: 768px);

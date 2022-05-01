@@ -23,10 +23,13 @@ interface KilordleCb {
   addChar: (c: string) => void;
   deleteChar: () => void;
   setPuzzles: (puzzles: PuzzleWasmData[]) => void;
+  setWordsLeft: (wordsLeft: number) => void;
 }
 
 interface KilordleState {
   foundLetters: Record<string, true>;
+  submissionCount: number;
+  wordsLeft: number;
   word: string;
   puzzles: PuzzleData[];
   callbacks: KilordleCb;
@@ -38,7 +41,7 @@ const wasmRef: wasm.WasmRef = wasm.ref();
 const KEYROWS = [
   "qwertyuiop".split(""),
   "asdfghjkl".split(""),
-  ["Enter", ..."zxcvbnm".split(""), "Del"],
+  ["Go", ..."zxcvbnm".split(""), "Del"],
 ];
 
 const pressKey = (key: string, cb: KilordleCb): boolean => {
@@ -78,46 +81,41 @@ const useStore = create<KilordleState>((set, get) => {
         return { word: state.word };
       }
 
-      return { word: state.word + c.toUpperCase() };
+      return { word: state.word + c.toLowerCase() };
     });
 
   const submit = () => {
     const state = get();
-    const { word, foundLetters } = get();
+    const { word, foundLetters, submissionCount } = get();
 
     if (word.length < 5) {
       return;
     }
 
-    wasmRef.defer
-      .submitWord(
-        word.charCodeAt(0),
-        word.charCodeAt(1),
-        word.charCodeAt(2),
-        word.charCodeAt(3),
-        word.charCodeAt(4)
-      )
-      .then((success) => {
-        if (!success) {
-          return;
-        }
+    const chars = word.split("");
+    const codes = chars.map((c) => c.charCodeAt(0));
 
-        const newFounds: Record<string, true> = {};
-        const foundCount = 0;
+    wasmRef.defer.submitWord(...codes).then((success: boolean) => {
+      if (!success) {
+        return;
+      }
 
-        word.toLowerCase().split("").forEach((letter) => {
-          if (!foundLetters[letter]) {
-            newFounds[letter] = true;
-            foundCount += 1;
-          }
-        });
+      const newFounds: Record<string, true> = {};
+      let foundCount = 0;
 
-        if (foundCount > 0) {
-          set({ foundLetters: { ...foundLetters, ...newFounds } });
+      chars.forEach((letter) => {
+        if (!foundLetters[letter]) {
+          newFounds[letter] = true;
+          foundCount += 1;
         }
       });
 
-    set({ word: "" });
+      if (foundCount > 0) {
+        set({ foundLetters: { ...foundLetters, ...newFounds } });
+      }
+    });
+
+    set({ word: "", submissionCount: submissionCount + 1 });
   };
 
   const setPuzzles = (puzzles: PuzzleWasmData[]) => {
@@ -132,24 +130,41 @@ const useStore = create<KilordleState>((set, get) => {
     });
   };
 
+  const setWordsLeft = (wordsLeft: number) => {
+    set({ wordsLeft });
+  };
+
   return {
     word: "",
+    submissionCount: 0,
+    wordsLeft: 0,
     foundLetters: {},
     puzzles: [],
-    callbacks: { submit, addChar, deleteChar, setPuzzles },
+    callbacks: { submit, addChar, deleteChar, setPuzzles, setWordsLeft },
   };
 });
 
 const TopBar: React.VFC = () => {
-  const word = useStore((state) => state.word);
+  const word = useStore((state) => state.word.toUpperCase());
+  const submissionCount = useStore((state) => state.submissionCount);
+  const wordsLeft = useStore((state) => state.wordsLeft);
 
   return (
     <div className={css.topBar}>
-      <div className={css.letterBox}>{word[0]}</div>
-      <div className={css.letterBox}>{word[1]}</div>
-      <div className={css.letterBox}>{word[2]}</div>
-      <div className={css.letterBox}>{word[3]}</div>
-      <div className={css.letterBox}>{word[4]}</div>
+      <div></div>
+
+      <div className={css.submitWindow}>
+        <div className={css.letterBox}>{word[0]}</div>
+        <div className={css.letterBox}>{word[1]}</div>
+        <div className={css.letterBox}>{word[2]}</div>
+        <div className={css.letterBox}>{word[3]}</div>
+        <div className={css.letterBox}>{word[4]}</div>
+      </div>
+
+      <div className={css.statsBox}>
+        <div>Guesses: {submissionCount}</div>
+        <div>Words: {wordsLeft}</div>
+      </div>
     </div>
   );
 };
@@ -248,6 +263,14 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
 const PuzzleArea: React.VFC = () => {
   const puzzles = useStore((state) => state.puzzles);
 
+  if (puzzles.length === 0) {
+    return (
+      <div className={css.centerMessage}>
+        {"No submissions yet. Try typing a word and hitting 'Enter'!"}
+      </div>
+    );
+  }
+
   return (
     <div className={css.guessesArea}>
       {puzzles.map((puzzle) => (
@@ -274,6 +297,7 @@ export const Kilordle: React.VFC = () => {
       .fetchWasm("/assets/kilordle.wasm", wasmRef, {
         postMessage,
         setPuzzles: cb.setPuzzles,
+        raw: { setWordsLeft: cb.setWordsLeft },
       })
       .then((ref) => {
         ref.abi.init();
@@ -283,7 +307,9 @@ export const Kilordle: React.VFC = () => {
   return (
     <div className={css.wrapper}>
       <TopBar />
-      <PuzzleArea />
+      <div className={css.centerArea}>
+        <PuzzleArea />
+      </div>
       <Keyboard />
     </div>
   );

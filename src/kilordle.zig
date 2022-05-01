@@ -10,6 +10,7 @@ const ArrayList = std.ArrayList;
 
 const ext = struct {
     extern fn setPuzzles(obj: wasm.Obj) void;
+    extern fn setWordsLeft(count: usize) void;
 };
 
 // 1. which letters have been used overall? (keyboard)
@@ -39,6 +40,12 @@ const Puzzle = struct {
 var wordles_left: ArrayList(Wordle) = undefined;
 var found_letters: [5]Letters = [_]Letters{Letters.initEmpty()} ** 5;
 var submissions: ArrayList([5]u8) = undefined;
+
+fn setWordsLeft(count: usize) void {
+    if (builtin.target.cpu.arch != .wasm32) return;
+
+    ext.setWordsLeft(count);
+}
 
 fn setPuzzles(puzzles: []Puzzle) void {
     if (builtin.target.cpu.arch != .wasm32) return;
@@ -81,34 +88,60 @@ fn searchList(word: []const u8, dict: []const u8) bool {
     return false;
 }
 
+// Returns array of matches. Value v at index i is a match between wordle[i]
+// and submission[v], or null if that match doesn't exist.
+fn matchWordle(wordle: [5]u8, submission: [5]u8) [5]?u8 {
+    var text = submission;
+    var match = [_]?u8{null} ** 5;
+
+    for (wordle) |c, idx| {
+        if (submission[idx] == c) {
+            match[idx] = @truncate(u8, idx);
+            text[idx] = 0;
+        }
+    }
+
+    for (wordle) |c, idx| {
+        if (match[idx] != null) {
+            continue;
+        }
+
+        for (text) |*slot, text_idx| {
+            if (slot.* == c) {
+                match[idx] = @truncate(u8, text_idx);
+                slot.* = 0;
+            }
+        }
+    }
+
+    return match;
+}
+
 pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
     var _temp = liu.Temp.init();
     const temp = _temp.allocator();
     defer _temp.deinit();
 
     const word = [_]u8{ l0, l1, l2, l3, l4 };
-    var lowercased: [5]u8 = undefined;
 
     // lowercase
-    for (word) |letter, idx| {
-        if (letter < 'A' or letter > 'Z') {
+    for (word) |letter| {
+        if (letter < 'a' or letter > 'z') {
             wasm.postFmt(.err, "invalid string {s}", .{word});
             return false;
         }
-
-        lowercased[idx] = letter - 'A' + 'a';
     }
 
-    const is_wordle = searchList(&lowercased, assets.wordles);
-    if (!is_wordle and !searchList(&lowercased, assets.wordle_words)) {
+    const is_wordle = searchList(&word, assets.wordles);
+    if (!is_wordle and !searchList(&word, assets.wordle_words)) {
         wasm.postFmt(.err, "{s} doesn't exist", .{word});
         return false;
     }
 
-    submissions.append(lowercased) catch @panic("failed to save submission");
+    submissions.append(word) catch @panic("failed to save submission");
 
     for (word) |letter, idx| {
-        found_letters[idx].set(letter - 'A');
+        found_letters[idx].set(letter - 'a');
     }
 
     var write_head: u32 = 0;
@@ -167,35 +200,22 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
     std.sort.sort(Wordle, wordles_left.items, {}, compareWordles);
 
-    for (solved.items) |solved_word| {
-        wasm.postFmt(.info, "solved {s}", .{solved_word});
-    }
-
-    wasm.postFmt(.info, "{s} solved {}", .{ word, solved.items.len });
-
-    if (wordles_left.items.len > 0) {
-        wasm.postFmt(.info, "{} words left", .{wordles_left.items.len});
-    } else {
-        wasm.postFmt(.success, "done!", .{});
-    }
-
-    const top_count = std.math.min(wordles_left.items.len, 6);
+    const top_count = std.math.min(wordles_left.items.len, 32);
     var puzzles = ArrayList(Puzzle).init(temp);
     for (wordles_left.items[0..top_count]) |wordle| {
         var relevant_submits = ArrayList(u8).init(temp);
-        var unfilled = [_]u8{0} ** 26;
         var filled = [_]u8{' '} ** 5;
+        var match = [_]?u8{null} ** 5;
 
         var found: u32 = 0;
         for (wordle.text) |c, idx| {
             const letter_index = c - 'a';
             if (found_letters[idx].isSet(letter_index)) {
                 filled[idx] = c;
+                match[idx] = @truncate(u8, idx);
                 found += 1;
                 continue;
             }
-
-            unfilled[letter_index] += 1;
         }
 
         for (submissions.items) |submit| {
@@ -203,15 +223,18 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
                 break;
             }
 
-            var submit_letters = submit;
             const found_before = found;
-            for (submit) |c, idx| {
-                const slot = &unfilled[c - 'a'];
+            var submit_letters = submit;
+            const new_match = matchWordle(wordle.text, submit);
+            for (match) |*slot, idx| {
+                if (slot.* != null) {
+                    continue;
+                }
 
-                if (slot.* > 0) {
-                    submit_letters[idx] = c - 'a' + 'A';
+                if (new_match[idx]) |submit_idx| {
+                    submit_letters[submit_idx] = submit[submit_idx] - 'a' + 'A';
+                    slot.* = submit_idx;
                     found += 1;
-                    slot.* -= 1;
                 }
             }
 
@@ -278,5 +301,6 @@ pub export fn init() void {
         wordles_left.appendAssumeCapacity(wordle);
     }
 
+    setWordsLeft(wordles_left.items.len);
     std.log.info("WASM initialized!", .{});
 }
