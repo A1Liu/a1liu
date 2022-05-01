@@ -102,8 +102,6 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
         // wordle is done, so we don't write it
         if (wordle.places_found >= 5) {
-            // wasm.postFmt(.info, "solved {s}", .{wordle.text});
-            // solved += 1;
             solved.append(wordle.text) catch @panic("failed to append to arraylist");
             continue;
         }
@@ -121,6 +119,10 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     wordles_left.items.len = write_head;
 
     std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
+
+    for (solved.items) |solved_word| {
+        wasm.postFmt(.info, "solved {s}", .{solved_word});
+    }
 
     wasm.postFmt(.info, "{s} solved {}", .{ word, solved.items.len });
 
