@@ -25,6 +25,7 @@ const WordSubmission = struct {
 
 const Wordle = struct {
     text: [5]u8,
+    matches: [5]?u8,
     letters_found: u8,
     places_found: u8,
 };
@@ -202,7 +203,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
     wordles_left.items.len = write_head;
 
-    std.sort.sort(Wordle, wordles_left.items, {}, compareWordles);
+    std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
 
     const top_count = std.math.min(wordles_left.items.len, 32);
     var puzzles = ArrayList(Puzzle).init(temp);
@@ -298,6 +299,7 @@ pub export fn init() void {
     while ((word_index + 5) < wordles.len) : (word_index += 6) {
         var wordle = Wordle{
             .text = undefined,
+            .matches = [_]?u8{null} ** 5,
             .letters_found = 0,
             .places_found = 0,
         };

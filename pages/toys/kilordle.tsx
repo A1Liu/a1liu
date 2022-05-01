@@ -52,6 +52,7 @@ const pressKey = (key: string, cb: KilordleCb): boolean => {
       return false;
 
     case "Enter":
+    case "Go":
       cb.submit();
       break;
 
