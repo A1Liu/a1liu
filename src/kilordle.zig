@@ -5,6 +5,12 @@ const liu = @import("liu");
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
+// 1. which letters have been used overall? (keyboard)
+// 2. which puzzles are most solved? (center)
+// 3. what are the greens for those puzzles? (center)
+// 4. what are the unfound letters for those puzzles? (center)
+// 5. what are the historical submissions? (right, put in React)
+
 const WordSubmission = struct {
     word: [5]u8,
 };
