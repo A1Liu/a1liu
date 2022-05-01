@@ -6,10 +6,9 @@ export const getStaticProps: GetStaticProps<Props> = async (props) => {
   return blogProps(props);
 };
 
-const Index: NextPage<Props> = ({ files, children }) => {
+const Index: NextPage<Props> = ({ files }) => {
   return (
     <Layout>
-      {children}
       <img
         style={{ width: "200px", marginLeft: "15px", float: "right" }}
         src="/assets/pfp.jpg"
