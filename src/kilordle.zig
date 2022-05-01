@@ -1,9 +1,20 @@
 const std = @import("std");
 const assets = @import("assets");
+const builtin = @import("builtin");
 const liu = @import("liu");
 
 const wasm = liu.wasm;
 pub usingnamespace wasm;
+
+const ext = struct {
+    extern fn setPuzzles(obj: wasm.Obj) void;
+};
+
+fn setPuzzles() void {
+    if (builtin.target.cpu.arch != .wasm32) {
+        return;
+    }
+}
 
 // 1. which letters have been used overall? (keyboard)
 // 2. which puzzles are most solved? (center)
@@ -137,6 +148,8 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
     } else {
         wasm.postFmt(.success, "done!", .{});
     }
+
+    setPuzzles();
 }
 
 fn compareWordles(context: void, left: Wordle, right: Wordle) bool {

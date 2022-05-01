@@ -6,14 +6,21 @@ import cx from "classnames";
 import create from "zustand";
 import { useToast, ToastColors } from "components/errors";
 
+interface PuzzleData {
+  wordle: string;
+  guesses: string[];
+}
+
 interface KilordleCb {
   submit: () => void;
   addChar: (c: string) => void;
   deleteChar: () => void;
+  setPuzzles: (puzzles: PuzzleData[]) => void;
 }
 
 interface KilordleState {
   word: string;
+  puzzles: PuzzleData[];
   callbacks: KilordleCb;
 }
 
@@ -84,9 +91,12 @@ const useStore = create<KilordleState>((set, get) => {
     set({ word: "" });
   };
 
+  const setPuzzles = (puzzles: PuzzleData[]) => set({ puzzles });
+
   return {
     word: "",
-    callbacks: { submit, addChar, deleteChar },
+    puzzles: [],
+    callbacks: { submit, addChar, deleteChar, setPuzzles },
   };
 });
 
@@ -121,24 +131,23 @@ export const Kilordle: React.VFC = () => {
   }, [cb]);
 
   React.useEffect(() => {
-    function postMessage(tag: string, data: any) {
+    const postMessage = (tag: string, data: any) => {
       console.log(tag, data);
-
-      if (Array.isArray(data)) {
-        data.forEach((d) => postMessage(tag, d));
-      }
 
       if (typeof data === "string") {
         toast.add(ToastColors[tag] ?? "green", null, data);
       }
-    }
+    };
 
     wasm
-      .fetchWasm("/assets/kilordle.wasm", wasmRef, { postMessage })
+      .fetchWasm("/assets/kilordle.wasm", wasmRef, {
+        postMessage,
+        setPuzzles: cb.setPuzzles,
+      })
       .then((ref) => {
         ref.abi.init();
       });
-  }, [toast]);
+  }, [toast, cb]);
 
   React.useEffect(() => {
     keyboardRef.current?.focus();

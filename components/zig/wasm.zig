@@ -12,7 +12,7 @@ extern fn stringObjExt(message: [*]const u8, length: usize) Obj;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 
-pub extern fn postObj(tagIdx: Obj, id: Obj) void;
+pub extern fn postMessage(tagIdx: Obj, id: Obj) void;
 
 pub extern fn exitExt(objIndex: Obj) noreturn;
 
@@ -88,7 +88,7 @@ pub fn log(
 pub fn postFmt(level: BuiltinObj, comptime fmt: []const u8, args: anytype) void {
     if (builtin.target.cpu.arch == .wasm32) {
         const obj = stringFmtObj(fmt, args);
-        postObj(@enumToInt(level), obj);
+        postMessage(@enumToInt(level), obj);
 
         clearObjBufferForObjAndAfter(obj);
     } else {

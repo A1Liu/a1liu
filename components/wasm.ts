@@ -45,8 +45,15 @@ const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
 
 const env = (ref: WasmRef, imports: Imports) => {
   const { postMessage, ...extra } = imports;
+
   const objectBuffer = [...initialObjectBuffer];
   const initialLen = objectBuffer.length;
+
+  const wasmImports = {} as any;
+  Object.entries(imports).forEach(([key, value]) => {
+    wasmImports[key] = (...args: number[]) =>
+      value(...args.map((idx) => objectBuffer[idx]));
+  });
 
   return {
     stringObjExt: (location: number, size: number): number => {
@@ -70,16 +77,13 @@ const env = (ref: WasmRef, imports: Imports) => {
       objectBuffer.length = initialLen;
     },
 
-    postObj: (tagIdx: number, idx: number) =>
-      postMessage(`${objectBuffer[tagIdx]}`, objectBuffer[idx]),
-
     exitExt: (idx: number) => {
       const value = objectBuffer[idx];
 
       throw new Error(`Crashed: ${value}`);
     },
 
-    ...extra,
+    ...wasmImports,
   };
 };
 

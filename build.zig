@@ -32,7 +32,7 @@ pub fn build(b: *Builder) void {
     playground.addPackagePath("liu", "components/zig/lib.zig");
     playground.setBuildMode(mode);
 
-    playground.install();
+    // playground.install();
 
     // Un-commenting this doesn't output a file, so whatever I guess
     // const all_step = b.step("all", "Build all apps");
