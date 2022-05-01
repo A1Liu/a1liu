@@ -3,8 +3,7 @@ import css from "./errors.module.css";
 import cx from "classnames";
 import create from "zustand";
 
-type AddToast = (color: ToastColor, text: string, timeout?: number) => void;
-// type AddToasts = (color: ToastColor, text: string[], timeout?: number) => void;
+type AddToast = (kind: ToastColor, time: number | null, ...t: string[]) => void;
 
 type ToastColor =
   | "red"
@@ -48,7 +47,6 @@ interface ToastData {
 
 interface ToastCallbacks {
   add: AddToast;
-  // addArray: AddToasts;
 }
 
 // Use Map here, which iterates in insertion order
@@ -59,29 +57,22 @@ interface ToastState {
 }
 
 const useStore = create<ToastState>((set) => {
-  function popToast() {
+  function popToast(count: number) {
+    // TODO bounds check?
     set((state) => ({
-      toasts: state.toasts.slice(1),
-      toastId: state.toastId + 1,
+      toasts: state.toasts.slice(count),
+      toastId: state.toastId + count,
     }));
   }
 
-  function add(color: ToastColor, text: string, timeout?: number) {
+  function add(kind: ToastColor, time: number | null, ...toasts: string[]) {
+    const color = ColorMap[kind];
     set((state) => ({
-      toasts: [...state.toasts, { color: ColorMap[color], text }],
+      toasts: [...state.toasts, ...toasts.map((text) => ({ color, text }))],
     }));
 
-    setTimeout(popToast, timeout ?? 3 * 1000);
+    setTimeout(() => popToast(toasts.length), time ?? 3 * 1000);
   }
-
-  // function addArray(inColor: ToastColor, toasts: string[], timeout?: number) {
-  //   const color = ColorMap[inColor];
-  //   set((state) => ({
-  //     toasts: [...state.toasts, ...toasts.map((text) => ({ color, text }))],
-  //   }));
-
-  //   setTimeout(popToast, timeout ?? 3 * 1000);
-  // }
 
   return {
     toasts: [],

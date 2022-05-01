@@ -41,9 +41,11 @@ const sendString = (str: string) => {
   u8.set(encodedString);
 };
 
+const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
+
 const env = (ref: WasmRef, imports: Imports) => {
   const { postMessage, ...extra } = imports;
-  const objectBuffer: any[] = ["log", "info", "warn", "error", "success"];
+  const objectBuffer = [...initialObjectBuffer];
   const initialLen = objectBuffer.length;
 
   return {
@@ -57,16 +59,10 @@ const env = (ref: WasmRef, imports: Imports) => {
 
       return length;
     },
-    pushCopy: (idx: number): number => {
-      const length = objectBuffer.length;
-      objectBuffer.push(objectBuffer[idx]);
-      return length;
-    },
 
     // TODO some kind of pop stack operation that makes full objects or arrays
     // or whatever
 
-    watermarkObj: () => objectBuffer.length,
     clearObjBufferForObjAndAfter: (idx: number) => {
       objectBuffer.length = idx;
     },

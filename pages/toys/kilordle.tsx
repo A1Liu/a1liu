@@ -120,13 +120,17 @@ export const Kilordle: React.VFC = () => {
   }, [cb]);
 
   React.useEffect(() => {
-    const postMessage = (tag: string, data: any) => {
+    function postMessage(tag: string, data: any) {
       console.log(tag, data);
 
-      if (typeof data === "string") {
-        toast.add(ToastColors[tag] ?? "green", data);
+      if (Array.isArray(data)) {
+        data.forEach((d) => postMessage(tag, d));
       }
-    };
+
+      if (typeof data === "string") {
+        toast.add(ToastColors[tag] ?? "green", null, data);
+      }
+    }
 
     wasm
       .fetchWasm("/assets/kilordle.wasm", wasmRef, { postMessage })
