@@ -23,13 +23,29 @@ export const BlogContent: React.VFC<Props> = ({ files }) => {
 
       <ul style={{ display: "flex", flexDirection: "column-reverse" }}>
         {files.map((file, idx) => {
-          const url = `/blog/${file.replace(/\.[^/.]+$/, "")}`;
+          const slug = file.replace(/\.[^/.]+$/, "");
+          const url = `/blog/${slug}`;
+          const titleSlug = slug.split("-").slice(3);
+
+          const titleWords = titleSlug.map((word) => {
+            if (word.length <= 1) {
+              return word;
+            }
+
+            if (["the", "an", "is", "of", "this"].includes(word)) {
+              return word;
+            }
+
+            return word.substring(0, 1).toUpperCase() + word.substring(1);
+          });
 
           return (
             <li key={url}>
               <p>
                 <Link href={url}>
-                  <a>Entry {idx + 1}</a>
+                  <a>
+                    Entry {idx + 1}: {titleWords.join(" ")}
+                  </a>
                 </Link>
               </p>
             </li>
