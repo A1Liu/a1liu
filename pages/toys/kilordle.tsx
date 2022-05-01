@@ -124,7 +124,7 @@ export const Kilordle: React.VFC = () => {
       console.log(tag, data);
 
       if (typeof data === "string") {
-        toast.addToast(ToastColors[tag] ?? "green", data);
+        toast.add(ToastColors[tag] ?? "green", data);
       }
     };
 

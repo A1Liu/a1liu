@@ -47,7 +47,7 @@ interface ToastData {
 }
 
 interface ToastCallbacks {
-  addToast: AddToast;
+  add: AddToast;
   // addArray: AddToasts;
 }
 
@@ -66,7 +66,7 @@ const useStore = create<ToastState>((set) => {
     }));
   }
 
-  function addToast(color: ToastColor, text: string, timeout?: number) {
+  function add(color: ToastColor, text: string, timeout?: number) {
     set((state) => ({
       toasts: [...state.toasts, { color: ColorMap[color], text }],
     }));
@@ -87,7 +87,7 @@ const useStore = create<ToastState>((set) => {
     toasts: [],
     toastId: 0,
     cb: {
-      addToast,
+      add,
     },
   };
 });
