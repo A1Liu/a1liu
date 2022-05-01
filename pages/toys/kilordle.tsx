@@ -23,7 +23,7 @@ const wasmRef: wasm.WasmRef = wasm.ref();
 const KEYROWS = [
   "qwertyuiop".split(""),
   "asdfghjkl".split(""),
-  ["Enter", ..."zxcvbnm".split(""), "Delete"],
+  ["Enter", ..."zxcvbnm".split(""), "Del"],
 ];
 
 const pressKey = (key: string, cb: KilordleCb): boolean => {
@@ -39,6 +39,7 @@ const pressKey = (key: string, cb: KilordleCb): boolean => {
 
     case "Backspace":
     case "Delete":
+    case "Del":
       cb.deleteChar();
       break;
 

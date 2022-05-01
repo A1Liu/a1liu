@@ -161,7 +161,8 @@ pub export fn init() void {
     const wordles = assets.wordles;
 
     const wordle_count = (wordles.len - 1) / 6 + 1;
-    wordles_left.ensureUnusedCapacity(wordle_count) catch @panic("failed to allocate room for wordles");
+    wordles_left.ensureUnusedCapacity(wordle_count) catch
+        @panic("failed to allocate room for wordles");
 
     var word_index: u32 = 0;
     while ((word_index + 5) < wordles.len) : (word_index += 6) {

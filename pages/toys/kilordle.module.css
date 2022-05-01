@@ -1,3 +1,6 @@
+@value min-md from 'components/util.module.css';
+@value max-md from 'components/util.module.css';
+
 .wrapper {
   height: 100vh;
   width: 100vw;
@@ -50,7 +53,13 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 16px;
-  font-size: 2em;
+
+  @media max-md {
+    font-size: 1.25em;
+  }
+  @media min-md {
+    font-size: 2em;
+  }
 
   padding-bottom: 1em;
 }
@@ -60,6 +69,8 @@
   flex-direction: row;
   flex-wrap: nowrap;
   gap: 0.25em;
+
+  text-decoration: none;
 }
 
 .keyBox {
