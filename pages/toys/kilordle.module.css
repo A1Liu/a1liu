@@ -47,6 +47,23 @@
   gap: 1rem;
 }
 
+.puzzle {
+  display: flex;
+  flex-direction: column;
+}
+
+.filledBox {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.submitBox {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
 .keyboard {
   display: flex;
   flex-direction: column;
@@ -84,4 +101,12 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.green {
+  background-color: lightgreen;
 }

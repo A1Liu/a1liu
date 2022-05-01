@@ -50,7 +50,7 @@ const env = (ref: WasmRef, imports: Imports) => {
   const initialLen = objectBuffer.length;
 
   const wasmImports = {} as any;
-  Object.entries(imports).forEach(([key, value]) => {
+  Object.entries(imports).forEach(([key, value]: [string, any]) => {
     wasmImports[key] = (...args: number[]) =>
       value(...args.map((idx) => objectBuffer[idx]));
   });
@@ -70,11 +70,39 @@ const env = (ref: WasmRef, imports: Imports) => {
     // TODO some kind of pop stack operation that makes full objects or arrays
     // or whatever
 
+    watermarkObj: (idx: number) => objectBuffer.length,
     clearObjBufferForObjAndAfter: (idx: number) => {
       objectBuffer.length = idx;
     },
     clearObjBuffer: () => {
       objectBuffer.length = initialLen;
+    },
+
+    makeArray: () => {
+      const idx = objectBuffer.length;
+      objectBuffer.push([]);
+
+      return idx;
+    },
+    makeObj: () => {
+      const idx = objectBuffer.length;
+      objectBuffer.push({});
+
+      return idx;
+    },
+
+    arrayPush: (arrayIdx: number, valueIdx: number) => {
+      const arr = objectBuffer[arrayIdx];
+      const value = objectBuffer[valueIdx];
+
+      arr.push(value);
+    },
+    objSet: (objIdx: number, keyIdx: number, valueIdx: number) => {
+      const obj = objectBuffer[objIdx];
+      const key = objectBuffer[keyIdx];
+      const value = objectBuffer[valueIdx];
+
+      obj[key] = value;
     },
 
     exitExt: (idx: number) => {

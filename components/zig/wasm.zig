@@ -3,11 +3,19 @@ const root = @import("root");
 const liu = @import("./lib.zig");
 const builtin = @import("builtin");
 
+// building array of objects:
+
 const ArrayList = std.ArrayList;
 
 pub const Obj = u32;
 
 extern fn stringObjExt(message: [*]const u8, length: usize) Obj;
+
+pub extern fn watermarkObj() Obj;
+pub extern fn makeArray() Obj;
+pub extern fn makeObj() Obj;
+pub extern fn arrayPush(arr: Obj, obj: Obj) void;
+pub extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;

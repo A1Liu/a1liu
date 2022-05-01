@@ -7,15 +7,22 @@ import create from "zustand";
 import { useToast, ToastColors } from "components/errors";
 
 interface PuzzleData {
-  wordle: string;
-  guesses: string[];
+  solution: string;
+  filled: string;
+  submits: string[];
+}
+
+interface PuzzleWasmData {
+  solution: string;
+  filled: string;
+  submits: string;
 }
 
 interface KilordleCb {
   submit: () => void;
   addChar: (c: string) => void;
   deleteChar: () => void;
-  setPuzzles: (puzzles: PuzzleData[]) => void;
+  setPuzzles: (puzzles: PuzzleWasmData[]) => void;
 }
 
 interface KilordleState {
@@ -91,7 +98,17 @@ const useStore = create<KilordleState>((set, get) => {
     set({ word: "" });
   };
 
-  const setPuzzles = (puzzles: PuzzleData[]) => set({ puzzles });
+  const setPuzzles = (puzzles: PuzzleWasmData[]) => {
+    console.log(puzzles);
+    set({
+      puzzles: puzzles.map((puzzle) => {
+        return {
+          ...puzzle,
+          submits: puzzle.submits.split(","),
+        };
+      }),
+    });
+  };
 
   return {
     word: "",
@@ -100,16 +117,27 @@ const useStore = create<KilordleState>((set, get) => {
   };
 });
 
-const Puzzle: React.VFC<{ index: number }> = ({ index }) => {
-  return null;
+const TopBar: React.VFC = () => {
+  const word = useStore((state) => state.word);
+
+  return (
+    <div className={css.topBar}>
+      <div className={css.letterBox}>{word[0]}</div>
+      <div className={css.letterBox}>{word[1]}</div>
+      <div className={css.letterBox}>{word[2]}</div>
+      <div className={css.letterBox}>{word[3]}</div>
+      <div className={css.letterBox}>{word[4]}</div>
+    </div>
+  );
 };
 
-export const Kilordle: React.VFC = () => {
-  const word = useStore((state) => state.word);
+const Keyboard: React.VFC = () => {
+  const keyboardRef = React.useRef<HTMLInputElement>(null);
   const cb = useStore((state) => state.callbacks);
 
-  const keyboardRef = React.useRef<HTMLInputElement>(null);
-  const toast = useToast();
+  React.useEffect(() => {
+    keyboardRef.current?.focus();
+  }, [keyboardRef]);
 
   React.useEffect(() => {
     const listener = (evt: KeyboardEvent) => {
@@ -130,6 +158,93 @@ export const Kilordle: React.VFC = () => {
     };
   }, [cb]);
 
+  return (
+    <div ref={keyboardRef} className={css.keyboard}>
+      {KEYROWS.map((row, idx) => {
+        return (
+          <div key={idx} className={css.keyboardRow}>
+            {row.map((key) => {
+              return (
+                <button
+                  key={key}
+                  className={css.keyBox}
+                  onClick={() => pressKey(key, cb)}
+                >
+                  {key}
+                </button>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
+  return (
+    <div className={css.puzzle}>
+      <div className={css.filledBox}>
+        {puzzle.solution.split("").map((letter) => (
+          <div key={letter} className={css.letterBox}>
+            {letter}
+          </div>
+        ))}
+      </div>
+
+      <div className={css.filledBox}>
+        {puzzle.filled.split("").map((letter) => {
+          const upper = letter.toUpperCase();
+          const isUpper = letter === upper;
+
+          return (
+            <div
+              key={letter}
+              className={cx(css.letterBox, letter !== " " && css.green)}
+            >
+              {upper}
+            </div>
+          );
+        })}
+      </div>
+
+      {puzzle.submits.map((submit) => (
+        <div key={submit} className={css.submitBox}>
+          {submit.split("").map((letter) => {
+            const upper = letter.toUpperCase();
+            const isUpper = letter === upper;
+
+            return (
+              <div
+                key={letter}
+                className={cx(css.letterBox, isUpper && css.yellow)}
+              >
+                {upper}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const PuzzleArea: React.VFC = () => {
+  const puzzles = useStore((state) => state.puzzles);
+
+  return (
+    <div className={css.guessesArea}>
+      {puzzles.map((puzzle) => (
+        <Puzzle key={puzzle.solution} puzzle={puzzle} />
+      ))}
+    </div>
+  );
+};
+
+export const Kilordle: React.VFC = () => {
+  const cb = useStore((state) => state.callbacks);
+  const toast = useToast();
+
   React.useEffect(() => {
     const postMessage = (tag: string, data: any) => {
       console.log(tag, data);
@@ -149,44 +264,11 @@ export const Kilordle: React.VFC = () => {
       });
   }, [toast, cb]);
 
-  React.useEffect(() => {
-    keyboardRef.current?.focus();
-  }, [keyboardRef]);
-
   return (
     <div className={css.wrapper}>
-      {/* current word */}
-      <div className={css.topBar}>
-        <div className={css.letterBox}>{word[0]}</div>
-        <div className={css.letterBox}>{word[1]}</div>
-        <div className={css.letterBox}>{word[2]}</div>
-        <div className={css.letterBox}>{word[3]}</div>
-        <div className={css.letterBox}>{word[4]}</div>
-      </div>
-
-      {/* viewable area */}
-      <div className={css.guessesArea}></div>
-
-      {/* keyboard */}
-      <div ref={keyboardRef} className={css.keyboard}>
-        {KEYROWS.map((row, idx) => {
-          return (
-            <div key={idx} className={css.keyboardRow}>
-              {row.map((key) => {
-                return (
-                  <button
-                    key={key}
-                    className={css.keyBox}
-                    onClick={() => pressKey(key, cb)}
-                  >
-                    {key}
-                  </button>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+      <TopBar />
+      <PuzzleArea />
+      <Keyboard />
     </div>
   );
 };
