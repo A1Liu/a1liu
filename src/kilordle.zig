@@ -156,6 +156,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
         var is_taken: [5]bool = [_]bool{false} ** 5;
 
+        // Exact matches (position + letter)
         for (wordle.text) |c, idx| {
             if (found_letters[idx].isSet(c - 'a')) {
                 wordle.letters_found += 1;
@@ -164,13 +165,16 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
             }
         }
 
+        // Matches for just letter
         for (wordle.text) |c, c_idx| {
             if (is_taken[c_idx]) {
                 continue;
             }
 
             for (found_letters) |letters, idx| {
-                if (is_taken[idx]) {
+                if (is_taken[idx] and c == wordle.text[idx]) {
+                    // We've already used this letter in this spot for an exact
+                    // match, so let's skip it here
                     continue;
                 }
 
