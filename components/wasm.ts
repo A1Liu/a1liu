@@ -66,6 +66,7 @@ const env = (ref: WasmRef, imports: Imports) => {
     // TODO some kind of pop stack operation that makes full objects or arrays
     // or whatever
 
+    watermarkObj: () => objectBuffer.length,
     clearObjBufferForObjAndAfter: (idx: number) => {
       objectBuffer.length = idx;
     },

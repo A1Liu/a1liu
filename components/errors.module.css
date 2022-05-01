@@ -1,10 +1,17 @@
 .toastCorner {
-  position: sticky;
+  position: fixed;
   left: 8px;
   bottom: 8px;
   z-index: 10000;
-  overflow-y: scroll;
+  width: 300px;
 
+  overflow: hidden;
+  display: flex;
+  flex-direction: column-reverse;
+  max-height: calc(100vh - 8px);
+}
+
+.toastContent {
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -15,7 +22,7 @@
 
 .toast {
   min-height: 1.5rem;
-  max-width: 300px;
+  width: 100%;
 
   color: white;
   font-weight: bold;

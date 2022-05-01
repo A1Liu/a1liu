@@ -10,6 +10,7 @@ pub const Obj = u32;
 extern fn stringObjExt(message: [*]const u8, length: usize) Obj;
 pub extern fn pushCopy(idx: u32) u32;
 
+pub extern fn watermarkObj() Obj;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 

@@ -35,6 +35,10 @@ fn searchList(word: []const u8, dict: []const u8) bool {
 }
 
 pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
+    var _temp = liu.Temp.init();
+    const temp = _temp.allocator();
+    defer _temp.deinit();
+
     const word = [_]u8{ l0, l1, l2, l3, l4 };
     var lowercased: [5]u8 = undefined;
 
@@ -58,9 +62,11 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
         found_letters[idx].set(letter - 'A');
     }
 
-    var solved: u32 = 0;
     var write_head: u32 = 0;
     var read_head: u32 = 0;
+
+    var solved = std.ArrayList([5]u8).init(temp);
+
     const arena_len = wordles_left.items.len;
 
     while (read_head < arena_len) : (read_head += 1) {
@@ -96,8 +102,9 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
         // wordle is done, so we don't write it
         if (wordle.places_found >= 5) {
-            wasm.postFmt(.info, "solved {s}", .{wordle.text});
-            solved += 1;
+            // wasm.postFmt(.info, "solved {s}", .{wordle.text});
+            // solved += 1;
+            solved.append(wordle.text) catch @panic("failed to append to arraylist");
             continue;
         }
 
@@ -115,7 +122,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) void {
 
     std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
 
-    wasm.postFmt(.info, "{s} solved {}", .{ word, solved });
+    wasm.postFmt(.info, "{s} solved {}", .{ word, solved.items.len });
 
     if (wordles_left.items.len > 0) {
         wasm.postFmt(.info, "{} words left", .{wordles_left.items.len});

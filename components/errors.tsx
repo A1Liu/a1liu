@@ -4,6 +4,7 @@ import cx from "classnames";
 import create from "zustand";
 
 type AddToast = (color: ToastColor, text: string, timeout?: number) => void;
+// type AddToasts = (color: ToastColor, text: string[], timeout?: number) => void;
 
 type ToastColor =
   | "red"
@@ -45,10 +46,16 @@ interface ToastData {
   text: string;
 }
 
+interface ToastCallbacks {
+  addToast: AddToast;
+  // addArray: AddToasts;
+}
+
+// Use Map here, which iterates in insertion order
 interface ToastState {
   toasts: ToastData[];
   toastId: number;
-  addToast: AddToast;
+  cb: ToastCallbacks;
 }
 
 const useStore = create<ToastState>((set) => {
@@ -67,21 +74,32 @@ const useStore = create<ToastState>((set) => {
     setTimeout(popToast, timeout ?? 3 * 1000);
   }
 
+  // function addArray(inColor: ToastColor, toasts: string[], timeout?: number) {
+  //   const color = ColorMap[inColor];
+  //   set((state) => ({
+  //     toasts: [...state.toasts, ...toasts.map((text) => ({ color, text }))],
+  //   }));
+
+  //   setTimeout(popToast, timeout ?? 3 * 1000);
+  // }
+
   return {
     toasts: [],
     toastId: 0,
-    addToast,
+    cb: {
+      addToast,
+    },
   };
 });
 
 const getToasts = (state: ToastState) => state.toasts;
 const getToastId = (state: ToastState) => state.toastId;
-const getAddToast = (state: ToastState) => state.addToast;
+const getCallbacks = (state: ToastState): ToastCallbacks => state.cb;
 
-export function useAddToast(): AddToast {
-  const addToast = useStore(getAddToast);
+export function useToast(): ToastCallbacks {
+  const cb = useStore(getCallbacks);
 
-  return addToast;
+  return cb;
 }
 
 export const ToastCorner: React.VFC = () => {
@@ -90,13 +108,15 @@ export const ToastCorner: React.VFC = () => {
 
   return (
     <div className={css.toastCorner}>
-      {toasts.map(({ color, text }, idx) => {
-        return (
-          <div key={idx + toastId} className={cx(css.toast, color)}>
-            {text}
-          </div>
-        );
-      })}
+      <div className={css.toastContent}>
+        {toasts.map(({ color, text }, idx) => {
+          return (
+            <div key={idx + toastId} className={cx(css.toast, color)}>
+              {text}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

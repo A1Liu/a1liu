@@ -6,6 +6,7 @@
     "build": "zig build -Drelease-fast && cp zig-out/lib/*.wasm public/assets/ && next build",
     "export": "next export",
     "lint": "next lint --fix",
+    "clean": "rm -rf .next node_modules out zig-out",
     "deploy": "git push origin main:production"
   },
   "dependencies": {

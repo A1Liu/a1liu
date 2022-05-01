@@ -4,7 +4,7 @@ import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
 import cx from "classnames";
 import create from "zustand";
-import { useAddToast, ToastColors } from "components/errors";
+import { useToast, ToastColors } from "components/errors";
 
 interface KilordleCb {
   submit: () => void;
@@ -98,7 +98,7 @@ export const Kilordle: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
 
   const keyboardRef = React.useRef<HTMLInputElement>(null);
-  const addToast = useAddToast();
+  const toast = useToast();
 
   React.useEffect(() => {
     const listener = (evt: KeyboardEvent) => {
@@ -124,7 +124,7 @@ export const Kilordle: React.VFC = () => {
       console.log(tag, data);
 
       if (typeof data === "string") {
-        addToast(ToastColors[tag] ?? "green", data);
+        toast.addToast(ToastColors[tag] ?? "green", data);
       }
     };
 
@@ -133,7 +133,7 @@ export const Kilordle: React.VFC = () => {
       .then((ref) => {
         ref.abi.init();
       });
-  }, [addToast]);
+  }, [toast]);
 
   React.useEffect(() => {
     keyboardRef.current?.focus();
