@@ -11,7 +11,22 @@ const ArrayList = std.ArrayList;
 const ext = struct {
     extern fn setPuzzles(obj: wasm.Obj) void;
     extern fn setWordsLeft(count: usize) void;
+
+    fn submitWordExt(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) callconv(.C) bool {
+        return submitWord([_]u8{ l0, l1, l2, l3, l4 }) catch @panic("submitWord failed");
+    }
+
+    fn initExt() callconv(.C) void {
+        init() catch @panic("init failed");
+    }
 };
+
+// I think this needs to be in root. I tried moving it inside `ext` and most of
+// the code got deleted.
+comptime {
+    @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
+    @export(ext.submitWordExt, .{ .name = "submitWord", .linkage = .Strong });
+}
 
 const WordSubmission = struct {
     word: [5]u8,
@@ -25,7 +40,6 @@ const Wordle = struct {
 };
 
 pub const WasmCommand = WordSubmission;
-const Letters = std.bit_set.IntegerBitSet(26);
 const Puzzle = struct {
     solution: [5]u8,
     filled: [5]u8,
@@ -118,12 +132,10 @@ fn matchWordle(wordle: [5]u8, submission: [5]u8) [5]Match {
     return match;
 }
 
-pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
+pub fn submitWord(word: [5]u8) !bool {
     var _temp = liu.Temp.init();
     const temp = _temp.allocator();
     defer _temp.deinit();
-
-    const word = [_]u8{ l0, l1, l2, l3, l4 };
 
     // lowercase
     for (word) |letter| {
@@ -139,14 +151,14 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
         return false;
     }
 
-    submissions.append(word) catch @panic("failed to save submission");
+    try submissions.append(word);
 
     // We use a buffer that's 1 bigger than what we'll eventually read so
     // that we can add to the end and then sort the whole thing. This strategy
     // also has the benefit that insertion sort is guaranteed linear time
     // over our buffer, since it does one sweep up and then one sweep down.
     const top_count = 32;
-    var top_values = std.BoundedArray(Wordle, top_count + 1).init(0) catch @panic("???");
+    var top_values = try std.BoundedArray(Wordle, top_count + 1).init(0);
 
     var write_head: u32 = 0;
     var read_head: u32 = 0;
@@ -170,7 +182,7 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
             continue;
         }
 
-        top_values.append(wordle.*) catch @panic("failed to add to top_values array");
+        try top_values.append(wordle.*);
         std.sort.insertionSort(Wordle, top_values.slice(), {}, compareWordles);
         if (top_values.len > top_count) {
             _ = top_values.pop();
@@ -234,10 +246,8 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
             }
 
             if (found_before < found) {
-                relevant_submits.appendSlice(&submit_letters) catch
-                    @panic("failed to append submission");
-                relevant_submits.append(',') catch
-                    @panic("failed to append submission");
+                try relevant_submits.appendSlice(&submit_letters);
+                try relevant_submits.append(',');
             }
         }
 
@@ -245,12 +255,11 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
             _ = relevant_submits.pop();
         }
 
-        const err = puzzles.append(.{
+        try puzzles.append(.{
             .solution = wordle.text,
             .filled = filled,
             .submits = relevant_submits.items,
         });
-        err catch @panic("failed to add puzzle");
     }
 
     setPuzzles(puzzles.items);
@@ -273,7 +282,7 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
     return false;
 }
 
-pub export fn init() void {
+pub fn init() !void {
     wasm.initIfNecessary();
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
@@ -282,8 +291,7 @@ pub export fn init() void {
     const wordles = assets.wordles;
 
     const wordle_count = (wordles.len - 1) / 6 + 1;
-    wordles_left.ensureUnusedCapacity(wordle_count) catch
-        @panic("failed to allocate room for wordles");
+    try wordles_left.ensureUnusedCapacity(wordle_count);
 
     var word_index: u32 = 0;
     while ((word_index + 5) < wordles.len) : (word_index += 6) {
