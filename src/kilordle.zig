@@ -141,10 +141,15 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
     submissions.append(word) catch @panic("failed to save submission");
 
+    // We use a buffer that's 1 bigger than what we'll eventually read so
+    // that we can add to the end and then sort the whole thing. This strategy
+    // also has the benefit that insertion sort is guaranteed linear time
+    // over our buffer, since it does one sweep up and then one sweep down.
+    const top_count = 32;
+    var top_values = std.BoundedArray(Wordle, top_count + 1).init(0) catch @panic("???");
+
     var write_head: u32 = 0;
     var read_head: u32 = 0;
-    var solved = ArrayList([5]u8).init(temp);
-
     const arena_len = wordles_left.items.len;
     while (read_head < arena_len) : (read_head += 1) {
         const wordle = &wordles_left.items[read_head];
@@ -162,11 +167,16 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
         // wordle is done, so we "delete" it by not writing it back to the buffer
         if (wordle.places_found >= 5) {
-            solved.append(wordle.text) catch @panic("failed to append to arraylist");
             continue;
         }
 
-        // write would be no-op
+        top_values.append(wordle.*) catch @panic("failed to add to top_values array");
+        std.sort.insertionSort(Wordle, top_values.slice(), {}, compareWordles);
+        if (top_values.len > top_count) {
+            _ = top_values.pop();
+        }
+
+        // write-back would be no-op
         if (read_head == write_head) {
             write_head += 1;
             continue;
@@ -178,11 +188,8 @@ pub export fn submitWord(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) bool {
 
     wordles_left.items.len = write_head;
 
-    std.sort.insertionSort(Wordle, wordles_left.items, {}, compareWordles);
-
-    const top_count = std.math.min(wordles_left.items.len, 32);
     var puzzles = ArrayList(Puzzle).init(temp);
-    for (wordles_left.items[0..top_count]) |wordle| {
+    for (top_values.slice()) |wordle| {
         var relevant_submits = ArrayList(u8).init(temp);
         var matches = [_]Match{.none} ** 5;
 
