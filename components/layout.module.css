@@ -85,6 +85,10 @@
     }
   }
 
+  & ul {
+    padding-left: 40px;
+  }
+
   & h1 {
     font-size: 2rem;
     font-weight: 500;

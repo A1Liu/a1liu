@@ -1,8 +1,9 @@
 import { GetStaticProps, NextPage } from "next";
+import Link from "next/link";
 import Layout from "components/layout";
 import { readdir } from "fs/promises";
 
-interface Props {
+export interface Props {
   readonly files: string[];
 }
 
@@ -23,7 +24,9 @@ const Documents: NextPage<Props> = ({ files }) => {
 
         return (
           <>
-            <a href={url}>{url}</a>
+            <Link href={url}>
+              <a>{url}</a>
+            </Link>
             <br />
           </>
         );
