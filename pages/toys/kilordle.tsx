@@ -2,6 +2,7 @@ import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
+import type { WasmRef } from "components/wasm";
 import cx from "classnames";
 import create from "zustand";
 import { useToast, ToastColors } from "components/errors";
@@ -24,10 +25,12 @@ interface KilordleCb {
   deleteChar: () => void;
   setPuzzles: (puzzles: PuzzleWasmData[]) => void;
   setWordsLeft: (wordsLeft: number) => void;
+  setWasmRef: (wasmRef: WasmRef) => void;
   clearError: () => void;
 }
 
 interface KilordleState {
+  wasmRef: WasmRef | undefined;
   foundLetters: Record<string, true>;
   submissionCount: number;
   wordsLeft: number;
@@ -38,7 +41,6 @@ interface KilordleState {
 }
 
 // https://github.com/vercel/next.js/tree/canary/examples/with-web-worker
-const wasmRef: wasm.WasmRef = wasm.ref();
 
 const KEYROWS = [
   "qwertyuiop".split(""),
@@ -89,9 +91,13 @@ const useStore = create<KilordleState>((set, get) => {
 
   const submit = () => {
     const state = get();
-    const { word, foundLetters, submissionCount } = get();
+    const { word, foundLetters, submissionCount, wasmRef } = get();
 
     if (word.length < 5) {
+      return;
+    }
+
+    if (!wasmRef) {
       return;
     }
 
@@ -145,8 +151,11 @@ const useStore = create<KilordleState>((set, get) => {
 
   const clearError = () => set({ submitError: false });
 
+  const setWasmRef = (wasmRef: WasmRef) => set({ wasmRef });
+
   return {
     word: "",
+    wasmRef: undefined,
     submissionCount: 0,
     submitError: false,
     wordsLeft: 0,
@@ -159,6 +168,7 @@ const useStore = create<KilordleState>((set, get) => {
       setPuzzles,
       setWordsLeft,
       clearError,
+      setWasmRef,
     },
   };
 });
@@ -337,15 +347,16 @@ export const Kilordle: React.VFC = () => {
       }
     };
 
-    wasm
-      .fetchWasm("/assets/kilordle.wasm", wasmRef, {
-        postMessage,
-        setPuzzles: cb.setPuzzles,
-        raw: { setWordsLeft: cb.setWordsLeft },
-      })
-      .then((ref) => {
-        ref.abi.init();
-      });
+    const wasmPromise = wasm.fetchWasm("/assets/kilordle.wasm", {
+      postMessage,
+      imports: { setPuzzles: cb.setPuzzles },
+      raw: { setWordsLeft: cb.setWordsLeft },
+    });
+
+    wasmPromise.then((ref) => {
+      ref.abi.init();
+      cb.setWasmRef(ref);
+    });
   }, [toast, cb]);
 
   return (

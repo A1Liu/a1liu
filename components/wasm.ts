@@ -8,29 +8,32 @@ export const decoder = new TextDecoder();
 // allocate array of integers
 // allocate array of floats
 
+// These could be more advanced but, meh
+type WasmFunc = (...data: any[]) => any;
+type AsyncWasmFunc = (...data: any[]) => Promise<any>;
+
 export interface WasmRef {
-  instance: any;
-  abi: any;
-  defer: any;
+  readonly instance: any;
+  readonly memory: WebAssembly.Memory;
+  readonly abi: { readonly [x: string]: WasmFunc };
+  readonly defer: { readonly [x: string]: AsyncWasmFunc };
+  readonly pushObj: (obj: any) => number;
 }
 
 export function ref(): WasmRef {
   return {
     instance: null,
-    abi: null,
-    defer: null,
+    memory: null as any,
+    abi: null as any,
+    defer: {},
+    pushObj: () => -1,
   };
 }
 
 interface Imports {
-  postMessage: (kind: string, data: any) => void;
-  raw?: any;
-
-  // Keys can be strings, numbers, or symbols.
-  // If you know it to be strings only, you can also restrict it to that.
-  // For the value you can use any or unknown,
-  // with unknown being the more defensive approach.
-  [x: string | number | symbol]: unknown;
+  readonly postMessage: (kind: string, data: any) => void;
+  readonly raw?: { readonly [x: string]: WasmFunc };
+  readonly imports: { readonly [x: string]: WasmFunc };
 }
 
 const sendString = (str: string) => {
@@ -42,23 +45,50 @@ const sendString = (str: string) => {
   u8.set(encodedString);
 };
 
+interface WasmRefInner {
+  instance: any;
+  abi: {
+    [x: string]: WasmFunc;
+  };
+  defer: { [x: string]: AsyncWasmFunc };
+  pushObj: (obj: any) => number;
+}
+
 const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
 
-const env = (ref: WasmRef, imports: Imports) => {
-  const { raw, ...functions } = imports;
+export const fetchWasm = async (
+  path: string,
+  importData: Imports
+): Promise<WasmRef> => {
+  const responsePromise = fetch(path);
 
+  const ref: WasmRef = {
+    instance: {} as any,
+    memory: {} as any,
+    abi: {} as any,
+    defer: {} as any,
+    pushObj: (data) => {
+      const idx = objectBuffer.length;
+      objectBuffer.push(data);
+      return idx;
+    },
+  };
+
+  const { postMessage, raw } = importData;
+
+  const imports = { postMessage, ...importData.imports };
   const objectBuffer = [...initialObjectBuffer];
   const initialLen = objectBuffer.length;
 
   const wasmImports = {} as any;
-  Object.entries(functions).forEach(([key, value]: [string, any]) => {
+  Object.entries(imports).forEach(([key, value]: [string, any]) => {
     wasmImports[key] = (...args: number[]) =>
       value(...args.map((idx) => objectBuffer[idx]));
   });
 
-  return {
+  const env = {
     stringObjExt: (location: number, size: number): number => {
-      const buffer = new Uint8Array(ref.abi.memory.buffer, location, size);
+      const buffer = new Uint8Array(ref.memory.buffer, location, size);
 
       const str = decoder.decode(buffer);
 
@@ -115,28 +145,23 @@ const env = (ref: WasmRef, imports: Imports) => {
     ...wasmImports,
     ...raw,
   };
-};
 
-export const fetchWasm = async (
-  path: string,
-  ref: WasmRef,
-  imports: Imports
-): Promise<WasmRef> => {
-  const responsePromise = fetch(path);
-  const importObject = {
-    env: env(ref, imports),
-  };
+  const importObject = { env };
 
   const result = await WebAssembly.instantiateStreaming(
     responsePromise,
     importObject
   );
-  ref.instance = result.instance;
-  ref.abi = result.instance.exports;
-  ref.defer = {};
 
-  Object.entries(ref.abi).forEach(([key, value]: [string, any]) => {
-    ref.defer[key] = (...t: any[]) =>
+  const refAny = ref as any;
+
+  refAny.instance = result.instance;
+  refAny.abi = result.instance.exports;
+  refAny.memory = result.instance.exports.memory;
+  refAny.defer = {};
+
+  Object.entries(ref.abi).forEach(([key, value]: [string, WasmFunc]) => {
+    refAny.defer[key] = (...t: (number | boolean)[]) =>
       new Promise((resolve) => setTimeout(() => resolve(value(...t)), 0));
   });
 

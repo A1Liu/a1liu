@@ -20,6 +20,8 @@ pub extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 
+extern fn readObjBufferStringExt(idx: Obj, begin: [*]u8, length: usize) void;
+
 pub extern fn postMessage(tagIdx: Obj, id: Obj) void;
 
 pub extern fn exitExt(objIndex: Obj) noreturn;
