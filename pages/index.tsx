@@ -40,7 +40,7 @@ const Index: NextPage<Props> = ({ files }) => {
       </p>
 
       <h2>Blog</h2>
-      <BlogContent files={files} />
+      <BlogContent files={files.slice(-10)} />
     </Layout>
   );
 };
