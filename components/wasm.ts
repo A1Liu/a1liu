@@ -98,6 +98,20 @@ export const fetchWasm = async (
       return length;
     },
 
+    objBufferStringEncodeExt: (idx: number): number => {
+      const value = objectBuffer[idx];
+      const encodedString = encoder.encode(value);
+
+      objectBuffer[idx] = encodedString;
+      return encodedString.length;
+    },
+    readObjBufferExt: (idx: number, begin: number): void => {
+      const array = objectBuffer[idx];
+
+      const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
+      writeTo.set(array);
+    },
+
     // TODO some kind of pop stack operation that makes full objects or arrays
     // or whatever
 

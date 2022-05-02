@@ -5,6 +5,7 @@ const builtin = @import("builtin");
 
 // building array of objects:
 
+const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
 pub const Obj = u32;
@@ -20,7 +21,8 @@ pub extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 
-extern fn readObjBufferStringExt(idx: Obj, begin: [*]u8, length: usize) void;
+extern fn objBufferStringEncodeExt(idx: Obj) usize;
+extern fn readObjBufferExt(idx: Obj, begin: [*]u8) void;
 
 pub extern fn postMessage(tagIdx: Obj, id: Obj) void;
 
@@ -34,6 +36,16 @@ pub const BuiltinObj = enum(u32) {
     err,
     success,
 };
+
+pub fn readStringObj(obj: Obj, alloc: Allocator) ![]u8 {
+    if (builtin.target.cpu.arch != .wasm32) return &.{};
+    const len = objBufferStringEncodeExt(obj);
+    const string = try alloc.alloc(u8, len);
+
+    readObjBufferExt(obj, string.ptr);
+
+    return string;
+}
 
 pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
     var _temp = liu.Temp.init();
@@ -136,15 +148,5 @@ pub fn initIfNecessary() void {
         commands = CommandBuffer.init();
 
         initialized = true;
-    }
-}
-
-export fn commandArrayAllocate(len: u32) [*c]u8 {
-    initIfNecessary();
-
-    if (CmdAlloc.alloc(u8, len)) |range| {
-        return range.ptr;
-    } else |_| {
-        return null;
     }
 }
