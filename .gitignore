@@ -3,7 +3,6 @@
 # Zig folders and output
 zig-cache
 zig-out
-*.wasm
 
 # IDK why Zig outputs this crap but IDK how to disable it.
 *.o
