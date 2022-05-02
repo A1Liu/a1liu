@@ -1,7 +1,5 @@
 import Layout from "components/layout";
-import Image from "next/image";
 import { GetStaticProps, NextPage } from "next";
-import pfp from "public/assets/pfp.jpg";
 import Link from "next/link";
 import { BlogContent, getStaticProps as blogProps, Props } from "./blog";
 
@@ -12,9 +10,16 @@ export const getStaticProps: GetStaticProps<Props> = async (props) => {
 const Index: NextPage<Props> = ({ files }) => {
   return (
     <Layout>
-      <div style={{ marginLeft: "15px", float: "right" }}>
-        <Image src={pfp} width={200} height={200} alt="a picture of me" />
-      </div>
+      <img
+        src={"/assets/pfp.jpg"}
+        alt="a picture of me"
+        style={{
+          width: "200px",
+          height: "200px",
+          marginLeft: "15px",
+          float: "right",
+        }}
+      />
 
       <h2>About Me</h2>
       <p>
