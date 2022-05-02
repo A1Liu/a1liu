@@ -1,3 +1,5 @@
+#!/bin/sh
+
 git checkout main || exit 1
 git push || exit 1
 git checkout -b production || exit 1
