@@ -20,6 +20,7 @@ pub fn build(b: *Builder) void {
     kilordle.setBuildMode(mode);
     kilordle.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
     if (mode == .Debug) {
+        // Output straight to assets folder during dev to make things easier
         kilordle.setOutputDir("./public/assets");
     }
 
