@@ -24,6 +24,8 @@ export interface Ref {
   readonly memory: WebAssembly.Memory;
   readonly abi: { readonly [x: string]: WasmFunc };
   readonly defer: { readonly [x: string]: AsyncWasmFunc };
+
+  // Add object to objectMap and return id for the object added
   readonly addObj: (obj: any) => number;
 }
 
@@ -32,6 +34,14 @@ interface Imports {
   readonly raw?: { readonly [x: string]: WasmFunc };
   readonly imports: { readonly [x: string]: WasmFunc };
 }
+
+export const fetchAsset = async (path: string): Promise<Uint8Array> => {
+  const resp = await fetch(path);
+  const blob = await resp.blob();
+  const arrayBuffer = await blob.arrayBuffer();
+
+  return new Uint8Array(arrayBuffer);
+};
 
 export const fetchWasm = async (
   path: string,
@@ -93,13 +103,17 @@ export const fetchWasm = async (
 
       return encodedString.length;
     },
-    readObjMapExt: (idx: number, begin: number): void => {
+    objMapLenExt: (idx: number): number => objectMap.get(idx).length,
+    readObjMapBytesExt: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
 
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
       writeTo.set(array);
 
       objectMap.delete(idx);
+      if (objectMap.size === 0) {
+        nextObjectId = 0;
+      }
     },
 
     // TODO some kind of pop stack operation that makes full objects or arrays

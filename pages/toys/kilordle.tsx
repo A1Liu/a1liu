@@ -342,8 +342,8 @@ export const Kilordle: React.VFC = () => {
       raw: { setWordsLeft: cb.setWordsLeft },
     });
 
-    const wordles = fetch("/assets/wordles.txt").then((r) => r.text());
-    const words = fetch("/assets/wordle-words.txt").then((r) => r.text());
+    const wordles = wasm.fetchAsset("/assets/wordles.txt");
+    const words = wasm.fetchAsset("/assets/wordle-words.txt");
 
     Promise.all([wasmRef, wordles, words]).then(([ref, wordles, words]) => {
       const wordlesId = ref.addObj(wordles);

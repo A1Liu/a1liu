@@ -282,8 +282,8 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
 pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
     wasm.initIfNecessary();
 
-    wordles = try wasm.readStringObj(l_wordles, liu.Pages);
-    wordle_words = try wasm.readStringObj(l_words, liu.Pages);
+    wordles = try wasm.readBytesObj(l_wordles, liu.Pages);
+    wordle_words = try wasm.readBytesObj(l_words, liu.Pages);
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
     submissions = ArrayList([5]u8).init(liu.Pages);
