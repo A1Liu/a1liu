@@ -19,7 +19,6 @@ pub extern fn arrayPush(arr: Obj, obj: Obj) void;
 pub extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
-pub extern fn clearObjBuffer() void;
 
 extern fn objMapStringEncodeExt(idx: Obj) usize;
 extern fn readObjMapExt(idx: Obj, begin: [*]u8) void;

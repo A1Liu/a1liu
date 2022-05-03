@@ -12,15 +12,8 @@ export const postToast = (tag: string, data: any): void => {
   }
 };
 
-export const encoder = new TextEncoder();
-export const decoder = new TextDecoder();
-
-// WasmAbi should be
-// allocate bytes
-//
-// later
-// allocate array of integers
-// allocate array of floats
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;
@@ -53,7 +46,6 @@ export const fetchWasm = async (
 
   // output data
   const objectBuffer = [...initialObjectBuffer];
-  const initialLen = initialObjectBuffer.length;
 
   // input data
   const objectMap = new Map<number, any>();
@@ -117,9 +109,6 @@ export const fetchWasm = async (
     watermarkObj: (idx: number) => objectBuffer.length,
     clearObjBufferForObjAndAfter: (idx: number) => {
       objectBuffer.length = idx;
-    },
-    clearObjBuffer: () => {
-      objectBuffer.length = initialLen;
     },
 
     makeArray: () => {
