@@ -106,11 +106,11 @@ export const fetchWasm = async (
     objMapLenExt: (idx: number): number => objectMap.get(idx).length,
     readObjMapBytesExt: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
+      objectMap.delete(idx);
 
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
       writeTo.set(array);
 
-      objectMap.delete(idx);
       if (objectMap.size === 0) {
         nextObjectId = 0;
       }
