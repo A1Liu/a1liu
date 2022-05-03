@@ -1,9 +1,8 @@
 {
   "name": "A1Liu",
   "scripts": {
-    "start": "next start -p 1337",
     "dev": "next dev -p 1337",
-    "build": "zig build -Drelease-small && cp zig-out/lib/*.wasm public/assets/ && next build",
+    "build": "next build",
     "export": "next export",
     "lint": "next lint --fix",
     "clean": "rm -rf .next out zig-cache zig-out",

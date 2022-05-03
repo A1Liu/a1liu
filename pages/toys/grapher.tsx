@@ -10,20 +10,20 @@ type WebGl = WebGL2RenderingContext;
 
 interface GrapherCb {
   initWasm: (wasmRef: wasm.Ref) => void;
-  initGl: (gl: WebGL) => void;
+  initGl: (gl: WebGl) => void;
 }
 
 interface GrapherState {
-  gl: WebGL | null;
+  gl: WebGl | null;
   wasmRef: wasm.Ref | null;
   callbacks: GrapherCb;
 }
 
 const useStore = create<GrapherState>((set, get) => {
   const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
-  const initGl = (gl: WebGL) => set({ gl });
+  const initGl = (gl: WebGl) => set({ gl });
   return {
-    glContext: null,
+    gl: null,
     wasmRef: null,
     callbacks: {
       initWasm,
@@ -40,13 +40,13 @@ const Grapher: React.VFC = () => {
   const toast = useToast();
 
   React.useEffect(() => {
-    const gl = canvasRef.current.getContext("webgl2");
+    const gl = canvasRef.current?.getContext("webgl2");
     if (!gl) {
       toast.add("error", null, "WebGL2 not supported!");
-    } else {
-      toast.add("success", null, "WebGL2 context initialized!");
+      return;
     }
 
+    toast.add("success", null, "WebGL2 context initialized!");
     cb.initGl(gl);
   }, [canvasRef, toast, cb]);
 
@@ -65,29 +65,29 @@ const Grapher: React.VFC = () => {
 
   return (
     <div className={css.wrapper}>
-      <form
-        onSubmit={(evt) => {
-          evt.preventDefault();
+    <form
+    onSubmit={(evt) => {
+      evt.preventDefault();
 
-          if (!wasmRef) return;
+      if (!wasmRef) return;
 
-          const idx = wasmRef.addObj(text);
-          wasmRef.abi.print(idx);
-        }}
+      const idx = wasmRef.addObj(text);
+      wasmRef.abi.print(idx);
+    }}
       >
-        <label>
-          Name:
-          <input
-            type="text"
-            value={text}
-            onChange={(evt) => setText(evt.target.value)}
-          />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
+  <label>
+  Name:
+<input
+type="text"
+value={text}
+onChange={(evt) => setText(evt.target.value)}
+  />
+  </label>
+  <input type="submit" value="Submit" />
+  </form>
 
-      <canvas ref={canvasRef} className={css.canvas} />
-    </div>
+  <canvas ref={canvasRef} className={css.canvas} />
+  </div>
   );
 };
 

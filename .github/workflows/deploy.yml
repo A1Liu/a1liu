@@ -42,8 +42,10 @@ jobs:
 
       - name: Build
         run: |
-          yarn build
-          yarn export
+          zig build -Drelease-small
+          cp zig-out/lib/*.wasm public/assets/
+          next build
+          next export
           touch out/.nojekyll
           echo config.a1liu.com >> out/CNAME
 
