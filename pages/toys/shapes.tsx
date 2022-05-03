@@ -51,7 +51,7 @@ const Shapes: React.VFC = () => {
         if (!wasmRef) return;
 
         const idx = wasmRef.addObj(text);
-        wasmRef.defer.print(idx);
+        wasmRef.abi.print(idx);
       }}
     >
       <label>

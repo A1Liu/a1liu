@@ -32,7 +32,7 @@ pub fn print(msg: wasm.Obj) !void {
     defer _temp.deinit();
 
     const message = try wasm.readStringObj(msg, temp);
-    std.log.info("{s}!", .{message});
+    wasm.postFmt(.info, "{s}!", .{message});
 }
 
 pub fn init() !void {

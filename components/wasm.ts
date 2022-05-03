@@ -33,12 +33,11 @@ interface Imports {
   readonly imports: { readonly [x: string]: WasmFunc };
 }
 
-
 export const fetchWasm = async (
   path: string,
   importData: Imports
 ): Promise<Ref> => {
-  const responsePromise = fetch(path);
+  const resp = fetch(path);
 
   const { postMessage, raw } = importData;
 
@@ -148,12 +147,7 @@ export const fetchWasm = async (
     ...raw,
   };
 
-  const importObject = { env };
-
-  const result = await WebAssembly.instantiateStreaming(
-    responsePromise,
-    importObject
-  );
+  const result = await WebAssembly.instantiateStreaming(resp, { env });
 
   const refAny = ref as any;
 
