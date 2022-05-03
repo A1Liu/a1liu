@@ -35,7 +35,7 @@ pub fn build(b: *Builder) void {
     target.cpu_arch = Arch.x86_64;
 
     _ = wasmProgram(b, mode, "kilordle");
-    _ = wasmProgram(b, mode, "shapes");
+    _ = wasmProgram(b, mode, "grapher");
 
     const playground = b.addExecutable("play", "src/test.zig");
     playground.addPackagePath("liu", "components/zig/lib.zig");

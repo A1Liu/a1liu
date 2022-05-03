@@ -18,6 +18,8 @@ const ext = struct {
     }
 };
 
+// Something to make simple graphs for memes
+
 // I think this needs to be in root. I tried moving it inside `ext` and most of
 // the code got deleted.
 comptime {
