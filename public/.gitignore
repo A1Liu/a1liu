@@ -1,6 +1,5 @@
 __pycache__
 *.pyc
-*.wasm
 
 /local/*
 !/local/.gitkeep
