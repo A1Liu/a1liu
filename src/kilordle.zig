@@ -1,11 +1,13 @@
 const std = @import("std");
-const assets = @import("assets");
 const builtin = @import("builtin");
 const liu = @import("liu");
 
 const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
+
+var wordles: []const u8 = undefined;
+var wordle_words: []const u8 = undefined;
 
 const ArrayList = std.ArrayList;
 
@@ -17,8 +19,8 @@ const ext = struct {
         return submitWord([_]u8{ l0, l1, l2, l3, l4 }) catch @panic("submitWord failed");
     }
 
-    fn initExt() callconv(.C) void {
-        init() catch @panic("init failed");
+    fn initExt(l_wordles: wasm.Obj, l_words: wasm.Obj) callconv(.C) void {
+        init(l_wordles, l_words) catch @panic("init failed");
     }
 };
 
@@ -141,8 +143,8 @@ pub fn submitWord(word: [5]u8) !bool {
         }
     }
 
-    const is_wordle = searchList(&word, assets.wordles);
-    if (!is_wordle and !searchList(&word, assets.wordle_words)) {
+    const is_wordle = searchList(&word, wordles);
+    if (!is_wordle and !searchList(&word, wordle_words)) {
         return false;
     }
 
@@ -277,13 +279,14 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
     return false;
 }
 
-pub fn init() !void {
+pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
     wasm.initIfNecessary();
+
+    wordles = try wasm.readStringObj(l_wordles, liu.Pages);
+    wordle_words = try wasm.readStringObj(l_words, liu.Pages);
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
     submissions = ArrayList([5]u8).init(liu.Pages);
-
-    const wordles = assets.wordles;
 
     const wordle_count = (wordles.len - 1) / 6 + 1;
     try wordles_left.ensureUnusedCapacity(wordle_count);

@@ -9,9 +9,10 @@ fn wasmProgram(
 ) *std.build.LibExeObjStep {
     const vers = b.version(0, 0, 0);
     const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
-    program.addPackagePath("assets", "components/assets.zig");
+
     program.addPackagePath("liu", "components/zig/lib.zig");
     program.setBuildMode(mode);
+
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
     if (mode == .Debug) {
         // Output straight to assets folder during dev to make things easier

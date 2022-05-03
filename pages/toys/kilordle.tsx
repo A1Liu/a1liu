@@ -336,14 +336,20 @@ export const Kilordle: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
 
   React.useEffect(() => {
-    const wasmPromise = wasm.fetchWasm("/assets/kilordle.wasm", {
+    const wasmRef = wasm.fetchWasm("/assets/kilordle.wasm", {
       postMessage: wasm.postToast,
       imports: { setPuzzles: cb.setPuzzles },
       raw: { setWordsLeft: cb.setWordsLeft },
     });
 
-    wasmPromise.then((ref) => {
-      ref.abi.init();
+    const wordles = fetch("/assets/wordles.txt").then((r) => r.text());
+    const words = fetch("/assets/wordle-words.txt").then((r) => r.text());
+
+    Promise.all([wasmRef, wordles, words]).then(([ref, wordles, words]) => {
+      const wordlesId = ref.addObj(wordles);
+      const wordsId = ref.addObj(words);
+
+      ref.abi.init(wordlesId, wordsId);
       cb.setWasmRef(ref);
     });
   }, [cb]);
