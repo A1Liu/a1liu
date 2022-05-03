@@ -8,7 +8,16 @@ const builtin = @import("builtin");
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
-pub const Obj = u32;
+pub const Obj = enum(u32) {
+    // These are kept up to date with components/wasm.ts
+    log,
+    info,
+    warn,
+    err,
+    success,
+
+    _,
+};
 
 extern fn stringObjExt(message: [*]const u8, length: usize) Obj;
 
@@ -27,15 +36,6 @@ extern fn readObjMapBytesExt(idx: Obj, begin: [*]u8) void;
 pub extern fn postMessage(tagIdx: Obj, id: Obj) void;
 
 pub extern fn exitExt(objIndex: Obj) noreturn;
-
-// Kept up to date
-pub const BuiltinObj = enum(u32) {
-    log,
-    info,
-    warn,
-    err,
-    success,
-};
 
 pub fn readBytesObj(obj: Obj, alloc: Allocator) ![]u8 {
     if (builtin.target.cpu.arch != .wasm32) return &.{};
@@ -107,7 +107,7 @@ pub fn log(
         return;
     }
 
-    const level_obj: BuiltinObj = switch (message_level) {
+    const level_obj: Obj = switch (message_level) {
         .debug => .info,
         .info => .info,
         .warn => .warn,
@@ -117,10 +117,10 @@ pub fn log(
     postFmt(level_obj, fmt ++ "\n", args);
 }
 
-pub fn postFmt(level: BuiltinObj, comptime fmt: []const u8, args: anytype) void {
+pub fn postFmt(level: Obj, comptime fmt: []const u8, args: anytype) void {
     if (builtin.target.cpu.arch == .wasm32) {
         const obj = stringFmtObj(fmt, args);
-        postMessage(@enumToInt(level), obj);
+        postMessage(level, obj);
 
         clearObjBufferForObjAndAfter(obj);
     } else {
