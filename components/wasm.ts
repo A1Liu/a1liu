@@ -17,17 +17,7 @@ export interface WasmRef {
   readonly memory: WebAssembly.Memory;
   readonly abi: { readonly [x: string]: WasmFunc };
   readonly defer: { readonly [x: string]: AsyncWasmFunc };
-  readonly pushObj: (obj: any) => number;
-}
-
-export function ref(): WasmRef {
-  return {
-    instance: null,
-    memory: null as any,
-    abi: null as any,
-    defer: {},
-    pushObj: () => -1,
-  };
+  readonly addObj: (obj: any) => number;
 }
 
 interface Imports {
@@ -45,15 +35,6 @@ const sendString = (str: string) => {
   u8.set(encodedString);
 };
 
-interface WasmRefInner {
-  instance: any;
-  abi: {
-    [x: string]: WasmFunc;
-  };
-  defer: { [x: string]: AsyncWasmFunc };
-  pushObj: (obj: any) => number;
-}
-
 const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
 
 export const fetchWasm = async (
@@ -62,29 +43,38 @@ export const fetchWasm = async (
 ): Promise<WasmRef> => {
   const responsePromise = fetch(path);
 
-  const ref: WasmRef = {
-    instance: {} as any,
-    memory: {} as any,
-    abi: {} as any,
-    defer: {} as any,
-    pushObj: (data) => {
-      const idx = objectBuffer.length;
-      objectBuffer.push(data);
-      return idx;
-    },
-  };
-
   const { postMessage, raw } = importData;
 
   const imports = { postMessage, ...importData.imports };
+
+  // output data
   const objectBuffer = [...initialObjectBuffer];
-  const initialLen = objectBuffer.length;
+  const initialLen = initialObjectBuffer.length;
+
+  // input data
+  const objectMap = new Map<number, any>();
+  let nextObjectId = 0;
 
   const wasmImports = {} as any;
   Object.entries(imports).forEach(([key, value]: [string, any]) => {
     wasmImports[key] = (...args: number[]) =>
       value(...args.map((idx) => objectBuffer[idx]));
   });
+
+  const ref: WasmRef = {
+    instance: {} as any,
+    memory: {} as any,
+    abi: {} as any,
+    defer: {} as any,
+    addObj: (data) => {
+      const idx = nextObjectId;
+
+      nextObjectId += 1;
+      objectMap.set(idx, data);
+
+      return idx;
+    },
+  };
 
   const env = {
     stringObjExt: (location: number, size: number): number => {
@@ -98,18 +88,21 @@ export const fetchWasm = async (
       return length;
     },
 
-    objBufferStringEncodeExt: (idx: number): number => {
-      const value = objectBuffer[idx];
-      const encodedString = encoder.encode(value);
+    objMapStringEncodeExt: (idx: number): number => {
+      const value = objectMap.get(idx);
 
-      objectBuffer[idx] = encodedString;
+      const encodedString = encoder.encode(value);
+      objectMap.set(idx, encodedString);
+
       return encodedString.length;
     },
-    readObjBufferExt: (idx: number, begin: number): void => {
-      const array = objectBuffer[idx];
+    readObjMapExt: (idx: number, begin: number): void => {
+      const array = objectMap.get(idx);
 
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
       writeTo.set(array);
+
+      objectMap.delete(idx);
     },
 
     // TODO some kind of pop stack operation that makes full objects or arrays

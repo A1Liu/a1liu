@@ -21,8 +21,8 @@ pub extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 pub extern fn clearObjBuffer() void;
 
-extern fn objBufferStringEncodeExt(idx: Obj) usize;
-extern fn readObjBufferExt(idx: Obj, begin: [*]u8) void;
+extern fn objMapStringEncodeExt(idx: Obj) usize;
+extern fn readObjMapExt(idx: Obj, begin: [*]u8) void;
 
 pub extern fn postMessage(tagIdx: Obj, id: Obj) void;
 
@@ -39,10 +39,10 @@ pub const BuiltinObj = enum(u32) {
 
 pub fn readStringObj(obj: Obj, alloc: Allocator) ![]u8 {
     if (builtin.target.cpu.arch != .wasm32) return &.{};
-    const len = objBufferStringEncodeExt(obj);
+    const len = objMapStringEncodeExt(obj);
     const string = try alloc.alloc(u8, len);
 
-    readObjBufferExt(obj, string.ptr);
+    readObjMapExt(obj, string.ptr);
 
     return string;
 }

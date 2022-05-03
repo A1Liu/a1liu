@@ -2,6 +2,28 @@ const std = @import("std");
 const Arch = std.Target.Cpu.Arch;
 const Builder = std.build.Builder;
 
+fn wasmProgram(
+    b: *Builder,
+    mode: std.builtin.Mode,
+    comptime name: []const u8,
+) *std.build.LibExeObjStep {
+    const vers = b.version(0, 0, 0);
+    const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
+    program.addPackagePath("assets", "components/assets.zig");
+    program.addPackagePath("liu", "components/zig/lib.zig");
+    program.setBuildMode(mode);
+    program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
+    if (mode == .Debug) {
+        // Output straight to assets folder during dev to make things easier
+        program.setOutputDir("./public/assets");
+    }
+
+    program.install();
+    b.default_step.dependOn(&program.step);
+
+    return program;
+}
+
 pub fn build(b: *Builder) void {
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
@@ -12,21 +34,8 @@ pub fn build(b: *Builder) void {
     var target = b.standardTargetOptions(.{});
     target.cpu_arch = Arch.x86_64;
 
-    const vers = b.version(0, 0, 0);
-
-    const kilordle = b.addSharedLibrary("kilordle", "src/kilordle.zig", vers);
-    kilordle.addPackagePath("assets", "components/assets.zig");
-    kilordle.addPackagePath("liu", "components/zig/lib.zig");
-    kilordle.setBuildMode(mode);
-    kilordle.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
-    if (mode == .Debug) {
-        // Output straight to assets folder during dev to make things easier
-        kilordle.setOutputDir("./public/assets");
-    }
-
-    kilordle.install();
-
-    b.default_step.dependOn(&kilordle.step);
+    _ = wasmProgram(b, mode, "kilordle");
+    _ = wasmProgram(b, mode, "shapes");
 
     const playground = b.addExecutable("play", "src/test.zig");
     playground.addPackagePath("assets", "components/assets.zig");
