@@ -1,12 +1,11 @@
 const std = @import("std");
-const Arch = std.Target.Cpu.Arch;
-const Builder = std.build.Builder;
 
-fn wasmProgram(
-    b: *Builder,
-    mode: std.builtin.Mode,
-    comptime name: []const u8,
-) *std.build.LibExeObjStep {
+const bld = std.build;
+const Arch = std.Target.Cpu.Arch;
+const Builder = bld.Builder;
+const Mode = std.builtin.Mode;
+
+fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8) *bld.LibExeObjStep {
     const vers = b.version(0, 0, 0);
     const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
 
@@ -39,7 +38,6 @@ pub fn build(b: *Builder) void {
     _ = wasmProgram(b, mode, "shapes");
 
     const playground = b.addExecutable("play", "src/test.zig");
-    playground.addPackagePath("assets", "components/assets.zig");
     playground.addPackagePath("liu", "components/zig/lib.zig");
     playground.setBuildMode(mode);
 

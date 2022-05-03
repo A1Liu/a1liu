@@ -1,5 +1,4 @@
 const std = @import("std");
-const assets = @import("assets");
 const builtin = @import("builtin");
 const liu = @import("liu");
 
