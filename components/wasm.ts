@@ -1,3 +1,17 @@
+import { useToastStore, ToastColors } from "./errors";
+
+const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
+
+export const postToast = (tag: string, data: any): void => {
+  const toast = useToastStore.getState().cb;
+
+  console.log(tag, data);
+
+  if (typeof data === "string") {
+    toast.add(ToastColors[tag] ?? "green", null, data);
+  }
+};
+
 export const encoder = new TextEncoder();
 export const decoder = new TextDecoder();
 
@@ -12,7 +26,7 @@ export const decoder = new TextDecoder();
 type WasmFunc = (...data: any[]) => any;
 type AsyncWasmFunc = (...data: any[]) => Promise<any>;
 
-export interface WasmRef {
+export interface Ref {
   readonly instance: any;
   readonly memory: WebAssembly.Memory;
   readonly abi: { readonly [x: string]: WasmFunc };
@@ -26,21 +40,11 @@ interface Imports {
   readonly imports: { readonly [x: string]: WasmFunc };
 }
 
-const sendString = (str: string) => {
-  const encodedString = encoder.encode(str);
-
-  const u8 = new Uint8Array(exports.mem);
-
-  // Copy the UTF-8 encoded string into the WASM memory.
-  u8.set(encodedString);
-};
-
-const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
 
 export const fetchWasm = async (
   path: string,
   importData: Imports
-): Promise<WasmRef> => {
+): Promise<Ref> => {
   const responsePromise = fetch(path);
 
   const { postMessage, raw } = importData;
@@ -61,19 +65,21 @@ export const fetchWasm = async (
       value(...args.map((idx) => objectBuffer[idx]));
   });
 
-  const ref: WasmRef = {
+  const addObj = (data: any): number => {
+    const idx = nextObjectId;
+
+    nextObjectId += 1;
+    objectMap.set(idx, data);
+
+    return idx;
+  };
+
+  const ref: Ref = {
     instance: {} as any,
     memory: {} as any,
     abi: {} as any,
     defer: {} as any,
-    addObj: (data) => {
-      const idx = nextObjectId;
-
-      nextObjectId += 1;
-      objectMap.set(idx, data);
-
-      return idx;
-    },
+    addObj,
   };
 
   const env = {

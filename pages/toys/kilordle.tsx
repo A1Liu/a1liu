@@ -2,10 +2,8 @@ import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
-import type { WasmRef } from "components/wasm";
 import cx from "classnames";
 import create from "zustand";
-import { useToast, ToastColors } from "components/errors";
 
 interface PuzzleData {
   solution: string;
@@ -25,12 +23,12 @@ interface KilordleCb {
   deleteChar: () => void;
   setPuzzles: (puzzles: PuzzleWasmData[]) => void;
   setWordsLeft: (wordsLeft: number) => void;
-  setWasmRef: (wasmRef: WasmRef) => void;
+  setWasmRef: (wasmRef: wasm.Ref) => void;
   clearError: () => void;
 }
 
 interface KilordleState {
-  wasmRef: WasmRef | undefined;
+  wasmRef: wasm.Ref | undefined;
   foundLetters: Record<string, true>;
   submissionCount: number;
   wordsLeft: number;
@@ -151,7 +149,7 @@ const useStore = create<KilordleState>((set, get) => {
 
   const clearError = () => set({ submitError: false });
 
-  const setWasmRef = (wasmRef: WasmRef) => set({ wasmRef });
+  const setWasmRef = (wasmRef: wasm.Ref) => set({ wasmRef });
 
   return {
     word: "",
@@ -336,19 +334,10 @@ const PuzzleArea: React.VFC = () => {
 
 export const Kilordle: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
-  const toast = useToast();
 
   React.useEffect(() => {
-    const postMessage = (tag: string, data: any) => {
-      console.log(tag, data);
-
-      if (typeof data === "string") {
-        toast.add(ToastColors[tag] ?? "green", null, data);
-      }
-    };
-
     const wasmPromise = wasm.fetchWasm("/assets/kilordle.wasm", {
-      postMessage,
+      postMessage: wasm.postToast,
       imports: { setPuzzles: cb.setPuzzles },
       raw: { setWordsLeft: cb.setWordsLeft },
     });
@@ -357,7 +346,7 @@ export const Kilordle: React.VFC = () => {
       ref.abi.init();
       cb.setWasmRef(ref);
     });
-  }, [toast, cb]);
+  }, [cb]);
 
   return (
     <div className={css.wrapper}>

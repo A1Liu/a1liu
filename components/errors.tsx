@@ -87,6 +87,8 @@ const getToasts = (state: ToastState) => state.toasts;
 const getToastId = (state: ToastState) => state.toastId;
 const getCallbacks = (state: ToastState): ToastCallbacks => state.cb;
 
+export const useToastStore = useStore;
+
 export function useToast(): ToastCallbacks {
   const cb = useStore(getCallbacks);
 

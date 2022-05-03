@@ -4,19 +4,18 @@ import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
 import cx from "classnames";
 import create from "zustand";
-import { useToast, ToastColors } from "components/errors";
 
 interface ShapesCb {
-  setWasmRef: (wasmRef: WasmRef) => void;
+  setWasmRef: (wasmRef: wasm.Ref) => void;
 }
 
 interface ShapesState {
-  wasmRef: WasmRef | undefined;
+  wasmRef: wasm.Ref | undefined;
   callbacks: ShapesCb;
 }
 
 const useStore = create<ShapesState>((set, get) => {
-  const setWasmRef = (wasmRef: WasmRef) => set({ wasmRef });
+  const setWasmRef = (wasmRef: wasm.Ref) => set({ wasmRef });
 
   return {
     wasmRef: undefined,
@@ -30,19 +29,10 @@ const Shapes: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const wasmRef = useStore((state) => state.wasmRef);
   const [text, setText] = React.useState("");
-  const toast = useToast();
 
   React.useEffect(() => {
-    const postMessage = (tag: string, data: any) => {
-      console.log(tag, data);
-
-      if (typeof data === "string") {
-        toast.add(ToastColors[tag] ?? "green", null, data);
-      }
-    };
-
     const wasmPromise = wasm.fetchWasm("/assets/shapes.wasm", {
-      postMessage,
+      postMessage: wasm.postToast,
       imports: {},
       raw: {},
     });
@@ -51,12 +41,14 @@ const Shapes: React.VFC = () => {
       ref.abi.init();
       cb.setWasmRef(ref);
     });
-  }, [toast, cb]);
+  }, [cb]);
 
   return (
     <form
       onSubmit={(evt) => {
         evt.preventDefault();
+
+        if (!wasmRef) return;
 
         const idx = wasmRef.addObj(text);
         wasmRef.defer.print(idx);
