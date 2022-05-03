@@ -5,16 +5,16 @@ import * as wasm from "components/wasm";
 import cx from "classnames";
 import create from "zustand";
 
-interface GraphsCb {
+interface GrapherCb {
   setWasmRef: (wasmRef: wasm.Ref) => void;
 }
 
-interface GraphsState {
+interface GrapherState {
   wasmRef: wasm.Ref | undefined;
-  callbacks: GraphsCb;
+  callbacks: GrapherCb;
 }
 
-const useStore = create<GraphsState>((set, get) => {
+const useStore = create<GrapherState>((set, get) => {
   const setWasmRef = (wasmRef: wasm.Ref) => set({ wasmRef });
 
   return {
@@ -25,13 +25,13 @@ const useStore = create<GraphsState>((set, get) => {
   };
 });
 
-const Graphs: React.VFC = () => {
+const Grapher: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const wasmRef = useStore((state) => state.wasmRef);
   const [text, setText] = React.useState("");
 
   React.useEffect(() => {
-    const wasmPromise = wasm.fetchWasm("/assets/graphs.wasm", {
+    const wasmPromise = wasm.fetchWasm("/assets/grapher.wasm", {
       postMessage: wasm.postToast,
       imports: {},
       raw: {},
@@ -67,4 +67,4 @@ const Graphs: React.VFC = () => {
   );
 };
 
-export default Graphs;
+export default Grapher;
