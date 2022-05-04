@@ -7,6 +7,7 @@ import cx from "classnames";
 import create from "zustand";
 
 // User sets image size/resolution manually
+// User customizes basically every part
 
 type WebGl = WebGL2RenderingContext;
 
