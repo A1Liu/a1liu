@@ -6,6 +6,8 @@ import { useToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
+// User sets image size/resolution manually
+
 type WebGl = WebGL2RenderingContext;
 
 interface GrapherCb {
