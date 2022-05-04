@@ -30,7 +30,7 @@ function work() {
     fi
 
     tmux new-session -d -s "work$1" -c "$HOME/code/orthly$1"
-    tmux split-window -h -c "$HOME/code/hygenist"
+    tmux split-window -h -c "$HOME/code/orthly$1"
     tmux attach -d -t "work$1"
 }
 
@@ -142,6 +142,7 @@ alias zx='unalias zx && a1liu_load_nvm && zx'
 alias oy='unalias oy && a1liu_load_nvm && oy'
 alias infra='yarn run infra'
 alias lerna='yarn run lerna'
+alias sidekick='unalias sidekick && a1liu_load_nvm && sidekick'
 
 function karimify() {
     if ! test -e "$HOME/.karim-dotfiles"; then
