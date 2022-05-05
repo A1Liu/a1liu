@@ -1,4 +1,5 @@
 import React from "react";
+import shallow from "zustand/shallow";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
@@ -14,32 +15,66 @@ import create from "zustand";
 interface GrapherCb {
   initWasm: (wasmRef: wasm.Ref) => void;
   initGl: (gl: GrapherGl) => void;
+  setRawTriangles: (floats: Float32Array) => void;
 }
 
 interface GrapherGl {
   ctx: WebGl;
   program: WebGLProgram;
   vao: WebGLVertexArrayObject;
+  rawTriangles: WebGLBuffer;
+}
+
+interface GrapherGlState {
+  renderId: number;
+  rawTrianglesLength: number;
 }
 
 interface GrapherState {
   gl: GrapherGl | null;
+  glState: GrapherGlState;
   wasmRef: wasm.Ref | null;
+
   callbacks: GrapherCb;
 }
 
 const useStore = create<GrapherState>((set, get) => {
   const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
   const initGl = (gl: GrapherGl) => set({ gl });
+  const setRawTriangles = (floats: Float32Array): void => {
+    const { gl, glState } = get();
+    if (!gl) return;
+
+    const ctx = gl.ctx;
+
+    ctx.bindBuffer(ctx.ARRAY_BUFFER, gl.rawTriangles);
+
+    // three 2d points
+    // const positions = [0, 0, 0, 0.5, 0.7, 0];
+    ctx.bufferData(ctx.ARRAY_BUFFER, floats, ctx.STATIC_DRAW);
+
+    set({
+      glState: {
+        ...glState,
+        rawTrianglesLength: Math.floor(floats.length / 2),
+        renderId: glState.renderId + 1,
+      },
+    });
+  };
 
   return {
     gl: null,
-    program: null,
+    glState: {
+      renderId: 0,
+      rawTrianglesLength: 0,
+    },
+
     wasmRef: null,
 
     callbacks: {
       initWasm,
       initGl,
+      setRawTriangles,
     },
   };
 });
@@ -68,26 +103,20 @@ const initGl = async (
   const vao = ctx.createVertexArray();
   if (!vao) return null;
 
+  const rawTriangles = ctx.createBuffer();
+  if (!rawTriangles) return null;
+
   const posLocation = 0;
 
   ctx.bindAttribLocation(program, posLocation, "pos");
-
-  const positionBuffer = ctx.createBuffer();
-  ctx.bindBuffer(ctx.ARRAY_BUFFER, positionBuffer);
-
-  // three 2d points
-  const positions = [0, 0, 0, 0.5, 0.7, 0];
-  ctx.bufferData(
-    ctx.ARRAY_BUFFER,
-    new Float32Array(positions),
-    ctx.STATIC_DRAW
-  );
 
   ctx.bindVertexArray(vao);
 
   ctx.enableVertexAttribArray(posLocation);
 
   {
+    ctx.bindBuffer(ctx.ARRAY_BUFFER, rawTriangles);
+
     const size = 2; // 2 components per iteration
     const type = ctx.FLOAT; // the data is 32bit floats
     const normalize = false; // don't normalize the data
@@ -98,12 +127,12 @@ const initGl = async (
 
   ctx.bindVertexArray(null);
 
-  const ggl: GrapherGl = { ctx, program, vao };
-
-  return ggl;
+  return { ctx, program, vao, rawTriangles };
 };
 
-const render = (ggl: GrapherGl) => {
+const render = (ggl: GrapherGl, glState: GrapherGlState) => {
+  console.log("GL rendering", glState);
+
   const ctx = ggl.ctx;
 
   GL.resizeCanvasToDisplaySize(ctx.canvas);
@@ -121,17 +150,17 @@ const render = (ggl: GrapherGl) => {
   {
     const primitiveType = ctx.TRIANGLES;
     const offset = 0;
-    const count = 3;
-    ctx.drawArrays(primitiveType, offset, count);
+    ctx.drawArrays(primitiveType, offset, glState.rawTrianglesLength);
   }
 };
 
-const Grapher: React.VFC = () => {
+const Canvas: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
-  const wasmRef = useStore((state) => state.wasmRef);
-  const [text, setText] = React.useState("");
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const toast = useToast();
+
+  const ggl = useStore((state) => state.gl);
+  const glState = useStore((state) => state.glState);
 
   React.useEffect(() => {
     initGl(canvasRef.current, cb).then((ggl) => {
@@ -140,12 +169,28 @@ const Grapher: React.VFC = () => {
         return;
       }
 
-      render(ggl);
       cb.initGl(ggl);
-
       toast.add("success", null, "WebGL2 context initialized!");
+
+      const positions = [0, 0, 0, 0.5, 0.7, 0];
+      cb.setRawTriangles(new Float32Array(positions));
     });
   }, [canvasRef, toast, cb]);
+
+  React.useEffect(() => {
+    if (!ggl) return;
+
+    render(ggl, glState);
+  }, [ggl, glState]);
+
+  return <canvas ref={canvasRef} className={css.canvas} />;
+};
+
+const Grapher: React.VFC = () => {
+  const cb = useStore((state) => state.callbacks);
+  const wasmRef = useStore((state) => state.wasmRef);
+
+  const [text, setText] = React.useState("");
 
   React.useEffect(() => {
     const wasmPromise = wasm.fetchWasm("/assets/grapher.wasm", {
@@ -183,7 +228,7 @@ const Grapher: React.VFC = () => {
         <input type="submit" value="Submit" />
       </form>
 
-      <canvas ref={canvasRef} className={css.canvas} />
+      <Canvas />
     </div>
   );
 };
