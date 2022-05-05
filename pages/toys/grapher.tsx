@@ -154,6 +154,35 @@ const render = (ggl: GrapherGl, glState: GrapherGlState) => {
   }
 };
 
+const Config: React.VFC = () => {
+  const cb = useStore((state) => state.callbacks);
+  const wasmRef = useStore((state) => state.wasmRef);
+  const [text, setText] = React.useState("");
+
+  return (
+    <form
+      onSubmit={(evt) => {
+        evt.preventDefault();
+
+        if (!wasmRef) return;
+
+        const idx = wasmRef.addObj(text);
+        wasmRef.abi.print(idx);
+      }}
+    >
+      <label>
+        Name:
+        <input
+          type="text"
+          value={text}
+          onChange={(evt) => setText(evt.target.value)}
+        />
+      </label>
+      <input type="submit" value="Submit" />
+    </form>
+  );
+};
+
 const Canvas: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -188,9 +217,6 @@ const Canvas: React.VFC = () => {
 
 const Grapher: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
-  const wasmRef = useStore((state) => state.wasmRef);
-
-  const [text, setText] = React.useState("");
 
   React.useEffect(() => {
     const wasmPromise = wasm.fetchWasm("/assets/grapher.wasm", {
@@ -207,27 +233,7 @@ const Grapher: React.VFC = () => {
 
   return (
     <div className={css.wrapper}>
-      <form
-        onSubmit={(evt) => {
-          evt.preventDefault();
-
-          if (!wasmRef) return;
-
-          const idx = wasmRef.addObj(text);
-          wasmRef.abi.print(idx);
-        }}
-      >
-        <label>
-          Name:
-          <input
-            type="text"
-            value={text}
-            onChange={(evt) => setText(evt.target.value)}
-          />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
-
+      <Config />
       <Canvas />
     </div>
   );
