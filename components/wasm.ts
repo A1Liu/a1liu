@@ -89,14 +89,14 @@ export const fetchWasm = async (
   );
 
   const env = {
-    makeStringExt: (location: number, size: number) => {
+    makeString: (location: number, size: number) => {
       const array = new Uint8Array(ref.memory.buffer, location, size);
       const length = objectBuffer.length;
       objectBuffer.push(decoder.decode(array));
 
       return length;
     },
-    makeViewExt: (ty: number, location: number, size: number) => {
+    makeView: (ty: number, location: number, size: number) => {
       const ArrayClass = objectBuffer[ty];
 
       const array = new ArrayClass(ref.memory.buffer, location, size);
@@ -107,7 +107,7 @@ export const fetchWasm = async (
       return length;
     },
 
-    objMapStringEncodeExt: (idx: number): number => {
+    objMapStringEncode: (idx: number): number => {
       const value = objectMap.get(idx);
 
       const encodedString = encoder.encode(value);
@@ -115,8 +115,8 @@ export const fetchWasm = async (
 
       return encodedString.length;
     },
-    objMapLenExt: (idx: number): number => objectMap.get(idx).length,
-    readObjMapBytesExt: (idx: number, begin: number): void => {
+    objMapLen: (idx: number): number => objectMap.get(idx).length,
+    readObjMapBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
       objectMap.delete(idx);
 
@@ -131,8 +131,8 @@ export const fetchWasm = async (
     // TODO some kind of pop stack operation that makes full objects or arrays
     // or whatever
 
-    watermarkObj: (idx: number) => objectBuffer.length,
-    clearObjBufferForObjAndAfter: (idx: number) => {
+    watermark: (idx: number) => objectBuffer.length,
+    setWatermark: (idx: number) => {
       objectBuffer.length = idx;
     },
 
@@ -163,7 +163,7 @@ export const fetchWasm = async (
       obj[key] = value;
     },
 
-    exitExt: (idx: number) => {
+    exit: (idx: number) => {
       const value = objectBuffer[idx];
 
       throw new Error(`Crashed: ${value}`);

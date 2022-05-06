@@ -63,26 +63,26 @@ fn setWordsLeft(count: usize) void {
 fn setPuzzles(puzzles: []Puzzle) void {
     if (builtin.target.cpu.arch != .wasm32) return;
 
-    const mark = wasm.watermarkObj();
-    defer wasm.clearObjBufferForObjAndAfter(mark);
+    const mark = wasm.watermark();
+    defer wasm.setWatermark(mark);
 
-    const arr = wasm.makeArray();
-    const solution_key = wasm.string("solution");
-    const filled_key = wasm.string("filled");
-    const submits_key = wasm.string("submits");
+    const arr = wasm.out.array();
+    const solution_key = wasm.out.string("solution");
+    const filled_key = wasm.out.string("filled");
+    const submits_key = wasm.out.string("submits");
 
     for (puzzles) |puzzle| {
-        const obj = wasm.makeObj();
+        const obj = wasm.out.obj();
 
-        const solution = wasm.string(&puzzle.solution);
-        const filled = wasm.string(&puzzle.filled);
-        const submits = wasm.string(puzzle.submits);
+        const solution = wasm.out.string(&puzzle.solution);
+        const filled = wasm.out.string(&puzzle.filled);
+        const submits = wasm.out.string(puzzle.submits);
 
-        wasm.objSet(obj, solution_key, solution);
-        wasm.objSet(obj, filled_key, filled);
-        wasm.objSet(obj, submits_key, submits);
+        wasm.out.objSet(obj, solution_key, solution);
+        wasm.out.objSet(obj, filled_key, filled);
+        wasm.out.objSet(obj, submits_key, submits);
 
-        wasm.arrayPush(arr, obj);
+        wasm.out.arrayPush(arr, obj);
     }
 
     ext.setPuzzles(arr);
@@ -138,7 +138,7 @@ pub fn submitWord(word: [5]u8) !bool {
     // lowercase
     for (word) |letter| {
         if (letter < 'a' or letter > 'z') {
-            wasm.postFmt(.err, "invalid string {s}", .{word});
+            wasm.out.post(.err, "invalid string {s}", .{word});
             return false;
         }
     }
@@ -282,8 +282,8 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
 pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
     wasm.initIfNecessary();
 
-    wordles = try wasm.readBytesObj(l_wordles, liu.Pages);
-    wordle_words = try wasm.readBytesObj(l_words, liu.Pages);
+    wordles = try wasm.in.bytes(l_wordles, liu.Pages);
+    wordle_words = try wasm.in.bytes(l_words, liu.Pages);
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
     submissions = ArrayList([5]u8).init(liu.Pages);

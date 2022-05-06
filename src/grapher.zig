@@ -32,8 +32,8 @@ pub fn print(msg: wasm.Obj) !void {
     const temp = _temp.allocator();
     defer _temp.deinit();
 
-    const message = try wasm.readStringObj(msg, temp);
-    wasm.postFmt(.info, "{s}!", .{message});
+    const message = try wasm.in.string(msg, temp);
+    wasm.out.post(.info, "{s}!", .{message});
 }
 
 pub fn init() !void {
