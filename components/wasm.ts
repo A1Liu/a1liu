@@ -1,6 +1,22 @@
 import { useToastStore, ToastColors } from "./errors";
 
-const initialObjectBuffer: any[] = ["log", "info", "warn", "error", "success"];
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+const initialObjectBuffer: any[] = [
+  "log",
+  "info",
+  "warn",
+  "error",
+  "success",
+  (buffer: ArrayBuffer, location: number, size: number) => {
+    const array = new Uint8Array(buffer, location, size);
+    return decoder.decode(array);
+  },
+  (buffer: ArrayBuffer, location: number, size: number) => {
+    return new Uint8Array(buffer, location, size);
+  },
+];
 
 export const postToast = (tag: string, data: any): void => {
   const toast = useToastStore.getState().cb;
@@ -11,9 +27,6 @@ export const postToast = (tag: string, data: any): void => {
     toast.add(ToastColors[tag] ?? "green", null, data);
   }
 };
-
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
 
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;
@@ -81,13 +94,11 @@ export const fetchWasm = async (
   );
 
   const env = {
-    stringObjExt: (location: number, size: number): number => {
-      const buffer = new Uint8Array(ref.memory.buffer, location, size);
-
-      const str = decoder.decode(buffer);
+    bytesExt: (ty: number, location: number, size: number) => {
+      const obj = objectBuffer[ty](ref.memory.buffer, location, size);
 
       const length = objectBuffer.length;
-      objectBuffer.push(str);
+      objectBuffer.push(obj);
 
       return length;
     },

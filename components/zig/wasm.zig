@@ -16,45 +16,58 @@ pub const Obj = enum(u32) {
     err,
     success,
 
+    String,
+    U8Array,
+    // makeF32Array,
+
     _,
 };
 
-extern fn stringObjExt(message: [*]const u8, length: usize) Obj;
+extern fn bytesExt(o: Obj, message: ?*const anyopaque, length: usize) Obj;
 
-pub extern fn watermarkObj() Obj;
 pub extern fn makeArray() Obj;
 pub extern fn makeObj() Obj;
 pub extern fn arrayPush(arr: Obj, obj: Obj) void;
 pub extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 
+pub extern fn watermarkObj() Obj;
 pub extern fn clearObjBufferForObjAndAfter(objIndex: Obj) void;
 
 extern fn objMapStringEncodeExt(idx: Obj) usize;
 extern fn objMapLenExt(idx: Obj) usize;
 extern fn readObjMapBytesExt(idx: Obj, begin: [*]u8) void;
 
-pub extern fn postMessage(tagIdx: Obj, id: Obj) void;
+extern fn postMessage(tagIdx: Obj, id: Obj) void;
+extern fn exitExt(objIndex: Obj) noreturn;
 
-pub extern fn exitExt(objIndex: Obj) noreturn;
+pub fn slice(obj: Obj, data: anytype) Obj {
+    const T = std.meta.Elem(@TypeOf(data));
+
+    return bytesExt(obj, data.ptr, data.len * @sizeOf(T));
+}
+
+pub fn string(a: []const u8) Obj {
+    return bytesExt(.String, a.ptr, a.len);
+}
 
 pub fn readBytesObj(obj: Obj, alloc: Allocator) ![]u8 {
     if (builtin.target.cpu.arch != .wasm32) return &.{};
     const len = objMapLenExt(obj);
-    const string = try alloc.alloc(u8, len);
+    const data = try alloc.alloc(u8, len);
 
-    readObjMapBytesExt(obj, string.ptr);
+    readObjMapBytesExt(obj, data.ptr);
 
-    return string;
+    return data;
 }
 
 pub fn readStringObj(obj: Obj, alloc: Allocator) ![]u8 {
     if (builtin.target.cpu.arch != .wasm32) return &.{};
     const len = objMapStringEncodeExt(obj);
-    const string = try alloc.alloc(u8, len);
+    const data = try alloc.alloc(u8, len);
 
-    readObjMapBytesExt(obj, string.ptr);
+    readObjMapBytesExt(obj, data.ptr);
 
-    return string;
+    return data;
 }
 
 pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
@@ -67,13 +80,9 @@ pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
     exit(s);
 }
 
-pub fn exit(bytes: []const u8) noreturn {
-    const obj = stringObjExt(bytes.ptr, bytes.len);
+pub fn exit(msg: []const u8) noreturn {
+    const obj = bytesExt(.String, msg.ptr, msg.len);
     return exitExt(obj);
-}
-
-pub fn stringObj(bytes: []const u8) Obj {
-    return stringObjExt(bytes.ptr, bytes.len);
 }
 
 pub fn stringFmtObj(comptime fmt: []const u8, args: anytype) Obj {
@@ -82,9 +91,9 @@ pub fn stringFmtObj(comptime fmt: []const u8, args: anytype) Obj {
     defer _temp.deinit();
 
     const allocResult = std.fmt.allocPrint(temp, fmt, args);
-    const bytes = allocResult catch @panic("failed to print");
+    const out = allocResult catch @panic("failed to print");
 
-    return stringObjExt(bytes.ptr, bytes.len);
+    return bytesExt(.String, out.ptr, out.len);
 }
 
 pub const strip_debug_info = true;

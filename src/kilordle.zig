@@ -67,16 +67,16 @@ fn setPuzzles(puzzles: []Puzzle) void {
     defer wasm.clearObjBufferForObjAndAfter(mark);
 
     const arr = wasm.makeArray();
-    const solution_key = wasm.stringObj("solution");
-    const filled_key = wasm.stringObj("filled");
-    const submits_key = wasm.stringObj("submits");
+    const solution_key = wasm.string("solution");
+    const filled_key = wasm.string("filled");
+    const submits_key = wasm.string("submits");
 
     for (puzzles) |puzzle| {
         const obj = wasm.makeObj();
 
-        const solution = wasm.stringObj(&puzzle.solution);
-        const filled = wasm.stringObj(&puzzle.filled);
-        const submits = wasm.stringObj(puzzle.submits);
+        const solution = wasm.string(&puzzle.solution);
+        const filled = wasm.string(&puzzle.filled);
+        const submits = wasm.string(puzzle.submits);
 
         wasm.objSet(obj, solution_key, solution);
         wasm.objSet(obj, filled_key, filled);
