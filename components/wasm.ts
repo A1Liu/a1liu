@@ -51,20 +51,9 @@ export const fetchWasm = async (
 
   const { postMessage, raw } = importData;
 
-  const imports = { postMessage, ...importData.imports };
-
-  // output data
-  const objectBuffer = [...initialObjectBuffer];
-
-  // input data
-  const objectMap = new Map<number, any>();
+  const objectBuffer = [...initialObjectBuffer]; // output data
+  const objectMap = new Map<number, any>(); // input data
   let nextObjectId = 0;
-
-  const wasmImports = {} as any;
-  Object.entries(imports).forEach(([key, value]: [string, any]) => {
-    wasmImports[key] = (...args: number[]) =>
-      value(...args.map((idx) => objectBuffer[idx]));
-  });
 
   const addObj = (data: any): number => {
     const idx = nextObjectId;
@@ -82,6 +71,14 @@ export const fetchWasm = async (
     defer: {} as any,
     addObj,
   };
+
+  const wasmImports = {} as any;
+  Object.entries({ postMessage, ...importData.imports }).forEach(
+    ([key, value]: [string, any]) => {
+      wasmImports[key] = (...args: number[]) =>
+        value(...args.map((idx) => objectBuffer[idx]));
+    }
+  );
 
   const env = {
     stringObjExt: (location: number, size: number): number => {
