@@ -16,14 +16,14 @@ pub const Obj = enum(u32) {
     err,
     success,
 
-    String,
     U8Array,
     // makeF32Array,
 
     _,
 };
 
-extern fn bytesExt(o: Obj, message: ?*const anyopaque, length: usize) Obj;
+extern fn makeStringExt(message: ?*const anyopaque, length: usize) Obj;
+extern fn makeViewExt(o: Obj, message: ?*const anyopaque, length: usize) Obj;
 
 pub extern fn makeArray() Obj;
 pub extern fn makeObj() Obj;
@@ -43,11 +43,11 @@ extern fn exitExt(objIndex: Obj) noreturn;
 pub fn slice(obj: Obj, data: anytype) Obj {
     const T = std.meta.Elem(@TypeOf(data));
 
-    return bytesExt(obj, data.ptr, data.len * @sizeOf(T));
+    return makeViewExt(obj, data.ptr, data.len * @sizeOf(T));
 }
 
 pub fn string(a: []const u8) Obj {
-    return bytesExt(.String, a.ptr, a.len);
+    return makeStringExt(a.ptr, a.len);
 }
 
 pub fn readBytesObj(obj: Obj, alloc: Allocator) ![]u8 {
@@ -81,7 +81,7 @@ pub fn exitFmt(comptime fmt: []const u8, args: anytype) noreturn {
 }
 
 pub fn exit(msg: []const u8) noreturn {
-    const obj = bytesExt(.String, msg.ptr, msg.len);
+    const obj = makeStringExt(msg.ptr, msg.len);
     return exitExt(obj);
 }
 
@@ -93,7 +93,7 @@ pub fn stringFmtObj(comptime fmt: []const u8, args: anytype) Obj {
     const allocResult = std.fmt.allocPrint(temp, fmt, args);
     const out = allocResult catch @panic("failed to print");
 
-    return bytesExt(.String, out.ptr, out.len);
+    return makeStringExt(out.ptr, out.len);
 }
 
 pub const strip_debug_info = true;

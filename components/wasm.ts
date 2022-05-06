@@ -9,13 +9,8 @@ const initialObjectBuffer: any[] = [
   "warn",
   "error",
   "success",
-  (buffer: ArrayBuffer, location: number, size: number) => {
-    const array = new Uint8Array(buffer, location, size);
-    return decoder.decode(array);
-  },
-  (buffer: ArrayBuffer, location: number, size: number) => {
-    return new Uint8Array(buffer, location, size);
-  },
+
+  Uint8Array,
 ];
 
 export const postToast = (tag: string, data: any): void => {
@@ -94,11 +89,20 @@ export const fetchWasm = async (
   );
 
   const env = {
-    bytesExt: (ty: number, location: number, size: number) => {
-      const obj = objectBuffer[ty](ref.memory.buffer, location, size);
+    makeStringExt: (location: number, size: number) => {
+      const array = new Uint8Array(ref.memory.buffer, location, size);
+      const length = objectBuffer.length;
+      objectBuffer.push(decoder.decode(array));
+
+      return length;
+    },
+    makeViewExt: (ty: number, location: number, size: number) => {
+      const ArrayClass = objectBuffer[ty];
+
+      const array = new ArrayClass(ref.memory.buffer, location, size);
 
       const length = objectBuffer.length;
-      objectBuffer.push(obj);
+      objectBuffer.push(array);
 
       return length;
     },
