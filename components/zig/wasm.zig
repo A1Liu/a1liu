@@ -23,7 +23,7 @@ pub const Obj = enum(u32) {
 };
 
 const ext = struct {
-    extern fn makeString(message: ?*const anyopaque, length: usize) Obj;
+    extern fn makeString(message: [*]const u8, length: usize) Obj;
     extern fn makeView(o: Obj, message: ?*const anyopaque, length: usize) Obj;
 
     extern fn makeArray() Obj;
@@ -106,16 +106,6 @@ pub const in = struct {
         return data;
     }
 };
-
-pub fn exitFmt(comptime format: []const u8, args: anytype) noreturn {
-    var _temp = liu.Temp.init();
-    const temp = _temp.allocator();
-
-    const allocResult = std.fmt.allocPrint(temp, format, args);
-    const s = allocResult catch @panic("failed to print");
-
-    exit(s);
-}
 
 pub fn exit(msg: []const u8) noreturn {
     const obj = ext.makeString(msg.ptr, msg.len);
