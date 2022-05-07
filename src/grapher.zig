@@ -38,30 +38,37 @@ comptime {
 var triangles: ArrayList(f32) = undefined;
 var temp_triangles: std.BoundedArray(f32, 6) = undefined;
 
-export fn onMove(posX_: f32, posY_: f32, width: f32, height: f32) void {
+fn removeInProgressTriangle() void {
+    temp_triangles.len = 0;
+    const items = triangles.items;
+    std.mem.set(f32, items[0..36], 0);
+}
+
+export fn onRightClick() void {
+    removeInProgressTriangle();
+
+    const obj = wasm.out.slice(triangles.items);
+    ext.setTriangles(obj);
+}
+
+export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     if (temp_triangles.len < 2) return;
 
-    const posX = posX_ * 2 / width - 1;
-    const posY = -(posY_ * 2 / height - 1);
+    const pos: Vec2 = .{ posX * 2 / width - 1, -(posY * 2 / height - 1) };
     const dims: Vec2 = .{ width, height };
 
     const len = temp_triangles.len;
-    temp_triangles.slice()[len - 2] = posX;
-    temp_triangles.slice()[len - 1] = posY;
+    temp_triangles.slice()[(len - 2)..][0..2].* = pos;
 
     if (temp_triangles.len < 4) return;
 
-    const prevX = temp_triangles.slice()[len - 4];
-    const prevY = temp_triangles.slice()[len - 3];
-
-    const pos: Vec2 = .{ posX, posY };
-    const prev: Vec2 = .{ prevX, prevY };
+    const prev: Vec2 = temp_triangles.slice()[(len - 4)..][0..2].*;
 
     const vector = pos - prev;
-    const rotated: Vec2 = .{ -vector[1], vector[0] };
+    const rot90: Vec2 = .{ -vector[1], vector[0] };
 
-    const tangent_len = std.math.sqrt(rotated[0] * rotated[0] + rotated[1] * rotated[1]);
-    const tangent = rotated * @splat(2, 2 / tangent_len) / dims;
+    const tangent_len = @sqrt(rot90[0] * rot90[0] + rot90[1] * rot90[1]);
+    const tangent = rot90 * @splat(2, 2 / tangent_len) / dims;
 
     const line_block_begin = (len - 4) / 2 * 12;
     const data = triangles.items[line_block_begin..];
@@ -88,9 +95,8 @@ fn onClick(posX_: f32, posY_: f32, width: f32, height: f32) !void {
         try triangles.ensureUnusedCapacity(6);
         try triangles.appendSlice(temp_triangles.slice());
 
-        temp_triangles.len = 0;
-        const items = triangles.items;
-        std.mem.set(f32, items[0..36], 0);
+        removeInProgressTriangle();
+
         const obj = wasm.out.slice(triangles.items);
         ext.setTriangles(obj);
 

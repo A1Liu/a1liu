@@ -229,6 +229,12 @@ const Canvas: React.VFC = () => {
         const y = evt.clientY;
         wasmRef.abi.onClick(x, y, evt.target.width, evt.target.height);
       }}
+      onContextMenu={(evt) => {
+        if (!wasmRef) return;
+
+        evt.preventDefault();
+        wasmRef.abi.onRightClick();
+      }}
     />
   );
 };
