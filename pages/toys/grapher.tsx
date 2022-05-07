@@ -215,12 +215,19 @@ const Canvas: React.VFC = () => {
     <canvas
       ref={canvasRef}
       className={css.canvas}
-      onClick={(evt) => {
-        if (!canvasRef.current) return;
+      onMouseMove={(evt) => {
+        if (!wasmRef) return;
 
-        const x = (evt.clientX * 2) / canvasRef.current.width - 1;
-        const y = (evt.clientY * 2) / canvasRef.current.height - 1;
-        wasmRef.abi.onClick(x, -y);
+        const x = evt.clientX;
+        const y = evt.clientY;
+        wasmRef.abi.onMove(x, y, evt.target.width, evt.target.height);
+      }}
+      onClick={(evt) => {
+        if (!wasmRef) return;
+
+        const x = evt.clientX;
+        const y = evt.clientY;
+        wasmRef.abi.onClick(x, y, evt.target.width, evt.target.height);
       }}
     />
   );
