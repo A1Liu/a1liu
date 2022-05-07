@@ -46,13 +46,13 @@ My Vim config uses these environment variables at startup:
 - `vim-S` A Vim flag, where `S` is the name of the flag
   - `light-mode` - Whether or not Vim is dark or light mode
   - `aliu` - Whether or not `<C-T>` is bound to a timestamped signature
-  - `plugins-base-enabled` - Whether or not the default plugins are enabled
-  - `plugins-format-enabled` - Whether or not vim-autoformat is enabled
-  - `plugins-fzf-enabled` - Whether or not fzf is enabled
-  - `plugins-solarized-enabled` - Whether or not the color scheme plugin is enabled
-  - `plugins-polyglot-enabled` - Whether or not vim-polyglot is enabled
-  - `plugins-snippets-enabled` - Whether or not vim-snippets is enabled
-  - `plugins-lsc-enabled` - Whether or not the language server client is enabled
+  - `plug-base` - Whether or not the default plugins are enabled
+  - `plug-format` - Whether or not vim-autoformat is enabled
+  - `plug-fzf` - Whether or not fzf is enabled
+  - `plug-solarized` - Whether or not the color scheme plugin is enabled
+  - `plug-polyglot` - Whether or not vim-polyglot is enabled
+  - `plug-snippets` - Whether or not vim-snippets is enabled
+  - `plug-lsc` - Whether or not the language server client is enabled
 
 
 ### TODO
