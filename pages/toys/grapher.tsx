@@ -43,6 +43,7 @@ interface GrapherState {
 const useStore = create<GrapherState>((set, get) => {
   const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
   const initGl = (gl: GrapherGl) => set({ gl });
+
   const setRawTriangles = (floats: Float32Array): void => {
     const { gl, glState } = get();
     if (!gl) return;
@@ -50,9 +51,6 @@ const useStore = create<GrapherState>((set, get) => {
     const ctx = gl.ctx;
 
     ctx.bindBuffer(ctx.ARRAY_BUFFER, gl.rawTriangles);
-
-    // three 2d points
-    // const positions = [0, 0, 0, 0.5, 0.7, 0];
     ctx.bufferData(ctx.ARRAY_BUFFER, floats, ctx.STATIC_DRAW);
 
     set({
@@ -109,7 +107,6 @@ const initGl = async (
   if (!rawTriangles) return null;
 
   const posLocation = 0;
-
   ctx.bindAttribLocation(program, posLocation, "pos");
 
   ctx.bindVertexArray(vao);
@@ -159,36 +156,37 @@ const render = (ggl: GrapherGl, glState: GrapherGlState) => {
 const Config: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const wasmRef = useStore((state) => state.wasmRef);
-  const [text, setText] = React.useState("");
 
   return (
-    <div className={css.config}>
-      <form
-        onSubmit={(evt) => {
-          evt.preventDefault();
+    <form
+      className={css.config}
+      onSubmit={(evt: React.FormEvent<HTMLFormElement>) => {
+        evt.preventDefault();
 
-          if (!wasmRef) return;
+        if (!wasmRef) return;
 
-          const idx = wasmRef.addObj(text);
-          wasmRef.abi.print(idx);
-        }}
-      >
-        <label>
-          Name:
-          <input
-            type="text"
-            value={text}
-            onChange={(evt) => setText(evt.target.value)}
-          />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
+        const target = evt.target as HTMLFormElement;
+        const data: Record<string, HTMLInputElement> = {};
+        Array.from(target.elements).forEach((e: any) => (data[e.name] = e));
+
+        const idx = wasmRef.addObj(data.blarg.value);
+        wasmRef.abi.print(idx);
+      }}
+    >
+      <h3>Settings</h3>
+
+      <label className={css.configRow}>
+        Name: <input type="text" name="blarg" />
+      </label>
+
+      <input type="submit" value="Submit" />
+    </form>
   );
 };
 
 const Canvas: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
+  const wasmRef = useStore((state) => state.wasmRef);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const toast = useToast();
 
@@ -213,7 +211,19 @@ const Canvas: React.VFC = () => {
     render(ggl, glState);
   }, [ggl, glState]);
 
-  return <canvas ref={canvasRef} className={css.canvas} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={css.canvas}
+      onClick={(evt) => {
+        if (!canvasRef.current) return;
+
+        const x = (evt.clientX * 2) / canvasRef.current.width - 1;
+        const y = (evt.clientY * 2) / canvasRef.current.height - 1;
+        wasmRef.abi.onClick(x, -y);
+      }}
+    />
+  );
 };
 
 const Grapher: React.VFC = () => {

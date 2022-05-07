@@ -11,10 +11,34 @@
 
 .canvas {
   height: 100%;
+  min-width: 0px;
+  width: inherit;
+  max-width: inherit;
   flex-grow: 1;
 }
 
 .config {
   height: 100%;
   width: 400px;
+
+  display: flex;
+  flex-direction: column;
+
+  border-left: 4px solid black;
+  padding: 8px 4px 16px 8px;
+  gap: 8px;
+
+  & input {
+    padding: 4px;
+    border: 2px solid black;
+    border-radius: 8px;
+  }
+}
+
+.configRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
 }
