@@ -8,6 +8,8 @@ PROMPT="\
 %{$fg[cyan]%}%c%{$reset_color%} \
 \$(git_prompt_info)%(?:%{$fg[green]%}#:%{$fg[red]%}#)%{$reset_color%} "
 
+zle_highlight=(default:bold)
+
 # Shamelessly copied from
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/git.zsh
 #
