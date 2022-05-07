@@ -160,26 +160,28 @@ const Config: React.VFC = () => {
   const [text, setText] = React.useState("");
 
   return (
-    <form
-      onSubmit={(evt) => {
-        evt.preventDefault();
+    <div className={css.config}>
+      <form
+        onSubmit={(evt) => {
+          evt.preventDefault();
 
-        if (!wasmRef) return;
+          if (!wasmRef) return;
 
-        const idx = wasmRef.addObj(text);
-        wasmRef.abi.print(idx);
-      }}
-    >
-      <label>
-        Name:
-        <input
-          type="text"
-          value={text}
-          onChange={(evt) => setText(evt.target.value)}
-        />
-      </label>
-      <input type="submit" value="Submit" />
-    </form>
+          const idx = wasmRef.addObj(text);
+          wasmRef.abi.print(idx);
+        }}
+      >
+        <label>
+          Name:
+          <input
+            type="text"
+            value={text}
+            onChange={(evt) => setText(evt.target.value)}
+          />
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
   );
 };
 
@@ -230,8 +232,8 @@ const Grapher: React.VFC = () => {
 
   return (
     <div className={css.wrapper}>
-      <Config />
       <Canvas />
+      <Config />
     </div>
   );
 };
