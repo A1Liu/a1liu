@@ -220,14 +220,16 @@ const Canvas: React.VFC = () => {
 
         const x = evt.clientX;
         const y = evt.clientY;
-        wasmRef.abi.onMove(x, y, evt.target.width, evt.target.height);
+        const target = evt.target as HTMLCanvasElement;
+        wasmRef.abi.onMove(x, y, target.width, target.height);
       }}
       onClick={(evt) => {
         if (!wasmRef) return;
 
         const x = evt.clientX;
         const y = evt.clientY;
-        wasmRef.abi.onClick(x, y, evt.target.width, evt.target.height);
+        const target = evt.target as HTMLCanvasElement;
+        wasmRef.abi.onClick(x, y, target.width, target.height);
       }}
       onContextMenu={(evt) => {
         if (!wasmRef) return;
