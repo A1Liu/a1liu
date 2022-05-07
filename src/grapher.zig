@@ -44,6 +44,10 @@ fn removeInProgressTriangle() void {
     std.mem.set(f32, items[0..36], 0);
 }
 
+fn translatePos(posX: f32, posY: f32, dims: Vec2) Vec2 {
+    return .{ posX * 2 / dims[0] - 1, -(posY * 2 / dims[1] - 1) };
+}
+
 export fn onRightClick() void {
     removeInProgressTriangle();
 
@@ -54,8 +58,8 @@ export fn onRightClick() void {
 export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     if (temp_triangles.len < 2) return;
 
-    const pos: Vec2 = .{ posX * 2 / width - 1, -(posY * 2 / height - 1) };
     const dims: Vec2 = .{ width, height };
+    const pos = translatePos(posX, posY, dims);
 
     const len = temp_triangles.len;
     temp_triangles.slice()[(len - 2)..][0..2].* = pos;
@@ -87,9 +91,8 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     ext.setTriangles(obj);
 }
 
-fn onClick(posX_: f32, posY_: f32, width: f32, height: f32) !void {
-    const posX = posX_ * 2 / width - 1;
-    const posY = -(posY_ * 2 / height - 1);
+fn onClick(posX: f32, posY: f32, width: f32, height: f32) !void {
+    const pos = translatePos(posX, posY, .{ width, height });
 
     if (temp_triangles.len == temp_triangles.buffer.len) {
         try triangles.ensureUnusedCapacity(6);
@@ -105,12 +108,13 @@ fn onClick(posX_: f32, posY_: f32, width: f32, height: f32) !void {
     }
 
     if (temp_triangles.len == 0) {
-        try temp_triangles.append(posX);
-        try temp_triangles.append(posY);
+        temp_triangles.buffer[0..2].* = pos;
+        temp_triangles.len += 2;
     }
 
-    try temp_triangles.append(posX);
-    try temp_triangles.append(posY);
+    const len = temp_triangles.len;
+    temp_triangles.buffer[len..][0..2].* = pos;
+    temp_triangles.len += 2;
 }
 
 pub fn print(msg: wasm.Obj) !void {
