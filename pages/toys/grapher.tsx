@@ -9,11 +9,6 @@ import { useToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
-// User sets image size/resolution manually
-// User customizes basically every part
-
-// step 1: simple drawing stuffs
-
 interface GrapherCb {
   initWasm: (wasmRef: wasm.Ref) => void;
   initGl: (gl: GrapherGl) => void;

@@ -3,8 +3,6 @@ const root = @import("root");
 const liu = @import("./lib.zig");
 const builtin = @import("builtin");
 
-// building array of objects:
-
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 

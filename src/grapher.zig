@@ -26,8 +26,6 @@ const ext = struct {
     }
 };
 
-// Something to make simple graphs for memes
-
 comptime {
     @export(ext.onClickExt, .{ .name = "onClick", .linkage = .Strong });
     @export(ext.printExt, .{ .name = "print", .linkage = .Strong });
