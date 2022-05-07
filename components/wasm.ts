@@ -11,6 +11,7 @@ const initialObjectBuffer: any[] = [
   "success",
 
   Uint8Array,
+  Float32Array,
 ];
 
 export const postToast = (tag: string, data: any): void => {

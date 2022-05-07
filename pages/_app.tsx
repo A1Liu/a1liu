@@ -5,6 +5,8 @@ import { post, get } from "components/util";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
 
+// https://github.com/timolins/react-hot-toast
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

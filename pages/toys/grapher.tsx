@@ -200,9 +200,6 @@ const Canvas: React.VFC = () => {
 
       cb.initGl(ggl);
       toast.add("success", null, "WebGL2 context initialized!");
-
-      const positions = [0, 0, 0, 0.5, 0.7, 0];
-      cb.setRawTriangles(new Float32Array(positions));
     });
   }, [canvasRef, toast, cb]);
 
@@ -221,7 +218,7 @@ const Grapher: React.VFC = () => {
   React.useEffect(() => {
     const wasmPromise = wasm.fetchWasm("/assets/grapher.wasm", {
       postMessage: wasm.postToast,
-      imports: {},
+      imports: { setTriangles: cb.setRawTriangles },
       raw: {},
     });
 

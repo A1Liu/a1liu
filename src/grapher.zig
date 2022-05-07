@@ -9,6 +9,8 @@ pub usingnamespace wasm;
 const ArrayList = std.ArrayList;
 
 const ext = struct {
+    extern fn setTriangles(obj: wasm.Obj) void;
+
     fn printExt(msg: wasm.Obj) callconv(.C) void {
         print(msg) catch @panic("print failed");
     }
@@ -34,6 +36,10 @@ pub fn print(msg: wasm.Obj) !void {
 
     const message = try wasm.in.string(msg, temp);
     wasm.out.post(.info, "{s}!", .{message});
+
+    const a = [_]f32{ 0, 0, 0, 0.5, 0.7, 0 };
+    const obj = wasm.out.slice(&a);
+    ext.setTriangles(obj);
 }
 
 pub fn init() !void {

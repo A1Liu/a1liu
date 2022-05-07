@@ -17,7 +17,7 @@ pub const Obj = enum(u32) {
     success,
 
     U8Array,
-    // makeF32Array,
+    F32Array,
 
     _,
 };
@@ -51,10 +51,32 @@ pub const out = struct {
     pub const arrayPush = ext.arrayPush;
     pub const objSet = ext.objSet;
 
-    pub fn slice(object: Obj, data: anytype) Obj {
-        const T = std.meta.Elem(@TypeOf(data));
+    pub fn slice(data: anytype) Obj {
+        const ptr: ?*const anyopaque = ptr: {
+            switch (@typeInfo(@TypeOf(data))) {
+                .Array => {},
+                .Pointer => |info| switch (info.size) {
+                    .One => switch (@typeInfo(info.child)) {
+                        .Array => break :ptr data,
+                        else => {},
+                    },
+                    .Many, .C => {},
+                    .Slice => break :ptr data.ptr,
+                },
+                else => {},
+            }
 
-        return ext.makeView(object, data.ptr, data.len * @sizeOf(T));
+            @compileError("Need to pass a slice or array");
+        };
+
+        const len = data.len;
+
+        const T = std.meta.Elem(@TypeOf(data));
+        return switch (T) {
+            u8 => ext.makeView(.U8Array, ptr, len),
+            f32 => ext.makeView(.F32Array, ptr, len),
+            else => unreachable,
+        };
     }
 
     pub fn string(a: []const u8) Obj {
