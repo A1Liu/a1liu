@@ -35,19 +35,15 @@ comptime {
 // First 36 triangles are reserved for the lines created during triangle drawing
 var triangles: ArrayList(f32) = undefined;
 var temp_triangle: std.BoundedArray(f32, 6) = undefined;
-
-fn removeInProgressTriangle() void {
-    temp_triangle.len = 0;
-    const items = triangles.items;
-    std.mem.set(f32, items[0..36], 0);
-}
+var temp_begin: usize = 0;
 
 fn translatePos(posX: f32, posY: f32, dims: Vec2) Vec2 {
     return .{ posX * 2 / dims[0] - 1, -(posY * 2 / dims[1] - 1) };
 }
 
 export fn onRightClick() void {
-    removeInProgressTriangle();
+    triangles.items.len = temp_begin;
+    temp_triangle.len = 0;
 
     const obj = wasm.out.slice(triangles.items);
     ext.setTriangles(obj);
@@ -72,8 +68,8 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     const tangent_len = @sqrt(rot90[0] * rot90[0] + rot90[1] * rot90[1]);
     const tangent = rot90 * @splat(2, 2 / tangent_len) / dims;
 
-    const line_block_begin = (len - 4) / 2 * 12;
-    const data = triangles.items[line_block_begin..];
+    const data_begin = temp_begin + ((len - 4) / 2 * 12);
+    const data = triangles.items[data_begin..];
 
     // first triangle, drawn clockwise
     data[0..2].* = prev + tangent;
@@ -93,15 +89,16 @@ fn onClick(posX: f32, posY: f32, width: f32, height: f32) !void {
     const pos = translatePos(posX, posY, .{ width, height });
 
     if (temp_triangle.len == temp_triangle.buffer.len) {
-        try triangles.ensureUnusedCapacity(6);
+        triangles.items.len = temp_begin;
         try triangles.appendSlice(temp_triangle.slice());
-
-        removeInProgressTriangle();
+        temp_begin = triangles.items.len;
+        temp_triangle.len = 0;
 
         const obj = wasm.out.slice(triangles.items);
         ext.setTriangles(obj);
 
         wasm.out.post(.success, "new triangle!", .{});
+
         return;
     }
 
@@ -113,6 +110,11 @@ fn onClick(posX: f32, posY: f32, width: f32, height: f32) !void {
     const len = temp_triangle.len;
     temp_triangle.buffer[len..][0..2].* = pos;
     temp_triangle.len += 2;
+
+    try triangles.appendSlice(&.{
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
+    });
 }
 
 pub fn print(msg: wasm.Obj) !void {
@@ -132,16 +134,16 @@ pub fn init() !void {
     temp_triangle = try std.BoundedArray(f32, 6).init(0);
     triangles = ArrayList(f32).init(liu.Pages);
 
-    try triangles.appendSlice(&.{
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0,
+    // try triangles.appendSlice(&.{
+    //     0, 0, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0,
 
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0,
 
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0,
-    });
+    //     0, 0, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0,
+    // });
 
     std.log.info("WASM initialized!", .{});
 }
