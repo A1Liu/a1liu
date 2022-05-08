@@ -7,7 +7,6 @@ pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 const ArrayList = std.ArrayList;
-
 const Vec2 = @Vector(2, f32);
 
 const ext = struct {
@@ -102,7 +101,7 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     ext.setTriangles(obj);
 }
 
-fn onClick(pos: Vec2) !void {
+pub fn onClick(pos: Vec2) !void {
     switch (temp_type) {
         .triangle => if (temp_points.len >= 6) {
             triangles.items.len = temp_begin;
