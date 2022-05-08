@@ -162,16 +162,5 @@ pub fn init() !void {
     temp_points = try std.BoundedArray(f32, 6).init(0);
     triangles = ArrayList(f32).init(liu.Pages);
 
-    // try triangles.appendSlice(&.{
-    //     0, 0, 0, 0, 0, 0,
-    //     0, 0, 0, 0, 0, 0,
-
-    //     0, 0, 0, 0, 0, 0,
-    //     0, 0, 0, 0, 0, 0,
-
-    //     0, 0, 0, 0, 0, 0,
-    //     0, 0, 0, 0, 0, 0,
-    // });
-
     std.log.info("WASM initialized!", .{});
 }
