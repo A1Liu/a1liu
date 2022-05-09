@@ -104,10 +104,12 @@ const LineTool = struct {
         return changed;
     }
 
-    fn move(self: *Self, pos: Vec2, dims: Vec2) void {
-        const prev = if (self.prev) |prev| prev else return;
+    fn move(self: *Self, pos: Vec2, dims: Vec2) bool {
+        const prev = if (self.prev) |prev| prev else return false;
         const data = triangles.items[temp_begin..];
         drawLineInto(data[0..12], prev, pos, dims);
+
+        return true;
     }
 
     fn click(self: *Self, pos: Vec2) !void {
@@ -139,17 +141,19 @@ const TriangleTool = struct {
         return changed;
     }
 
-    fn move(self: *Self, pos: Vec2, dims: Vec2) void {
+    fn move(self: *Self, pos: Vec2, dims: Vec2) bool {
         const data = triangles.items[temp_begin..];
 
-        const first = if (self.first) |first| first else return;
+        const first = if (self.first) |first| first else return false;
         const second = if (self.second) |second| second else {
             drawLineInto(data[0..12], first, pos, dims);
-            return;
+            return true;
         };
 
         drawLineInto(data[12..24], first, pos, dims);
         drawLineInto(data[24..36], second, pos, dims);
+
+        return true;
     }
 
     fn click(self: *Self, pos: Vec2) !void {
@@ -251,15 +255,20 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     switch (tool) {
         .none => return,
         .triangle => |*draw| {
-            draw.move(pos, dims);
+            if (draw.move(pos, dims)) {
+                const obj = wasm.out.slice(triangles.items);
+                ext.setTriangles(obj);
+            }
+
+            wasm.out.post(.info, "wasm", .{});
         },
         .line => |*draw| {
-            draw.move(pos, dims);
+            if (draw.move(pos, dims)) {
+                const obj = wasm.out.slice(triangles.items);
+                ext.setTriangles(obj);
+            }
         },
     }
-
-    const obj = wasm.out.slice(triangles.items);
-    ext.setTriangles(obj);
 }
 
 pub fn onClick(pos: Vec2) !void {
