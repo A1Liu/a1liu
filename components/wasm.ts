@@ -26,13 +26,11 @@ export const postToast = (tag: string, data: any): void => {
 
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;
-type AsyncWasmFunc = (...data: any[]) => Promise<any>;
 
 export interface Ref {
   readonly instance: any;
   readonly memory: WebAssembly.Memory;
   readonly abi: { readonly [x: string]: WasmFunc };
-  readonly defer: { readonly [x: string]: AsyncWasmFunc };
 
   // Read object from object buffer
   readonly readObj: (id: number) => any;
@@ -81,7 +79,6 @@ export const fetchWasm = async (
     instance: {} as any,
     memory: {} as any,
     abi: {} as any,
-    defer: {} as any,
     readObj,
     addObj,
   };
@@ -186,12 +183,6 @@ export const fetchWasm = async (
   refAny.instance = result.instance;
   refAny.abi = result.instance.exports;
   refAny.memory = result.instance.exports.memory;
-  refAny.defer = {};
-
-  Object.entries(ref.abi).forEach(([key, value]: [string, WasmFunc]) => {
-    refAny.defer[key] = (...t: (number | boolean)[]) =>
-      new Promise((resolve) => setTimeout(() => resolve(value(...t)), 0));
-  });
 
   return ref;
 };

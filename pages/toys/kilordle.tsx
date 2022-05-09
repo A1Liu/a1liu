@@ -2,6 +2,7 @@ import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
+import { defer } from "components/util";
 import cx from "classnames";
 import create from "zustand";
 
@@ -102,7 +103,7 @@ const useStore = create<KilordleState>((set, get) => {
     const chars = word.split("");
     const codes = chars.map((c) => c.charCodeAt(0));
 
-    wasmRef.defer.submitWord(...codes).then((success: boolean) => {
+    defer(() => wasmRef.abi.submitWord(...codes)).then((success: boolean) => {
       if (!success) {
         set({ submitError: true });
         return;

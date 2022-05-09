@@ -5,6 +5,10 @@ import css from "./util.module.css";
 export const timeout = (ms: number): Promise<void> =>
   new Promise((res) => setTimeout(res, ms));
 
+export function defer<T>(cb: () => T): Promise<T> {
+  return new Promise((res) => setTimeout(() => res(cb()), 0));
+}
+
 export const removeExtension = (filename: string): string => {
   return filename.replace(/\.[^/.]+$/, "");
 };
