@@ -34,6 +34,8 @@ export interface Ref {
   readonly abi: { readonly [x: string]: WasmFunc };
   readonly defer: { readonly [x: string]: AsyncWasmFunc };
 
+  // Read object from object buffer
+  readonly readObj: (id: number) => any;
   // Add object to objectMap and return id for the object added
   readonly addObj: (obj: any) => number;
 }
@@ -64,6 +66,8 @@ export const fetchWasm = async (
   const objectMap = new Map<number, any>(); // input data
   let nextObjectId = 0;
 
+  const readObj = (id: number): any => objectBuffer[id];
+
   const addObj = (data: any): number => {
     const idx = nextObjectId;
 
@@ -78,6 +82,7 @@ export const fetchWasm = async (
     memory: {} as any,
     abi: {} as any,
     defer: {} as any,
+    readObj,
     addObj,
   };
 

@@ -32,11 +32,19 @@ comptime {
     @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
 }
 
-// First 36 triangles are reserved for the lines created during triangle drawing
+const Tool = union(enum) {
+    none: void,
+    line: LineTool,
+    triangle: TriangleTool,
+};
+
 var triangles: ArrayList(f32) = undefined;
-var temp_type: enum { triangle, line } = .triangle;
-var temp_points: std.BoundedArray(f32, 6) = undefined;
+var tool: Tool = .{ .triangle = .{} };
 var temp_begin: usize = 0;
+
+var obj_line: wasm.Obj = undefined;
+var obj_triangle: wasm.Obj = undefined;
+var obj_none: wasm.Obj = undefined;
 
 fn translatePos(posX: f32, posY: f32, dims: Vec2) Vec2 {
     return .{ posX * 2 / dims[0] - 1, -(posY * 2 / dims[1] - 1) };
@@ -60,25 +68,136 @@ fn drawLineInto(buffer: *[12]f32, from: Vec2, to: Vec2, dims: Vec2) void {
     buffer[10..12].* = to - tangent;
 }
 
-export fn onRightClick() void {
-    if (temp_points.len > 2) {
+const LineTool = struct {
+    prev: ?Vec2 = null,
+
+    const Self = @This();
+
+    fn reset(self: *Self) bool {
+        const changed = self.prev != null;
+        self.prev = null;
+        return changed;
+    }
+
+    fn move(self: *Self, pos: Vec2, dims: Vec2) void {
+        const prev = if (self.prev) |prev| prev else return;
+        const data = triangles.items[temp_begin..];
+        drawLineInto(data[0..12], prev, pos, dims);
+    }
+
+    fn click(self: *Self, pos: Vec2) !void {
+        if (self.prev) |_| {
+            temp_begin = triangles.items.len;
+            _ = self.reset();
+            return;
+        }
+
+        self.prev = pos;
+
+        try triangles.appendSlice(&.{
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+        });
+    }
+};
+
+const TriangleTool = struct {
+    first: ?Vec2 = null,
+    second: ?Vec2 = null,
+
+    const Self = @This();
+
+    fn reset(self: *Self) bool {
+        const changed = self.first != null or self.second != null;
+        self.first = null;
+        self.second = null;
+        return changed;
+    }
+
+    fn move(self: *Self, pos: Vec2, dims: Vec2) void {
+        const data = triangles.items[temp_begin..];
+
+        const first = if (self.first) |first| first else return;
+        const second = if (self.second) |second| second else {
+            drawLineInto(data[0..12], first, pos, dims);
+            return;
+        };
+
+        drawLineInto(data[12..24], first, pos, dims);
+        drawLineInto(data[24..36], second, pos, dims);
+    }
+
+    fn click(self: *Self, pos: Vec2) !void {
+        const first = if (self.first) |first| first else {
+            self.first = pos;
+            try triangles.appendSlice(&.{
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+            });
+            return;
+        };
+
+        const second = if (self.second) |second| second else {
+            self.second = pos;
+            try triangles.appendSlice(&.{
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+            });
+            return;
+        };
+
+        _ = self.reset();
+
         triangles.items.len = temp_begin;
-        temp_points.len = 2;
+        try triangles.ensureUnusedCapacity(6);
+        try triangles.appendSlice(&.{
+            first[0],  first[1],
+            second[0], second[1],
+            pos[0],    pos[1],
+        });
+        temp_begin = triangles.items.len;
 
         const obj = wasm.out.slice(triangles.items);
         ext.setTriangles(obj);
-
-        return;
     }
+};
 
-    switch (temp_type) {
+export fn toggleTool() wasm.Obj {
+    switch (tool) {
+        .none => {
+            tool = .{ .triangle = .{} };
+            return obj_triangle;
+        },
         .triangle => {
-            temp_type = .line;
-            wasm.out.post(.info, "using line now", .{});
+            tool = .{ .line = .{} };
+            return obj_line;
         },
         .line => {
-            temp_type = .triangle;
-            wasm.out.post(.info, "using triangle now", .{});
+            tool = .{ .none = .{} };
+            return obj_none;
+        },
+    }
+}
+
+export fn onRightClick() void {
+    switch (tool) {
+        .none => return,
+        .triangle => |*draw| {
+            if (draw.reset()) {
+                triangles.items.len = temp_begin;
+                const obj = wasm.out.slice(triangles.items);
+                ext.setTriangles(obj);
+            }
+        },
+        .line => |*draw| {
+            if (draw.reset()) {
+                triangles.items.len = temp_begin;
+                const obj = wasm.out.slice(triangles.items);
+                ext.setTriangles(obj);
+            }
         },
     }
 }
@@ -87,28 +206,14 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
     const dims: Vec2 = .{ width, height };
     const pos = translatePos(posX, posY, dims);
 
-    const len = temp_points.len;
-
-    std.debug.assert(len >= 2);
-
-    temp_points.slice()[(len - 2)..][0..2].* = pos;
-
-    if (temp_points.len < 4) return;
-
-    const prev: Vec2 = temp_points.slice()[(len - 4)..][0..2].*;
-
-    const data_begin = temp_begin + ((len - 4) / 2 * 12);
-    const data = triangles.items[data_begin..];
-    drawLineInto(data[0..12], prev, pos, dims);
-
-    temp_type: {
-        if (temp_type == .triangle) {
-            if (temp_points.len < 6) break :temp_type;
-
-            const first = temp_points.slice()[0..2].*;
-            const data2 = triangles.items[(data_begin + 12)..];
-            drawLineInto(data2[0..12], first, pos, dims);
-        }
+    switch (tool) {
+        .none => return,
+        .triangle => |*draw| {
+            draw.move(pos, dims);
+        },
+        .line => |*draw| {
+            draw.move(pos, dims);
+        },
     }
 
     const obj = wasm.out.slice(triangles.items);
@@ -116,50 +221,15 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
 }
 
 pub fn onClick(pos: Vec2) !void {
-    std.debug.assert(temp_points.len >= 2);
-    temp_points.slice()[(temp_points.len - 2)..][0..2].* = pos;
-
-    switch (temp_type) {
-        .triangle => {
-            if (temp_points.len >= 6) {
-                triangles.items.len = temp_begin;
-                try triangles.appendSlice(temp_points.slice());
-                temp_begin = triangles.items.len;
-                temp_points.len = 2;
-
-                const obj = wasm.out.slice(triangles.items);
-                ext.setTriangles(obj);
-
-                wasm.out.post(.success, "new triangle!", .{});
-
-                return;
-            }
-
-            if (temp_points.len == 4) {
-                try triangles.appendSlice(&.{
-                    0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0,
-                });
-            }
+    switch (tool) {
+        .none => return,
+        .triangle => |*draw| {
+            try draw.click(pos);
         },
-
-        .line => if (temp_points.len >= 4) {
-            temp_begin = triangles.items.len;
-            temp_points.len = 2;
-            return;
+        .line => |*draw| {
+            try draw.click(pos);
         },
-
-        // else => return,
     }
-
-    const len = temp_points.len;
-    temp_points.buffer[len..][0..2].* = pos;
-    temp_points.len += 2;
-
-    try triangles.appendSlice(&.{
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0,
-    });
 }
 
 pub fn print(msg: wasm.Obj) !void {
@@ -176,10 +246,11 @@ pub fn print(msg: wasm.Obj) !void {
 
 pub fn init() !void {
     wasm.initIfNecessary();
-    temp_points = try std.BoundedArray(f32, 6).init(2);
     triangles = ArrayList(f32).init(liu.Pages);
 
-    temp_points.buffer[0..2].* = .{ 0, 0 };
+    obj_line = wasm.out.string("line");
+    obj_triangle = wasm.out.string("triangle");
+    obj_none = wasm.out.string("none");
 
     std.log.info("WASM initialized!", .{});
 }

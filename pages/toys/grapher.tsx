@@ -151,31 +151,22 @@ const render = (ggl: GrapherGl, glState: GrapherGlState) => {
 const Config: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const wasmRef = useStore((state) => state.wasmRef);
+  const [tool, setTool] = React.useState("triangle");
 
   return (
-    <form
-      className={css.config}
-      onSubmit={(evt: React.FormEvent<HTMLFormElement>) => {
-        evt.preventDefault();
-
-        if (!wasmRef) return;
-
-        const target = evt.target as HTMLFormElement;
-        const data: Record<string, HTMLInputElement> = {};
-        Array.from(target.elements).forEach((e: any) => (data[e.name] = e));
-
-        const idx = wasmRef.addObj(data.blarg.value);
-        wasmRef.abi.print(idx);
-      }}
-    >
+    <div className={css.config}>
       <h3>Settings</h3>
+      <button
+        onClick={() => {
+          if (!wasmRef) return;
 
-      <label className={css.configRow}>
-        Name: <input type="text" name="blarg" />
-      </label>
-
-      <input type="submit" value="Submit" />
-    </form>
+          const tool = wasmRef.readObj(wasmRef.abi.toggleTool());
+          setTool(tool);
+        }}
+      >
+        {tool}
+      </button>
+    </div>
   );
 };
 
