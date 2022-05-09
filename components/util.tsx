@@ -22,7 +22,7 @@ export const cleanJekyllSlug = (slug: string): string => {
       return word;
     }
 
-    if (["the", "an", "is", "of", "this"].includes(word)) {
+    if (["the", "an", "is", "of", "this", "into", "my"].includes(word)) {
       return word;
     }
 
