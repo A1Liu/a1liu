@@ -32,6 +32,31 @@ comptime {
     @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
 }
 
+const ToolInterface = struct {
+    const Self = @This();
+
+    const VTable = struct {
+        reset: *fn (ptr: *anyopaque) bool,
+        move: *fn (ptr: *anyopaque, pos: Vec2, dims: Vec2) void,
+        click: *fn (ptr: *anyopaque, pos: Vec2) anyerror!void,
+    };
+
+    ptr: *anyopaque,
+    vtable: VTable,
+
+    fn reset(self: *Self) bool {
+        self.vtable.reset(self.ptr);
+    }
+
+    fn move(self: *Self, pos: Vec2, dims: Vec2) void {
+        self.vtable.move(self.ptr, pos, dims);
+    }
+
+    fn click(self: *Self, pos: Vec2) anyerror!void {
+        return self.vtable.click(self.ptr, pos);
+    }
+};
+
 const Tool = union(enum) {
     none: void,
     line: LineTool,
@@ -269,5 +294,5 @@ pub fn init() !void {
     obj_triangle = wasm.out.string("triangle");
     obj_none = wasm.out.string("none");
 
-    std.log.info("WASM initialized!", .{});
+    wasm.out.post(.info, "WASM initialized!", .{});
 }
