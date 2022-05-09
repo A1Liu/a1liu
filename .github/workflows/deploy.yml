@@ -40,9 +40,11 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
+        # TODO please use -Drelease-small once pointer aliasing in wasm works
+        # properly
       - name: Build
         run: |
-          zig build -Drelease-small
+          zig build
           cp zig-out/lib/*.wasm public/assets/
           yarn build
           yarn export
