@@ -165,19 +165,36 @@ const TriangleTool = struct {
     }
 };
 
-export fn toggleTool() wasm.Obj {
+export fn currentTool() wasm.Obj {
+    switch (tool) {
+        .none => return obj_none,
+        .triangle => return obj_triangle,
+        .line => return obj_line,
+    }
+}
+
+export fn toggleTool() void {
     switch (tool) {
         .none => {
             tool = .{ .triangle = .{} };
-            return obj_triangle;
         },
-        .triangle => {
+        .triangle => |*draw| {
+            if (draw.reset()) {
+                triangles.items.len = temp_begin;
+                const obj = wasm.out.slice(triangles.items);
+                ext.setTriangles(obj);
+            }
+
             tool = .{ .line = .{} };
-            return obj_line;
         },
-        .line => {
+        .line => |*draw| {
+            if (draw.reset()) {
+                triangles.items.len = temp_begin;
+                const obj = wasm.out.slice(triangles.items);
+                ext.setTriangles(obj);
+            }
+
             tool = .{ .none = .{} };
-            return obj_none;
         },
     }
 }

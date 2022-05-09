@@ -151,7 +151,15 @@ const render = (ggl: GrapherGl, glState: GrapherGlState) => {
 const Config: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const wasmRef = useStore((state) => state.wasmRef);
-  const [tool, setTool] = React.useState("triangle");
+  const [tool, setTool] = React.useState("");
+
+  React.useEffect(() => {
+    if (!wasmRef) return;
+
+    const obj = wasmRef.abi.currentTool();
+    const tool = wasmRef.readObj(obj);
+    setTool(tool);
+  }, [wasmRef, setTool]);
 
   return (
     <div className={css.config}>
@@ -160,7 +168,9 @@ const Config: React.VFC = () => {
         onClick={() => {
           if (!wasmRef) return;
 
-          const tool = wasmRef.readObj(wasmRef.abi.toggleTool());
+          wasmRef.abi.toggleTool();
+          const obj = wasmRef.abi.currentTool();
+          const tool = wasmRef.readObj(obj);
           setTool(tool);
         }}
       >
