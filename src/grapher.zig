@@ -17,10 +17,6 @@ const ext = struct {
         onClick(pos) catch @panic("onClick failed");
     }
 
-    fn printExt(msg: wasm.Obj) callconv(.C) void {
-        print(msg) catch @panic("print failed");
-    }
-
     fn initExt() callconv(.C) void {
         init() catch @panic("init failed");
     }
@@ -28,34 +24,8 @@ const ext = struct {
 
 comptime {
     @export(ext.onClickExt, .{ .name = "onClick", .linkage = .Strong });
-    @export(ext.printExt, .{ .name = "print", .linkage = .Strong });
     @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
 }
-
-const ToolInterface = struct {
-    const Self = @This();
-
-    const VTable = struct {
-        reset: *fn (ptr: *anyopaque) bool,
-        move: *fn (ptr: *anyopaque, pos: Vec2, dims: Vec2) void,
-        click: *fn (ptr: *anyopaque, pos: Vec2) anyerror!void,
-    };
-
-    ptr: *anyopaque,
-    vtable: VTable,
-
-    fn reset(self: *Self) bool {
-        self.vtable.reset(self.ptr);
-    }
-
-    fn move(self: *Self, pos: Vec2, dims: Vec2) void {
-        self.vtable.move(self.ptr, pos, dims);
-    }
-
-    fn click(self: *Self, pos: Vec2) anyerror!void {
-        return self.vtable.click(self.ptr, pos);
-    }
-};
 
 const Tool = union(enum) {
     none: void,
@@ -259,8 +229,6 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
                 const obj = wasm.out.slice(triangles.items);
                 ext.setTriangles(obj);
             }
-
-            wasm.out.post(.info, "wasm", .{});
         },
         .line => |*draw| {
             if (draw.move(pos, dims)) {
@@ -283,22 +251,11 @@ pub fn onClick(pos: Vec2) !void {
     }
 }
 
-pub fn print(msg: wasm.Obj) !void {
-    var _temp = liu.Temp.init();
-    const temp = _temp.allocator();
-    defer _temp.deinit();
-
-    const message = try wasm.in.string(msg, temp);
-    wasm.out.post(.info, "{s}!", .{message});
-
-    const obj = wasm.out.slice(triangles.items);
-    ext.setTriangles(obj);
-}
-
 pub fn init() !void {
     wasm.initIfNecessary();
     triangles = ArrayList(f32).init(liu.Pages);
 
+    tool = .{ .triangle = .{} };
     obj_line = wasm.out.string("line");
     obj_triangle = wasm.out.string("triangle");
     obj_none = wasm.out.string("none");
