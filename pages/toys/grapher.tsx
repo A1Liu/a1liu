@@ -3,7 +3,8 @@ import shallow from "zustand/shallow";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
-import css from "./grapher.module.css";
+import styles from "./grapher.module.css";
+import css from "components/util.module.css";
 import * as wasm from "components/wasm";
 import { useToast } from "components/errors";
 import cx from "classnames";
@@ -162,9 +163,10 @@ const Config: React.VFC = () => {
   }, [wasmRef, setTool]);
 
   return (
-    <div className={css.config}>
-      <h3>Settings</h3>
+    <div className={styles.config}>
+      <h3>Drawing</h3>
       <button
+        className={css.muiButton}
         onClick={() => {
           if (!wasmRef) return;
 
@@ -210,7 +212,7 @@ const Canvas: React.VFC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className={css.canvas}
+      className={styles.canvas}
       onMouseMove={(evt) => {
         if (!wasmRef) return;
 
@@ -255,7 +257,7 @@ const Grapher: React.VFC = () => {
   }, [cb]);
 
   return (
-    <div className={css.wrapper}>
+    <div className={styles.wrapper}>
       <Canvas />
       <Config />
     </div>
