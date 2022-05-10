@@ -15,8 +15,8 @@ const ext = struct {
     extern fn setColors(obj: wasm.Obj) void;
 
     fn onClickExt(posX: f32, posY: f32, width: f32, height: f32) callconv(.C) void {
-        const pos = translatePos(posX, posY, .{ width, height });
-        onClick(pos) catch @panic("onClick failed");
+        const pt = render.getPoint(posX, posY, width, height);
+        onClick(pt) catch @panic("onClick failed");
     }
 
     fn initExt() callconv(.C) void {
@@ -37,6 +37,14 @@ const Render = struct {
     triangles: List(f32) = .{},
     colors: List(f32) = .{},
     temp_begin: ?usize = null,
+
+    fn getPoint(self: *Self, posX: f32, posY: f32, dimX: f32, dimY: f32) Point {
+        self.dims = Vec2{ dimX, dimY };
+        const pos = Vec2{ posX * 2 / dimX - 1, -(posY * 2 / dimY - 1) };
+        const color = current_color;
+
+        return .{ .pos = pos, .color = color };
+    }
 
     fn render(self: *Self) void {
         const mark = wasm.watermark();
@@ -173,15 +181,16 @@ const LineTool = struct {
         render.dropTempData();
     }
 
-    fn move(self: *Self, pos: Vec2) void {
+    fn move(self: *Self, pt: Point) void {
         const prev = if (self.prev) |prev| prev else return;
+
         const temp = render.temp();
-        render.drawLine(temp, prev, .{ .pos = pos, .color = current_color });
+        render.drawLine(temp, prev, pt);
 
         return;
     }
 
-    fn click(self: *Self, pos: Vec2) !void {
+    fn click(self: *Self, pt: Point) !void {
         if (self.prev) |_| {
             render.useTempData();
             self.prev = null;
@@ -189,7 +198,7 @@ const LineTool = struct {
         }
 
         render.startTempStorage();
-        self.prev = .{ .pos = pos, .color = current_color };
+        self.prev = pt;
 
         try render.pushVert(6);
     }
@@ -208,9 +217,7 @@ const TriangleTool = struct {
         render.dropTempData();
     }
 
-    fn move(self: *Self, pos: Vec2) void {
-        const pt = Point{ .pos = pos, .color = current_color };
-
+    fn move(self: *Self, pt: Point) void {
         const first = if (self.first) |first| first else return;
 
         const temp = render.temp();
@@ -226,27 +233,24 @@ const TriangleTool = struct {
         return;
     }
 
-    fn click(self: *Self, pos: Vec2) !void {
+    fn click(self: *Self, pt: Point) !void {
         const first = if (self.first) |first| first else {
             render.startTempStorage();
 
-            self.first = .{ .pos = pos, .color = current_color };
+            self.first = pt;
             try render.pushVert(6);
 
             return;
         };
 
         const second = if (self.second) |second| second else {
-            self.second = .{ .pos = pos, .color = current_color };
+            self.second = pt;
 
             try render.pushVert(12);
             return;
         };
 
-        _ = self.reset();
-
-        render.dropTempData();
-        const pt = Point{ .pos = pos, .color = current_color };
+        self.reset();
         try render.addTriangle(.{ first, second, pt });
     }
 };
@@ -298,34 +302,31 @@ export fn onRightClick() void {
 }
 
 export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
-    const dims: Vec2 = .{ width, height };
-    const pos = translatePos(posX, posY, dims);
-
-    render.dims = dims;
+    const pt = render.getPoint(posX, posY, width, height);
 
     switch (tool) {
         .none => return,
         .triangle => {
             const draw = &tool_triangle;
-            draw.move(pos);
+            draw.move(pt);
         },
         .line => {
             const draw = &tool_line;
-            draw.move(pos);
+            draw.move(pt);
         },
     }
 }
 
-pub fn onClick(pos: Vec2) !void {
+pub fn onClick(pt: Point) !void {
     switch (tool) {
         .none => return,
         .triangle => {
             const draw = &tool_triangle;
-            try draw.click(pos);
+            try draw.click(pt);
         },
         .line => {
             const draw = &tool_line;
-            try draw.click(pos);
+            try draw.click(pt);
         },
     }
 }
