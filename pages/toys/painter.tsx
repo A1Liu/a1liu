@@ -238,7 +238,7 @@ const Config: React.VFC = () => {
       </button>
 
       <input
-        value={`${r}`}
+        value={r.toFixed(3)}
         onChange={(evt) => {
           if (!wasmRef) return;
 
@@ -250,7 +250,7 @@ const Config: React.VFC = () => {
       />
 
       <input
-        value={`${g}`}
+        value={g.toFixed(3)}
         onChange={(evt) => {
           if (!wasmRef) return;
 
@@ -262,7 +262,7 @@ const Config: React.VFC = () => {
       />
 
       <input
-        value={`${b}`}
+        value={b.toFixed(3)}
         onChange={(evt) => {
           if (!wasmRef) return;
 
