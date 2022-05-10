@@ -6,9 +6,9 @@ const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
 
-const ArrayList = std.ArrayList;
 const Vec2 = @Vector(2, f32);
 const Vec3 = @Vector(3, f32);
+const Point = struct { pos: Vec2, color: Vec3 };
 
 const ext = struct {
     extern fn setTriangles(obj: wasm.Obj) void;
@@ -38,7 +38,7 @@ const Render = struct {
     colors: List(f32) = .{},
     temp_begin: ?usize = null,
 
-    fn getPoint(self: *Self, posX: f32, posY: f32, dimX: f32, dimY: f32) Point {
+    pub fn getPoint(self: *Self, posX: f32, posY: f32, dimX: f32, dimY: f32) Point {
         self.dims = Vec2{ dimX, dimY };
         const pos = Vec2{ posX * 2 / dimX - 1, -(posY * 2 / dimY - 1) };
         const color = current_color;
@@ -160,15 +160,6 @@ var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 var obj_line: wasm.Obj = undefined;
 var obj_triangle: wasm.Obj = undefined;
 var obj_none: wasm.Obj = undefined;
-
-fn translatePos(posX: f32, posY: f32, dims: Vec2) Vec2 {
-    return .{ posX * 2 / dims[0] - 1, -(posY * 2 / dims[1] - 1) };
-}
-
-const Point = struct {
-    pos: Vec2,
-    color: Vec3,
-};
 
 const LineTool = struct {
     prev: ?Point = null,
