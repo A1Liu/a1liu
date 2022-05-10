@@ -126,7 +126,7 @@ const initGl = async (
 };
 
 const render = (ggl: PainterGl, glState: PainterGlState) => {
-  console.log("GL rendering", glState);
+  // console.log("GL rendering", glState);
 
   const ctx = ggl.ctx;
 
