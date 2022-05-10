@@ -27,14 +27,19 @@ comptime {
     @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
 }
 
-const Tool = union(enum) {
-    none: void,
-    line: LineTool,
-    triangle: TriangleTool,
+const Tool = enum {
+    none,
+    line,
+    triangle,
 };
 
+// Need to do it this way until pointer aliasing works properly with tagged
+// unions at global scope
+var tool_line: LineTool = .{};
+var tool_triangle: TriangleTool = .{};
+
 var triangles: ArrayList(f32) = undefined;
-var tool: Tool = .{ .triangle = .{} };
+var tool: Tool = .triangle;
 var temp_begin: usize = 0;
 
 var obj_line: wasm.Obj = undefined;
@@ -175,25 +180,27 @@ export fn currentTool() wasm.Obj {
 export fn toggleTool() void {
     switch (tool) {
         .none => {
-            tool = .{ .triangle = .{} };
+            tool = .triangle;
         },
-        .triangle => |*draw| {
+        .triangle => {
+            const draw = &tool_triangle;
             if (draw.reset()) {
                 triangles.items.len = temp_begin;
                 const obj = wasm.out.slice(triangles.items);
                 ext.setTriangles(obj);
             }
 
-            tool = .{ .line = .{} };
+            tool = .line;
         },
-        .line => |*draw| {
+        .line => {
+            const draw = &tool_line;
             if (draw.reset()) {
                 triangles.items.len = temp_begin;
                 const obj = wasm.out.slice(triangles.items);
                 ext.setTriangles(obj);
             }
 
-            tool = .{ .none = .{} };
+            tool = .none;
         },
     }
 }
@@ -201,14 +208,16 @@ export fn toggleTool() void {
 export fn onRightClick() void {
     switch (tool) {
         .none => return,
-        .triangle => |*draw| {
+        .triangle => {
+            const draw = &tool_triangle;
             if (draw.reset()) {
                 triangles.items.len = temp_begin;
                 const obj = wasm.out.slice(triangles.items);
                 ext.setTriangles(obj);
             }
         },
-        .line => |*draw| {
+        .line => {
+            const draw = &tool_line;
             if (draw.reset()) {
                 triangles.items.len = temp_begin;
                 const obj = wasm.out.slice(triangles.items);
@@ -224,13 +233,15 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
 
     switch (tool) {
         .none => return,
-        .triangle => |*draw| {
+        .triangle => {
+            const draw = &tool_triangle;
             if (draw.move(pos, dims)) {
                 const obj = wasm.out.slice(triangles.items);
                 ext.setTriangles(obj);
             }
         },
-        .line => |*draw| {
+        .line => {
+            const draw = &tool_line;
             if (draw.move(pos, dims)) {
                 const obj = wasm.out.slice(triangles.items);
                 ext.setTriangles(obj);
@@ -242,10 +253,12 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
 pub fn onClick(pos: Vec2) !void {
     switch (tool) {
         .none => return,
-        .triangle => |*draw| {
+        .triangle => {
+            const draw = &tool_triangle;
             try draw.click(pos);
         },
-        .line => |*draw| {
+        .line => {
+            const draw = &tool_line;
             try draw.click(pos);
         },
     }
@@ -255,7 +268,6 @@ pub fn init() !void {
     wasm.initIfNecessary();
     triangles = ArrayList(f32).init(liu.Pages);
 
-    tool = .{ .triangle = .{} };
     obj_line = wasm.out.string("line");
     obj_triangle = wasm.out.string("triangle");
     obj_none = wasm.out.string("none");
