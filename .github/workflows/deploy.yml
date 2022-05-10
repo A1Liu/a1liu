@@ -6,7 +6,6 @@ on:
 jobs:
   deployment:
     runs-on: ubuntu-latest
-    environment: 'prod'
 
     steps:
       - name: Checkout
