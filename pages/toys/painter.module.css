@@ -41,6 +41,12 @@
 .floatInWrapper {
   position: relative;
   width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
 }
 
 .floatInInput {

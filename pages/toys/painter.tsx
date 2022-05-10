@@ -197,11 +197,12 @@ const render = (ggl: PainterGl, glState: PainterGlState) => {
 };
 
 interface FloatInputProps {
+  prefix: string;
   data: number;
   setData: (data: number) => void;
 }
 
-const FloatInput: React.VFC<FloatInputProps> = ({ data, setData }) => {
+const FloatInput: React.VFC<FloatInputProps> = ({ prefix, data, setData }) => {
   const [text, setText] = React.useState(() => `${data}`);
   const [error, setError] = React.useState(false);
   const paletteRef = React.useRef<HTMLDivElement>(null);
@@ -220,6 +221,7 @@ const FloatInput: React.VFC<FloatInputProps> = ({ data, setData }) => {
 
   return (
     <div className={styles.floatInWrapper}>
+      {`${prefix}: `}
       <input
         className={styles.floatInInput}
         value={text}
@@ -291,9 +293,9 @@ const Config: React.VFC = () => {
         <div ref={paletteRef} className={styles.palette} />
 
         <div className={styles.colorValues}>
-          <FloatInput data={r} setData={setR} />
-          <FloatInput data={g} setData={setG} />
-          <FloatInput data={b} setData={setB} />
+          <FloatInput prefix={"R"} data={r} setData={setR} />
+          <FloatInput prefix={"G"} data={g} setData={setG} />
+          <FloatInput prefix={"B"} data={b} setData={setB} />
         </div>
       </div>
     </div>
