@@ -19,7 +19,8 @@
 
 .config {
   height: 100%;
-  width: 400px;
+  min-width: 400px;
+  max-width: 400px;
 
   display: flex;
   flex-direction: column;
@@ -27,12 +28,6 @@
   border-left: 4px solid black;
   padding: 8px 4px 16px 8px;
   gap: 8px;
-
-  & input {
-    padding: 4px;
-    border: 2px solid black;
-    border-radius: 8px;
-  }
 }
 
 .configRow {
@@ -41,4 +36,51 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
+}
+
+.floatInWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.floatInInput {
+  width: 100%;
+  padding: 4px;
+  border: 2px solid black;
+  border-radius: 8px;
+}
+
+.floatInButton {
+  font-size: 0.8rem;
+  line-height: 1em;
+  border-radius: 4px;
+  background-color: #ff7276;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  padding: 4px 8px 4px 8px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+
+.colorPicker {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 4px;
+}
+
+.colorValues {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.palette {
+  border-radius: 8px;
+  width: 120px;
+  height: inherit;
 }

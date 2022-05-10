@@ -196,10 +196,53 @@ const render = (ggl: PainterGl, glState: PainterGlState) => {
   }
 };
 
+interface FloatInputProps {
+  data: number;
+  setData: (data: number) => void;
+}
+
+const FloatInput: React.VFC<FloatInputProps> = ({ data, setData }) => {
+  const [text, setText] = React.useState(() => `${data}`);
+  const [error, setError] = React.useState(false);
+  const paletteRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const val = Number.parseFloat(text);
+
+    if (isNaN(val)) {
+      setError(true);
+      return;
+    }
+
+    setError(false);
+    setData(val);
+  }, [text, setError, setData]);
+
+  return (
+    <div className={styles.floatInWrapper}>
+      <input
+        className={styles.floatInInput}
+        value={text}
+        onChange={(evt) => setText(evt.target.value)}
+      />
+
+      {error && (
+        <button
+          className={styles.floatInButton}
+          onClick={() => setText(`${data}`)}
+        >
+          reset
+        </button>
+      )}
+    </div>
+  );
+};
+
 const Config: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
   const wasmRef = useStore((state) => state.wasmRef);
   const [tool, setTool] = React.useState("");
+  const paletteRef = React.useRef<HTMLDivElement>(null);
 
   const [r, setR] = React.useState(0.5);
   const [g, setG] = React.useState(0.5);
@@ -219,6 +262,13 @@ const Config: React.VFC = () => {
     wasmRef.abi.setColor(r, g, b);
   }, [wasmRef, r, g, b]);
 
+  React.useEffect(() => {
+    if (!paletteRef.current) return;
+
+    const color = `rgb(${r * 256}, ${g * 256}, ${b * 256})`;
+    paletteRef.current.style.backgroundColor = color;
+  }, [paletteRef, r, g, b]);
+
   return (
     <div className={styles.config}>
       <h3>Painter</h3>
@@ -237,41 +287,15 @@ const Config: React.VFC = () => {
         {tool}
       </button>
 
-      <input
-        value={r.toFixed(3)}
-        onChange={(evt) => {
-          if (!wasmRef) return;
+      <div className={styles.colorPicker}>
+        <div ref={paletteRef} className={styles.palette} />
 
-          const val = Number.parseFloat(evt.target.value);
-          if (isNaN(val)) return;
-
-          setR(val);
-        }}
-      />
-
-      <input
-        value={g.toFixed(3)}
-        onChange={(evt) => {
-          if (!wasmRef) return;
-
-          const val = Number.parseFloat(evt.target.value);
-          if (isNaN(val)) return;
-
-          setG(val);
-        }}
-      />
-
-      <input
-        value={b.toFixed(3)}
-        onChange={(evt) => {
-          if (!wasmRef) return;
-
-          const val = Number.parseFloat(evt.target.value);
-          if (isNaN(val)) return;
-
-          setB(val);
-        }}
-      />
+        <div className={styles.colorValues}>
+          <FloatInput data={r} setData={setR} />
+          <FloatInput data={g} setData={setG} />
+          <FloatInput data={b} setData={setB} />
+        </div>
+      </div>
     </div>
   );
 };
