@@ -213,6 +213,12 @@ const Config: React.VFC = () => {
     setTool(tool);
   }, [wasmRef, setTool]);
 
+  React.useEffect(() => {
+    if (!wasmRef) return;
+
+    wasmRef.abi.setColor(r, g, b);
+  }, [wasmRef, r, g, b]);
+
   return (
     <div className={styles.config}>
       <h3>Painter</h3>
@@ -240,7 +246,6 @@ const Config: React.VFC = () => {
           if (isNaN(val)) return;
 
           setR(val);
-          wasmRef.abi.setColor(val, g, b);
         }}
       />
 
@@ -253,7 +258,6 @@ const Config: React.VFC = () => {
           if (isNaN(val)) return;
 
           setG(val);
-          wasmRef.abi.setColor(r, val, b);
         }}
       />
 
@@ -266,7 +270,6 @@ const Config: React.VFC = () => {
           if (isNaN(val)) return;
 
           setB(val);
-          wasmRef.abi.setColor(r, g, val);
         }}
       />
     </div>
