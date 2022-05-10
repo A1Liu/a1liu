@@ -29,7 +29,69 @@ comptime {
     @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
 }
 
-const Globals = struct {};
+const Render = struct {
+    const List = std.ArrayListUnmanaged;
+    const Self = @This();
+
+    dims: Vec2 = Vec2{ 0, 0 },
+    triangles: List(f32) = .{},
+    colors: List(f32) = .{},
+    temp_begin: ?usize = 0,
+
+    pub fn dropTempData(self: *Self) void {
+        self.triangles.items.len = temp_begin * 2;
+        self.colors.items.len = temp_begin * 3;
+        self.temp_begin = null;
+    }
+
+    pub fn startTempStorage(self: *Self) void {
+        self.temp_begin = self.triangles.items.len / 2;
+    }
+
+    pub fn addTriangle(self: *Self, pt: Point) !void {
+        try self.triangles.appendSlice(liu.Pages, &.{ pt.pos[0], pt.pos[1] });
+        try self.colors.appendSlice(liu.Pages, &.{ pt.color[0], pt.color[1], pt.color[2] });
+    }
+
+    pub fn temp(self: *Self) usize {
+        if (self.temp_begin) |t| {
+            return t;
+        }
+
+        unreachable;
+    }
+
+    pub fn push(self: Self, count: usize) !void {
+        try self.triangles.appendNTimes(liu.Pages, 0, count * 2);
+        try self.colors.appendNTimes(liu.Pages, 0.5, count * 3);
+    }
+
+    pub fn drawLine(self: *Self, vertex: usize, from: Point, to: Point) !void {
+        const pos = self.triangles.items[(vertex * 2)..];
+        const color = self.triangles.items[(vertex * 3)..];
+        const vector = to.pos - from.pos;
+        const rot90: Vec2 = .{ -vector[1], vector[0] };
+
+        const tangent_len = @sqrt(rot90[0] * rot90[0] + rot90[1] * rot90[1]);
+        const tangent = rot90 * @splat(2, 2 / tangent_len) / self.dims;
+
+        // first triangle, drawn clockwise
+        pos[0..2].* = from.pos + tangent;
+        color[0..3].* = from.color;
+        pos[2..4].* = to + tangent;
+        color[3..6].* = to.color;
+        pos[4..6].* = from - tangent;
+        color[6..9].* = from.color;
+
+        // second triangle, drawn clockwise
+        pos[6..8].* = from - tangent;
+        color[9..12].* = from.color;
+        pos[8..10].* = to + tangent;
+        color[12..15].* = to.color;
+        pos[10..12].* = to - tangent;
+        color[15..18].* = to.color;
+    }
+};
 
 const Tool = enum {
     none,
@@ -37,13 +99,14 @@ const Tool = enum {
     triangle,
 };
 
+var render: Render = .{};
+
 // Need to do it this way until pointer aliasing works properly with tagged
 // unions at global scope
 var tool_line: LineTool = .{};
 var tool_triangle: TriangleTool = .{};
 var tool: Tool = .triangle;
 
-var triangles: ArrayList(f32) = undefined;
 var colors: ArrayList(f32) = undefined;
 var temp_begin: usize = 0;
 
@@ -93,7 +156,7 @@ const LineTool = struct {
 
     fn move(self: *Self, pos: Vec2, dims: Vec2) bool {
         const prev = if (self.prev) |prev| prev else return false;
-        const data = triangles.items[temp_begin..];
+        const data = render.triangles.items[temp_begin..];
         drawLineInto(data[0..12], prev, pos, dims);
 
         return true;
@@ -101,14 +164,14 @@ const LineTool = struct {
 
     fn click(self: *Self, pos: Vec2) !void {
         if (self.prev) |_| {
-            temp_begin = triangles.items.len;
+            temp_begin = render.triangles.items.len;
             _ = self.reset();
             return;
         }
 
         self.prev = pos;
 
-        try triangles.appendSlice(&.{
+        try render.triangles.appendSlice(liu.Pages, &.{
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
         });
@@ -136,7 +199,7 @@ const TriangleTool = struct {
     }
 
     fn move(self: *Self, pos: Vec2, dims: Vec2) bool {
-        const data = triangles.items[temp_begin..];
+        const data = render.triangles.items[temp_begin..];
 
         const first = if (self.first) |first| first else return false;
         const second = if (self.second) |second| second else {
@@ -153,7 +216,7 @@ const TriangleTool = struct {
     fn click(self: *Self, pos: Vec2) !void {
         const first = if (self.first) |first| first else {
             self.first = .{ .pos = pos, .color = current_color };
-            try triangles.appendSlice(&.{
+            try render.triangles.appendSlice(liu.Pages, &.{
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
             });
@@ -170,7 +233,7 @@ const TriangleTool = struct {
 
         const second = if (self.second) |second| second else {
             self.second = .{ .pos = pos, .color = current_color };
-            try triangles.appendSlice(&.{
+            try render.triangles.appendSlice(liu.Pages, &.{
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
 
@@ -189,10 +252,10 @@ const TriangleTool = struct {
 
         _ = self.reset();
 
-        triangles.items.len = temp_begin;
+        render.triangles.items.len = temp_begin;
         colors.items.len = temp_begin / 2 * 3;
-        try triangles.ensureUnusedCapacity(6);
-        try triangles.appendSlice(&.{
+        try render.triangles.ensureUnusedCapacity(liu.Pages, 6);
+        try render.triangles.appendSlice(liu.Pages, &.{
             first.pos[0],  first.pos[1],
             second.pos[0], second.pos[1],
             pos[0],        pos[1],
@@ -202,9 +265,9 @@ const TriangleTool = struct {
             second.color[0],  second.color[1],  second.color[2],
             current_color[0], current_color[1], current_color[2],
         });
-        temp_begin = triangles.items.len;
+        temp_begin = render.triangles.items.len;
 
-        const obj = wasm.out.slice(triangles.items);
+        const obj = wasm.out.slice(render.triangles.items);
         ext.setTriangles(obj);
         const obj2 = wasm.out.slice(colors.items);
         ext.setColors(obj2);
@@ -231,9 +294,9 @@ export fn toggleTool() void {
         .triangle => {
             const draw = &tool_triangle;
             if (draw.reset()) {
-                triangles.items.len = temp_begin;
+                render.triangles.items.len = temp_begin;
                 colors.items.len = temp_begin / 2 * 3;
-                const obj = wasm.out.slice(triangles.items);
+                const obj = wasm.out.slice(render.triangles.items);
                 ext.setTriangles(obj);
                 const obj2 = wasm.out.slice(colors.items);
                 ext.setColors(obj2);
@@ -244,9 +307,9 @@ export fn toggleTool() void {
         .line => {
             const draw = &tool_line;
             if (draw.reset()) {
-                triangles.items.len = temp_begin;
+                render.triangles.items.len = temp_begin;
                 colors.items.len = temp_begin / 2 * 3;
-                const obj = wasm.out.slice(triangles.items);
+                const obj = wasm.out.slice(render.triangles.items);
                 ext.setTriangles(obj);
                 const obj2 = wasm.out.slice(colors.items);
                 ext.setColors(obj2);
@@ -263,9 +326,9 @@ export fn onRightClick() void {
         .triangle => {
             const draw = &tool_triangle;
             if (draw.reset()) {
-                triangles.items.len = temp_begin;
+                render.triangles.items.len = temp_begin;
                 colors.items.len = temp_begin / 2 * 3;
-                const obj = wasm.out.slice(triangles.items);
+                const obj = wasm.out.slice(render.triangles.items);
                 ext.setTriangles(obj);
                 const obj2 = wasm.out.slice(colors.items);
                 ext.setColors(obj2);
@@ -274,9 +337,9 @@ export fn onRightClick() void {
         .line => {
             const draw = &tool_line;
             if (draw.reset()) {
-                triangles.items.len = temp_begin;
+                render.triangles.items.len = temp_begin;
                 colors.items.len = temp_begin / 2 * 3;
-                const obj = wasm.out.slice(triangles.items);
+                const obj = wasm.out.slice(render.triangles.items);
                 ext.setTriangles(obj);
                 const obj2 = wasm.out.slice(colors.items);
                 ext.setColors(obj2);
@@ -294,7 +357,7 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
         .triangle => {
             const draw = &tool_triangle;
             if (draw.move(pos, dims)) {
-                const obj = wasm.out.slice(triangles.items);
+                const obj = wasm.out.slice(render.triangles.items);
                 ext.setTriangles(obj);
                 const obj2 = wasm.out.slice(colors.items);
                 ext.setColors(obj2);
@@ -303,7 +366,7 @@ export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
         .line => {
             const draw = &tool_line;
             if (draw.move(pos, dims)) {
-                const obj = wasm.out.slice(triangles.items);
+                const obj = wasm.out.slice(render.triangles.items);
                 ext.setTriangles(obj);
                 const obj2 = wasm.out.slice(colors.items);
                 ext.setColors(obj2);
@@ -328,7 +391,7 @@ pub fn onClick(pos: Vec2) !void {
 
 pub fn init() !void {
     wasm.initIfNecessary();
-    triangles = ArrayList(f32).init(liu.Pages);
+    // render.triangles = ArrayList(f32).init(liu.Pages);
     colors = ArrayList(f32).init(liu.Pages);
 
     obj_line = wasm.out.string("line");
