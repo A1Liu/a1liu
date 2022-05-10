@@ -3,11 +3,12 @@ name: Build and Deploy to Github Pages
 on:
   push:
     branches:
-      - production
+      - main
 
 jobs:
   deployment:
     runs-on: ubuntu-latest
+    environment: 'prod'
 
     steps:
       - name: Checkout
