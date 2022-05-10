@@ -117,9 +117,8 @@ const Render = struct {
         const vector = to.pos - from.pos;
         const rot90: Vec2 = .{ -vector[1], vector[0] };
 
-        const halfLineWidthPx: f32 = 1;
         const tangent_len = @sqrt(rot90[0] * rot90[0] + rot90[1] * rot90[1]);
-        const tangent = rot90 * @splat(2, halfLineWidthPx * 2 / tangent_len) / self.dims;
+        const tangent = rot90 * @splat(2, 2 / tangent_len) / self.dims;
 
         // first triangle, drawn clockwise
         pos[0..2].* = from.pos + tangent;
@@ -141,20 +140,14 @@ const Render = struct {
     }
 };
 
-const Tool = enum {
-    none,
-    line,
-    triangle,
-};
-
-var render: Render = .{};
-
 // Need to do it this way until pointer aliasing works properly with tagged
 // unions at global scope
+const Tool = enum { none, line, triangle };
 var tool_line: LineTool = .{};
 var tool_triangle: TriangleTool = .{};
 var tool: Tool = .triangle;
 
+var render: Render = .{};
 var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 
 var obj_line: wasm.Obj = undefined;
