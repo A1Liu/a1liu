@@ -12,6 +12,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 });
 
 const config = {
+  trailingSlash: true,
   reactStrictMode: true,
   pageExtensions: ["ts", "tsx", "mdx"],
 
