@@ -3,42 +3,42 @@ import shallow from "zustand/shallow";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
-import styles from "./grapher.module.css";
+import styles from "./painter.module.css";
 import css from "components/util.module.css";
 import * as wasm from "components/wasm";
 import { useToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
-interface GrapherCb {
+interface PainterCb {
   initWasm: (wasmRef: wasm.Ref) => void;
-  initGl: (gl: GrapherGl) => void;
+  initGl: (gl: PainterGl) => void;
   setRawTriangles: (floats: Float32Array) => void;
 }
 
-interface GrapherGl {
+interface PainterGl {
   ctx: WebGl;
   program: WebGLProgram;
   vao: WebGLVertexArrayObject;
   rawTriangles: WebGLBuffer;
 }
 
-interface GrapherGlState {
+interface PainterGlState {
   renderId: number;
   rawTrianglesLength: number;
 }
 
-interface GrapherState {
-  gl: GrapherGl | null;
-  glState: GrapherGlState;
+interface PainterState {
+  gl: PainterGl | null;
+  glState: PainterGlState;
   wasmRef: wasm.Ref | null;
 
-  callbacks: GrapherCb;
+  callbacks: PainterCb;
 }
 
-const useStore = create<GrapherState>((set, get) => {
+const useStore = create<PainterState>((set, get) => {
   const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
-  const initGl = (gl: GrapherGl) => set({ gl });
+  const initGl = (gl: PainterGl) => set({ gl });
 
   const setRawTriangles = (floats: Float32Array): void => {
     const { gl, glState } = get();
@@ -77,16 +77,16 @@ const useStore = create<GrapherState>((set, get) => {
 
 const initGl = async (
   canvas: HTMLCanvasElement | null,
-  cb: GrapherCb
-): Promise<GrapherGl | null> => {
+  cb: PainterCb
+): Promise<PainterGl | null> => {
   const ctx = canvas?.getContext("webgl2");
   if (!ctx) {
     return null;
   }
 
   const [vertSrc, fragSrc] = await Promise.all([
-    fetch("/assets/grapher.vert").then((r) => r.text()),
-    fetch("/assets/grapher.frag").then((r) => r.text()),
+    fetch("/assets/painter.vert").then((r) => r.text()),
+    fetch("/assets/painter.frag").then((r) => r.text()),
   ]);
 
   const vertexShader = GL.createShader(ctx, ctx.VERTEX_SHADER, vertSrc);
@@ -125,7 +125,7 @@ const initGl = async (
   return { ctx, program, vao, rawTriangles };
 };
 
-const render = (ggl: GrapherGl, glState: GrapherGlState) => {
+const render = (ggl: PainterGl, glState: PainterGlState) => {
   console.log("GL rendering", glState);
 
   const ctx = ggl.ctx;
@@ -164,7 +164,7 @@ const Config: React.VFC = () => {
 
   return (
     <div className={styles.config}>
-      <h3>Drawing</h3>
+      <h3>Painter</h3>
       <button
         className={css.muiButton}
         onClick={() => {
@@ -240,11 +240,11 @@ const Canvas: React.VFC = () => {
   );
 };
 
-const Grapher: React.VFC = () => {
+const Painter: React.VFC = () => {
   const cb = useStore((state) => state.callbacks);
 
   React.useEffect(() => {
-    const wasmPromise = wasm.fetchWasm("/assets/grapher.wasm", {
+    const wasmPromise = wasm.fetchWasm("/assets/painter.wasm", {
       postMessage: wasm.postToast,
       imports: { setTriangles: cb.setRawTriangles },
       raw: {},
@@ -264,4 +264,4 @@ const Grapher: React.VFC = () => {
   );
 };
 
-export default Grapher;
+export default Painter;
