@@ -37,9 +37,9 @@ const Tool = enum {
 // unions at global scope
 var tool_line: LineTool = .{};
 var tool_triangle: TriangleTool = .{};
+var tool: Tool = .triangle;
 
 var triangles: ArrayList(f32) = undefined;
-var tool: Tool = .triangle;
 var temp_begin: usize = 0;
 
 var obj_line: wasm.Obj = undefined;
