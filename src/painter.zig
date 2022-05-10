@@ -109,7 +109,7 @@ const Render = struct {
         const vector = to.pos - from.pos;
         const rot90: Vec2 = .{ -vector[1], vector[0] };
 
-        const halfLineWidthPx: f32 = 1.5;
+        const halfLineWidthPx: f32 = 1;
         const tangent_len = @sqrt(rot90[0] * rot90[0] + rot90[1] * rot90[1]);
         const tangent = rot90 * @splat(2, halfLineWidthPx * 2 / tangent_len) / self.dims;
 
