@@ -1,0 +1,468 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+<style type="text/css">
+.ansi2html-content { display: inline; white-space: pre-wrap; word-wrap: break-word; }
+.body_foreground { color: #AAAAAA; }
+.body_background { background-color: #000000; }
+.body_foreground > .bold,.bold > .body_foreground, body.body_foreground > pre > .bold { color: #FFFFFF; font-weight: normal; }
+.inv_foreground { color: #000000; }
+.inv_background { background-color: #AAAAAA; }
+.ansi1 { font-weight: bold; }
+.ansi31 { color: #aa0000; }
+.ansi32 { color: #00aa00; }
+.ansi36 { color: #00aaaa; }
+.ansi41 { background-color: #aa0000; }
+</style>
+</head>
+<body class="body_foreground body_background" style="font-size: normal;" >
+<pre class="ansi2html-content">
+<span class="ansi1">diff --git a/CODEOWNERS b/.github/CODEOWNERS</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from CODEOWNERS</span>
+<span class="ansi32">rename to .github/CODEOWNERS</span>
+
+
+<span class="ansi1">diff --git a/CONTRIBUTE.md b/.github/CONTRIBUTING.md</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from CONTRIBUTE.md</span>
+<span class="ansi32">rename to .github/CONTRIBUTING.md</span>
+
+
+<span class="ansi1">diff --git a/.github/ISSUE_TEMPLATE/bug_report.md b/.github/ISSUE_TEMPLATE/bug_report.md</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..ed8b74f</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/.github/ISSUE_TEMPLATE/bug_report.md</span>
+<span class="ansi36">@@ -0,0 +1,27 @@</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">name: Bug report</span>
+<span class="ansi32">+</span><span class="ansi32">about: Create a report to help us improve</span>
+<span class="ansi32">+</span><span class="ansi32">title: "[BUG] "</span>
+<span class="ansi32">+</span><span class="ansi32">labels: bug, help wanted</span>
+<span class="ansi32">+</span><span class="ansi32">assignees: A1Liu</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Describe the bug**</span>
+<span class="ansi32">+</span><span class="ansi32">A clear and concise description of what the bug is.</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**To Reproduce**</span>
+<span class="ansi32">+</span><span class="ansi32">Steps to reproduce the behavior:</span>
+<span class="ansi32">+</span><span class="ansi32">1. Go to '...'</span>
+<span class="ansi32">+</span><span class="ansi32">2. Click on '....'</span>
+<span class="ansi32">+</span><span class="ansi32">3. Scroll down to '....'</span>
+<span class="ansi32">+</span><span class="ansi32">4. See error</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Expected behavior**</span>
+<span class="ansi32">+</span><span class="ansi32">A clear and concise description of what you expected to happen.</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Screenshots**</span>
+<span class="ansi32">+</span><span class="ansi32">If applicable, add screenshots to help explain your problem.</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Additional context**</span>
+<span class="ansi32">+</span><span class="ansi32">Add any other context about the problem here.</span>
+
+
+<span class="ansi1">diff --git a/.github/ISSUE_TEMPLATE/feature_request.md b/.github/ISSUE_TEMPLATE/feature_request.md</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..160206b</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/.github/ISSUE_TEMPLATE/feature_request.md</span>
+<span class="ansi36">@@ -0,0 +1,20 @@</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">name: Feature request</span>
+<span class="ansi32">+</span><span class="ansi32">about: Suggest an idea for this project</span>
+<span class="ansi32">+</span><span class="ansi32">title: "[FEATURE] "</span>
+<span class="ansi32">+</span><span class="ansi32">labels: enhancement</span>
+<span class="ansi32">+</span><span class="ansi32">assignees: A1Liu</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Is your feature request related to a problem? Please describe.**</span>
+<span class="ansi32">+</span><span class="ansi32">A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Describe the solution you'd like**</span>
+<span class="ansi32">+</span><span class="ansi32">A clear and concise description of what you want to happen.</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Describe alternatives you've considered**</span>
+<span class="ansi32">+</span><span class="ansi32">A clear and concise description of any alternative solutions or features you've considered.</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">**Additional context**</span>
+<span class="ansi32">+</span><span class="ansi32">Add any other context or screenshots about the feature request here.</span>
+
+
+<span class="ansi1">diff --git a/LICENSE b/.github/LICENSE</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from LICENSE</span>
+<span class="ansi32">rename to .github/LICENSE</span>
+
+
+<span class="ansi1">diff --git a/.github/PULL_REQUEST_TEMPLATE/default.md b/.github/PULL_REQUEST_TEMPLATE/default.md</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..5ead5d4</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/.github/PULL_REQUEST_TEMPLATE/default.md</span>
+<span class="ansi36">@@ -0,0 +1,29 @@</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- Provide a general summary of your changes in the Title above --&gt;</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">## Description</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- Describe your changes in detail --&gt;</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">## Motivation and Context</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- Why is this change required? What problem does it solve? --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- If it fixes an open issue, please link to the issue here. --&gt;</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">## How Has This Been Tested?</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- Please describe in detail how you tested your changes. --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- Include details of your testing environment, and the tests you ran to --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- see how your change affects other areas of the code, etc. --&gt;</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">## Screenshots (if appropriate):</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">## Types of changes</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] Bug fix (non-breaking change which fixes an issue)</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] New feature (non-breaking change which adds functionality)</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] Breaking change (fix or feature that would cause existing functionality to change)</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">## Checklist:</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- Go over all the following points, and put an `x` in all the boxes that apply. --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] My code follows the code style of this project.</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] My change requires a change to the documentation.</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] I have updated the documentation accordingly.</span>
+<span class="ansi32">+</span><span class="ansi32">- [ ] I have read the **CONTRIBUTING** document.</span>
+
+
+<span class="ansi1">diff --git a/README.md b/.github/README.md</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from README.md</span>
+<span class="ansi32">rename to .github/README.md</span>
+
+
+<span class="ansi1">diff --git a/404.html b/404.html</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..eb3935c</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/404.html</span>
+<span class="ansi36">@@ -0,0 +1,26 @@</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">layout: default</span>
+<span class="ansi32">+</span><span class="ansi32">title: 404 Not Found</span>
+<span class="ansi32">+</span><span class="ansi32">permalink: /404.html</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;div class="header"&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">  &lt;div class="header-content"&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">    &lt;h1 class="brand"&gt;404 Not Found_&lt;/h1&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">  &lt;/div&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;/div&gt;</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;div class="container"&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;div&gt;</span>
+<span class="ansi32">+</span>		<span class="ansi32">&lt;p&gt;</span>
+<span class="ansi32">+</span>			<span class="ansi32">Looks like you found a BUG! If you'd like, you can tell us about it by</span>
+<span class="ansi32">+</span>			<span class="ansi32">&lt;a href="mailto:bugscommunicationsteam@gmail.com"&gt;sending us an email&lt;/a&gt;</span>
+<span class="ansi32">+</span>			<span class="ansi32">or by</span>
+<span class="ansi32">+</span>			<span class="ansi32">&lt;a href="site.github.repository_url"&gt;opening an issue&lt;/a&gt;</span>
+<span class="ansi32">+</span>			<span class="ansi32">on this website's repository!</span>
+<span class="ansi32">+</span>		<span class="ansi32">&lt;/p&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;/div&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;br /&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;!-- image that is small and centered --&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">  &lt;img src="{{ site.baseurl }}/assets/img/logo_no_title.png"</span>
+<span class="ansi32">+</span>	<span class="ansi41">  </span>		<span class="ansi32">class="mx-auto img-thumbnail center" alt="ITS A BUG" width=200px&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;/div&gt;</span>
+
+
+<span class="ansi1">diff --git a/_config.yml b/_config.yml</span>
+<span class="ansi1">index aaba48b..e65d9d8 100644</span>
+<span class="ansi1">--- a/_config.yml</span>
+<span class="ansi1">+++ b/_config.yml</span>
+<span class="ansi36">@@ -37,3 +37,26 @@</span> collections:
+ 
+ # Build settings
+ markdown: kramdown
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">defaults:</span>
+<span class="ansi32">+</span><span class="ansi32">  -</span>
+<span class="ansi32">+</span><span class="ansi32">    scope:</span>
+<span class="ansi32">+</span><span class="ansi32">      type: "pages"</span>
+<span class="ansi32">+</span><span class="ansi32">      path: "" # an empty string here means all files in the project</span>
+<span class="ansi32">+</span><span class="ansi32">    values:</span>
+<span class="ansi32">+</span><span class="ansi32">      layout: "default"</span>
+<span class="ansi32">+</span><span class="ansi32">  -</span>
+<span class="ansi32">+</span><span class="ansi32">    scope:</span>
+<span class="ansi32">+</span><span class="ansi32">      type: "posts"</span>
+<span class="ansi32">+</span><span class="ansi32">    values:</span>
+<span class="ansi32">+</span><span class="ansi32">      layout: "post"</span>
+<span class="ansi32">+</span><span class="ansi32">  -</span>
+<span class="ansi32">+</span><span class="ansi32">    scope:</span>
+<span class="ansi32">+</span><span class="ansi32">      type: "events"</span>
+<span class="ansi32">+</span><span class="ansi32">    values:</span>
+<span class="ansi32">+</span><span class="ansi32">      layout: "event"</span>
+<span class="ansi32">+</span><span class="ansi32">  -</span>
+<span class="ansi32">+</span><span class="ansi32">    scope:</span>
+<span class="ansi32">+</span><span class="ansi32">      type: "projects"</span>
+<span class="ansi32">+</span><span class="ansi32">    values:</span>
+<span class="ansi32">+</span><span class="ansi32">      layout: "project"</span>
+
+
+<span class="ansi1">diff --git a/_events/template_event.md b/_events/.template_event.md</span>
+<span class="ansi1">similarity index 73%</span>
+<span class="ansi31">rename from _events/template_event.md</span>
+<span class="ansi32">rename to _events/.template_event.md</span>
+<span class="ansi1">index b8ef140..4e814d8 100644</span>
+<span class="ansi1">--- a/_events/template_event.md</span>
+<span class="ansi1">+++ b/_events/.template_event.md</span>
+<span class="ansi36">@@ -1,7 +1,6 @@</span>
+ ---
+<span class="ansi31">-layout: event</span>
+ title: "Template Event"
+<span class="ansi31">-event_date: 2017-12-31</span>
+<span class="ansi32">+</span><span class="ansi32">date: 2017-12-31</span>
+ time: "8pm"
+ location: "Courant Room 205"
+ ---
+
+
+<span class="ansi1">diff --git a/_includes/header.html b/_includes/header.html</span>
+<span class="ansi1">index 5dbe233..a8c9c7e 100644</span>
+<span class="ansi1">--- a/_includes/header.html</span>
+<span class="ansi1">+++ b/_includes/header.html</span>
+<span class="ansi36">@@ -1,9 +1,8 @@</span>
+ &lt;head&gt;
+<span class="ansi31">-  &lt;link rel="shortcut icon" type="image/x-icon" href="{{ site.baseurl }}/assets/img/logo.jpg"&gt;</span>
+   &lt;title&gt; BUGS - NYU &lt;/title&gt;
+   &lt;link type="text/css" rel="stylesheet" href="{{ site.baseurl }}/assets/css/main.css"&gt;
+   &lt;meta property="og:title" content="BUGS Open Source Club @ NYU" /&gt;
+<span class="ansi31">-  &lt;link href="assets/img/favicon.ico" rel="shortcut icon"&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">  &lt;link href="{{ site.baseurl }}/assets/img/favicon.ico" rel="shortcut icon"&gt;</span>
+   &lt;meta charset="utf-8"&gt;
+   &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+   &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+
+
+<span class="ansi1">diff --git a/_includes/important-format.html b/_includes/important-format.html</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..a9a0544</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/_includes/important-format.html</span>
+<span class="ansi36">@@ -0,0 +1,2 @@</span>
+<span class="ansi32">+</span><span class="ansi32">{% assign event = include.event %}</span>
+<span class="ansi32">+</span><span class="ansi32">Upcoming: &lt;a href="{{ event.url }}"&gt;{{ event.title }}&lt;/a&gt; on {{ event.date | date: "%B %e, %Y" }} in {{ event.location }} at {{ event.time }}</span>
+
+
+<span class="ansi1">diff --git a/_includes/important.html b/_includes/important.html</span>
+<span class="ansi1">index 81dc251..72132bf 100644</span>
+<span class="ansi1">--- a/_includes/important.html</span>
+<span class="ansi1">+++ b/_includes/important.html</span>
+<span class="ansi36">@@ -1,33 +1,28 @@</span>
+<span class="ansi31">-&lt;div id="important"&gt;</span>
+<span class="ansi31">-&lt;p&gt;</span>
+<span class="ansi31">-	{% assign final_title = "0" %}</span>
+<span class="ansi31">-	{% assign today = "now" | date: "%Y-%m-%d" | date: "%s" %} &lt;!-- The easiest way to compare dates numerically is to convert the date to a hard unix timestamp --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;!-- Set the value for today to today's date --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">{% assign today = "now" | date: "%Y-%m-%d" | date: "%s" %}</span>
+ 
+<span class="ansi31">-	{% for event in site.events %}</span>
+<span class="ansi31">-		{% assign event_date = event.event_date | date: "%s" %} &lt;!-- Unix timestamp for comparing dates --&gt;</span>
+<span class="ansi31">-		{% if event_date &gt;= today %} &lt;!-- Filter out past events --&gt;</span>
+<span class="ansi31">-			{% if final_title == "0" %} &lt;!-- Make variable assignments for first future event encountered --&gt;</span>
+<span class="ansi31">-				{% assign final_title = event.title %}</span>
+<span class="ansi31">-				{% assign final_date = event.event_date %}</span>
+<span class="ansi31">-				{% assign final_location = event.location %}</span>
+<span class="ansi31">-				{% assign final_time = event.time %}</span>
+<span class="ansi31">-				{% assign final_date_compare = event_date_compare %} &lt;!-- Unix timestamp for comparing dates --&gt;</span>
+<span class="ansi31">-			{% elsif event_date &lt; final_date_compare %} &lt;!-- If there is a sooner future event, aka the next upcoming event, reassign all relevant variables --&gt;</span>
+<span class="ansi31">-				{% assign final_title = event.title %}</span>
+<span class="ansi31">-				{% assign final_date = event.event_date %}</span>
+<span class="ansi31">-				{% assign final_location = event.location %}</span>
+<span class="ansi31">-				{% assign final_time = event.time %}</span>
+<span class="ansi31">-				{% assign final_date_compare = event_date_compare %}</span>
+<span class="ansi31">-			{% endif %}</span>
+<span class="ansi31">-		{% endif %}</span>
+<span class="ansi31">-	{% endfor %}</span>
+<span class="ansi32">+</span><span class="ansi32">{% for event in site.events %}</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;!-- variable date holds date of current event in seconds --&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">{% assign date = event.date | date: "%s" %}</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;!-- If the event's in the past, ignore it --&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">{% if date &lt; today %}{% continue %}{% endif %}</span>
+ 
+<span class="ansi31">-	{% if final_title != "0" %}</span>
+<span class="ansi31">-		Upcoming: {{ final_title }} on {{ final_date | date: "%B %e, %Y" }} in {{ final_location }} at {{ final_time }} &lt;!-- Try to have all variables complete in event MD files so it looks nice :) --&gt;</span>
+<span class="ansi31">-	{% else %}</span>
+<span class="ansi31">-		No events upcoming, keep being awesome!</span>
+<span class="ansi31">-	{% endif %}</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;!-- The code inside this 'unless' block only executes if the expression is false --&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">{% unless date &gt; final_date %}&lt;!-- This evaluates to false if final_date isn't assigned yet --&gt;</span>
+<span class="ansi32">+</span>		<span class="ansi32">&lt;!-- Assigns final_event and final_date to keep track of the</span>
+<span class="ansi32">+</span>			<span class="ansi32">date of the most imminent future event --&gt;</span>
+<span class="ansi32">+</span>		<span class="ansi32">{% assign final_event = event %}</span>
+<span class="ansi32">+</span>		<span class="ansi32">{% assign final_date = date %}</span>
+<span class="ansi32">+</span>	<span class="ansi32">{% endunless %}</span>
+<span class="ansi32">+</span><span class="ansi32">{% endfor %}</span>
+ 
+<span class="ansi31">-	&lt;!-- Not sure how to make the event URL a variable because it's a special case not written in the event MD files --&gt;</span>
+<span class="ansi31">-&lt;/p&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">&lt;div id="important"&gt;</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;p&gt;</span>
+<span class="ansi32">+</span>		<span class="ansi32">{% if final_event %}</span>
+<span class="ansi32">+</span>			<span class="ansi32">{% include important-format.html event = final_event %}</span>
+<span class="ansi32">+</span>		<span class="ansi32">{% else %}</span>
+<span class="ansi32">+</span>			<span class="ansi32">No events upcoming, keep being awesome!</span>
+<span class="ansi32">+</span>		<span class="ansi32">{% endif %}</span>
+<span class="ansi32">+</span>	<span class="ansi32">&lt;/p&gt;</span>
+ &lt;/div&gt;
+
+
+<span class="ansi1">diff --git a/_posts/template_post.md b/_posts/template_post.md</span>
+<span class="ansi1">index b68e92b..242c9a3 100644</span>
+<span class="ansi1">--- a/_posts/template_post.md</span>
+<span class="ansi1">+++ b/_posts/template_post.md</span>
+<span class="ansi36">@@ -1,5 +1,4 @@</span>
+ ---
+<span class="ansi31">-layout: post</span>
+ title: "Template Post"
+ date: 2017-12-31
+ ---
+
+
+<span class="ansi1">diff --git a/_projects/2 archive.md b/_projects/.archive.md</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from _projects/2 archive.md</span>
+<span class="ansi32">rename to _projects/.archive.md</span>
+
+
+<span class="ansi1">diff --git a/_projects/.template_project.md b/_projects/.template_project.md</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..08679af</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/_projects/.template_project.md</span>
+<span class="ansi36">@@ -0,0 +1,9 @@</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">name: "Template Project"</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">### [Title][primary_sponsor]</span>
+<span class="ansi32">+</span><span class="ansi32">**Mentor:** MENTOR_NAME  &lt;!-- Make sure there's two spaces after MENTOR_NAME so that markdown adds a line break --&gt;</span>
+<span class="ansi32">+</span><span class="ansi32">Description here</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">[primary_sponsor]: mailto:bradley.brecher@nyu.edu</span>
+<span class="ansi32">+</span><span class="ansi32">[link_variable]: link_to_page</span>
+
+
+<span class="ansi1">diff --git a/_projects/4 hfoss.md b/_projects/4 hfoss.md</span>
+<span class="ansi1">deleted file mode 100644</span>
+<span class="ansi1">index a681d13..0000000</span>
+<span class="ansi1">--- a/_projects/4 hfoss.md</span>	
+<span class="ansi1">+++ /dev/null</span>
+<span class="ansi36">@@ -1,3 +0,0 @@</span>
+<span class="ansi31">----</span>
+<span class="ansi31">-name: HFOSS</span>
+<span class="ansi31">----</span>
+
+
+<span class="ansi1">diff --git a/_projects/3 bugs-website.md b/_projects/bugs-website.md</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from _projects/3 bugs-website.md</span>
+<span class="ansi32">rename to _projects/bugs-website.md</span>
+
+
+<span class="ansi1">diff --git a/_projects/hfoss.md b/_projects/hfoss.md</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..4a4171a</span>
+<span class="ansi1">--- /dev/null</span>
+<span class="ansi1">+++ b/_projects/hfoss.md</span>
+<span class="ansi36">@@ -0,0 +1,14 @@</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">name: HFOSS</span>
+<span class="ansi32">+</span><span class="ansi32">---</span>
+<span class="ansi32">+</span><span class="ansi32">### [Humanitarian Free and Open Source Software (HFOSS) Project][slack-workspace]</span>
+<span class="ansi32">+</span><span class="ansi32">**Mentor:** Joanna Klukowska</span><span class="ansi41">  </span>
+<span class="ansi32">+</span><span class="ansi32">To join this team, check out the [Slack workspace][slack-workspace].</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">The goal of this project is to explore several open source projects that are humanitarian in nature and figure out how to make contributions to those projects. Fore more information, check out the [Slack workspace][slack-workspace] or the project's [Github account][hfoss-account].</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">Meeting Times: Wednesdays 12:30-1:30pm, CIWW Room 905</span>
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">[profklukowska]: https://hfoss-project.slack.com/team/UCUBBL5RS</span>
+<span class="ansi32">+</span><span class="ansi32">[hfoss-account]: https://github.com/nyu-hfoss-project</span>
+<span class="ansi32">+</span><span class="ansi32">[slack-workspace]: hfoss-project.slack.com</span>
+
+
+<span class="ansi1">diff --git a/_projects/1 yacs.md b/_projects/yacs.md</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from _projects/1 yacs.md</span>
+<span class="ansi32">rename to _projects/yacs.md</span>
+
+
+<span class="ansi1">diff --git a/_sass/base/_utils.scss b/_sass/base/_utils.scss</span>
+<span class="ansi1">index e9e5a9a..783d00a 100644</span>
+<span class="ansi1">--- a/_sass/base/_utils.scss</span>
+<span class="ansi1">+++ b/_sass/base/_utils.scss</span>
+<span class="ansi36">@@ -18,3 +18,8 @@</span>
+ .u-pull-left {
+   float: left;
+ }
+<span class="ansi32">+</span>
+<span class="ansi32">+</span><span class="ansi32">.center {</span>
+<span class="ansi32">+</span><span class="ansi32">    display: block;</span>
+<span class="ansi32">+</span><span class="ansi32">    margin: 0 auto;</span>
+<span class="ansi32">+</span><span class="ansi32">}</span>
+
+
+<span class="ansi1">diff --git a/logo two.pdf b/assets/img/logo two.pdf</span>
+<span class="ansi1">similarity index 100%</span>
+<span class="ansi31">rename from logo two.pdf</span>
+<span class="ansi32">rename to assets/img/logo two.pdf</span>
+
+
+<span class="ansi1">diff --git a/assets/img/logo_no_title.png b/assets/img/logo_no_title.png</span>
+<span class="ansi1">new file mode 100644</span>
+<span class="ansi1">index 0000000..325ad2f</span>
+Binary files /dev/null and b/assets/img/logo_no_title.png differ
+
+
+<span class="ansi1">diff --git a/calendar/data.html b/calendar/data.html</span>
+<span class="ansi1">index bf25668..0ae9d9b 100644</span>
+<span class="ansi1">--- a/calendar/data.html</span>
+<span class="ansi1">+++ b/calendar/data.html</span>
+<span class="ansi36">@@ -1,6 +1,5 @@</span>
+ ---
+<span class="ansi31">-layout:</span>
+<span class="ansi31">-title:</span>
+<span class="ansi32">+</span><span class="ansi32">layout: null</span>
+ permalink: /calendar/data/
+ ---
+ 
+
+
+<span class="ansi1">diff --git a/index.html b/index.html</span>
+<span class="ansi1">index 4865a0a..c10519b 100644</span>
+<span class="ansi1">--- a/index.html</span>
+<span class="ansi1">+++ b/index.html</span>
+<span class="ansi36">@@ -1,5 +1,6 @@</span>
+ ---
+ title: BUGS
+<span class="ansi32">+</span><span class="ansi32">layout: null</span>
+ ---
+ 
+ &lt;html&gt;
+
+
+<span class="ansi1">diff --git a/irc/index.html b/irc/index.html</span>
+<span class="ansi1">deleted file mode 100644</span>
+<span class="ansi1">index 0d6905d..0000000</span>
+<span class="ansi1">--- a/irc/index.html</span>
+<span class="ansi1">+++ /dev/null</span>
+<span class="ansi36">@@ -1,3 +0,0 @@</span>
+<span class="ansi31">----</span>
+<span class="ansi31">-layout: default</span>
+<span class="ansi31">----</span>
+</pre>
+</body>
+
+</html>
