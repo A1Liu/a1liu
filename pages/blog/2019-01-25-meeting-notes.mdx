@@ -1,11 +1,8 @@
----
-title: BUGS EBoard Meeting Notes
-categories: [bugs-nyu]
-tags: [yacs, ideas, meeting, eboard]
----
+import Layout from "components/layout";
+
+# BUGS EBoard Meeting Notes
 These are my meeting notes for the first BUGS EBoard meeting of the Spring semester.
 Since I couldn't attend the meeting, this is the best I could do `:(`.
-{% capture top %}<small><a name="" href="#">back to top</a></small>{% endcapture %}
 
 [Skip to Website Info](#website-info)
 
@@ -23,7 +20,7 @@ and led by Ada Young, who is currently working on integrating NYU course
 information into the YACS infrastructure, so that NYU students will have a genuine
 graphical interface to schedule their courses.
 
-#### Progress Last Semester {{ top }}
+#### Progress Last Semester <small><a name="" href="#">back to top</a></small>
 Bradley and I organized a small group of NYU students to build an "adapter",
 which is the term used to describe an HTTP endpoint that responds to YACS HTTP
 requests with course information. Our team first built a Python script to collect
@@ -46,7 +43,7 @@ have a system ready to help NYU students schedule their courses.
 [albert-class-search]: https://m.albert.nyu.edu/app/catalog/classSearch
 [eboard-post]: https://bugs-mentors.slack.com/archives/G97EZ3D7F/p1544817503000200
 
-#### Resources for More Information {{ top }}
+#### Resources for More Information <small><a name="" href="#">back to top</a></small>
 - [YACS User-Facing Website][nightly-yacs] - the website that RPI students use to schedule courses
 - [Documentation][yacs-docs] - More information on contributing to YACS/using its API
 - [Github Repository][yacs-repo] - Source code
@@ -63,7 +60,7 @@ relevant to the planning of YACS. The ultimate audience for this doc is RCOS adm
 [rcos-dropbox-paper]: https://paper.dropbox.com/doc/YACS-Spring-2019-The-Bester-Semester-Ever-gWZcv5kjBK3BbKcQXM4ST
 
 <a name="yacs-new-info"></a>
-#### New Information {{ top }}
+#### New Information <small><a name="" href="#">back to top</a></small>
 Firstly, the YACS workflow has moved to [MatterMost][rcos-mattermost]; the NYU students
 that originally showed interest in working on YACS are still in the Slack, and so
 we can't just ignore it, but we should migrate our own workflow to their MatterMost
@@ -87,7 +84,7 @@ for NYU students and also reduce the complexity of our scraper.
 [pr-nyu-adapter]: https://github.com/YACS-RCOS/yacs/pull/392
 
 <a name="website-info"></a>
-## Club Website {{ top }}
+## Club Website <small><a name="" href="#">back to top</a></small>
 I don't really know what we're trying to accomplish with the website, so I've been
 trying to stay away from redesigning anything. That is, are we trying to...
 
@@ -120,3 +117,5 @@ integrating them:
 - Features and new pages
 - IRC/Discord Server (this is on the TODO but idk what it means)
 - Increasing the amount of content on the site (e.g. blogging? More regular news posts?)
+
+export default ({ children }) => <Layout>{children}</Layout>;
