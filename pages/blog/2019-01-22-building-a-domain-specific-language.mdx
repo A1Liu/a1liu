@@ -1,8 +1,6 @@
----
-title: Building a Domain-Specific Language
-categories: [bugs-nyu, yacs]
-tags: [writeup,new-lang,ideas]
----
+import Layout from "components/layout";
+
+# Building a Domain-Specific Language
 So I'm trying to build a declarative language to describe course prerequisites.
 Here's my process. Also, I'm doing this while watching [this video][kernighan] on loop.
 
@@ -155,45 +153,40 @@ Prerequisites: 'MATH-UA 123 Calculus III' and "MATH-UA 235 Probability and Stati
 Additionally, we want to make sure that the syntax is pretty close to the domain's
 language, so this should also be acceptable,
 
-<div class="highlight">
-<pre class="highlight">
-<code><span class='n'>Prerequisites:</span> <span class='s'>MATH-UA 123 Calculus III</span> <span class='ow'>and</span> <span class='s'>MATH-UA 235 Probability "and" Statistics</span><span class='n'>.</span></code>
-</pre>
-</div>
+<code>
+<span class='n'>Prerequisites:</span> <span class='s'>MATH-UA 123 Calculus III</span> <span class='ow'>and</span> <span class='s'>MATH-UA 235 Probability "and" Statistics</span><span class='n'>.</span>
+</code>
 
 ...since in reality nobody puts quotes around every proper noun. We also want
 whitespace to be *almost meaningless*; the above should mean the same thing even
 if it's written like this:
 
-{% capture code %}
+<code>
 <span class='n'>Prerequisites:</span>
   <span class='s'>MATH-UA 123 Calculus III</span>
   <span class='ow'>and</span> <span class='s'>"MATH-UA 235 Probability and Statistics"</span><span class='n'>.</span>
-{% endcapture %}
-{% include custom-code-block.html code=code %}
+</code>
 
 because that's how spacing works with text wrapping when we read normally. The
 writer shouldn't have to worry about indentation when writing, it should be handled
 for them. Also, the above should be the same thing as this:
 
-{% capture code %}
+<code>
 <span class='n'>Prerequisites:</span>
   <span class='s'>MATH-UA 123   Calculus III</span>
   <span class='ow'>and</span> <span class='s'>MATH-UA  235 Probability "and" Statistics</span><span class='n'> .</span>
-{% endcapture %}
-{% include custom-code-block.html code=code %}
+</code>
 
 because it would be the same thing to a reader. Quotes don't have any 'special'
 meaning in this context; they only signal to the interpreter that the word should
 be evaluated as a string instead of an operator. Thus, there should be no problem
 with using single and double quotes liberally:
 
-{% capture code %}
+<code>
 <span class='n'>Prerequisites:</span>
   <span class='s'>MATH-UA 123   Calculus III</span>
   <span class='ow'>and</span> <span class='s'>"MATH"-UA  "235" Probability "and" Statistics</span><span class='n'> .</span>
-{% endcapture %}
-{% include custom-code-block.html code=code %}
+</code>
 
 With these rules we have an implicit order of execution: the interpreter needs to
 first handle spacing, then parse strings, then it can start looking at words and
@@ -235,7 +228,7 @@ Prerequisite: two relevant courses.
 To handle this case, we need to add lists, so that we can write the above as
 something like this:
 
-{% capture code %}
+<code>
 <span class='n'>Prerequisites:</span> <span class='mi'>2</span> <span class='ow'>of</span>
   <span class='n'>(</span>
     <span class='s'>PHIL-UA 1</span><span class='n'>,</span>
@@ -243,18 +236,11 @@ something like this:
     <span class='s'>PHIL-UA 6</span><span class='n'>,</span>
     <span class='s'>PHIL-UA 7</span>
   <span class='n'>).</span>
-{% endcapture %}
-{% include custom-code-block.html code=code %}
-
-<div class="highlight">
-<pre class="highlight">
-<code></code>
-</pre>
-</div>
+</code>
 
 We should also add in variables so that this would also work:
 
-{% capture code %}
+<code>
 <span class='n'>relevant courses =</span>
   <span class='n'>(</span>
     <span class='s'>PHIL-UA 1</span><span class='n'>,</span>
@@ -264,8 +250,7 @@ We should also add in variables so that this would also work:
   <span class='n'>);</span>
 <span class='n'>Prerequisites:</span>
   <span class='mi'>2</span> <span class='ow'>of</span> <span class='s'>relevant courses</span><span class='n'>.</span>
-{% endcapture %}
-{% include custom-code-block.html code=code %}
+</code>
 
 And now our final statement looks almost exactly like the original prerequisite!
 That's exactly what we're going for.
@@ -276,3 +261,5 @@ I'm going to start writing these features down, and then write a post describing
 the syntax of the language as if for a manual for the end-user, and then also
 write another post describing the implementation, with the intent being that the
 two could be read side-by-side and make sense.
+
+export default ({ children }) => <Layout>{children}</Layout>;
