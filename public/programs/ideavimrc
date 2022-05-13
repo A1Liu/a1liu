@@ -11,10 +11,12 @@ map Q gq
 
 " Mapping <C-H> to escape
 snoremap <C-H> <Esc>
+inoremap <C-H> <Esc>
 noremap <C-H> <Esc>
 noremap! <C-H> <Esc>
 cnoremap <C-H> <C-C>
 nnoremap r<C-H> <Nop>
+nnoremap ; :
 
 nnoremap <C-T> a<C-R>=strftime("- Albert Liu, %b %d, %Y %a %H:%M %Z")<CR><Esc>
 inoremap <C-T> <C-R>=strftime("- Albert Liu, %b %d, %Y %a %H:%M %Z")<CR>
