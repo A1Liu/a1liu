@@ -17,16 +17,23 @@
   flex-grow: 1;
 }
 
-.config {
+.configBox {
   height: 100%;
   min-width: 400px;
   max-width: 400px;
 
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 
   border-left: 4px solid black;
   padding: 8px 4px 16px 8px;
+  gap: 8px;
+}
+
+.config {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -89,4 +96,17 @@
   border-radius: 8px;
   width: 120px;
   height: inherit;
+}
+
+.bugReport {
+  box-sizing: border-box;
+  border-radius: 8px;
+  text-decoration: none;
+  color: black;
+  padding: 8px;
+  background: lightblue;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

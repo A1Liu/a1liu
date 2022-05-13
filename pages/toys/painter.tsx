@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import shallow from "zustand/shallow";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
@@ -9,6 +10,7 @@ import * as wasm from "components/wasm";
 import { useToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
+import { get } from "components/util";
 
 interface PainterCb {
   initWasm: (wasmRef: wasm.Ref) => void;
@@ -271,33 +273,46 @@ const Config: React.VFC = () => {
     paletteRef.current.style.backgroundColor = color;
   }, [paletteRef, r, g, b]);
 
+  let urlString = "https://github.com/A1Liu/a1liu/issues/new";
+  const query = { title: "Painter: ", body: "" };
+  const queryString = new URLSearchParams(query).toString();
+  if (queryString) {
+    urlString += "?" + queryString;
+  }
+
   return (
-    <div className={styles.config}>
-      <h3>Painter</h3>
+    <div className={styles.configBox}>
+      <div className={styles.config}>
+        <h3>Painter</h3>
 
-      <button
-        className={css.muiButton}
-        onClick={() => {
-          if (!wasmRef) return;
+        <button
+          className={css.muiButton}
+          onClick={() => {
+            if (!wasmRef) return;
 
-          wasmRef.abi.toggleTool();
-          const obj = wasmRef.abi.currentTool();
-          const tool = wasmRef.readObj(obj);
-          setTool(tool);
-        }}
-      >
-        {tool}
-      </button>
+            wasmRef.abi.toggleTool();
+            const obj = wasmRef.abi.currentTool();
+            const tool = wasmRef.readObj(obj);
+            setTool(tool);
+          }}
+        >
+          {tool}
+        </button>
 
-      <div className={styles.colorPicker}>
-        <div ref={paletteRef} className={styles.palette} />
+        <div className={styles.colorPicker}>
+          <div ref={paletteRef} className={styles.palette} />
 
-        <div className={styles.colorValues}>
-          <FloatInput prefix={"R"} data={r} setData={setR} />
-          <FloatInput prefix={"G"} data={g} setData={setG} />
-          <FloatInput prefix={"B"} data={b} setData={setB} />
+          <div className={styles.colorValues}>
+            <FloatInput prefix={"R"} data={r} setData={setR} />
+            <FloatInput prefix={"G"} data={g} setData={setG} />
+            <FloatInput prefix={"B"} data={b} setData={setB} />
+          </div>
         </div>
       </div>
+
+      <a className={styles.bugReport} target="_blank" href={urlString}>
+        Report a bug
+      </a>
     </div>
   );
 };
@@ -343,7 +358,7 @@ const Canvas: React.VFC = () => {
         const width = target.clientWidth;
         const height = target.clientHeight;
 
-        wasmRef.abi.onMove(x, y, width ,height);
+        wasmRef.abi.onMove(x, y, width, height);
       }}
       onClick={(evt) => {
         if (!wasmRef) return;
