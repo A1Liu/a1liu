@@ -2,6 +2,9 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("liu");
 
+// Recording a canvas
+// https://dev.to/ndesmic/how-to-record-a-canvas-element-and-make-a-gif-4852
+
 const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
