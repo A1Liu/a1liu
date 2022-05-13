@@ -29,33 +29,6 @@ pub fn build(b: *Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    // I cannot get things to work on macbook M1 without doing this. Also,
-    // initializing threadlocal doesn't really work on MacOS it seems.
-    var target = b.standardTargetOptions(.{});
-    target.cpu_arch = Arch.x86_64;
-
     _ = wasmProgram(b, mode, "kilordle");
     _ = wasmProgram(b, mode, "painter");
-
-    const playground = b.addExecutable("play", "src/test.zig");
-    playground.addPackagePath("liu", "components/zig/lib.zig");
-    playground.setBuildMode(mode);
-
-    playground.install();
-
-    // Un-commenting this doesn't output a file, so whatever I guess
-    // const all_step = b.step("all", "Build all apps");
-    // all_step.dependOn(&kilordle.step);
-
-    const run_cmd = playground.run();
-    run_cmd.step.dependOn(&playground.step);
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
-
-    const run_step = b.step("run", "Run the app");
-    run_step.dependOn(&run_cmd.step);
-
-    // const native_step = b.step("native", "Build native version");
-    // native_step.dependOn(&exe.step);
 }
