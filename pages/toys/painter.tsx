@@ -436,25 +436,25 @@ const Canvas: React.VFC = () => {
     <canvas
       ref={canvasRef}
       className={styles.canvas}
-      onMouseMove={(evt) => {
+      onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
         if (!wasmRef) return;
 
         const x = evt.clientX;
         const y = evt.clientY;
 
-        const target = evt.target as HTMLCanvasElement;
+        const target = evt.currentTarget;
         const width = target.clientWidth;
         const height = target.clientHeight;
 
         wasmRef.abi.onMove(x, y, width, height);
       }}
-      onClick={(evt) => {
+      onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
         if (!wasmRef) return;
 
         const x = evt.clientX;
         const y = evt.clientY;
 
-        const target = evt.target as HTMLCanvasElement;
+        const target = evt.currentTarget;
         const width = target.clientWidth;
         const height = target.clientHeight;
 
