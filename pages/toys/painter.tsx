@@ -330,23 +330,35 @@ const Config: React.VFC = () => {
           </div>
         </div>
 
-        <div className={styles.configRow}>
+        <div className={css.configRow}>
           <button
             className={css.muiButton}
             onClick={() => cb.setIsRecording(!isRecording)}
           >
             {isRecording ? "Stop Recording" : "Start Recording"}
           </button>
+
+          {recordingUrl && (
+            <button
+              className={css.muiButton}
+              onClick={() => {
+                const a = document.createElement("a");
+                a.href = recordingUrl;
+                a.download = "recording.webm";
+                a.click();
+              }}
+            >
+              Download
+            </button>
+          )}
         </div>
 
-        {recordingUrl ? (
+        {recordingUrl && (
           <video controls autoPlay muted width="100%">
             <source src={recordingUrl} type="video/mp4" />
 
             {"Sorry, your browser doesn't support embedded videos."}
           </video>
-        ) : (
-          <div>No recording available</div>
         )}
       </div>
 
@@ -399,9 +411,7 @@ const Canvas: React.VFC = () => {
 
     mediaRecorder.start();
 
-    return () => {
-      mediaRecorder.stop();
-    };
+    return () => mediaRecorder.stop();
   }, [cb, isRecording]);
 
   React.useEffect(() => {
