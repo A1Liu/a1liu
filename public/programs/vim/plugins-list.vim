@@ -83,6 +83,11 @@ if PlugFlag('polyglot')
   " colors of the rainbow into your highlighter, it doesn't make the
   " experience any better.
   "                                 - Albert Liu, Feb 04, 2022 Fri 22:46 EST
+  "
+  " NOTE: Might need to fix all the instances of `hi link` to say `hi def link`
+  " in the syntax folder of this highlighter so that it doesn't disappear when
+  " using `<C-L>`
+  "                                 - Albert Liu, May 14, 2022 Sat 17:16 EDT
   Plug 'leafgarland/typescript-vim'
 
   Plug 'jansedivy/jai.vim'
