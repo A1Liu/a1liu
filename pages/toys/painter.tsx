@@ -355,7 +355,7 @@ const Config: React.VFC = () => {
 
         {recordingUrl && (
           <video controls autoPlay muted width="100%">
-            <source src={recordingUrl} type="video/mp4" />
+            <source src={recordingUrl} type="video/webm" />
 
             {"Sorry, your browser doesn't support embedded videos."}
           </video>
@@ -397,7 +397,7 @@ const Canvas: React.VFC = () => {
     };
 
     mediaRecorder.onstop = (e) => {
-      const blob = new Blob(recordedChunks, { type: "video/mp4" });
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
       const url = URL.createObjectURL(blob);
       cb.setRecordingUrl(url);
     };
