@@ -117,9 +117,7 @@ const initGl = async (
   cb: PainterCb
 ): Promise<PainterGl | null> => {
   const ctx = canvas?.getContext("webgl2");
-  if (!ctx) {
-    return null;
-  }
+  if (!ctx) return null;
 
   const [vertSrc, fragSrc] = await Promise.all([
     fetch("/assets/painter.vert").then((r) => r.text()),
@@ -224,12 +222,11 @@ const FloatInput: React.VFC<FloatInputProps> = ({ prefix, data, setData }) => {
   React.useEffect(() => {
     const val = Number.parseFloat(text);
 
-    if (isNaN(val)) {
-      setError(true);
-      return;
-    }
+    const valIsInvalid = isNaN(val);
+    setError(valIsInvalid);
 
-    setError(false);
+    if (valIsInvalid) return;
+
     setData(val);
   }, [text, setError, setData]);
 
@@ -396,15 +393,11 @@ const Canvas: React.VFC = () => {
     const recordedChunks: any[] = [];
 
     mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        recordedChunks.push(e.data);
-      }
+      if (e.data.size > 0) recordedChunks.push(e.data);
     };
 
     mediaRecorder.onstop = (e) => {
-      const blob = new Blob(recordedChunks, {
-        type: "video/mp4",
-      });
+      const blob = new Blob(recordedChunks, { type: "video/mp4" });
       const url = URL.createObjectURL(blob);
       cb.setRecordingUrl(url);
     };
