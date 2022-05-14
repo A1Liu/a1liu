@@ -5,4 +5,4 @@ onmessage = (event) => {
   messages.push(ev);
 };
 
-postMessage("hello");
+postMessage("bello");

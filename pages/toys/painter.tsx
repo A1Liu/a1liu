@@ -485,7 +485,7 @@ const Painter: React.VFC = () => {
   const { cb } = useStable();
 
   React.useEffect(() => {
-    const worker = new Worker(new URL("../../src/painter.worker.js", import.meta.url));
+    const worker = new Worker(new URL("src/painter.worker.ts", import.meta.url));
     worker.onmessage = (ev: MessageEvent<Message>) => {
       console.log(ev.data);
     };
