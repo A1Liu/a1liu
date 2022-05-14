@@ -10,7 +10,6 @@ import * as wasm from "components/wasm";
 import { useToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
-import { get } from "components/util";
 
 interface PainterCb {
   initWasm: (wasmRef: wasm.Ref) => void;
