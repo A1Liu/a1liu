@@ -330,12 +330,12 @@ const Config: React.VFC = () => {
           </div>
         </div>
 
-        <div className={css.configRow}>
+        <div className={styles.configRow}>
           <button
             className={css.muiButton}
             onClick={() => cb.setIsRecording(!isRecording)}
           >
-            {isRecording ? "Stop Recording" : "Start Recording"}
+            {isRecording ? "stop" : "record"}
           </button>
 
           {recordingUrl && (
