@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import shallow from "zustand/shallow";
-// import type { Message } from "src/painter-worker";
+import type { Message } from "src/painter.worker";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
@@ -11,8 +11,6 @@ import * as wasm from "components/wasm";
 import { useToast, postToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
-
-type Message = { kind: "canvas"; offscreen: any };
 
 interface PainterCb {
   initWasm: (wasmRef: wasm.Ref) => void;
@@ -431,7 +429,7 @@ const Canvas: React.VFC = () => {
     const canvas = canvasRef.current;
     if (!canvas || !workerRef) return;
 
-    // console.log("hello");
+    console.log("hello");
     // const offscreen = (canvas as any).transferControlToOffscreen();
     // workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
   }, [workerRef, canvasRef]);
@@ -485,7 +483,9 @@ const Painter: React.VFC = () => {
   const { cb } = useStable();
 
   React.useEffect(() => {
-    const worker = new Worker(new URL("src/painter.worker.ts", import.meta.url));
+    const worker = new Worker(
+      new URL("src/painter.worker.ts", import.meta.url)
+    );
     worker.onmessage = (ev: MessageEvent<Message>) => {
       console.log(ev.data);
     };
