@@ -17,6 +17,8 @@ interface PainterCb {
   initGl: (gl: PainterGl) => void;
   setRawTriangles: (floats: Float32Array) => void;
   setColors: (floats: Float32Array) => void;
+  setIsRecording: (isRecording: boolean) => void;
+  setRecordingUrl: (url: string) => void;
 }
 
 interface PainterGl {
@@ -37,6 +39,9 @@ interface PainterState {
   gl: PainterGl | null;
   glState: PainterGlState;
   wasmRef: wasm.Ref | null;
+
+  isRecording: boolean;
+  recordingUrl: string | null;
 
   callbacks: PainterCb;
 }
@@ -81,6 +86,9 @@ const useStore = create<PainterState>((set, get) => {
     });
   };
 
+  const setIsRecording = (isRecording: boolean): void => set({ isRecording });
+  const setRecordingUrl = (recordingUrl: string): void => set({ recordingUrl });
+
   return {
     gl: null,
     glState: {
@@ -89,6 +97,9 @@ const useStore = create<PainterState>((set, get) => {
       rawTrianglesLength: 0,
     },
 
+    isRecording: false,
+    recordingUrl: null,
+
     wasmRef: null,
 
     callbacks: {
@@ -96,6 +107,8 @@ const useStore = create<PainterState>((set, get) => {
       initGl,
       setRawTriangles,
       setColors,
+      setIsRecording,
+      setRecordingUrl,
     },
   };
 });
@@ -248,6 +261,8 @@ const Config: React.VFC = () => {
   const [tool, setTool] = React.useState("");
   const paletteRef = React.useRef<HTMLDivElement>(null);
 
+  const recordingUrl = useStore((state) => state.recordingUrl);
+
   const [r, setR] = React.useState(0.5);
   const [g, setG] = React.useState(0.5);
   const [b, setB] = React.useState(0.5);
@@ -259,6 +274,12 @@ const Config: React.VFC = () => {
     const tool = wasmRef.readObj(obj);
     setTool(tool);
   }, [wasmRef, setTool]);
+
+  React.useEffect(() => {
+    if (recordingUrl === null) return () => {};
+
+    return () => URL.revokeObjectURL(recordingUrl);
+  }, [recordingUrl]);
 
   React.useEffect(() => {
     if (!wasmRef) return;
@@ -274,7 +295,7 @@ const Config: React.VFC = () => {
   }, [paletteRef, r, g, b]);
 
   let urlString = "https://github.com/A1Liu/a1liu/issues/new";
-  const query = { title: "Painter: ", body: "" };
+  const query = { title: "Painter: Bug Report", body: "" };
   const queryString = new URLSearchParams(query).toString();
   if (queryString) {
     urlString += "?" + queryString;
@@ -310,7 +331,12 @@ const Config: React.VFC = () => {
         </div>
       </div>
 
-      <a className={styles.bugReport} target="_blank" href={urlString}>
+      <a
+        className={styles.bugReport}
+        target="_blank"
+        rel="noreferrer"
+        href={urlString}
+      >
         Report a bug
       </a>
     </div>
