@@ -113,14 +113,7 @@ const useStore = create<PainterState>((set, get) => {
 });
 
 const useStable = (): Pick<PainterState, "cb" | "wasmRef" | "ggl"> => {
-  return useStore(
-    (state) => ({
-      cb: state.cb,
-      wasmRef: state.wasmRef,
-      ggl: state.ggl,
-    }),
-    shallow
-  );
+  return useStore(({ cb, wasmRef, ggl }) => ({ cb, wasmRef, ggl }), shallow);
 };
 
 const initGl = async (
@@ -472,7 +465,7 @@ const Canvas: React.VFC = () => {
 };
 
 const Painter: React.VFC = () => {
-  const cb = useStore((state) => state.cb);
+  const { cb } = useStable();
 
   React.useEffect(() => {
     const wasmPromise = wasm.fetchWasm("/assets/painter.wasm", {
