@@ -113,3 +113,13 @@ export const ToastCorner: React.VFC = () => {
     </div>
   );
 };
+
+export const postToast = (tag: string, data: any): void => {
+  const toast = useStore.getState().cb;
+
+  console.log(tag, data);
+
+  if (typeof data === "string") {
+    toast.add(ToastColors[tag] ?? "green", null, data);
+  }
+};

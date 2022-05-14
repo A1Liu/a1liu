@@ -2,6 +2,7 @@ import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "components/wasm";
+import { postToast } from "components/errors";
 import { defer } from "components/util";
 import cx from "classnames";
 import create from "zustand";
@@ -338,7 +339,7 @@ export const Kilordle: React.VFC = () => {
 
   React.useEffect(() => {
     const wasmRef = wasm.fetchWasm("/assets/kilordle.wasm", {
-      postMessage: wasm.postToast,
+      postMessage: postToast,
       imports: { setPuzzles: cb.setPuzzles },
       raw: { setWordsLeft: cb.setWordsLeft },
     });

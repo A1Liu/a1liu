@@ -1,5 +1,3 @@
-import { useToastStore, ToastColors } from "./errors";
-
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -13,16 +11,6 @@ const initialObjectBuffer: any[] = [
   Uint8Array,
   Float32Array,
 ];
-
-export const postToast = (tag: string, data: any): void => {
-  const toast = useToastStore.getState().cb;
-
-  console.log(tag, data);
-
-  if (typeof data === "string") {
-    toast.add(ToastColors[tag] ?? "green", null, data);
-  }
-};
 
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;

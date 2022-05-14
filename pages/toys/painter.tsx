@@ -1,18 +1,22 @@
 import React from "react";
 import Link from "next/link";
 import shallow from "zustand/shallow";
+// import type { Message } from "src/painter-worker";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
 import styles from "./painter.module.css";
 import css from "components/util.module.css";
 import * as wasm from "components/wasm";
-import { useToast } from "components/errors";
+import { useToast, postToast } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
+type Message = { kind: "canvas"; offscreen: any };
+
 interface PainterCb {
   initWasm: (wasmRef: wasm.Ref) => void;
+  initWorker: (workerRef: Worker) => void;
   initGl: (gl: PainterGl) => void;
   setRawTriangles: (floats: Float32Array) => void;
   setColors: (floats: Float32Array) => void;
@@ -38,6 +42,7 @@ interface PainterState {
   ggl: PainterGl | null;
   glState: PainterGlState;
   wasmRef: wasm.Ref | null;
+  workerRef: Worker | null;
 
   isRecording: boolean;
   recordingUrl: string | null;
@@ -47,6 +52,7 @@ interface PainterState {
 
 const useStore = create<PainterState>((set, get) => {
   const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
+  const initWorker = (workerRef: Worker) => set({ workerRef });
   const initGl = (ggl: PainterGl) => set({ ggl });
 
   const setColors = (floats: Float32Array): void => {
@@ -99,10 +105,12 @@ const useStore = create<PainterState>((set, get) => {
     isRecording: false,
     recordingUrl: null,
 
+    workerRef: null,
     wasmRef: null,
 
     cb: {
       initWasm,
+      initWorker,
       initGl,
       setRawTriangles,
       setColors,
@@ -117,8 +125,7 @@ const useStable = (): Pick<PainterState, "cb" | "wasmRef" | "ggl"> => {
 };
 
 const initGl = async (
-  canvas: HTMLCanvasElement | null,
-  cb: PainterCb
+  canvas: HTMLCanvasElement | null
 ): Promise<PainterGl | null> => {
   const ctx = canvas?.getContext("webgl2");
   if (!ctx) return null;
@@ -377,6 +384,7 @@ const Config: React.VFC = () => {
 const Canvas: React.VFC = () => {
   const { cb, wasmRef, ggl } = useStable();
   const glState = useStore((state) => state.glState);
+  const workerRef = useStore((state) => state.workerRef);
   const isRecording = useStore((state) => state.isRecording);
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -408,7 +416,7 @@ const Canvas: React.VFC = () => {
   }, [cb, isRecording]);
 
   React.useEffect(() => {
-    initGl(canvasRef.current, cb).then((ggl) => {
+    initGl(canvasRef.current).then((ggl) => {
       if (!ggl) {
         toast.add("error", null, "WebGL2 not supported!");
         return;
@@ -418,6 +426,15 @@ const Canvas: React.VFC = () => {
       toast.add("success", null, "WebGL2 context initialized!");
     });
   }, [canvasRef, toast, cb]);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !workerRef) return;
+
+    // console.log("hello");
+    // const offscreen = (canvas as any).transferControlToOffscreen();
+    // workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
+  }, [workerRef, canvasRef]);
 
   React.useEffect(() => {
     if (!ggl) return;
@@ -468,8 +485,17 @@ const Painter: React.VFC = () => {
   const { cb } = useStable();
 
   React.useEffect(() => {
+    const worker = new Worker(new URL("../../src/painter.worker.js", import.meta.url));
+    worker.onmessage = (ev: MessageEvent<Message>) => {
+      console.log(ev.data);
+    };
+
+    cb.initWorker(worker);
+  }, [cb]);
+
+  React.useEffect(() => {
     const wasmPromise = wasm.fetchWasm("/assets/painter.wasm", {
-      postMessage: wasm.postToast,
+      postMessage: postToast,
       raw: {},
       imports: {
         setTriangles: cb.setRawTriangles,
