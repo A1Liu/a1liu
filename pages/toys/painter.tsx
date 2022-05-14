@@ -261,6 +261,7 @@ const Config: React.VFC = () => {
   const [tool, setTool] = React.useState("");
   const paletteRef = React.useRef<HTMLDivElement>(null);
 
+  const isRecording = useStore((state) => state.isRecording);
   const recordingUrl = useStore((state) => state.recordingUrl);
 
   const [r, setR] = React.useState(0.5);
@@ -276,7 +277,7 @@ const Config: React.VFC = () => {
   }, [wasmRef, setTool]);
 
   React.useEffect(() => {
-    if (recordingUrl === null) return () => {};
+    if (recordingUrl === null) return;
 
     return () => URL.revokeObjectURL(recordingUrl);
   }, [recordingUrl]);
@@ -329,6 +330,25 @@ const Config: React.VFC = () => {
             <FloatInput prefix={"B"} data={b} setData={setB} />
           </div>
         </div>
+
+        <div className={styles.configRow}>
+          <button
+            className={css.muiButton}
+            onClick={() => cb.setIsRecording(!isRecording)}
+          >
+            {isRecording ? "Stop Recording" : "Start Recording"}
+          </button>
+        </div>
+
+        {recordingUrl ? (
+          <video controls autoPlay muted width="100%">
+            <source src={recordingUrl} type="video/mp4" />
+
+            {"Sorry, your browser doesn't support embedded videos."}
+          </video>
+        ) : (
+          <div>No recording available</div>
+        )}
       </div>
 
       <a
@@ -351,6 +371,39 @@ const Canvas: React.VFC = () => {
 
   const ggl = useStore((state) => state.gl);
   const glState = useStore((state) => state.glState);
+
+  const isRecording = useStore((state) => state.isRecording);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+
+    if (!canvas) return;
+    if (!isRecording) return;
+
+    const stream = canvas.captureStream(24);
+    const mediaRecorder = new MediaRecorder(stream);
+    const recordedChunks: any[] = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        recordedChunks.push(e.data);
+      }
+    };
+
+    mediaRecorder.onstop = (e) => {
+      const blob = new Blob(recordedChunks, {
+        type: "video/mp4",
+      });
+      const url = URL.createObjectURL(blob);
+      cb.setRecordingUrl(url);
+    };
+
+    mediaRecorder.start();
+
+    return () => {
+      mediaRecorder.stop();
+    };
+  }, [cb, isRecording]);
 
   React.useEffect(() => {
     initGl(canvasRef.current, cb).then((ggl) => {
