@@ -35,27 +35,27 @@ interface PainterGlState {
 }
 
 interface PainterState {
-  gl: PainterGl | null;
+  ggl: PainterGl | null;
   glState: PainterGlState;
   wasmRef: wasm.Ref | null;
 
   isRecording: boolean;
   recordingUrl: string | null;
 
-  callbacks: PainterCb;
+  cb: PainterCb;
 }
 
 const useStore = create<PainterState>((set, get) => {
   const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
-  const initGl = (gl: PainterGl) => set({ gl });
+  const initGl = (ggl: PainterGl) => set({ ggl });
 
   const setColors = (floats: Float32Array): void => {
-    const { gl, glState } = get();
-    if (!gl) return;
+    const { ggl, glState } = get();
+    if (!ggl) return;
 
-    const ctx = gl.ctx;
+    const ctx = ggl.ctx;
 
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, gl.colors);
+    ctx.bindBuffer(ctx.ARRAY_BUFFER, ggl.colors);
     ctx.bufferData(ctx.ARRAY_BUFFER, floats, ctx.DYNAMIC_DRAW);
 
     set({
@@ -68,12 +68,12 @@ const useStore = create<PainterState>((set, get) => {
   };
 
   const setRawTriangles = (floats: Float32Array): void => {
-    const { gl, glState } = get();
-    if (!gl) return;
+    const { ggl, glState } = get();
+    if (!ggl) return;
 
-    const ctx = gl.ctx;
+    const ctx = ggl.ctx;
 
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, gl.rawTriangles);
+    ctx.bindBuffer(ctx.ARRAY_BUFFER, ggl.rawTriangles);
     ctx.bufferData(ctx.ARRAY_BUFFER, floats, ctx.DYNAMIC_DRAW);
 
     set({
@@ -89,7 +89,7 @@ const useStore = create<PainterState>((set, get) => {
   const setRecordingUrl = (recordingUrl: string): void => set({ recordingUrl });
 
   return {
-    gl: null,
+    ggl: null,
     glState: {
       renderId: 0,
       colorsLength: 0,
@@ -101,7 +101,7 @@ const useStore = create<PainterState>((set, get) => {
 
     wasmRef: null,
 
-    callbacks: {
+    cb: {
       initWasm,
       initGl,
       setRawTriangles,
@@ -111,6 +111,17 @@ const useStore = create<PainterState>((set, get) => {
     },
   };
 });
+
+const useStable = (): Pick<PainterState, "cb" | "wasmRef" | "ggl"> => {
+  return useStore(
+    (state) => ({
+      cb: state.cb,
+      wasmRef: state.wasmRef,
+      ggl: state.ggl,
+    }),
+    shallow
+  );
+};
 
 const initGl = async (
   canvas: HTMLCanvasElement | null,
@@ -252,13 +263,12 @@ const FloatInput: React.VFC<FloatInputProps> = ({ prefix, data, setData }) => {
 };
 
 const Config: React.VFC = () => {
-  const cb = useStore((state) => state.callbacks);
-  const wasmRef = useStore((state) => state.wasmRef);
-  const [tool, setTool] = React.useState("");
-  const paletteRef = React.useRef<HTMLDivElement>(null);
-
+  const { cb, wasmRef } = useStable();
   const isRecording = useStore((state) => state.isRecording);
   const recordingUrl = useStore((state) => state.recordingUrl);
+
+  const [tool, setTool] = React.useState("");
+  const paletteRef = React.useRef<HTMLDivElement>(null);
 
   const [r, setR] = React.useState(0.5);
   const [g, setG] = React.useState(0.5);
@@ -372,15 +382,12 @@ const Config: React.VFC = () => {
 };
 
 const Canvas: React.VFC = () => {
-  const cb = useStore((state) => state.callbacks);
-  const wasmRef = useStore((state) => state.wasmRef);
+  const { cb, wasmRef, ggl } = useStable();
+  const glState = useStore((state) => state.glState);
+  const isRecording = useStore((state) => state.isRecording);
+
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const toast = useToast();
-
-  const ggl = useStore((state) => state.gl);
-  const glState = useStore((state) => state.glState);
-
-  const isRecording = useStore((state) => state.isRecording);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -465,7 +472,7 @@ const Canvas: React.VFC = () => {
 };
 
 const Painter: React.VFC = () => {
-  const cb = useStore((state) => state.callbacks);
+  const cb = useStore((state) => state.cb);
 
   React.useEffect(() => {
     const wasmPromise = wasm.fetchWasm("/assets/painter.wasm", {
