@@ -37,7 +37,7 @@ const Index = () => {
       <h2>Toys</h2>
       <ul>
         <li>
-          <a href="/kilordle/"> Kilordle Clone </a> Clone of{" "}
+          <a href="/kilordle/">Kilordle Clone</a> Clone of{" "}
           <a href="https://jonesnxt.github.io/kilordle/ ">
             someone else&apos;s idea
           </a>
