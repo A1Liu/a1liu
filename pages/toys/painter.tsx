@@ -209,11 +209,10 @@ const Config: React.VFC = () => {
   );
 };
 
-const Canvas: React.VFC = () => {
+type CanvasRef = React.RefObject<HTMLCanvasElement>;
+const Canvas: React.VFC<{ canvasRef: CanvasRef }> = ({ canvasRef }) => {
   const { cb, workerRef } = useStable();
   const isRecording = useStore((state) => state.isRecording);
-
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -238,7 +237,7 @@ const Canvas: React.VFC = () => {
     mediaRecorder.start();
 
     return () => mediaRecorder.stop();
-  }, [cb, isRecording]);
+  }, [cb, isRecording, canvasRef]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -253,19 +252,12 @@ const Canvas: React.VFC = () => {
       ref={canvasRef}
       className={styles.canvas}
       onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        const x = evt.clientX;
-        const y = evt.clientY;
+        const [x, y] = [evt.clientX, evt.clientY];
 
-        const target = evt.currentTarget;
-        const width = target.clientWidth;
-        const height = target.clientHeight;
-
-        workerRef?.postMessage({ kind: "resize", data: [width, height] });
         workerRef?.postMessage({ kind: "mousemove", data: [x, y] });
       }}
       onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        const x = evt.clientX;
-        const y = evt.clientY;
+        const [x, y] = [evt.clientX, evt.clientY];
 
         workerRef?.postMessage({ kind: "leftclick", data: [x, y] });
       }}
@@ -279,8 +271,27 @@ const Canvas: React.VFC = () => {
 };
 
 const Painter: React.VFC = () => {
-  const { cb } = useStable();
+  const { cb, workerRef } = useStable();
   const toast = useToast();
+
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  React.useEffect(() => {
+    if (!workerRef) return;
+
+    const listener = (evt: any) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      workerRef.postMessage({ kind: "resize", data: [width, height] });
+    };
+
+    window.addEventListener("resize", listener);
+
+    return () => window.removeEventListener("resize", listener);
+  }, [canvasRef, workerRef]);
 
   React.useEffect(() => {
     // Writing this in a different way doesn't work. URL constructor call
@@ -294,6 +305,13 @@ const Painter: React.VFC = () => {
       switch (message.kind) {
         case "setTool":
           cb.setTool(message.data);
+          break;
+
+        case "initDone":
+          const canvas = canvasRef.current!;
+          const width = canvas.clientWidth;
+          const height = canvas.clientHeight;
+          worker.postMessage({ kind: "resize", data: [width, height] });
           break;
 
         default:
@@ -312,7 +330,7 @@ const Painter: React.VFC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <Canvas />
+      <Canvas canvasRef={canvasRef} />
       <Config />
     </div>
   );

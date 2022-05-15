@@ -32,6 +32,7 @@ const waitForMessage = (): Promise<Message[]> => {
 };
 
 export type OutMessage =
+  | { kind: "initDone"; data?: void }
   | { kind: "setTool"; data: string }
   | { kind: string; data: any };
 
@@ -138,21 +139,21 @@ const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
     // Make the canvas the same size
     ctx.canvas.width = width;
     ctx.canvas.height = height;
-    wasmRef.abi.setDims(width, height);
-  }
 
-  ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
+    wasmRef.abi.setDims(width, height);
+
+    glState.renderId = glState.renderId + 1;
+  }
 };
 
 const render = () => {
-  // console.log("GL rendering", glState);
-
   const ggl = gglRef.current;
   if (!ggl) return;
 
   const ctx = ggl.ctx;
 
-  ctx.clearColor(0, 0, 0, 1);
+  ctx.clearColor(1, 1, 1, 1);
   ctx.clear(ctx.COLOR_BUFFER_BIT);
 
   ctx.useProgram(ggl.program);
@@ -290,6 +291,7 @@ const init = async () => {
     gglRef.current = ggl;
 
     postMessage({ kind: "success", data: "WebGL2 context initialized!" });
+    postMessage({ kind: "initDone" });
     break;
   }
 
@@ -297,29 +299,3 @@ const init = async () => {
 };
 
 init();
-
-/*
- *
-
-  React.useEffect(() => {
-    if (!ggl) return;
-
-    render(ggl, glState);
-  }, [ggl, glState]);
-
-  React.useEffect(() => {
-    if (!wasmRef) return;
-
-    wasmRef.abi.setColor(r, g, b);
-  }, [wasmRef, r, g, b]);
-
-  React.useEffect(() => {
-    if (!wasmRef) return;
-
-    const obj = wasmRef.abi.currentTool();
-    const tool = wasmRef.readObj(obj);
-    setTool(tool);
-  }, [wasmRef, setTool]);
-
-
- */
