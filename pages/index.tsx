@@ -1,5 +1,4 @@
 import Layout from "components/layout";
-import { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 
 const Index = () => {
@@ -27,17 +26,18 @@ const Index = () => {
       <h2>What I&apos;m Doing Now</h2>
       <p>
         Right now I&apos;m working on{" "}
-        <Link href="https://a1liu.com/tci">
-          <a>Teaching C Interpreter</a>
-        </Link>
-        , an interpreter of the C programming language that tries to make it
-        easier to debug programs.
+        <a href="https://a1liu.com/tci">Teaching C Interpreter</a>, an
+        interpreter of the C programming language that tries to make it easier
+        to debug programs.
       </p>
 
       <h2>Toys</h2>
       <ul>
         <li>
-          <a href="/kilordle/">Kilordle Clone</a> Clone of{" "}
+          <Link href="/kilordle/">
+            <a>Kilordle Clone</a>
+          </Link>{" "}
+          - Clone of{" "}
           <a href="https://jonesnxt.github.io/kilordle/">
             someone else&apos;s idea
           </a>
@@ -45,7 +45,10 @@ const Index = () => {
           <a href="https://www.powerlanguage.co.uk/wordle/">Wordle</a>
         </li>
         <li>
-          <a href="/painter/">Painter</a> Tiny WebGL2 drawing app
+          <Link href="/painter/">
+            <a>Painter</a>
+          </Link>{" "}
+          - Tiny WebGL2 drawing app
         </li>
       </ul>
     </Layout>
