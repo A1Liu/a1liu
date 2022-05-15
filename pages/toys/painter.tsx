@@ -133,8 +133,6 @@ const Config: React.VFC = () => {
     urlString += "?" + queryString;
   }
 
-  console.log(recordingUrl);
-
   return (
     <div className={styles.configBox}>
       <div className={styles.config}>
