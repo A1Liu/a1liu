@@ -16,15 +16,6 @@ const TopNav: React.VFC = () => {
           <Link href="/">
             <a className={styles.navItem}>Home</a>
           </Link>
-          <Link href="/blog">
-            <a className={styles.navItem}>Blog</a>
-          </Link>
-          <Link href="/career">
-            <a className={styles.navItem}>CV</a>
-          </Link>
-          <Link href="/resources">
-            <a className={styles.navItem}>Resources</a>
-          </Link>
         </nav>
       </div>
     </div>

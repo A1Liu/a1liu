@@ -1,13 +1,8 @@
 import Layout from "components/layout";
 import { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
-import { BlogContent, getStaticProps as blogProps, Props } from "./blog";
 
-export const getStaticProps: GetStaticProps<Props> = async (props) => {
-  return blogProps(props);
-};
-
-const Index: NextPage<Props> = ({ files }) => {
+const Index = () => {
   return (
     <Layout>
       <img
@@ -39,8 +34,20 @@ const Index: NextPage<Props> = ({ files }) => {
         easier to debug programs.
       </p>
 
-      <h2>Blog</h2>
-      <BlogContent files={files.slice(-10)} />
+      <h2>Toys</h2>
+      <ul>
+        <li>
+          <a href="/kilordle/"> Kilordle Clone </a> Clone of{" "}
+          <a href="https://jonesnxt.github.io/kilordle/ ">
+            someone else&apos;s idea
+          </a>
+          , which was inspired by{" "}
+          <a href="https://www.powerlanguage.co.uk/wordle/">Wordle</a>
+        </li>
+        <li>
+          <a href="/painter/">Painter</a> Tiny WebGL2 drawing app
+        </li>
+      </ul>
     </Layout>
   );
 };

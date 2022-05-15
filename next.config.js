@@ -1,12 +1,5 @@
 // const withPreact = require("next-plugin-preact");
 
-const withMDX = require("@next/mdx")({
-  extension: /\.mdx$/,
-  options: {
-    remarkPlugins: [require("remark-prism")],
-  },
-});
-
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
@@ -14,7 +7,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const config = {
   trailingSlash: true,
   reactStrictMode: true,
-  pageExtensions: ["ts", "tsx", "mdx"],
+  pageExtensions: ["ts", "tsx"],
 
   // webpack(config) {
   //   config.output.webassemblyModuleFilename = "static/wasm/[modulehash].wasm";
@@ -26,8 +19,8 @@ const config = {
   // },
 };
 
-const mdxConfig = withMDX(config);
+// const mdxConfig = withMDX(config);
 // const preactConfig = withPreact(mdxConfig);
-const analyzedConfig = withBundleAnalyzer(mdxConfig);
+const analyzedConfig = withBundleAnalyzer(config);
 
 module.exports = analyzedConfig;
