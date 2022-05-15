@@ -5,8 +5,7 @@
     "build": "next build",
     "export": "next export",
     "lint": "next lint --fix",
-    "clean": "rm -rf .next out zig-cache zig-out",
-    "deploy": "git push origin main:production"
+    "clean": "rm -rf .next out zig-cache zig-out"
   },
   "dependencies": {
     "classnames": "2.3.1",
