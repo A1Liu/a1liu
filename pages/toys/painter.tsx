@@ -1,47 +1,28 @@
 import React from "react";
 import Link from "next/link";
 import shallow from "zustand/shallow";
-import type { Message } from "src/painter.worker";
+import type { Message, OutMessage } from "src/painter.worker";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
 import styles from "./painter.module.css";
 import css from "components/util.module.css";
 import * as wasm from "components/wasm";
-import { useToast, postToast } from "components/errors";
+import { useToast, ToastColors } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
 interface PainterCb {
-  initWasm: (wasmRef: wasm.Ref) => void;
   initWorker: (workerRef: Worker) => void;
-  initGl: (gl: PainterGl) => void;
-  setRawTriangles: (floats: Float32Array) => void;
-  setColors: (floats: Float32Array) => void;
   setIsRecording: (isRecording: boolean) => void;
   setRecordingUrl: (url: string) => void;
-}
-
-interface PainterGl {
-  ctx: WebGl;
-  program: WebGLProgram;
-  vao: WebGLVertexArrayObject;
-  rawTriangles: WebGLBuffer;
-  colors: WebGLBuffer;
-}
-
-interface PainterGlState {
-  renderId: number;
-  rawTrianglesLength: number;
-  colorsLength: number;
+  setTool: (url: string) => void;
 }
 
 interface PainterState {
-  ggl: PainterGl | null;
-  glState: PainterGlState;
-  wasmRef: wasm.Ref | null;
   workerRef: Worker | null;
 
+  tool: string;
   isRecording: boolean;
   recordingUrl: string | null;
 
@@ -49,172 +30,28 @@ interface PainterState {
 }
 
 const useStore = create<PainterState>((set, get) => {
-  const initWasm = (wasmRef: wasm.Ref) => set({ wasmRef });
   const initWorker = (workerRef: Worker) => set({ workerRef });
-  const initGl = (ggl: PainterGl) => set({ ggl });
-
-  const setColors = (floats: Float32Array): void => {
-    const { ggl, glState } = get();
-    if (!ggl) return;
-
-    const ctx = ggl.ctx;
-
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, ggl.colors);
-    ctx.bufferData(ctx.ARRAY_BUFFER, floats, ctx.DYNAMIC_DRAW);
-
-    set({
-      glState: {
-        ...glState,
-        colorsLength: Math.floor(floats.length / 3),
-        renderId: glState.renderId + 1,
-      },
-    });
-  };
-
-  const setRawTriangles = (floats: Float32Array): void => {
-    const { ggl, glState } = get();
-    if (!ggl) return;
-
-    const ctx = ggl.ctx;
-
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, ggl.rawTriangles);
-    ctx.bufferData(ctx.ARRAY_BUFFER, floats, ctx.DYNAMIC_DRAW);
-
-    set({
-      glState: {
-        ...glState,
-        rawTrianglesLength: Math.floor(floats.length / 2),
-        renderId: glState.renderId + 1,
-      },
-    });
-  };
-
   const setIsRecording = (isRecording: boolean): void => set({ isRecording });
   const setRecordingUrl = (recordingUrl: string): void => set({ recordingUrl });
+  const setTool = (tool: string): void => set({ tool });
 
   return {
-    ggl: null,
-    glState: {
-      renderId: 0,
-      colorsLength: 0,
-      rawTrianglesLength: 0,
-    },
-
     isRecording: false,
     recordingUrl: null,
-
     workerRef: null,
-    wasmRef: null,
+    tool: "triangle",
 
     cb: {
-      initWasm,
       initWorker,
-      initGl,
-      setRawTriangles,
-      setColors,
       setIsRecording,
       setRecordingUrl,
+      setTool,
     },
   };
 });
 
-const useStable = (): Pick<PainterState, "cb" | "wasmRef" | "ggl"> => {
-  return useStore(({ cb, wasmRef, ggl }) => ({ cb, wasmRef, ggl }), shallow);
-};
-
-const initGl = async (
-  canvas: HTMLCanvasElement | null
-): Promise<PainterGl | null> => {
-  const ctx = canvas?.getContext("webgl2");
-  if (!ctx) return null;
-
-  const [vertSrc, fragSrc] = await Promise.all([
-    fetch("/assets/painter.vert").then((r) => r.text()),
-    fetch("/assets/painter.frag").then((r) => r.text()),
-  ]);
-
-  const vertexShader = GL.createShader(ctx, ctx.VERTEX_SHADER, vertSrc);
-  const fragmentShader = GL.createShader(ctx, ctx.FRAGMENT_SHADER, fragSrc);
-  if (!vertexShader || !fragmentShader) return null;
-
-  const program = GL.createProgram(ctx, vertexShader, fragmentShader);
-  if (!program) return null;
-
-  const vao = ctx.createVertexArray();
-  if (!vao) return null;
-
-  const rawTriangles = ctx.createBuffer();
-  if (!rawTriangles) return null;
-
-  const colors = ctx.createBuffer();
-  if (!colors) return null;
-
-  const posLocation = 0;
-  const colorLocation = 1;
-
-  ctx.bindAttribLocation(program, posLocation, "pos");
-  ctx.bindAttribLocation(program, colorLocation, "color");
-
-  ctx.bindVertexArray(vao);
-
-  ctx.enableVertexAttribArray(posLocation);
-  {
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, rawTriangles);
-
-    const size = 2; // 2 components per iteration
-    const type = ctx.FLOAT; // the data is 32bit floats
-    const normalize = false; // don't normalize the data
-    const stride = 0; // 0 = move forward size * sizeof(type)
-    const offset = 0; // start at the beginning of the buffer
-    ctx.vertexAttribPointer(posLocation, size, type, normalize, stride, offset);
-  }
-
-  ctx.enableVertexAttribArray(colorLocation);
-  {
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, colors);
-
-    const size = 3; // 2 components per iteration
-    const type = ctx.FLOAT; // the data is 32bit floats
-    const normalize = false; // don't normalize the data
-    const stride = 0; // 0 = move forward size * sizeof(type)
-    const offset = 0; // start at the beginning of the buffer
-    ctx.vertexAttribPointer(
-      colorLocation,
-      size,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-  }
-
-  ctx.bindVertexArray(null);
-
-  return { ctx, program, vao, rawTriangles, colors };
-};
-
-const render = (ggl: PainterGl, glState: PainterGlState) => {
-  // console.log("GL rendering", glState);
-
-  const ctx = ggl.ctx;
-
-  GL.resizeCanvasToDisplaySize(ctx.canvas);
-
-  ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-  ctx.clearColor(0, 0, 0, 0);
-  ctx.clear(ctx.COLOR_BUFFER_BIT);
-
-  ctx.useProgram(ggl.program);
-
-  // Bind the attribute/buffer set we want.
-  ctx.bindVertexArray(ggl.vao);
-
-  {
-    const primitiveType = ctx.TRIANGLES;
-    const offset = 0;
-    ctx.drawArrays(primitiveType, offset, glState.rawTrianglesLength);
-  }
+const useStable = (): Pick<PainterState, "cb" | "workerRef"> => {
+  return useStore(({ cb, workerRef }) => ({ cb, workerRef }), shallow);
 };
 
 interface FloatInputProps {
@@ -261,24 +98,18 @@ const FloatInput: React.VFC<FloatInputProps> = ({ prefix, data, setData }) => {
 };
 
 const Config: React.VFC = () => {
-  const { cb, wasmRef } = useStable();
+  const { cb, workerRef } = useStable();
   const isRecording = useStore((state) => state.isRecording);
   const recordingUrl = useStore((state) => state.recordingUrl);
+  const tool = useStore((state) => state.tool);
 
-  const [tool, setTool] = React.useState("");
+  const toast = useToast();
+
   const paletteRef = React.useRef<HTMLDivElement>(null);
 
   const [r, setR] = React.useState(0.5);
   const [g, setG] = React.useState(0.5);
   const [b, setB] = React.useState(0.5);
-
-  React.useEffect(() => {
-    if (!wasmRef) return;
-
-    const obj = wasmRef.abi.currentTool();
-    const tool = wasmRef.readObj(obj);
-    setTool(tool);
-  }, [wasmRef, setTool]);
 
   React.useEffect(() => {
     if (recordingUrl === null) return;
@@ -287,17 +118,13 @@ const Config: React.VFC = () => {
   }, [recordingUrl]);
 
   React.useEffect(() => {
-    if (!wasmRef) return;
-
-    wasmRef.abi.setColor(r, g, b);
-  }, [wasmRef, r, g, b]);
-
-  React.useEffect(() => {
     if (!paletteRef.current) return;
+    if (!workerRef) return;
 
     const color = `rgb(${r * 256}, ${g * 256}, ${b * 256})`;
     paletteRef.current.style.backgroundColor = color;
-  }, [paletteRef, r, g, b]);
+    workerRef.postMessage({ kind: "setColor", data: [r, g, b] });
+  }, [paletteRef, workerRef, r, g, b]);
 
   let urlString = "https://github.com/A1Liu/a1liu/issues/new";
   const query = { title: "Painter: Bug Report", body: "" };
@@ -313,14 +140,7 @@ const Config: React.VFC = () => {
 
         <button
           className={css.muiButton}
-          onClick={() => {
-            if (!wasmRef) return;
-
-            wasmRef.abi.toggleTool();
-            const obj = wasmRef.abi.currentTool();
-            const tool = wasmRef.readObj(obj);
-            setTool(tool);
-          }}
+          onClick={() => workerRef?.postMessage({ kind: "toggleTool" })}
         >
           {tool}
         </button>
@@ -338,7 +158,19 @@ const Config: React.VFC = () => {
         <div className={styles.configRow}>
           <button
             className={css.muiButton}
-            onClick={() => cb.setIsRecording(!isRecording)}
+            onClick={() => {
+              if (navigator.userAgent.indexOf("Firefox") != -1) {
+                toast.add(
+                  "warn",
+                  5 * 1000,
+                  "Recording on Firefox isn't supported right now"
+                );
+
+                return;
+              }
+
+              cb.setIsRecording(!isRecording);
+            }}
           >
             {isRecording ? "stop" : "record"}
           </button>
@@ -380,13 +212,10 @@ const Config: React.VFC = () => {
 };
 
 const Canvas: React.VFC = () => {
-  const { cb, wasmRef, ggl } = useStable();
-  const glState = useStore((state) => state.glState);
-  const workerRef = useStore((state) => state.workerRef);
+  const { cb, workerRef } = useStable();
   const isRecording = useStore((state) => state.isRecording);
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const toast = useToast();
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -414,39 +243,18 @@ const Canvas: React.VFC = () => {
   }, [cb, isRecording]);
 
   React.useEffect(() => {
-    initGl(canvasRef.current).then((ggl) => {
-      if (!ggl) {
-        toast.add("error", null, "WebGL2 not supported!");
-        return;
-      }
-
-      cb.initGl(ggl);
-      toast.add("success", null, "WebGL2 context initialized!");
-    });
-  }, [canvasRef, toast, cb]);
-
-  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !workerRef) return;
 
-    console.log("hello");
-    // const offscreen = (canvas as any).transferControlToOffscreen();
-    // workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
+    const offscreen = (canvas as any).transferControlToOffscreen();
+    workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
   }, [workerRef, canvasRef]);
-
-  React.useEffect(() => {
-    if (!ggl) return;
-
-    render(ggl, glState);
-  }, [ggl, glState]);
 
   return (
     <canvas
       ref={canvasRef}
       className={styles.canvas}
       onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!wasmRef) return;
-
         const x = evt.clientX;
         const y = evt.clientY;
 
@@ -454,26 +262,19 @@ const Canvas: React.VFC = () => {
         const width = target.clientWidth;
         const height = target.clientHeight;
 
-        wasmRef.abi.onMove(x, y, width, height);
+        workerRef?.postMessage({ kind: "resize", data: [width, height] });
+        workerRef?.postMessage({ kind: "mousemove", data: [x, y] });
       }}
       onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!wasmRef) return;
-
         const x = evt.clientX;
         const y = evt.clientY;
 
-        const target = evt.currentTarget;
-        const width = target.clientWidth;
-        const height = target.clientHeight;
-
-        wasmRef.abi.onClick(x, y, width, height);
+        workerRef?.postMessage({ kind: "leftclick", data: [x, y] });
       }}
       onContextMenu={(evt) => {
         evt.preventDefault();
 
-        if (!wasmRef) return;
-
-        wasmRef.abi.onRightClick();
+        workerRef?.postMessage({ kind: "rightclick" });
       }}
     />
   );
@@ -481,33 +282,35 @@ const Canvas: React.VFC = () => {
 
 const Painter: React.VFC = () => {
   const { cb } = useStable();
+  const toast = useToast();
 
   React.useEffect(() => {
+    // Writing this in a different way doesn't work. URL constructor call
+    // must be passed directly to worker constructor.
     const worker = new Worker(
       new URL("src/painter.worker.ts", import.meta.url)
     );
-    worker.onmessage = (ev: MessageEvent<Message>) => {
-      console.log(ev.data);
+
+    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
+      const message = ev.data;
+      switch (message.kind) {
+        case "setTool":
+          cb.setTool(message.data);
+          break;
+
+        default:
+          if (typeof message.data === "string") {
+            const color = ToastColors[message.kind] ?? "info";
+            toast.add(color, null, message.data);
+          }
+
+          console.log(message.data);
+          break;
+      }
     };
 
     cb.initWorker(worker);
-  }, [cb]);
-
-  React.useEffect(() => {
-    const wasmPromise = wasm.fetchWasm("/assets/painter.wasm", {
-      postMessage: postToast,
-      raw: {},
-      imports: {
-        setTriangles: cb.setRawTriangles,
-        setColors: cb.setColors,
-      },
-    });
-
-    wasmPromise.then((ref) => {
-      ref.abi.init();
-      cb.initWasm(ref);
-    });
-  }, [cb]);
+  }, [cb, toast]);
 
   return (
     <div className={styles.wrapper}>
