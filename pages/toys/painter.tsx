@@ -133,6 +133,8 @@ const Config: React.VFC = () => {
     urlString += "?" + queryString;
   }
 
+  console.log(recordingUrl);
+
   return (
     <div className={styles.configBox}>
       <div className={styles.config}>
@@ -191,9 +193,7 @@ const Config: React.VFC = () => {
         </div>
 
         {recordingUrl && (
-          <video controls autoPlay muted width="100%">
-            <source src={recordingUrl} type="video/webm" />
-
+          <video controls autoPlay muted src={recordingUrl} width="100%">
             {"Sorry, your browser doesn't support embedded videos."}
           </video>
         )}
