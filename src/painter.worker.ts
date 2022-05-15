@@ -147,7 +147,7 @@ const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
   }
 };
 
-const render = () => {
+function render() {
   const ggl = gglRef.current;
   if (!ggl) return;
 
@@ -166,7 +166,13 @@ const render = () => {
     const offset = 0;
     ctx.drawArrays(primitiveType, offset, glState.rawTrianglesLength);
   }
-};
+
+  // Technically maybe we don't have to do this every frame if nothing updates.
+  // However, the media recorder seems to skip frames when we don't forcibly
+  // re-render at every opportunity. Oh well.
+  //                                - Albert Liu, May 15, 2022 Sun 02:25 EDT
+  requestAnimationFrame(render);
+}
 
 const updateState = (
   triangles: Float32Array | null,
@@ -238,16 +244,12 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
 };
 
 const main = async (wasmRef: wasm.Ref) => {
-  let tempId = 0;
+  requestAnimationFrame(render);
+
   while (true) {
     const captured = await waitForMessage();
 
     captured.forEach((msg) => handleMessage(wasmRef, msg));
-
-    if (glState.renderId > tempId) {
-      requestAnimationFrame(render);
-      tempId = glState.renderId;
-    }
   }
 };
 

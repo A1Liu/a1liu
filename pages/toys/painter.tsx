@@ -252,18 +252,15 @@ const Canvas: React.VFC<{ canvasRef: CanvasRef }> = ({ canvasRef }) => {
       ref={canvasRef}
       className={styles.canvas}
       onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        const [x, y] = [evt.clientX, evt.clientY];
-
-        workerRef?.postMessage({ kind: "mousemove", data: [x, y] });
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "mousemove", data });
       }}
       onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        const [x, y] = [evt.clientX, evt.clientY];
-
-        workerRef?.postMessage({ kind: "leftclick", data: [x, y] });
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "leftclick", data });
       }}
       onContextMenu={(evt) => {
         evt.preventDefault();
-
         workerRef?.postMessage({ kind: "rightclick" });
       }}
     />
