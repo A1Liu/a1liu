@@ -16,8 +16,8 @@ const Point = struct { pos: Vec2, color: Vec3 };
 const ext = struct {
     extern fn renderExt(triangles: wasm.Obj, colors: wasm.Obj) void;
 
-    fn onClickExt(posX: f32, posY: f32, width: f32, height: f32) callconv(.C) void {
-        const pt = render.getPoint(posX, posY, width, height);
+    fn onClickExt(posX: f32, posY: f32) callconv(.C) void {
+        const pt = render.getPoint(posX, posY);
         onClick(pt) catch @panic("onClick failed");
     }
 
@@ -40,8 +40,10 @@ const Render = struct {
     colors: List(f32) = .{},
     temp_begin: ?usize = null,
 
-    pub fn getPoint(self: *Self, posX: f32, posY: f32, dimX: f32, dimY: f32) Point {
-        self.dims = Vec2{ dimX, dimY };
+    pub fn getPoint(self: *Self, posX: f32, posY: f32) Point {
+        const dimX = self.dims[0];
+        const dimY = self.dims[1];
+
         const pos = Vec2{ posX * 2 / dimX - 1, -(posY * 2 / dimY - 1) };
         const color = current_color;
 
@@ -244,6 +246,10 @@ export fn setColor(r: f32, g: f32, b: f32) void {
     current_color = Vec3{ r, g, b };
 }
 
+export fn setDims(width: f32, height: f32) void {
+    render.dims = Vec2{ width, height };
+}
+
 export fn currentTool() wasm.Obj {
     switch (tool) {
         .none => return obj_none,
@@ -286,8 +292,8 @@ export fn onRightClick() void {
     }
 }
 
-export fn onMove(posX: f32, posY: f32, width: f32, height: f32) void {
-    const pt = render.getPoint(posX, posY, width, height);
+export fn onMove(posX: f32, posY: f32) void {
+    const pt = render.getPoint(posX, posY);
 
     switch (tool) {
         .none => return,

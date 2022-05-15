@@ -2,13 +2,16 @@ import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
 import * as wasm from "components/wasm";
 
+type Number2 = [number, number];
 type Number3 = [number, number, number];
 type Number4 = [number, number, number, number];
+
 export type Message =
   | { kind: "toggleTool" }
+  | { kind: "resize"; data: Number2 }
   | { kind: "setColor"; data: Number3 }
-  | { kind: "mousemove"; data: Number4 }
-  | { kind: "leftclick"; data: Number4 }
+  | { kind: "mousemove"; data: Number2 }
+  | { kind: "leftclick"; data: Number2 }
   | { kind: "rightclick" }
   | { kind: "canvas"; offscreen: any };
 
@@ -30,6 +33,7 @@ const waitForMessage = (): Promise<Message[]> => {
 
 export type OutMessage =
   | { kind: "setColor"; data: Number3 }
+  | { kind: "setTool"; data: string }
   | { kind: string; data: any };
 
 interface PainterGlState {
@@ -50,7 +54,7 @@ const gglRef: { current: PainterGl | null } = { current: null };
 const glState: PainterGlState = {
   rawTrianglesLength: 0,
   colorsLength: 0,
-  renderId: 0,
+  renderId: 1,
 };
 
 const initGl = async (canvas: any): Promise<PainterGl | null> => {
@@ -122,23 +126,20 @@ const initGl = async (canvas: any): Promise<PainterGl | null> => {
   return { ctx, program, vao, rawTriangles, colors };
 };
 
-const resize = () => {
+const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
   const ggl = gglRef.current;
   if (!ggl) return;
 
   const ctx = ggl.ctx;
 
-  const displayWidth = 1000; //ctx.canvas.clientWidth;
-  const displayHeight = 600; //ctx.canvas.clientHeight;
-
   // Check if the canvas is not the same size.
-  const needResize =
-    ctx.canvas.width !== displayWidth || ctx.canvas.height !== displayHeight;
+  const needResize = ctx.canvas.width !== width || ctx.canvas.height !== height;
 
   if (needResize) {
     // Make the canvas the same size
-    ctx.canvas.width = displayWidth;
-    ctx.canvas.height = displayHeight;
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+    wasmRef.abi.setDims(width, height);
   }
 
   ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -193,43 +194,59 @@ const updateState = (
   }
 };
 
-let shouldRender = false;
+const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
+  switch (msg.kind) {
+    case "mousemove": {
+      const [x, y] = msg.data;
+      wasmRef.abi.onMove(x, y);
+      break;
+    }
+
+    case "leftclick": {
+      const [x, y] = msg.data;
+      wasmRef.abi.onClick(x, y);
+      break;
+    }
+
+    case "rightclick":
+      wasmRef.abi.onRightClick();
+      break;
+
+    case "resize": {
+      const [width, height] = msg.data;
+      resize(wasmRef, width, height);
+      break;
+    }
+
+    case "setColor": {
+      const [r, g, b] = msg.data;
+      wasmRef.abi.setColor(r, g, b);
+      break;
+    }
+
+    case "toggleTool": {
+      wasmRef.abi.toggleTool();
+      const obj = wasmRef.abi.currentTool();
+      const data = wasmRef.readObj(obj);
+      postMessage({ kind: "setTool", data });
+      break;
+    }
+
+    default:
+      return;
+  }
+};
 
 const main = async (wasmRef: wasm.Ref) => {
+  let tempId = 0;
   while (true) {
     const captured = await waitForMessage();
 
-    postMessage({ kind: "log", len: captured.length });
+    captured.forEach((msg) => handleMessage(wasmRef, msg));
 
-    let moveData = null;
-    captured.forEach((msg) => {
-      switch (msg.kind) {
-        case "mousemove":
-          moveData = msg.data;
-          break;
-
-        case "leftclick":
-          const [x, y, width, height] = msg.data;
-          wasmRef.abi.onClick(x, y, width, height);
-          break;
-
-        case "rightclick":
-          wasmRef.abi.onRightClick();
-          break;
-
-        default:
-          return;
-      }
-    });
-
-    if (moveData) {
-      const [x, y, width, height] = moveData;
-      wasmRef.abi.onMove(x, y, width, height);
-    }
-
-    if (shouldRender) {
+    if (glState.renderId > tempId) {
       requestAnimationFrame(render);
-      shouldRender = false;
+      tempId = glState.renderId;
     }
   }
 };
@@ -239,13 +256,8 @@ const init = async () => {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: {},
     imports: {
-      renderExt: (
-        triangles: Float32Array | null,
-        colors: Float32Array | null
-      ) => {
-        updateState(triangles, colors);
-        shouldRender = true;
-      },
+      renderExt: (tri: Float32Array | null, colors: Float32Array | null) =>
+        updateState(tri, colors),
     },
   });
 
@@ -262,7 +274,8 @@ const init = async () => {
           break;
 
         default:
-          return;
+          handleMessage(wasmRef, msg);
+          break;
       }
     });
 
@@ -276,7 +289,7 @@ const init = async () => {
     }
 
     gglRef.current = ggl;
-    resize();
+
     postMessage({ kind: "success", data: "WebGL2 context initialized!" });
     break;
   }

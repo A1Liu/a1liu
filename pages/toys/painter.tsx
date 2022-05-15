@@ -1,14 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import shallow from "zustand/shallow";
-import type { Message } from "src/painter.worker";
+import type { Message, OutMessage } from "src/painter.worker";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
 import styles from "./painter.module.css";
 import css from "components/util.module.css";
 import * as wasm from "components/wasm";
-import { useToast, postToast } from "components/errors";
+import { useToast, ToastColors } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
@@ -39,7 +39,7 @@ const useStore = create<PainterState>((set, get) => {
     isRecording: false,
     recordingUrl: null,
     workerRef: null,
-    tool: "none",
+    tool: "triangle",
 
     cb: {
       initWorker,
@@ -101,8 +101,10 @@ const Config: React.VFC = () => {
   const { cb, workerRef } = useStable();
   const isRecording = useStore((state) => state.isRecording);
   const recordingUrl = useStore((state) => state.recordingUrl);
+  const tool = useStore((state) => state.tool);
 
-  const [tool, setTool] = React.useState("");
+  const toast = useToast();
+
   const paletteRef = React.useRef<HTMLDivElement>(null);
 
   const [r, setR] = React.useState(0.5);
@@ -117,10 +119,12 @@ const Config: React.VFC = () => {
 
   React.useEffect(() => {
     if (!paletteRef.current) return;
+    if (!workerRef) return;
 
     const color = `rgb(${r * 256}, ${g * 256}, ${b * 256})`;
     paletteRef.current.style.backgroundColor = color;
-  }, [paletteRef, r, g, b]);
+    workerRef.postMessage({ kind: "setColor", data: [r, g, b] });
+  }, [paletteRef, workerRef, r, g, b]);
 
   let urlString = "https://github.com/A1Liu/a1liu/issues/new";
   const query = { title: "Painter: Bug Report", body: "" };
@@ -154,7 +158,19 @@ const Config: React.VFC = () => {
         <div className={styles.configRow}>
           <button
             className={css.muiButton}
-            onClick={() => cb.setIsRecording(!isRecording)}
+            onClick={() => {
+              if (navigator.userAgent.indexOf("Firefox") != -1) {
+                toast.add(
+                  "warn",
+                  5 * 1000,
+                  "Recording on Firefox isn't supported right now"
+                );
+
+                return;
+              }
+
+              cb.setIsRecording(!isRecording);
+            }}
           >
             {isRecording ? "stop" : "record"}
           </button>
@@ -200,7 +216,6 @@ const Canvas: React.VFC = () => {
   const isRecording = useStore((state) => state.isRecording);
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const toast = useToast();
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -247,23 +262,14 @@ const Canvas: React.VFC = () => {
         const width = target.clientWidth;
         const height = target.clientHeight;
 
-        workerRef?.postMessage({
-          kind: "mousemove",
-          data: [x, y, width, height],
-        });
+        workerRef?.postMessage({ kind: "resize", data: [width, height] });
+        workerRef?.postMessage({ kind: "mousemove", data: [x, y] });
       }}
       onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
         const x = evt.clientX;
         const y = evt.clientY;
 
-        const target = evt.currentTarget;
-        const width = target.clientWidth;
-        const height = target.clientHeight;
-
-        workerRef?.postMessage({
-          kind: "leftclick",
-          data: [x, y, width, height],
-        });
+        workerRef?.postMessage({ kind: "leftclick", data: [x, y] });
       }}
       onContextMenu={(evt) => {
         evt.preventDefault();
@@ -276,17 +282,35 @@ const Canvas: React.VFC = () => {
 
 const Painter: React.VFC = () => {
   const { cb } = useStable();
+  const toast = useToast();
 
   React.useEffect(() => {
+    // Writing this in a different way doesn't work. URL constructor call
+    // must be passed directly to worker constructor.
     const worker = new Worker(
       new URL("src/painter.worker.ts", import.meta.url)
     );
-    worker.onmessage = (ev: MessageEvent<Message>) => {
-      console.log(ev.data);
+
+    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
+      const message = ev.data;
+      switch (message.kind) {
+        case "setTool":
+          cb.setTool(message.data);
+          break;
+
+        default:
+          if (typeof message.data === "string") {
+            const color = ToastColors[message.kind] ?? "info";
+            toast.add(color, null, message.data);
+          }
+
+          console.log(message.data);
+          break;
+      }
     };
 
     cb.initWorker(worker);
-  }, [cb]);
+  }, [cb, toast]);
 
   return (
     <div className={styles.wrapper}>

@@ -77,9 +77,7 @@ const useStore = create<ToastState>((set) => {
   return {
     toasts: [],
     toastId: 0,
-    cb: {
-      add,
-    },
+    cb: { add },
   };
 });
 
