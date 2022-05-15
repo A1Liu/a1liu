@@ -14,8 +14,7 @@ const Vec3 = @Vector(3, f32);
 const Point = struct { pos: Vec2, color: Vec3 };
 
 const ext = struct {
-    extern fn setTriangles(obj: wasm.Obj) void;
-    extern fn setColors(obj: wasm.Obj) void;
+    extern fn renderExt(triangles: wasm.Obj, colors: wasm.Obj) void;
 
     fn onClickExt(posX: f32, posY: f32, width: f32, height: f32) callconv(.C) void {
         const pt = render.getPoint(posX, posY, width, height);
@@ -54,9 +53,8 @@ const Render = struct {
         defer wasm.setWatermark(mark);
 
         const obj = wasm.out.slice(self.triangles.items);
-        ext.setTriangles(obj);
         const obj2 = wasm.out.slice(self.colors.items);
-        ext.setColors(obj2);
+        ext.renderExt(obj, obj2);
     }
 
     pub fn dropTempData(self: *Self) void {
