@@ -152,7 +152,7 @@ const render = () => {
 
   const ctx = ggl.ctx;
 
-  ctx.clearColor(0, 0, 0, 0);
+  ctx.clearColor(0, 0, 0, 1);
   ctx.clear(ctx.COLOR_BUFFER_BIT);
 
   ctx.useProgram(ggl.program);
