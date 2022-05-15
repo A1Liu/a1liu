@@ -32,7 +32,6 @@ const waitForMessage = (): Promise<Message[]> => {
 };
 
 export type OutMessage =
-  | { kind: "setColor"; data: Number3 }
   | { kind: "setTool"; data: string }
   | { kind: string; data: any };
 
