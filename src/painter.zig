@@ -7,6 +7,7 @@ const liu = @import("liu");
 // create animation/start animation
 // undo/redo?
 // -> move objects
+// -> select objects
 
 const wasm = liu.wasm;
 pub const WasmCommand = void;
