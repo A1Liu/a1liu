@@ -233,7 +233,7 @@ test "RingBuffer: data integrity" {
     }
 }
 
-pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type {
+const LruConst = struct {
     const MAX = std.math.maxInt(u32);
     const TOMBSTONE = MAX;
     const EMPTY = MAX - 1;
@@ -242,47 +242,168 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
         next: u32,
         prev: u32,
         hash: u64,
+
+        fn debug(node: *const LNode, idx: u32) void {
+            if (node.next == LruConst.EMPTY) {
+                std.debug.print("{}: EMPTY\n", .{idx});
+            } else if (node.next == LruConst.TOMBSTONE) {
+                std.debug.print("{}: TOMB \n", .{idx});
+            } else {
+                std.debug.print("{}: hash: {} {}<- ->{} \n", .{
+                    idx,
+                    node.hash,
+                    node.prev,
+                    node.next,
+                });
+            }
+        }
     };
+};
+
+pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type {
+    const TOMBSTONE = LruConst.TOMBSTONE;
+    const EMPTY = LruConst.EMPTY;
+    const LNode = LruConst.LNode;
 
     return struct {
         len: u32 = 0,
-        last: u32 = undefined,
-        meta: *LNode,
-        values: *V,
         capacity: u32,
+        last: u32 = undefined, // circular doubly linked list
+        meta: [*]LNode,
+        values: [*]V,
 
         const Self = @This();
+
+        const alignment = std.math.max(@alignOf(V), @alignOf(LNode));
+
+        fn allocSize(size: u32) usize {
+            const unaligned = size * (@sizeOf(V) + @sizeOf(LNode));
+            return mem.alignForward(unaligned, alignment);
+        }
 
         pub fn init(alloc: Allocator, size: u32) !Self {
             if (size >= EMPTY or size == 0) return error.InvalidParam;
 
-            _ = alloc;
+            const byte_size = allocSize(size);
+            const data = try alloc.alignedAlloc(u8, alignment, byte_size);
+            const meta = @ptrCast([*]LNode, data.ptr);
 
-            return error.Overflow;
+            var index: u32 = 0;
+            while (index < size) : (index += 1) {
+                const slot = &meta[index];
+                slot.next = EMPTY;
+                slot.prev = EMPTY;
+            }
 
-            // const data = try alloc.alloc(LNode, size);
-            // for (data) |*slot| {
-            //     slot.next = EMPTY;
-            //     slot.prev = EMPTY;
-            // }
+            const unaligned_values = @ptrToInt(data.ptr) + (size * @sizeOf(LNode));
+            const values = mem.alignForward(unaligned_values, alignment);
 
-            // return Self{ .data = data };
+            return Self{
+                .meta = meta,
+                .values = @intToPtr([*]V, values),
+                .capacity = size,
+            };
         }
 
         pub fn deinit(self: *Self, alloc: Allocator) void {
-            alloc.free(self.data);
+            var bytes: []u8 = &.{};
+            bytes.ptr = @ptrCast([*]u8, self.meta);
+            bytes.len = allocSize(self.capacity);
+
+            alloc.free(bytes);
+        }
+
+        fn _meta(self: *const Self) []LNode {
+            var meta: []LNode = &.{};
+            meta.ptr = self.meta;
+            meta.len = self.capacity;
+            return meta;
+        }
+
+        fn _values(self: *const Self) []V {
+            var values: []V = &.{};
+            values.ptr = self.values;
+            values.len = self.capacity;
+
+            return values;
+        }
+
+        fn search(self: *const Self, key: K) ?u32 {
+            if (self.len == 0) return null;
+
+            const hash = hasher(key);
+            var index = @truncate(u32, hash % self.capacity);
+
+            const meta = self._meta();
+
+            var count: u32 = 0;
+            while (count < self.capacity) : (count += 1) {
+                const node = &meta[index];
+
+                if (node.next == EMPTY) return null;
+                if (node.next != TOMBSTONE and node.hash == hash) return index;
+
+                index += 1;
+                if (index >= self.capacity) index = 0;
+            }
+
+            return null;
+        }
+
+        fn removeNodeFromChain(self: *Self, index: u32) *LNode {
+            const meta = self._meta();
+
+            const node = &meta[index];
+            const prev = &meta[node.prev];
+            const next = &meta[node.next];
+
+            prev.next = node.next;
+            next.prev = node.prev;
+
+            if (index == self.last) {
+                self.last = node.prev;
+            }
+
+            return node;
+        }
+
+        pub fn read(self: *const Self, key: K) ?V {
+            const index = self.search(key);
+
+            const values = self._values();
+
+            if (index) |i| return values[i];
+            return null;
+        }
+
+        pub fn remove(self: *Self, key: K) ?V {
+            const index = self.search(key);
+
+            const values = self._values();
+
+            if (index) |i| {
+                const node = self.removeNodeFromChain(i);
+                node.next = TOMBSTONE;
+                self.len -= 1;
+
+                return values[i];
+            }
+
+            return null;
         }
 
         pub fn insert(self: *Self, key: K, value: V) ?V {
             const hash = hasher(key);
-            var index = hash % self.data.len;
-            var count = 0;
+            var index = @truncate(u32, hash % self.capacity);
 
             var previous: ?V = null;
 
+            const meta = self._meta();
+            const values = self._values();
+
             const slot = slot: {
                 if (self.len == 0) {
-                    const node = &self.data[index];
+                    const node = &meta[index];
 
                     self.last = index;
                     node.next = index;
@@ -291,37 +412,50 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
                     break :slot node;
                 }
 
-                while (count < self.data.len) : (count += 1) {
-                    const node = &self.data[index];
-                    if (node.next == TOMBSTONE or node.next == EMPTY) {
+                var count: u32 = 0;
+                while (count < self.capacity) : (count += 1) {
+                    const node = &meta[index];
+
+                    const empty_slot = node.next == TOMBSTONE or node.next == EMPTY;
+                    if (empty_slot) {
                         self.len += 1;
                         break :slot node;
                     }
 
+                    if (node.hash == hash) {
+                        _ = self.removeNodeFromChain(index);
+
+                        previous = values[index];
+
+                        break :slot node;
+                    }
+
                     index += 1;
-                    if (index > self.data.len) index = 0;
+                    if (index >= self.capacity) index = 0;
                 }
 
                 // LRU stuff
+                const last = &meta[self.last];
+                index = last.next;
 
-                const first_index = self.data[self.last].next;
-                const first = &self.data[first_index];
-
-                previous = first.value;
+                const first = self.removeNodeFromChain(index);
+                previous = values[index];
 
                 break :slot first;
             };
 
-            const last = &self.data[self.last];
+            const last = &meta[self.last];
+            const first = &meta[last.next];
 
             slot.prev = self.last;
             slot.next = last.next;
             slot.hash = hash;
-            slot.value = value;
 
             last.next = index;
-
+            first.prev = index;
             self.last = index;
+
+            values[index] = value;
 
             return previous;
         }
@@ -331,11 +465,80 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
 test "LRU: ordering" {
     const liu = @import("./lib.zig");
     const hasher = struct {
-        fn hasher(i: u32) u64 {
-            return i;
+        fn hasher(i: i32) u64 {
+            var extended: i64 = i;
+            extended *%= 1239851438124109481;
+
+            return @bitCast(u64, extended);
         }
     }.hasher;
 
-    var lru = try LRU(u32, u32, hasher).init(liu.Pages, 100);
-    _ = lru;
+    var lru = try LRU(i32, i32, hasher).init(liu.Pages, 100);
+    defer lru.deinit(liu.Pages);
+
+    var i: i32 = 0;
+    while (i < 100) : (i += 1) {
+        const res = lru.insert(i, i + 1);
+        try std.testing.expect(res == null);
+    }
+
+    i = 0;
+
+    while (i < 100) : (i += 2) {
+        const res = lru.remove(i);
+        try std.testing.expect(res == i + 1);
+    }
+
+    i = 0;
+
+    while (i < 100) : (i += 1) {
+        const res = lru.read(i);
+
+        if (@mod(i, 2) == 0) {
+            try std.testing.expect(res == null);
+        } else {
+            try std.testing.expect(res == i + 1);
+        }
+    }
+
+    i = 0;
+
+    while (i < 100) : (i += 2) {
+        const res = lru.insert(i, i + 1);
+        try std.testing.expect(res == null);
+    }
+
+    i = 1;
+    while (i < 100) : (i += 2) {
+        const res = lru.insert(i + 100, i + 1);
+
+        try std.testing.expect(res == i + 1);
+    }
+
+    i = 0;
+    while (i < 100) : (i += 2) {
+        const res = lru.insert(i + 100, i + 1);
+
+        try std.testing.expect(res == i + 1);
+    }
+
+    try std.testing.expect(lru.len == 100);
+
+    i = 1;
+    while (i < 100) : (i += 2) {
+        const res = lru.remove(i + 100);
+
+        try std.testing.expect(res == i + 1);
+    }
+
+    try std.testing.expect(lru.len == 50);
+
+    i = 0;
+    while (i < 100) : (i += 2) {
+        const res = lru.remove(i + 100);
+
+        try std.testing.expect(res == i + 1);
+    }
+
+    try std.testing.expect(lru.len == 0);
 }
