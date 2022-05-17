@@ -450,7 +450,6 @@ pub fn LRU(comptime V: type) type {
 
                     if (node.hash == hash) {
                         _ = self.removeNodeFromChain(index);
-
                         previous = values[index];
 
                         break :slot node;
