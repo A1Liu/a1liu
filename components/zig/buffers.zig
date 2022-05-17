@@ -311,9 +311,7 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
         }
 
         pub fn clear(self: *Self) void {
-            const meta = self._meta();
-            for (meta) |*slot| slot.next = EMPTY;
-
+            for (self._meta()) |*slot| slot.next = EMPTY;
             self.len = 0;
         }
 
