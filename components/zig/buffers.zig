@@ -385,34 +385,25 @@ pub fn LRU(comptime V: type) type {
         }
 
         pub fn read(self: *Self, hash: u64) ?*V {
+            const index = self.search(hash) orelse return null;
+
+            _ = self.removeNodeFromChain(index);
+            self.addNodeToEndOfChain(index);
+
             const values = self._values();
-
-            const index = self.search(hash);
-
-            if (index) |i| {
-                _ = self.removeNodeFromChain(i);
-                self.addNodeToEndOfChain(i);
-
-                return &values[i];
-            }
-
-            return null;
+            return &values[index];
         }
 
         pub fn remove(self: *Self, hash: u64) ?V {
-            const index = self.search(hash);
+            const index = self.search(hash) orelse return null;
 
             const values = self._values();
 
-            if (index) |i| {
-                const node = self.removeNodeFromChain(i);
-                node.next = TOMBSTONE;
-                self.len -= 1;
+            const node = self.removeNodeFromChain(index);
+            node.next = TOMBSTONE;
+            self.len -= 1;
 
-                return values[i];
-            }
-
-            return null;
+            return values[index];
         }
 
         pub fn insert(self: *Self, hash: u64, value: V) ?V {
