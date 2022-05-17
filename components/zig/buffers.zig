@@ -260,7 +260,7 @@ const LruConst = struct {
     };
 };
 
-pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type {
+pub fn LRU(comptime V: type) type {
     const TOMBSTONE = LruConst.TOMBSTONE;
     const EMPTY = LruConst.EMPTY;
     const LNode = LruConst.LNode;
@@ -331,10 +331,9 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             return values;
         }
 
-        fn search(self: *const Self, key: K) ?u32 {
+        fn search(self: *const Self, hash: u64) ?u32 {
             if (self.len == 0) return null;
 
-            const hash = hasher(key);
             var index = @truncate(u32, hash % self.capacity);
 
             const meta = self._meta();
@@ -385,10 +384,10 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             self.last = index;
         }
 
-        pub fn read(self: *Self, key: K) ?*V {
+        pub fn read(self: *Self, hash: u64) ?*V {
             const values = self._values();
 
-            const index = self.search(key);
+            const index = self.search(hash);
 
             if (index) |i| {
                 _ = self.removeNodeFromChain(i);
@@ -400,8 +399,8 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             return null;
         }
 
-        pub fn remove(self: *Self, key: K) ?V {
-            const index = self.search(key);
+        pub fn remove(self: *Self, hash: u64) ?V {
+            const index = self.search(hash);
 
             const values = self._values();
 
@@ -416,26 +415,29 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             return null;
         }
 
-        pub fn insert(self: *Self, key: K, value: V) ?V {
+        pub fn insert(self: *Self, hash: u64, value: V) ?V {
             const meta = self._meta();
             const values = self._values();
 
-            var previous: ?V = null;
-
-            const hash = hasher(key);
             var index = @truncate(u32, hash % self.capacity);
 
+            if (self.len == 0) {
+                const node = &meta[index];
+
+                self.last = index;
+                node.next = index;
+                node.prev = index;
+
+                self.len += 1;
+                node.hash = hash;
+                values[index] = value;
+
+                return null;
+            }
+
+            var previous: ?V = null;
+
             const slot = slot: {
-                if (self.len == 0) {
-                    const node = &meta[index];
-
-                    self.last = index;
-                    node.next = index;
-                    self.len += 1;
-
-                    break :slot node;
-                }
-
                 var count: u32 = 0;
                 while (count < self.capacity) : (count += 1) {
                     const node = &meta[index];
@@ -480,19 +482,11 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
 
 test "LRU: ordering" {
     const liu = @import("./lib.zig");
-    const hasher = struct {
-        fn hasher(i: i32) u64 {
-            var extended: i64 = i;
-            extended *%= 1239851438124109481;
 
-            return @bitCast(u64, extended);
-        }
-    }.hasher;
-
-    var lru = try LRU(i32, i32, hasher).init(liu.Pages, 100);
+    var lru = try LRU(u32).init(liu.Pages, 100);
     defer lru.deinit(liu.Pages);
 
-    var i: i32 = 0;
+    var i: u32 = 0;
     while (i < 100) : (i += 1) {
         const res = lru.insert(i, i + 1);
         try std.testing.expect(res == null);
