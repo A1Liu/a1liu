@@ -233,35 +233,109 @@ test "RingBuffer: data integrity" {
     }
 }
 
-pub fn LRU(comptime T: type) type {
-    const NULL_NODE = std.math.maxInt(u32);
+pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type {
+    const MAX = std.math.maxInt(u32);
+    const TOMBSTONE = MAX;
+    const EMPTY = MAX - 1;
 
     const LNode = struct {
         next: u32,
         prev: u32,
-        data: T,
+        hash: u64,
     };
 
     return struct {
         len: u32 = 0,
-        first: u32 = NULL_NODE,
-        last: u32 = NULL_NODE,
-        data: []LNode,
+        last: u32 = undefined,
+        meta: *LNode,
+        values: *V,
+        capacity: u32,
 
         const Self = @This();
 
         pub fn init(alloc: Allocator, size: u32) !Self {
-            return Self{ .data = try alloc.alloc(LNode, size) };
+            if (size >= EMPTY or size == 0) return error.InvalidParam;
+
+            _ = alloc;
+
+            return error.Overflow;
+
+            // const data = try alloc.alloc(LNode, size);
+            // for (data) |*slot| {
+            //     slot.next = EMPTY;
+            //     slot.prev = EMPTY;
+            // }
+
+            // return Self{ .data = data };
         }
 
         pub fn deinit(self: *Self, alloc: Allocator) void {
             alloc.free(self.data);
+        }
+
+        pub fn insert(self: *Self, key: K, value: V) ?V {
+            const hash = hasher(key);
+            var index = hash % self.data.len;
+            var count = 0;
+
+            var previous: ?V = null;
+
+            const slot = slot: {
+                if (self.len == 0) {
+                    const node = &self.data[index];
+
+                    self.last = index;
+                    node.next = index;
+                    self.len += 1;
+
+                    break :slot node;
+                }
+
+                while (count < self.data.len) : (count += 1) {
+                    const node = &self.data[index];
+                    if (node.next == TOMBSTONE or node.next == EMPTY) {
+                        self.len += 1;
+                        break :slot node;
+                    }
+
+                    index += 1;
+                    if (index > self.data.len) index = 0;
+                }
+
+                // LRU stuff
+
+                const first_index = self.data[self.last].next;
+                const first = &self.data[first_index];
+
+                previous = first.value;
+
+                break :slot first;
+            };
+
+            const last = &self.data[self.last];
+
+            slot.prev = self.last;
+            slot.next = last.next;
+            slot.hash = hash;
+            slot.value = value;
+
+            last.next = index;
+
+            self.last = index;
+
+            return previous;
         }
     };
 }
 
 test "LRU: ordering" {
     const liu = @import("./lib.zig");
-    var lru = try LRU(u32).init(liu.Pages, 100);
+    const hasher = struct {
+        fn hasher(i: u32) u64 {
+            return i;
+        }
+    }.hasher;
+
+    var lru = try LRU(u32, u32, hasher).init(liu.Pages, 100);
     _ = lru;
 }
