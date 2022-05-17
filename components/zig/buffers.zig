@@ -244,9 +244,9 @@ const LruConst = struct {
         hash: u64,
 
         fn debug(node: *const LNode, idx: u32) void {
-            if (node.next == LruConst.EMPTY) {
+            if (node.next == EMPTY) {
                 std.debug.print("{}: EMPTY\n", .{idx});
-            } else if (node.next == LruConst.TOMBSTONE) {
+            } else if (node.next == TOMBSTONE) {
                 std.debug.print("{}: TOMB \n", .{idx});
             } else {
                 std.debug.print("{}: hash: {} {}<- ->{} \n", .{
@@ -265,10 +265,11 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
     const EMPTY = LruConst.EMPTY;
     const LNode = LruConst.LNode;
 
+    // Uses circular doubly linked list to store implicit LRU statuses
     return struct {
+        last: u32 = undefined,
         len: u32 = 0,
         capacity: u32,
-        last: u32 = undefined, // circular doubly linked list
         meta: [*]LNode,
         values: [*]V,
 
@@ -367,12 +368,33 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             return node;
         }
 
-        pub fn read(self: *const Self, key: K) ?V {
+        fn addNodeToEndOfChain(self: *Self, index: u32) void {
+            const meta = self._meta();
+
+            const slot = &meta[index];
+            const last = &meta[self.last];
+            const first = &meta[last.next];
+
+            slot.prev = self.last;
+            slot.next = last.next;
+
+            last.next = index;
+            first.prev = index;
+            self.last = index;
+        }
+
+        pub fn read(self: *Self, key: K) ?V {
             const index = self.search(key);
 
             const values = self._values();
 
-            if (index) |i| return values[i];
+            if (index) |i| {
+                _ = self.removeNodeFromChain(i);
+                self.addNodeToEndOfChain(i);
+
+                return values[i];
+            }
+
             return null;
         }
 
@@ -393,13 +415,13 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
         }
 
         pub fn insert(self: *Self, key: K, value: V) ?V {
-            const hash = hasher(key);
-            var index = @truncate(u32, hash % self.capacity);
+            const meta = self._meta();
+            const values = self._values();
 
             var previous: ?V = null;
 
-            const meta = self._meta();
-            const values = self._values();
+            const hash = hasher(key);
+            var index = @truncate(u32, hash % self.capacity);
 
             const slot = slot: {
                 if (self.len == 0) {
@@ -444,17 +466,9 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
                 break :slot first;
             };
 
-            const last = &meta[self.last];
-            const first = &meta[last.next];
+            self.addNodeToEndOfChain(index);
 
-            slot.prev = self.last;
-            slot.next = last.next;
             slot.hash = hash;
-
-            last.next = index;
-            first.prev = index;
-            self.last = index;
-
             values[index] = value;
 
             return previous;
