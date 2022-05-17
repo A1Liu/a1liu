@@ -73,10 +73,7 @@ pub const Mark = struct {
     range: usize,
     index_in_range: usize,
 
-    pub const ZERO: @This() = .{
-        .range = 0,
-        .index_in_range = 0,
-    };
+    pub const ZERO: @This() = .{ .range = 0, .index_in_range = 0 };
 };
 
 pub const Bump = struct {
