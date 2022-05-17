@@ -174,40 +174,6 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
     };
 }
 
-pub fn LRU(T: type, size: u32) type {
-    if (size == 0) {
-        @compileError("what does this even mean?");
-    }
-
-    const NULL_NODE = std.math.max(u32);
-
-    const LNode = struct {
-        next: u32,
-        prev: u32,
-        data: T,
-    };
-
-    return struct {
-        len: u32 = 0,
-        first: u32 = NULL_NODE,
-        last: u32 = NULL_NODE,
-        data: [size]LNode = undefined,
-
-        const Self = @This();
-
-        pub fn insert(self: *Self, new: T) ?T {
-            if (self.len >= self.data.len) {
-                // do LRU things
-                return null;
-            }
-
-            _ = new;
-
-            return null;
-        }
-    };
-}
-
 test "RingBuffer: capacity safety" {
     const TBuffer = RingBuffer(u8, 16);
     var messages: TBuffer = TBuffer.init();
@@ -265,4 +231,37 @@ test "RingBuffer: data integrity" {
             try std.testing.expect(c == i + 8);
         }
     }
+}
+
+pub fn LRU(comptime T: type) type {
+    const NULL_NODE = std.math.maxInt(u32);
+
+    const LNode = struct {
+        next: u32,
+        prev: u32,
+        data: T,
+    };
+
+    return struct {
+        len: u32 = 0,
+        first: u32 = NULL_NODE,
+        last: u32 = NULL_NODE,
+        data: []LNode,
+
+        const Self = @This();
+
+        pub fn init(alloc: Allocator, size: u32) !Self {
+            return Self{ .data = try alloc.alloc(LNode, size) };
+        }
+
+        pub fn deinit(self: *Self, alloc: Allocator) void {
+            alloc.free(self.data);
+        }
+    };
+}
+
+test "LRU: ordering" {
+    const liu = @import("./lib.zig");
+    var lru = try LRU(u32).init(liu.Pages, 100);
+    _ = lru;
 }
