@@ -383,16 +383,16 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             self.last = index;
         }
 
-        pub fn read(self: *Self, key: K) ?V {
-            const index = self.search(key);
-
+        pub fn read(self: *Self, key: K) ?*V {
             const values = self._values();
+
+            const index = self.search(key);
 
             if (index) |i| {
                 _ = self.removeNodeFromChain(i);
                 self.addNodeToEndOfChain(i);
 
-                return values[i];
+                return &values[i];
             }
 
             return null;
@@ -510,8 +510,10 @@ test "LRU: ordering" {
 
         if (@mod(i, 2) == 0) {
             try std.testing.expect(res == null);
+        } else if (res) |r| {
+            try std.testing.expect(r.* == i + 1);
         } else {
-            try std.testing.expect(res == i + 1);
+            try std.testing.expect(false);
         }
     }
 
