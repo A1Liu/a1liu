@@ -287,23 +287,19 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
 
             const byte_size = allocSize(size);
             const data = try alloc.alignedAlloc(u8, alignment, byte_size);
-            const meta = @ptrCast([*]LNode, data.ptr);
-
-            var index: u32 = 0;
-            while (index < size) : (index += 1) {
-                const slot = &meta[index];
-                slot.next = EMPTY;
-                slot.prev = EMPTY;
-            }
 
             const unaligned_values = @ptrToInt(data.ptr) + (size * @sizeOf(LNode));
             const values = mem.alignForward(unaligned_values, alignment);
 
-            return Self{
-                .meta = meta,
+            var self = Self{
+                .meta = @ptrCast([*]LNode, data.ptr),
                 .values = @intToPtr([*]V, values),
                 .capacity = size,
             };
+
+            self.clear();
+
+            return self;
         }
 
         pub fn deinit(self: *Self, alloc: Allocator) void {
@@ -314,10 +310,18 @@ pub fn LRU(comptime K: type, comptime V: type, comptime hasher: fn (K) u64) type
             alloc.free(bytes);
         }
 
+        pub fn clear(self: *Self) void {
+            const meta = self._meta();
+            for (meta) |*slot| slot.next = EMPTY;
+
+            self.len = 0;
+        }
+
         fn _meta(self: *const Self) []LNode {
             var meta: []LNode = &.{};
             meta.ptr = self.meta;
             meta.len = self.capacity;
+
             return meta;
         }
 
