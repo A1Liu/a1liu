@@ -112,7 +112,7 @@ const Render = struct {
 
     pub fn pushVert(self: *Self, count: usize) !void {
         try self.triangles.appendNTimes(liu.Pages, 0, count * 2);
-        try self.colors.appendNTimes(liu.Pages, 0.5, count * 3);
+        try self.colors.appendNTimes(liu.Pages, 0, count * 3);
     }
 
     pub fn drawLine(self: *Self, vertex: usize, from: Point, to: Point) void {
@@ -147,9 +147,10 @@ const Render = struct {
 
 // Need to do it this way until pointer aliasing works properly with tagged
 // unions at global scope
-const Tool = enum { none, line, triangle };
+const Tool = enum { click, line, triangle };
 var tool_line: LineTool = .{};
 var tool_triangle: TriangleTool = .{};
+var tool_click: ClickTool = .{};
 var tool: Tool = .triangle;
 
 var render: Render = .{};
@@ -157,7 +158,7 @@ var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 
 var obj_line: wasm.Obj = undefined;
 var obj_triangle: wasm.Obj = undefined;
-var obj_none: wasm.Obj = undefined;
+var obj_click: wasm.Obj = undefined;
 
 const LineTool = struct {
     prev: ?Point = null,
@@ -244,6 +245,38 @@ const TriangleTool = struct {
     }
 };
 
+const ClickTool = struct {
+    const Self = @This();
+
+    selected: bool = false,
+
+    fn reset(self: *Self) void {
+        self.selected = false;
+
+        render.dropTempData();
+    }
+
+    fn move(self: *Self, pt: Point) void {
+        _ = self;
+        _ = pt;
+    }
+
+    fn click(self: *Self, pt: Point) !void {
+        if (!self.selected) {
+            render.startTempStorage();
+
+            try render.pushVert(6);
+
+            self.selected = true;
+        }
+
+        const temp = render.temp();
+
+        const orig = Point{ .pos = .{ 0, 0 }, .color = current_color };
+        render.drawLine(temp, orig, pt);
+    }
+};
+
 export fn setColor(r: f32, g: f32, b: f32) void {
     current_color = Vec3{ r, g, b };
 }
@@ -254,7 +287,7 @@ export fn setDims(width: f32, height: f32) void {
 
 export fn currentTool() wasm.Obj {
     switch (tool) {
-        .none => return obj_none,
+        .click => return obj_click,
         .triangle => return obj_triangle,
         .line => return obj_line,
     }
@@ -262,7 +295,10 @@ export fn currentTool() wasm.Obj {
 
 export fn toggleTool() void {
     switch (tool) {
-        .none => {
+        .click => {
+            const draw = &tool_click;
+            draw.reset();
+
             tool = .triangle;
         },
         .triangle => {
@@ -275,14 +311,17 @@ export fn toggleTool() void {
             const draw = &tool_line;
             draw.reset();
 
-            tool = .none;
+            tool = .click;
         },
     }
 }
 
 export fn onRightClick() void {
     switch (tool) {
-        .none => return,
+        .click => {
+            const draw = &tool_click;
+            draw.reset();
+        },
         .triangle => {
             const draw = &tool_triangle;
             draw.reset();
@@ -298,7 +337,10 @@ export fn onMove(posX: f32, posY: f32) void {
     const pt = render.getPoint(posX, posY);
 
     switch (tool) {
-        .none => return,
+        .click => {
+            const draw = &tool_click;
+            draw.move(pt);
+        },
         .triangle => {
             const draw = &tool_triangle;
             draw.move(pt);
@@ -312,7 +354,10 @@ export fn onMove(posX: f32, posY: f32) void {
 
 pub fn onClick(pt: Point) !void {
     switch (tool) {
-        .none => return,
+        .click => {
+            const draw = &tool_click;
+            try draw.click(pt);
+        },
         .triangle => {
             const draw = &tool_triangle;
             try draw.click(pt);
@@ -329,7 +374,7 @@ pub fn init() !void {
 
     obj_line = wasm.out.string("line");
     obj_triangle = wasm.out.string("triangle");
-    obj_none = wasm.out.string("none");
+    obj_click = wasm.out.string("click");
 
     wasm.out.post(.info, "WASM initialized!", .{});
 }

@@ -260,6 +260,10 @@ const Canvas: React.VFC<{ canvasRef: CanvasRef }> = ({ canvasRef }) => {
         const data = [evt.clientX, evt.clientY];
         workerRef?.postMessage({ kind: "leftclick", data });
       }}
+      onDoubleClick={(evt) => {
+        evt.stopPropagation();
+        evt.preventDefault();
+      }}
       onContextMenu={(evt) => {
         evt.preventDefault();
         workerRef?.postMessage({ kind: "rightclick" });
