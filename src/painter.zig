@@ -86,17 +86,15 @@ const Render = struct {
     }
 
     pub fn addTriangle(self: *Self, pts: [3]Point) !void {
-        const pos = .{
-            pts[0].pos[0], pts[0].pos[1],
-            pts[1].pos[0], pts[1].pos[1],
-            pts[2].pos[0], pts[2].pos[1],
-        };
+        var pos: [6]f32 = undefined;
+        pos[0..2].* = pts[0].pos;
+        pos[2..4].* = pts[1].pos;
+        pos[4..6].* = pts[2].pos;
 
-        const color = .{
-            pts[0].color[0], pts[0].color[1], pts[0].color[2],
-            pts[1].color[0], pts[1].color[1], pts[1].color[2],
-            pts[2].color[0], pts[2].color[1], pts[2].color[2],
-        };
+        var color: [9]f32 = undefined;
+        color[0..3].* = pts[0].color;
+        color[3..6].* = pts[1].color;
+        color[6..9].* = pts[2].color;
 
         try self.triangles.appendSlice(liu.Pages, &pos);
         try self.colors.appendSlice(liu.Pages, &color);
