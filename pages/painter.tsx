@@ -50,8 +50,9 @@ const useStore = create<PainterState>((set, get) => {
   };
 });
 
+const selectStable = ({ cb, workerRef }: PainterState) => ({ cb, workerRef });
 const useStable = (): Pick<PainterState, "cb" | "workerRef"> => {
-  return useStore(({ cb, workerRef }) => ({ cb, workerRef }), shallow);
+  return useStore(selectStable, shallow);
 };
 
 interface FloatInputProps {
