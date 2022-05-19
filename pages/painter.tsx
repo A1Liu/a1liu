@@ -17,7 +17,7 @@ interface PainterCb {
   setIsRecording: (isRecording: boolean) => void;
   setRecordingUrl: (url: string) => void;
   setTool: (url: string) => void;
-  setColor: (color: Number3) => void;
+  setColor: (setter: (color: Number3) => Number3) => void;
 }
 
 interface PainterState {
@@ -36,7 +36,10 @@ const useStore = create<PainterState>((set, get) => {
   const setIsRecording = (isRecording: boolean): void => set({ isRecording });
   const setRecordingUrl = (recordingUrl: string): void => set({ recordingUrl });
   const setTool = (tool: string): void => set({ tool });
-  const setColor = (color: Number3): void => set({ color });
+  const setColor = (setter: (color: Number3) => Number3): void => {
+    const { color } = get();
+    set({ color: setter(color) });
+  };
 
   return {
     isRecording: false,
@@ -82,11 +85,13 @@ const FloatInput: React.VFC<FloatInputProps> = ({ index, data }) => {
 
     if (valIsInvalid) return;
 
-    const newVal = [...color];
-    newVal[index] = val;
+    cb.setColor((color) => {
+      const newVal: Number3 = [...color];
+      newVal[index] = val;
 
-    cb.setColor(newVal);
-  }, [text, setError, cb]);
+      return newVal;
+    });
+  }, [text, setError, index, cb]);
 
   return (
     <div className={styles.floatInWrapper}>
