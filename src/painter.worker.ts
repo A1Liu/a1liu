@@ -2,9 +2,9 @@ import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
 import * as wasm from "components/wasm";
 
-type Number2 = [number, number];
-type Number3 = [number, number, number];
-type Number4 = [number, number, number, number];
+export type Number2 = [number, number];
+export type Number3 = [number, number, number];
+export type Number4 = [number, number, number, number];
 
 export type Message =
   | { kind: "toggleTool" }
@@ -34,6 +34,7 @@ const waitForMessage = (): Promise<Message[]> => {
 export type OutMessage =
   | { kind: "initDone"; data?: void }
   | { kind: "setTool"; data: string }
+  | { kind: "setColor"; data: Number3 }
   | { kind: string; data: any };
 
 interface PainterGlState {

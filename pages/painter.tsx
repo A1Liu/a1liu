@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import shallow from "zustand/shallow";
-import type { Message, OutMessage } from "src/painter.worker";
+import type { Number3, Message, OutMessage } from "src/painter.worker";
 import type { Dispatch, SetStateAction } from "react";
 import * as GL from "components/webgl";
 import type { WebGl } from "components/webgl";
@@ -17,11 +17,13 @@ interface PainterCb {
   setIsRecording: (isRecording: boolean) => void;
   setRecordingUrl: (url: string) => void;
   setTool: (url: string) => void;
+  setColor: (color: Number3) => void;
 }
 
 interface PainterState {
   workerRef: Worker | null;
 
+  color: Number3;
   tool: string;
   isRecording: boolean;
   recordingUrl: string | null;
@@ -34,11 +36,14 @@ const useStore = create<PainterState>((set, get) => {
   const setIsRecording = (isRecording: boolean): void => set({ isRecording });
   const setRecordingUrl = (recordingUrl: string): void => set({ recordingUrl });
   const setTool = (tool: string): void => set({ tool });
+  const setColor = (color: Number3): void => set({ color });
 
   return {
     isRecording: false,
     recordingUrl: null,
     workerRef: null,
+
+    color: [0.5, 0.5, 0.5],
     tool: "triangle",
 
     cb: {
@@ -46,6 +51,7 @@ const useStore = create<PainterState>((set, get) => {
       setIsRecording,
       setRecordingUrl,
       setTool,
+      setColor,
     },
   };
 });
@@ -102,15 +108,12 @@ const Config: React.VFC = () => {
   const { cb, workerRef } = useStable();
   const isRecording = useStore((state) => state.isRecording);
   const recordingUrl = useStore((state) => state.recordingUrl);
+  const color = useStore((state) => state.color);
   const tool = useStore((state) => state.tool);
 
   const toast = useToast();
 
   const paletteRef = React.useRef<HTMLDivElement>(null);
-
-  const [r, setR] = React.useState(0.5);
-  const [g, setG] = React.useState(0.5);
-  const [b, setB] = React.useState(0.5);
 
   React.useEffect(() => {
     if (recordingUrl === null) return;
@@ -118,12 +121,14 @@ const Config: React.VFC = () => {
     return () => URL.revokeObjectURL(recordingUrl);
   }, [recordingUrl]);
 
+  const [r, g, b] = color;
+
   React.useEffect(() => {
     if (!paletteRef.current) return;
     if (!workerRef) return;
 
-    const color = `rgb(${r * 256}, ${g * 256}, ${b * 256})`;
-    paletteRef.current.style.backgroundColor = color;
+    const colorStyle = `rgb(${r * 256}, ${g * 256}, ${b * 256})`;
+    paletteRef.current.style.backgroundColor = colorStyle;
     workerRef.postMessage({ kind: "setColor", data: [r, g, b] });
   }, [paletteRef, workerRef, r, g, b]);
 
@@ -150,9 +155,23 @@ const Config: React.VFC = () => {
           <div ref={paletteRef} className={styles.palette} />
 
           <div className={styles.colorValues}>
-            <FloatInput prefix={"R"} data={r} setData={setR} />
-            <FloatInput prefix={"G"} data={g} setData={setG} />
-            <FloatInput prefix={"B"} data={b} setData={setB} />
+            <FloatInput
+              prefix={"R"}
+              data={r}
+              setData={(r) => cb.setColor([r, g, b])}
+            />
+
+            <FloatInput
+              prefix={"G"}
+              data={g}
+              setData={(g) => cb.setColor([r, g, b])}
+            />
+
+            <FloatInput
+              prefix={"B"}
+              data={b}
+              setData={(b) => cb.setColor([r, g, b])}
+            />
           </div>
         </div>
 
@@ -307,6 +326,10 @@ const Painter: React.VFC = () => {
       switch (message.kind) {
         case "setTool":
           cb.setTool(message.data);
+          break;
+
+        case "setColor":
+          cb.setColor(message.data);
           break;
 
         case "initDone":
