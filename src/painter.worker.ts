@@ -232,8 +232,7 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
     }
 
     case "toggleTool": {
-      wasmRef.abi.toggleTool();
-      const obj = wasmRef.abi.currentTool();
+      const obj = wasmRef.abi.toggleTool();
       const data = wasmRef.readObj(obj);
       postMessage({ kind: "setTool", data });
       break;

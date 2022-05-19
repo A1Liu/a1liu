@@ -364,29 +364,24 @@ export fn setDims(width: f32, height: f32) void {
     render.dims = Vec2{ width, height };
 }
 
-export fn currentTool() wasm.Obj {
-    switch (tool_kind) {
-        .click => return obj_click,
-        .triangle => return obj_triangle,
-        .line => return obj_line,
-    }
-}
-
-export fn toggleTool() void {
+export fn toggleTool() wasm.Obj {
     tool.reset();
 
     switch (tool_kind) {
         .click => {
             tool = Tool.init(&tool_triangle);
             tool_kind = .triangle;
+            return obj_triangle;
         },
         .triangle => {
             tool = Tool.init(&tool_line);
             tool_kind = .line;
+            return obj_line;
         },
         .line => {
             tool = Tool.init(&tool_click);
             tool_kind = .click;
+            return obj_click;
         },
     }
 }
