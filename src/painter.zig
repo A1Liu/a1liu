@@ -341,8 +341,13 @@ const ClickTool = struct {
         //     self.selected = true;
         // }
 
-        var i: u32 = 0;
-        while (i < render.triangles.items.len) : (i += 6) {
+        var i: u32 = render.triangles.items.len;
+        std.debug.assert(i % 6 == 0);
+        while (i > 0) { // iterate in reverse order
+            // we assume that the `triangles` slice is in fact a slice of
+            // 2d triangles
+            i -= 6;
+
             const vert = i / 2;
             if (intersect(vert, pt.pos)) {
                 const color = render.colors.items[(vert * 3)..];
