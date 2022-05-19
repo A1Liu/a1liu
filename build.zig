@@ -16,6 +16,8 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8) *bld.LibExeOb
     if (mode == .Debug) {
         // Output straight to assets folder during dev to make things easier
         program.setOutputDir("./public/assets");
+    } else {
+        program.strip = true;
     }
 
     program.install();
