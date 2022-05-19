@@ -165,10 +165,12 @@ const Tool = struct {
     }
 
     pub fn initWithVtable(comptime T: type, obj: *T, comptime VtableType: type) Self {
+        const info = std.meta.fieldInfo;
+
         const vtable = comptime VTable{
-            .reset = @ptrCast(fn (self: *anyopaque) void, VtableType.reset),
-            .move = @ptrCast(fn (self: *anyopaque, pt: Point) void, VtableType.move),
-            .click = @ptrCast(fn (self: *anyopaque, pt: Point) anyerror!void, VtableType.click),
+            .reset = @ptrCast(info(VTable, .reset).field_type, VtableType.reset),
+            .move = @ptrCast(info(VTable, .move).field_type, VtableType.move),
+            .click = @ptrCast(info(VTable, .click).field_type, VtableType.click),
         };
 
         return Self{ .ptr = @ptrCast(*anyopaque, obj), .vtable = &vtable };
