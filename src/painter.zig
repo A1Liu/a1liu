@@ -13,8 +13,8 @@ const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
 
-const Vec2 = @Vector(2, f32);
-const Vec3 = @Vector(3, f32);
+const Vec2 = liu.Vec2;
+const Vec3 = liu.Vec3;
 const Point = struct { pos: Vec2, color: Vec3 };
 
 const ext = struct {
@@ -147,7 +147,6 @@ const Render = struct {
 
 // Need to do it this way until pointer aliasing works properly with tagged
 // unions at global scope
-const EPSILON: f32 = 0.0000001;
 const Tool = enum { click, line, triangle };
 var tool_line: LineTool = .{};
 var tool_triangle: TriangleTool = .{};
@@ -161,73 +160,20 @@ var obj_line: wasm.Obj = undefined;
 var obj_triangle: wasm.Obj = undefined;
 var obj_click: wasm.Obj = undefined;
 
-fn intersect(vert: u32, ray2: Vec2) bool {
-    const pos = render.triangles.items[(vert * 2)..];
+const Math = struct {
+    // Möller–Trumbore algorithm for triangle-ray intersection algorithm
+    fn intersect(vert: u32, ray2: Vec2) bool {
+        const pos = render.triangles.items[(vert * 2)..];
 
-    const makeVec3 = struct {
-        fn f(v: Vec2, third: f32) Vec3 {
-            var vec: Vec3 = undefined;
-            vec[0] = v[0];
-            vec[1] = v[1];
-            vec[2] = third;
+        const ray_origin = liu.vec2Append(ray2, 1);
+        const ray = Vec3{ 0, 0, -1 };
+        const vert0 = liu.vec2Append(pos[0..2].*, 0);
+        const vert1 = liu.vec2Append(pos[2..4].*, 0);
+        const vert2 = liu.vec2Append(pos[4..6].*, 0);
 
-            return vec;
-        }
-    }.f;
-
-    const cross = struct {
-        fn f(a: Vec3, b: Vec3) Vec3 {
-            var vec: Vec3 = undefined;
-            vec[0] = a[1] * b[2] - a[2] * b[1];
-            vec[1] = a[2] * b[0] - a[0] * b[2];
-            vec[2] = a[0] * b[1] - a[1] * b[0];
-
-            return vec;
-        }
-    }.f;
-
-    const dot = struct {
-        fn f(a: Vec3, b: Vec3) f32 {
-            var vec: Vec3 = a * b;
-
-            return vec[0] + vec[1] + vec[2];
-        }
-    }.f;
-
-    const ray_origin = makeVec3(ray2, 1);
-    const ray = Vec3{ 0, 0, -1 };
-    const vert0 = makeVec3(pos[0..2].*, 0);
-    const vert1 = makeVec3(pos[2..4].*, 0);
-    const vert2 = makeVec3(pos[4..6].*, 0);
-
-    const edge1 = vert1 - vert0;
-    const edge2 = vert2 - vert0;
-
-    const h = cross(ray, edge2);
-    const a = dot(edge1, h);
-
-    if (a > -EPSILON and a < EPSILON)
-        return false; // This ray is parallel to this triangle.
-
-    const f = 1.0 / a;
-    const s = ray_origin - vert0;
-    const u = f * dot(s, h);
-    if (u < 0.0 or u > 1.0)
-        return false;
-    const q = cross(s, edge1);
-    const v = f * dot(ray, q);
-    if (v < 0.0 or u + v > 1.0)
-        return false;
-
-    // At this stage we can compute t to find out where the intersection point
-    // is on the line.
-    const t = f * dot(edge2, q);
-    if (t > EPSILON) { // ray intersection
-        return true;
-    } else { // This means that there is a line intersection but not a ray intersection.
-        return false;
+        return liu.intersect(ray, ray_origin, .{ vert0, vert1, vert2 });
     }
-}
+};
 
 const LineTool = struct {
     prev: ?Point = null,
@@ -349,7 +295,7 @@ const ClickTool = struct {
             i -= 6;
 
             const vert = i / 2;
-            if (intersect(vert, pt.pos)) {
+            if (Math.intersect(vert, pt.pos)) {
                 const color = render.colors.items[(vert * 3)..];
                 color[0..3].* = pt.color;
                 color[3..6].* = pt.color;
