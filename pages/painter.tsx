@@ -62,15 +62,17 @@ const useStable = (): Pick<PainterState, "cb" | "workerRef"> => {
 };
 
 interface FloatInputProps {
-  prefix: string;
+  index: number;
   data: number;
-  setData: (data: number) => void;
 }
 
-const FloatInput: React.VFC<FloatInputProps> = ({ prefix, data, setData }) => {
+const FloatInput: React.VFC<FloatInputProps> = ({ index, data }) => {
+  const { cb } = useStable();
   const [text, setText] = React.useState(() => `${data}`);
   const [error, setError] = React.useState(false);
   const paletteRef = React.useRef<HTMLDivElement>(null);
+
+  const color = useStore((state) => state.color);
 
   React.useEffect(() => {
     const val = Number.parseFloat(text);
@@ -80,12 +82,15 @@ const FloatInput: React.VFC<FloatInputProps> = ({ prefix, data, setData }) => {
 
     if (valIsInvalid) return;
 
-    setData(val);
-  }, [text, setError, setData]);
+    const newVal = [...color];
+    newVal[index] = val;
+
+    cb.setColor(newVal);
+  }, [text, setError, cb]);
 
   return (
     <div className={styles.floatInWrapper}>
-      {`${prefix}: `}
+      {`${"RGB"[index]}: `}
       <input
         className={styles.floatInInput}
         value={text}
@@ -155,23 +160,11 @@ const Config: React.VFC = () => {
           <div ref={paletteRef} className={styles.palette} />
 
           <div className={styles.colorValues}>
-            <FloatInput
-              prefix={"R"}
-              data={r}
-              setData={(r) => cb.setColor([r, g, b])}
-            />
+            <FloatInput index={0} data={r} />
 
-            <FloatInput
-              prefix={"G"}
-              data={g}
-              setData={(g) => cb.setColor([r, g, b])}
-            />
+            <FloatInput index={1} data={g} />
 
-            <FloatInput
-              prefix={"B"}
-              data={b}
-              setData={(b) => cb.setColor([r, g, b])}
-            />
+            <FloatInput index={2} data={b} />
           </div>
         </div>
 
