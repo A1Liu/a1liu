@@ -171,10 +171,7 @@ const Tool = struct {
             .click = @ptrCast(fn (self: *anyopaque, pt: Point) anyerror!void, VtableType.click),
         };
 
-        return Self{
-            .ptr = @ptrCast(*anyopaque, obj),
-            .vtable = &vtable,
-        };
+        return Self{ .ptr = @ptrCast(*anyopaque, obj), .vtable = &vtable };
     }
 
     pub fn reset(self: *Self) void {
