@@ -2,6 +2,8 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("liu");
 
+// https://github.com/Pagedraw/pagedraw/blob/master/src/frontend/DraggingCanvas.cjsx
+
 // clear canvas
 // draw freehand/curves with cursor
 // create animation/start animation
@@ -306,10 +308,30 @@ const TriangleTool = struct {
     }
 };
 
+const MoveTool = struct {
+    const Self = @This();
+
+    selected: usize,
+
+    fn reset(self: *Self) void {
+        _ = self;
+    }
+
+    fn move(self: *Self, pt: Point) void {
+        _ = self;
+        _ = pt;
+    }
+
+    fn click(self: *Self, pt: Point) !void {
+        _ = self;
+        _ = pt;
+    }
+};
+
 const ClickTool = struct {
     const Self = @This();
 
-    selected: bool = false,
+    dummy: bool = false,
 
     fn reset(self: *Self) void {
         _ = self;
