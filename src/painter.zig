@@ -145,13 +145,60 @@ const Render = struct {
     }
 };
 
+const Tool = struct {
+    const Self = @This();
+
+    const VTable = struct {
+        reset: fn (self: *anyopaque) void,
+        move: fn (self: *anyopaque, pt: Point) void,
+        click: fn (self: *anyopaque, pt: Point) anyerror!void,
+    };
+
+    ptr: *anyopaque,
+    vtable: *const VTable,
+
+    pub fn init(obj: anytype) Self {
+        const PtrT = @TypeOf(obj);
+        const T = std.meta.Child(PtrT);
+
+        return initWithVtable(T, obj, T);
+    }
+
+    pub fn initWithVtable(comptime T: type, obj: *T, comptime VtableType: type) Self {
+        const vtable = comptime VTable{
+            .reset = @ptrCast(fn (self: *anyopaque) void, VtableType.reset),
+            .move = @ptrCast(fn (self: *anyopaque, pt: Point) void, VtableType.move),
+            .click = @ptrCast(fn (self: *anyopaque, pt: Point) anyerror!void, VtableType.click),
+        };
+
+        return Self{
+            .ptr = @ptrCast(*anyopaque, obj),
+            .vtable = &vtable,
+        };
+    }
+
+    pub fn reset(self: *Self) void {
+        return self.vtable.reset(self.ptr);
+    }
+
+    pub fn move(self: *Self, pt: Point) void {
+        return self.vtable.move(self.ptr, pt);
+    }
+
+    pub fn click(self: *Self, pt: Point) anyerror!void {
+        return self.vtable.click(self.ptr, pt);
+    }
+};
+
 // Need to do it this way until pointer aliasing works properly with tagged
 // unions at global scope
-const Tool = enum { click, line, triangle };
+const ToolKind = enum { click, line, triangle };
 var tool_line: LineTool = .{};
 var tool_triangle: TriangleTool = .{};
 var tool_click: ClickTool = .{};
-var tool: Tool = .triangle;
+
+var tool: Tool = Tool.init(&tool_triangle);
+var tool_kind: ToolKind = .triangle;
 
 var render: Render = .{};
 var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
@@ -263,7 +310,7 @@ const TriangleTool = struct {
 const ClickTool = struct {
     const Self = @This();
 
-    // selected: bool = false,
+    selected: bool = false,
 
     fn reset(self: *Self) void {
         _ = self;
@@ -321,7 +368,7 @@ export fn setDims(width: f32, height: f32) void {
 }
 
 export fn currentTool() wasm.Obj {
-    switch (tool) {
+    switch (tool_kind) {
         .click => return obj_click,
         .triangle => return obj_triangle,
         .line => return obj_line,
@@ -329,79 +376,36 @@ export fn currentTool() wasm.Obj {
 }
 
 export fn toggleTool() void {
-    switch (tool) {
-        .click => {
-            const draw = &tool_click;
-            draw.reset();
+    tool.reset();
 
-            tool = .triangle;
+    switch (tool_kind) {
+        .click => {
+            tool = Tool.init(&tool_triangle);
+            tool_kind = .triangle;
         },
         .triangle => {
-            const draw = &tool_triangle;
-            draw.reset();
-
-            tool = .line;
+            tool = Tool.init(&tool_line);
+            tool_kind = .line;
         },
         .line => {
-            const draw = &tool_line;
-            draw.reset();
-
-            tool = .click;
+            tool = Tool.init(&tool_click);
+            tool_kind = .click;
         },
     }
 }
 
 export fn onRightClick() void {
-    switch (tool) {
-        .click => {
-            const draw = &tool_click;
-            draw.reset();
-        },
-        .triangle => {
-            const draw = &tool_triangle;
-            draw.reset();
-        },
-        .line => {
-            const draw = &tool_line;
-            draw.reset();
-        },
-    }
+    tool.reset();
 }
 
 export fn onMove(posX: f32, posY: f32) void {
     const pt = render.getPoint(posX, posY);
 
-    switch (tool) {
-        .click => {
-            const draw = &tool_click;
-            draw.move(pt);
-        },
-        .triangle => {
-            const draw = &tool_triangle;
-            draw.move(pt);
-        },
-        .line => {
-            const draw = &tool_line;
-            draw.move(pt);
-        },
-    }
+    tool.move(pt);
 }
 
 pub fn onClick(pt: Point) !void {
-    switch (tool) {
-        .click => {
-            const draw = &tool_click;
-            try draw.click(pt);
-        },
-        .triangle => {
-            const draw = &tool_triangle;
-            try draw.click(pt);
-        },
-        .line => {
-            const draw = &tool_line;
-            try draw.click(pt);
-        },
-    }
+    try tool.click(pt);
 }
 
 pub fn init() !void {
