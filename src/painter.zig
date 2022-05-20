@@ -335,9 +335,6 @@ const ClickTool = struct {
 
     fn reset(self: *Self) void {
         _ = self;
-        // self.selected = false;
-
-        // render.dropTempData();
     }
 
     fn move(self: *Self, pt: Point) void {
@@ -347,13 +344,6 @@ const ClickTool = struct {
 
     fn click(self: *Self, pt: Point) !void {
         _ = self;
-        // if (!self.selected) {
-        //     render.startTempStorage();
-
-        //     try render.pushVert(6);
-
-        //     self.selected = true;
-        // }
 
         var i: u32 = render.triangles.items.len;
         std.debug.assert(i % 6 == 0);
@@ -373,10 +363,6 @@ const ClickTool = struct {
                 break;
             }
         }
-
-        // const temp = render.temp();
-        // const orig = Point{ .pos = .{ 0, 0 }, .color = current_color };
-        // render.drawLine(temp, orig, pt);
     }
 };
 
