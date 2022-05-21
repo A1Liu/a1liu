@@ -227,70 +227,9 @@ const Config: React.VFC = () => {
   );
 };
 
-type CanvasRef = React.RefObject<HTMLCanvasElement>;
-const Canvas: React.VFC<{ canvasRef: CanvasRef }> = ({ canvasRef }) => {
-  const { cb, workerRef } = useStable();
-  const isRecording = useStore((state) => state.isRecording);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-
-    if (!canvas) return;
-    if (!isRecording) return;
-
-    const stream = canvas.captureStream(24);
-    const mediaRecorder = new MediaRecorder(stream);
-    const recordedChunks: any[] = [];
-
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = (e) => {
-      const blob = new Blob(recordedChunks, { type: "video/webm" });
-      const url = URL.createObjectURL(blob);
-      cb.setRecordingUrl(url);
-    };
-
-    mediaRecorder.start();
-
-    return () => mediaRecorder.stop();
-  }, [cb, isRecording, canvasRef]);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !workerRef) return;
-
-    const offscreen = (canvas as any).transferControlToOffscreen();
-    workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
-  }, [workerRef, canvasRef]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className={styles.canvas}
-      onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        const data = [evt.clientX, evt.clientY];
-        workerRef?.postMessage({ kind: "mousemove", data });
-      }}
-      onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-        const data = [evt.clientX, evt.clientY];
-        workerRef?.postMessage({ kind: "leftclick", data });
-      }}
-      onDoubleClick={(evt) => {
-        evt.stopPropagation();
-        evt.preventDefault();
-      }}
-      onContextMenu={(evt) => {
-        evt.preventDefault();
-        workerRef?.postMessage({ kind: "rightclick" });
-      }}
-    />
-  );
-};
-
 const Painter: React.VFC = () => {
   const { cb, workerRef } = useStable();
+  const isRecording = useStore((state) => state.isRecording);
   const toast = useToast();
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -351,9 +290,62 @@ const Painter: React.VFC = () => {
     cb.initWorker(worker);
   }, [cb, toast]);
 
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+
+    if (!canvas) return;
+    if (!isRecording) return;
+
+    const stream = canvas.captureStream(24);
+    const mediaRecorder = new MediaRecorder(stream);
+    const recordedChunks: any[] = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = (e) => {
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      const url = URL.createObjectURL(blob);
+      cb.setRecordingUrl(url);
+    };
+
+    mediaRecorder.start();
+
+    return () => mediaRecorder.stop();
+  }, [cb, isRecording, canvasRef]);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !workerRef) return;
+
+    const offscreen = (canvas as any).transferControlToOffscreen();
+    workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
+  }, [workerRef, canvasRef]);
+
   return (
     <div className={styles.wrapper}>
-      <Canvas canvasRef={canvasRef} />
+      <canvas
+        ref={canvasRef}
+        className={styles.canvas}
+        onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
+          const data = [evt.clientX, evt.clientY];
+          workerRef?.postMessage({ kind: "mousemove", data });
+        }}
+        onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
+          const data = [evt.clientX, evt.clientY];
+          workerRef?.postMessage({ kind: "leftclick", data });
+        }}
+        onDoubleClick={(evt) => {
+          evt.stopPropagation();
+          evt.preventDefault();
+        }}
+        onContextMenu={(evt) => {
+          evt.preventDefault();
+          workerRef?.postMessage({ kind: "rightclick" });
+        }}
+      />
+
       <Config />
     </div>
   );
