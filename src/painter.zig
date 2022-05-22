@@ -265,9 +265,9 @@ const LineTool = struct {
     const Self = @This();
 
     fn reset(self: *Self) void {
-        self.prev = null;
-
         render.dropTempData();
+
+        self.prev = null;
     }
 
     fn move(self: *Self, pt: Point) !void {
@@ -300,10 +300,10 @@ const TriangleTool = struct {
     const Self = @This();
 
     fn reset(self: *Self) void {
+        render.dropTempData();
+
         self.first = null;
         self.second = null;
-
-        render.dropTempData();
     }
 
     fn move(self: *Self, pt: Point) !void {
