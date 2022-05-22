@@ -245,6 +245,8 @@ var obj_line: wasm.Obj = undefined;
 var obj_draw: wasm.Obj = undefined;
 
 const Math = struct {
+    const EPSILON: f32 = 0.0000001;
+
     // Möller–Trumbore algorithm for triangle-ray intersection algorithm
     fn intersect(vert: u32, ray2: Vec2) bool {
         const pos = render.triangles.items[(vert * 2)..];
@@ -255,7 +257,7 @@ const Math = struct {
         const vert1 = liu.vec2Append(pos[2..4].*, 0);
         const vert2 = liu.vec2Append(pos[4..6].*, 0);
 
-        return liu.intersect(ray, ray_origin, .{ vert0, vert1, vert2 });
+        return liu.intersect(EPSILON, ray, ray_origin, .{ vert0, vert1, vert2 });
     }
 };
 

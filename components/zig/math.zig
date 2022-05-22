@@ -1,5 +1,3 @@
-const EPSILON: f32 = 0.0000001;
-
 pub const Vec2 = @Vector(2, f32);
 pub const Vec3 = @Vector(3, f32);
 
@@ -28,7 +26,7 @@ pub fn dot(a: Vec3, b: Vec3) f32 {
 }
 
 // Möller–Trumbore algorithm for triangle-ray intersection algorithm
-pub fn intersect(ray: Vec3, ray_origin: Vec3, triangle: [3]Vec3) bool {
+pub fn intersect(EPSILON: f32, ray: Vec3, ray_origin: Vec3, triangle: [3]Vec3) bool {
     const vert0 = triangle[0];
     const vert1 = triangle[1];
     const vert2 = triangle[2];
