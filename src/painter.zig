@@ -5,7 +5,8 @@ const liu = @import("liu");
 // https://github.com/Pagedraw/pagedraw/blob/master/src/frontend/DraggingCanvas.cjsx
 
 // clear canvas
-// draw freehand/curves with cursor
+// draw curves with cursor
+// input changes
 // create animation/start animation
 // undo/redo?
 // -> move objects

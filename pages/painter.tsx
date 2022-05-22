@@ -324,25 +324,38 @@ const Painter: React.VFC = () => {
   }, [workerRef, canvasRef]);
 
   return (
-    <div className={styles.wrapper}>
+    <div
+      className={styles.wrapper}
+      onMouseMove={(evt: React.MouseEvent) => {
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "mousemove", data });
+      }}
+      onClick={(evt: React.MouseEvent) => {
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "leftclick", data });
+      }}
+      onContextMenu={(evt) => {
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        evt.preventDefault();
+
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "rightclick", data });
+      }}
+    >
       <canvas
         ref={canvasRef}
         className={styles.canvas}
-        onMouseMove={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-          const data = [evt.clientX, evt.clientY];
-          workerRef?.postMessage({ kind: "mousemove", data });
-        }}
-        onClick={(evt: React.MouseEvent<HTMLCanvasElement>) => {
-          const data = [evt.clientX, evt.clientY];
-          workerRef?.postMessage({ kind: "leftclick", data });
-        }}
         onDoubleClick={(evt) => {
           evt.stopPropagation();
           evt.preventDefault();
-        }}
-        onContextMenu={(evt) => {
-          evt.preventDefault();
-          workerRef?.postMessage({ kind: "rightclick" });
         }}
       />
 

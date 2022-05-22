@@ -12,7 +12,7 @@ export type Message =
   | { kind: "setColor"; data: Number3 }
   | { kind: "mousemove"; data: Number2 }
   | { kind: "leftclick"; data: Number2 }
-  | { kind: "rightclick" }
+  | { kind: "rightclick"; data: Number2 }
   | { kind: "canvas"; offscreen: any };
 
 let resolve: null | ((msg: Message[]) => void) = null;
