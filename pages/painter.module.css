@@ -15,6 +15,8 @@
   width: inherit;
   max-width: inherit;
   flex-grow: 1;
+
+  cursor: default;
 }
 
 .configBox {

@@ -243,6 +243,7 @@ const Painter: React.VFC = () => {
 
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
+      console.log("resize");
       workerRef.postMessage({ kind: "resize", data: [width, height] });
     };
 
@@ -323,6 +324,25 @@ const Painter: React.VFC = () => {
     workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
   }, [workerRef, canvasRef]);
 
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !workerRef) return;
+
+    const listener = (evt: any) => {
+      const canvas = canvasRef.current;
+      if (!canvas || !workerRef) return;
+
+      // if (evt.isComposing || evt.keyCode === 229) return;
+
+      // workerRef.postMessage({ kind: "resize", data: [width, height] });
+      // workerRef?.postMessage({ kind: "keydown", data: evt.keyCode });
+    };
+
+    window.addEventListener("keydown", listener);
+
+    return () => window.removeEventListener("keydown", listener);
+  }, [canvasRef, workerRef]);
+
   return (
     <div
       className={styles.wrapper}
@@ -340,7 +360,7 @@ const Painter: React.VFC = () => {
         const data = [evt.clientX, evt.clientY];
         workerRef?.postMessage({ kind: "leftclick", data });
       }}
-      onContextMenu={(evt) => {
+      onContextMenu={(evt: React.MouseEvent) => {
         if (!canvasRef.current) return;
         if (evt.target !== canvasRef.current) return;
 
@@ -349,10 +369,20 @@ const Painter: React.VFC = () => {
         const data = [evt.clientX, evt.clientY];
         workerRef?.postMessage({ kind: "rightclick", data });
       }}
+      onKeyDown={(evt: any) => {
+        if (evt.isComposing || evt.keyCode === 229) return;
+
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        // console.log("bruh", evt.target, evt.keyCode);
+        workerRef?.postMessage({ kind: "keydown", data: evt.keyCode });
+      }}
     >
       <canvas
         ref={canvasRef}
         className={styles.canvas}
+        contentEditable
         onDoubleClick={(evt) => {
           evt.stopPropagation();
           evt.preventDefault();

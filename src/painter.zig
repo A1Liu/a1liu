@@ -150,6 +150,7 @@ const Tool = struct {
 
     const VTable = struct {
         reset: fn (self: *anyopaque) void,
+        key: fn (self: *anyopaque, code: u32) anyerror!void,
         move: fn (self: *anyopaque, pt: Point) anyerror!void,
         click: fn (self: *anyopaque, pt: Point) anyerror!void,
     };
@@ -169,6 +170,7 @@ const Tool = struct {
 
         const vtable = comptime VTable{
             .reset = @ptrCast(info(VTable, .reset).field_type, VtableType.reset),
+            .key = @ptrCast(info(VTable, .key).field_type, VtableType.key),
             .move = @ptrCast(info(VTable, .move).field_type, VtableType.move),
             .click = @ptrCast(info(VTable, .click).field_type, VtableType.click),
         };
@@ -178,6 +180,10 @@ const Tool = struct {
 
     pub fn reset(self: *Self) void {
         return self.vtable.reset(self.ptr);
+    }
+
+    pub fn key(self: *Self, code: u32) !void {
+        return self.vtable.key(self.ptr, code);
     }
 
     pub fn move(self: *Self, pt: Point) !void {
@@ -233,6 +239,11 @@ const LineTool = struct {
         render.dropTempData();
     }
 
+    fn key(self: *Self, code: u32) !void {
+        _ = self;
+        _ = code;
+    }
+
     fn move(self: *Self, pt: Point) !void {
         const prev = if (self.prev) |prev| prev else return;
 
@@ -267,6 +278,11 @@ const TriangleTool = struct {
         self.second = null;
 
         render.dropTempData();
+    }
+
+    fn key(self: *Self, code: u32) !void {
+        _ = self;
+        _ = code;
     }
 
     fn move(self: *Self, pt: Point) !void {
@@ -316,6 +332,11 @@ const DrawTool = struct {
         self.previous = null;
     }
 
+    fn key(self: *Self, code: u32) !void {
+        _ = self;
+        _ = code;
+    }
+
     fn move(self: *Self, pt: Point) !void {
         const previous = if (self.previous) |prev| prev else return;
         self.previous = pt;
@@ -341,6 +362,11 @@ const ClickTool = struct {
 
     fn reset(self: *Self) void {
         _ = self;
+    }
+
+    fn key(self: *Self, code: u32) !void {
+        _ = self;
+        _ = code;
     }
 
     fn move(self: *Self, pt: Point) !void {
@@ -409,6 +435,10 @@ export fn toggleTool() wasm.Obj {
 
 export fn onRightClick() void {
     tool.reset();
+}
+
+export fn onKey(code: u32) void {
+    tool.key(code) catch @panic("onKey failed");
 }
 
 export fn onMove(posX: f32, posY: f32) void {
