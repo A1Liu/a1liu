@@ -23,15 +23,7 @@ const ext = struct {
     extern fn renderExt(triangles: wasm.Obj, colors: wasm.Obj) void;
     extern fn readPixel(x: u32, y: u32) wasm.Obj;
     extern fn setColorExt(r: f32, g: f32, b: f32) void;
-
-    fn initExt() callconv(.C) void {
-        init() catch @panic("init failed");
-    }
 };
-
-comptime {
-    @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
-}
 
 const Render = struct {
     const List = std.ArrayListUnmanaged;
@@ -358,6 +350,7 @@ const DrawTool = struct {
     previous: ?Point = null,
 
     fn reset(self: *Self) void {
+        render.dropTempData();
         self.previous = null;
     }
 
@@ -372,8 +365,12 @@ const DrawTool = struct {
 
     fn click(self: *Self, pt: Point) !void {
         if (self.previous == null) {
+            render.startTempStorage();
+
             self.previous = pt;
         } else {
+            render.useTempData();
+
             self.previous = null;
         }
     }
@@ -492,7 +489,7 @@ export fn onClick(posX: f32, posY: f32) void {
     tool.click(pt) catch @panic("onClick failed");
 }
 
-pub fn init() !void {
+export fn init() void {
     wasm.initIfNecessary();
 
     obj_line = wasm.out.string("line");
