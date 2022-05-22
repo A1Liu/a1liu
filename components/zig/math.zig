@@ -11,12 +11,20 @@ pub fn vec2Append(v: Vec2, third: f32) Vec3 {
 }
 
 pub fn cross(a: Vec3, b: Vec3) Vec3 {
-    var vec: Vec3 = undefined;
-    vec[0] = a[1] * b[2] - a[2] * b[1];
-    vec[1] = a[2] * b[0] - a[0] * b[2];
-    vec[2] = a[0] * b[1] - a[1] * b[0];
+    const a1 = Vec3{ a[1], a[2], a[0] };
+    const b2 = Vec3{ b[2], b[0], b[1] };
 
-    return vec;
+    const a2 = Vec3{ a[2], a[0], a[1] };
+    const b1 = Vec3{ b[1], b[2], b[0] };
+
+    return (a1 * b2) - (a2 * b1);
+
+    // var vec: Vec3 = undefined;
+    // vec[0] = a[1] * b[2] - a[2] * b[1];
+    // vec[1] = a[2] * b[0] - a[0] * b[2];
+    // vec[2] = a[0] * b[1] - a[1] * b[0];
+
+    // return vec;
 }
 
 pub fn dot(a: Vec3, b: Vec3) f32 {

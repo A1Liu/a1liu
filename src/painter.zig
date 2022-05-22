@@ -29,6 +29,8 @@ const Render = struct {
     const List = std.ArrayListUnmanaged;
     const Self = @This();
 
+    const TRIANGLE_SIZE: u32 = 12;
+
     dims: Vec2 = Vec2{ 0, 0 },
     triangles: List(f32) = .{},
     colors: List(f32) = .{},
@@ -69,8 +71,8 @@ const Render = struct {
     pub fn dropTempData(self: *Self) void {
         const temp_begin = if (self.temp_begin) |t| t else return;
 
-        self.triangles.items.len = temp_begin * 2;
-        self.colors.items.len = temp_begin * 3;
+        self.triangles.items.len = temp_begin;
+        self.colors.items.len = temp_begin / 2 * 3;
         self.temp_begin = null;
 
         self.render();
@@ -85,7 +87,7 @@ const Render = struct {
     pub fn startTempStorage(self: *Self) void {
         std.debug.assert(self.temp_begin == null);
 
-        self.temp_begin = self.triangles.items.len / 2;
+        self.temp_begin = self.triangles.items.len;
     }
 
     pub fn addTriangle(self: *Self, pts: [3]Point) !void {
@@ -118,12 +120,12 @@ const Render = struct {
         try self.triangles.appendNTimes(liu.Pages, 0, count * 2);
         try self.colors.appendNTimes(liu.Pages, 0, count * 3);
 
-        return len / 2;
+        return len;
     }
 
     pub fn drawLine(self: *Self, vertex: u32, from: Point, to: Point) void {
-        const pos = self.triangles.items[(vertex * 2)..];
-        const color = self.colors.items[(vertex * 3)..];
+        const pos = self.triangles.items[(vertex)..];
+        const color = self.colors.items[(vertex / 2 * 3)..];
 
         const vector = to.pos - from.pos;
         const rot90: Vec2 = .{ -vector[1], vector[0] };
@@ -249,7 +251,7 @@ const Math = struct {
 
     // Möller–Trumbore algorithm for triangle-ray intersection algorithm
     fn intersect(vert: u32, ray2: Vec2) bool {
-        const pos = render.triangles.items[(vert * 2)..];
+        const pos = render.triangles.items[vert..];
 
         const ray_origin = liu.vec2Append(ray2, 1);
         const ray = Vec3{ 0, 0, -1 };
@@ -318,8 +320,8 @@ const TriangleTool = struct {
             return;
         };
 
-        render.drawLine(temp + 6, first, pt);
-        render.drawLine(temp + 12, second, pt);
+        render.drawLine(temp + Render.TRIANGLE_SIZE, first, pt);
+        render.drawLine(temp + 2 * Render.TRIANGLE_SIZE, second, pt);
 
         return;
     }
@@ -360,7 +362,7 @@ const DrawTool = struct {
         const previous = if (self.previous) |prev| prev else return;
         self.previous = pt;
 
-        const vert = try render.pushVert(12);
+        const vert = try render.pushVert(6);
 
         render.drawLine(vert, previous, pt);
     }
