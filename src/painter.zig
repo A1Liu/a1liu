@@ -22,18 +22,12 @@ const Point = struct { pos: Vec2, color: Vec3 };
 const ext = struct {
     extern fn renderExt(triangles: wasm.Obj, colors: wasm.Obj) void;
 
-    fn onClickExt(posX: f32, posY: f32) callconv(.C) void {
-        const pt = render.getPoint(posX, posY);
-        onClick(pt) catch @panic("onClick failed");
-    }
-
     fn initExt() callconv(.C) void {
         init() catch @panic("init failed");
     }
 };
 
 comptime {
-    @export(ext.onClickExt, .{ .name = "onClick", .linkage = .Strong });
     @export(ext.initExt, .{ .name = "init", .linkage = .Strong });
 }
 
@@ -112,12 +106,15 @@ const Render = struct {
         unreachable;
     }
 
-    pub fn pushVert(self: *Self, count: usize) !void {
+    pub fn pushVert(self: *Self, count: usize) !u32 {
+        const len = self.triangles.items.len;
         try self.triangles.appendNTimes(liu.Pages, 0, count * 2);
         try self.colors.appendNTimes(liu.Pages, 0, count * 3);
+
+        return len / 2;
     }
 
-    pub fn drawLine(self: *Self, vertex: usize, from: Point, to: Point) void {
+    pub fn drawLine(self: *Self, vertex: u32, from: Point, to: Point) void {
         const pos = self.triangles.items[(vertex * 2)..];
         const color = self.colors.items[(vertex * 3)..];
 
@@ -152,7 +149,7 @@ const Tool = struct {
 
     const VTable = struct {
         reset: fn (self: *anyopaque) void,
-        move: fn (self: *anyopaque, pt: Point) void,
+        move: fn (self: *anyopaque, pt: Point) anyerror!void,
         click: fn (self: *anyopaque, pt: Point) anyerror!void,
     };
 
@@ -182,7 +179,7 @@ const Tool = struct {
         return self.vtable.reset(self.ptr);
     }
 
-    pub fn move(self: *Self, pt: Point) void {
+    pub fn move(self: *Self, pt: Point) !void {
         return self.vtable.move(self.ptr, pt);
     }
 
@@ -191,12 +188,12 @@ const Tool = struct {
     }
 };
 
-// Need to do it this way until pointer aliasing works properly with tagged
-// unions at global scope
-const ToolKind = enum { click, line, triangle };
-var tool_line: LineTool = .{};
-var tool_triangle: TriangleTool = .{};
+const ToolKind = enum { click, line, triangle, draw };
+
 var tool_click: ClickTool = .{};
+var tool_triangle: TriangleTool = .{};
+var tool_line: LineTool = .{};
+var tool_draw: DrawTool = .{};
 
 var tool: Tool = Tool.init(&tool_triangle);
 var tool_kind: ToolKind = .triangle;
@@ -204,9 +201,10 @@ var tool_kind: ToolKind = .triangle;
 var render: Render = .{};
 var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 
-var obj_line: wasm.Obj = undefined;
-var obj_triangle: wasm.Obj = undefined;
 var obj_click: wasm.Obj = undefined;
+var obj_triangle: wasm.Obj = undefined;
+var obj_line: wasm.Obj = undefined;
+var obj_draw: wasm.Obj = undefined;
 
 const Math = struct {
     // Möller–Trumbore algorithm for triangle-ray intersection algorithm
@@ -234,7 +232,7 @@ const LineTool = struct {
         render.dropTempData();
     }
 
-    fn move(self: *Self, pt: Point) void {
+    fn move(self: *Self, pt: Point) !void {
         const prev = if (self.prev) |prev| prev else return;
 
         const temp = render.temp();
@@ -253,7 +251,7 @@ const LineTool = struct {
         render.startTempStorage();
         self.prev = pt;
 
-        try render.pushVert(6);
+        _ = try render.pushVert(6);
     }
 };
 
@@ -270,7 +268,7 @@ const TriangleTool = struct {
         render.dropTempData();
     }
 
-    fn move(self: *Self, pt: Point) void {
+    fn move(self: *Self, pt: Point) !void {
         const first = if (self.first) |first| first else return;
 
         const temp = render.temp();
@@ -291,7 +289,7 @@ const TriangleTool = struct {
             render.startTempStorage();
 
             self.first = pt;
-            try render.pushVert(6);
+            _ = try render.pushVert(6);
 
             return;
         };
@@ -299,7 +297,7 @@ const TriangleTool = struct {
         const second = if (self.second) |second| second else {
             self.second = pt;
 
-            try render.pushVert(12);
+            _ = try render.pushVert(12);
             return;
         };
 
@@ -308,23 +306,30 @@ const TriangleTool = struct {
     }
 };
 
-const MoveTool = struct {
+const DrawTool = struct {
     const Self = @This();
 
-    selected: usize,
+    previous: ?Point = null,
 
     fn reset(self: *Self) void {
-        _ = self;
+        self.previous = null;
     }
 
-    fn move(self: *Self, pt: Point) void {
-        _ = self;
-        _ = pt;
+    fn move(self: *Self, pt: Point) !void {
+        const previous = if (self.previous) |prev| prev else return;
+        self.previous = pt;
+
+        const vert = try render.pushVert(12);
+
+        render.drawLine(vert, previous, pt);
     }
 
     fn click(self: *Self, pt: Point) !void {
-        _ = self;
-        _ = pt;
+        if (self.previous == null) {
+            self.previous = pt;
+        } else {
+            self.previous = null;
+        }
     }
 };
 
@@ -337,7 +342,7 @@ const ClickTool = struct {
         _ = self;
     }
 
-    fn move(self: *Self, pt: Point) void {
+    fn move(self: *Self, pt: Point) !void {
         _ = self;
         _ = pt;
     }
@@ -389,6 +394,11 @@ export fn toggleTool() wasm.Obj {
             return obj_line;
         },
         .line => {
+            tool = Tool.init(&tool_draw);
+            tool_kind = .draw;
+            return obj_draw;
+        },
+        .draw => {
             tool = Tool.init(&tool_click);
             tool_kind = .click;
             return obj_click;
@@ -403,11 +413,12 @@ export fn onRightClick() void {
 export fn onMove(posX: f32, posY: f32) void {
     const pt = render.getPoint(posX, posY);
 
-    tool.move(pt);
+    tool.move(pt) catch @panic("onMove failed");
 }
 
-pub fn onClick(pt: Point) !void {
-    try tool.click(pt);
+export fn onClick(posX: f32, posY: f32) void {
+    const pt = render.getPoint(posX, posY);
+    tool.click(pt) catch @panic("onClick failed");
 }
 
 pub fn init() !void {
@@ -416,6 +427,7 @@ pub fn init() !void {
     obj_line = wasm.out.string("line");
     obj_triangle = wasm.out.string("triangle");
     obj_click = wasm.out.string("click");
+    obj_draw = wasm.out.string("draw");
 
     wasm.out.post(.info, "WASM initialized!", .{});
 }
