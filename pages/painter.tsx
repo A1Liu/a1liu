@@ -12,18 +12,22 @@ import { useToast, ToastColors } from "components/errors";
 import cx from "classnames";
 import create from "zustand";
 
+type String3 = [string, string, string];
+
 interface PainterCb {
   initWorker: (workerRef: Worker) => void;
   setIsRecording: (isRecording: boolean) => void;
   setRecordingUrl: (url: string) => void;
   setTool: (url: string) => void;
   setColor: (setter: (color: Number3) => Number3) => void;
+  setColorText: (setter: (color: String3) => String3) => void;
 }
 
 interface PainterState {
   workerRef: Worker | null;
 
   color: Number3;
+  colorText: String3;
   tool: string;
   isRecording: boolean;
   recordingUrl: string | null;
@@ -40,6 +44,10 @@ const useStore = create<PainterState>((set, get) => {
     const { color } = get();
     set({ color: setter(color) });
   };
+  const setColorText = (setter: (color: String3) => String3): void => {
+    const { colorText } = get();
+    set({ colorText: setter(colorText) });
+  };
 
   return {
     isRecording: false,
@@ -47,6 +55,7 @@ const useStore = create<PainterState>((set, get) => {
     workerRef: null,
 
     color: [0.5, 0.5, 0.5],
+    colorText: ["0.5", "0.5", "0.5"],
     tool: "triangle",
 
     cb: {
@@ -55,6 +64,7 @@ const useStore = create<PainterState>((set, get) => {
       setRecordingUrl,
       setTool,
       setColor,
+      setColorText,
     },
   };
 });
@@ -71,7 +81,7 @@ interface FloatInputProps {
 
 const FloatInput: React.VFC<FloatInputProps> = ({ index, data }) => {
   const { cb } = useStable();
-  const [text, setText] = React.useState(() => `${data}`);
+  const text = useStore((state) => state.colorText[index]);
   const [error, setError] = React.useState(false);
   const paletteRef = React.useRef<HTMLDivElement>(null);
 
@@ -93,13 +103,22 @@ const FloatInput: React.VFC<FloatInputProps> = ({ index, data }) => {
     });
   }, [text, setError, index, cb]);
 
+  React.useEffect(() => {}, []);
+
   return (
     <div className={styles.floatInWrapper}>
       {`${"RGB"[index]}: `}
       <input
         className={styles.floatInInput}
         value={text}
-        onChange={(evt) => setText(evt.target.value)}
+        onChange={(evt) =>
+          cb.setColorText((prev: String3): String3 => {
+            const newVal: String3 = [...prev];
+            newVal[index] = evt.target.value;
+
+            return newVal;
+          })
+        }
       />
 
       {error && (
@@ -137,7 +156,7 @@ const Config: React.VFC = () => {
     if (!paletteRef.current) return;
     if (!workerRef) return;
 
-    const colorStyle = `rgb(${r * 256}, ${g * 256}, ${b * 256})`;
+    const colorStyle = `rgb(${r * 255}, ${g * 255}, ${b * 255})`;
     paletteRef.current.style.backgroundColor = colorStyle;
     workerRef.postMessage({ kind: "setColor", data: [r, g, b] });
   }, [paletteRef, workerRef, r, g, b]);
@@ -243,7 +262,6 @@ const Painter: React.VFC = () => {
 
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
-      console.log("resize");
       workerRef.postMessage({ kind: "resize", data: [width, height] });
     };
 
@@ -267,7 +285,8 @@ const Painter: React.VFC = () => {
           break;
 
         case "setColor":
-          cb.setColor(message.data);
+          cb.setColor((color: Number3) => message.data);
+          cb.setColorText((text: String3) => message.data.map((v) => `${v}`));
           break;
 
         case "initDone":
@@ -375,7 +394,6 @@ const Painter: React.VFC = () => {
         if (!canvasRef.current) return;
         if (evt.target !== canvasRef.current) return;
 
-        // console.log("bruh", evt.target, evt.keyCode);
         workerRef?.postMessage({ kind: "keydown", data: evt.keyCode });
       }}
     >

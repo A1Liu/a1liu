@@ -22,6 +22,8 @@ const Point = struct { pos: Vec2, color: Vec3 };
 
 const ext = struct {
     extern fn renderExt(triangles: wasm.Obj, colors: wasm.Obj) void;
+    extern fn readPixel(x: u32, y: u32) wasm.Obj;
+    extern fn setColorExt(r: f32, g: f32, b: f32) void;
 
     fn initExt() callconv(.C) void {
         init() catch @panic("init failed");
@@ -40,6 +42,19 @@ const Render = struct {
     triangles: List(f32) = .{},
     colors: List(f32) = .{},
     temp_begin: ?usize = null,
+
+    pub fn pixelPosition(self: *Self, pos: Vec2) @Vector(2, u32) {
+        const dimX = self.dims[0];
+        const dimY = self.dims[1];
+
+        const posX = (pos[0] + 1) * dimX / 2;
+        const posY = (pos[1] + 1) * dimY / 2;
+
+        const x = @floatToInt(u32, posX);
+        const y = @floatToInt(u32, posY);
+
+        return @Vector(2, u32){ x, y };
+    }
 
     pub fn getPoint(self: *Self, posX: f32, posY: f32) Point {
         const dimX = self.dims[0];
@@ -150,6 +165,7 @@ const Tool = struct {
 
     const VTable = struct {
         reset: fn (self: *anyopaque) void,
+        rightClick: fn (self: *anyopaque, pt: Point) anyerror!void,
         key: fn (self: *anyopaque, code: u32) anyerror!void,
         move: fn (self: *anyopaque, pt: Point) anyerror!void,
         click: fn (self: *anyopaque, pt: Point) anyerror!void,
@@ -168,9 +184,29 @@ const Tool = struct {
     pub fn initWithVtable(comptime T: type, obj: *T, comptime VtableType: type) Self {
         const info = std.meta.fieldInfo;
 
+        const Impls = struct {
+            fn rightClickMethod(o: *anyopaque, pt: Point) anyerror!void {
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+
+                if (@hasDecl(VtableType, "rightClick")) {
+                    return VtableType.rightClick(self, pt);
+                }
+
+                return VtableType.reset(self);
+            }
+
+            fn keyMethod(o: *anyopaque, code: u32) anyerror!void {
+                if (!@hasDecl(VtableType, "key")) return;
+
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+                return VtableType.key(self, code);
+            }
+        };
+
         const vtable = comptime VTable{
             .reset = @ptrCast(info(VTable, .reset).field_type, VtableType.reset),
-            .key = @ptrCast(info(VTable, .key).field_type, VtableType.key),
+            .rightClick = Impls.rightClickMethod,
+            .key = Impls.keyMethod,
             .move = @ptrCast(info(VTable, .move).field_type, VtableType.move),
             .click = @ptrCast(info(VTable, .click).field_type, VtableType.click),
         };
@@ -180,6 +216,10 @@ const Tool = struct {
 
     pub fn reset(self: *Self) void {
         return self.vtable.reset(self.ptr);
+    }
+
+    pub fn rightClick(self: *Self, pt: Point) !void {
+        return self.vtable.rightClick(self.ptr, pt);
     }
 
     pub fn key(self: *Self, code: u32) !void {
@@ -239,11 +279,6 @@ const LineTool = struct {
         render.dropTempData();
     }
 
-    fn key(self: *Self, code: u32) !void {
-        _ = self;
-        _ = code;
-    }
-
     fn move(self: *Self, pt: Point) !void {
         const prev = if (self.prev) |prev| prev else return;
 
@@ -278,11 +313,6 @@ const TriangleTool = struct {
         self.second = null;
 
         render.dropTempData();
-    }
-
-    fn key(self: *Self, code: u32) !void {
-        _ = self;
-        _ = code;
     }
 
     fn move(self: *Self, pt: Point) !void {
@@ -332,11 +362,6 @@ const DrawTool = struct {
         self.previous = null;
     }
 
-    fn key(self: *Self, code: u32) !void {
-        _ = self;
-        _ = code;
-    }
-
     fn move(self: *Self, pt: Point) !void {
         const previous = if (self.previous) |prev| prev else return;
         self.previous = pt;
@@ -364,9 +389,22 @@ const ClickTool = struct {
         _ = self;
     }
 
-    fn key(self: *Self, code: u32) !void {
+    fn rightClick(self: *Self, pt: Point) !void {
         _ = self;
-        _ = code;
+
+        var _temp = liu.Temp.init();
+        const temp = _temp.allocator();
+        defer _temp.deinit();
+
+        const pixPos = render.pixelPosition(pt.pos);
+        const pixObj = ext.readPixel(pixPos[0], pixPos[1]);
+        const bytes = try wasm.in.bytes(pixObj, temp);
+
+        current_color[0] = @intToFloat(f32, bytes[0]) / 255;
+        current_color[1] = @intToFloat(f32, bytes[1]) / 255;
+        current_color[2] = @intToFloat(f32, bytes[2]) / 255;
+
+        ext.setColorExt(current_color[0], current_color[1], current_color[2]);
     }
 
     fn move(self: *Self, pt: Point) !void {
@@ -433,8 +471,10 @@ export fn toggleTool() wasm.Obj {
     }
 }
 
-export fn onRightClick() void {
-    tool.reset();
+export fn onRightClick(posX: f32, posY: f32) void {
+    const pt = render.getPoint(posX, posY);
+
+    tool.rightClick(pt) catch @panic("onRightClick failed");
 }
 
 export fn onKey(code: u32) void {

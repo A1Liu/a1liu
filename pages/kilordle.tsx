@@ -341,7 +341,7 @@ export const Kilordle: React.VFC = () => {
     const wasmRef = wasm.fetchWasm("/assets/kilordle.wasm", {
       postMessage: postToast,
       imports: { setPuzzles: cb.setPuzzles },
-      raw: { setWordsLeft: cb.setWordsLeft },
+      raw: () => ({ setWordsLeft: cb.setWordsLeft }),
     });
 
     const wordles = wasm.fetchAsset("/assets/wordles.txt");

@@ -31,7 +31,7 @@ export interface Ref {
 
 interface Imports {
   readonly postMessage: (kind: string, data: any) => void;
-  readonly raw?: { readonly [x: string]: WasmFunc };
+  readonly raw?: (ref: Ref) => { readonly [x: string]: WasmFunc };
   readonly imports: { readonly [x: string]: WasmFunc };
 }
 
@@ -164,7 +164,7 @@ export const fetchWasm = async (
     },
 
     ...wasmImports,
-    ...raw,
+    ...raw?.(ref),
   };
 
   const result = await WebAssembly.instantiateStreaming(resp, { env });

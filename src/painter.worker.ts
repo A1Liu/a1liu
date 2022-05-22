@@ -60,7 +60,9 @@ const glState: PainterGlState = {
 };
 
 const initGl = async (canvas: any): Promise<PainterGl | null> => {
-  const ctx: WebGl = canvas?.getContext("webgl2");
+  const ctx: WebGl = canvas?.getContext("webgl2", {
+    preserveDrawingBuffer: true,
+  });
   if (!ctx) return null;
 
   const [vertSrc, fragSrc] = await Promise.all([
@@ -126,6 +128,26 @@ const initGl = async (canvas: any): Promise<PainterGl | null> => {
   ctx.bindVertexArray(null);
 
   return { ctx, program, vao, rawTriangles, colors };
+};
+
+const readPixel = (x: number, y: number): Uint8Array | null => {
+  const ggl = gglRef.current;
+  if (!ggl) return null;
+
+  const { ctx } = ggl;
+
+  const pixel = new Uint8Array(4);
+  ctx.readPixels(
+    Math.floor(x),
+    Math.floor(y),
+    1,
+    1,
+    ctx.RGBA,
+    ctx.UNSIGNED_BYTE,
+    pixel
+  );
+
+  return pixel;
 };
 
 const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
@@ -217,7 +239,8 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
     }
 
     case "rightclick":
-      wasmRef.abi.onRightClick();
+      const [x, y] = msg.data;
+      wasmRef.abi.onRightClick(x, y);
       break;
 
     case "keydown":
@@ -262,7 +285,15 @@ const main = async (wasmRef: wasm.Ref) => {
 const init = async () => {
   const wasmRef = await wasm.fetchWasm("/assets/painter.wasm", {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: {},
+    raw: (wasmRef: wasm.Ref) => ({
+      readPixel: (x: number, y: number): number => {
+        const pixel = readPixel(x, y);
+        return wasmRef.addObj(pixel);
+      },
+      setColorExt: (r: number, g: number, b: number): void => {
+        postMessage({ kind: "setColor", data: [r, g, b] });
+      },
+    }),
     imports: {
       renderExt: (tri: Float32Array | null, colors: Float32Array | null) =>
         updateState(tri, colors),
