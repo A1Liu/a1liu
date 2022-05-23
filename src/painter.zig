@@ -424,9 +424,9 @@ const ClickTool = struct {
             // 2d triangles
             i -= 6;
 
-            const vert = i / 2;
+            const vert = i;
             if (Math.intersect(vert, pt.pos)) {
-                const color = render.colors.items[(vert * 3)..];
+                const color = render.colors.items[(vert / 2 * 3)..];
                 color[0..3].* = pt.color;
                 color[3..6].* = pt.color;
                 color[6..9].* = pt.color;
