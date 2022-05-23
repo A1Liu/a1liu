@@ -33,4 +33,5 @@ pub fn build(b: *Builder) void {
 
     _ = wasmProgram(b, mode, "kilordle");
     _ = wasmProgram(b, mode, "painter");
+    _ = wasmProgram(b, mode, "planner");
 }
