@@ -103,7 +103,13 @@ const FloatInput: React.VFC<FloatInputProps> = ({ index, data }) => {
     });
   }, [text, setError, index, cb]);
 
-  React.useEffect(() => {}, []);
+  const setText = (val: string) =>
+    cb.setColorText((prev: String3): String3 => {
+      const newVal: String3 = [...prev];
+      newVal[index] = val;
+
+      return newVal;
+    });
 
   return (
     <div className={styles.floatInWrapper}>
@@ -111,14 +117,7 @@ const FloatInput: React.VFC<FloatInputProps> = ({ index, data }) => {
       <input
         className={styles.floatInInput}
         value={text}
-        onChange={(evt) =>
-          cb.setColorText((prev: String3): String3 => {
-            const newVal: String3 = [...prev];
-            newVal[index] = evt.target.value;
-
-            return newVal;
-          })
-        }
+        onChange={(evt) => setText(evt.target.value)}
       />
 
       {error && (
@@ -286,7 +285,7 @@ const Painter: React.VFC = () => {
 
         case "setColor":
           cb.setColor((color: Number3) => message.data);
-          cb.setColorText((text: String3) => message.data.map((v) => `${v}`));
+          cb.setColorText((text: String3) => message.data.map((v: any) => `${v}`));
           break;
 
         case "initDone":
