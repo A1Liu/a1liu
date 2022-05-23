@@ -8,6 +8,7 @@ const liu = @import("liu");
 // draw curves with cursor
 // create animation/start animation
 // undo/redo?
+// object tracking with binary search-ish thing
 // -> move objects
 // -> select objects
 

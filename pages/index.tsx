@@ -25,14 +25,30 @@ const Index = () => {
 
       <h2>What I&apos;m Doing Now</h2>
       <p>
-        Right now I&apos;m working on{" "}
-        <a href="https://a1liu.com/tci">Teaching C Interpreter</a>, an
-        interpreter of the C programming language that tries to make it easier
-        to debug programs.
+        Slowly learning things here and there while working on
+        <Link href="/painter/">
+          <a>Painter</a>
+        </Link>{" "}
+        and other projects.
       </p>
 
-      <h2>Toys</h2>
+      <h2>Projects</h2>
       <ul>
+        <li>
+          <Link href="https://schedge.a1liu.com/">
+            <a>Schedge</a>
+          </Link>{" "}
+          - API for NYU&apos;s course catalog
+        </li>
+
+        <li>
+          <Link href="https://tci.a1liu.com/">
+            <a>Teaching C Interpreter</a>
+          </Link>{" "}
+          - interpreter for the C programming language that tries to make it
+          easier to debug programs.
+        </li>
+
         <li>
           <Link href="/kilordle/">
             <a>Kilordle Clone</a>
@@ -44,6 +60,7 @@ const Index = () => {
           , which was inspired by{" "}
           <a href="https://www.powerlanguage.co.uk/wordle/">Wordle</a>
         </li>
+
         <li>
           <Link href="/painter/">
             <a>Painter</a>
