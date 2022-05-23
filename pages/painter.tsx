@@ -285,7 +285,9 @@ const Painter: React.VFC = () => {
 
         case "setColor":
           cb.setColor((color: Number3) => message.data);
-          cb.setColorText((text: String3) => message.data.map((v: any) => `${v}`));
+          cb.setColorText((text: String3) =>
+            message.data.map((v: any) => `${v}`)
+          );
           break;
 
         case "initDone":
@@ -341,25 +343,6 @@ const Painter: React.VFC = () => {
     const offscreen = (canvas as any).transferControlToOffscreen();
     workerRef.postMessage({ kind: "canvas", offscreen }, [offscreen]);
   }, [workerRef, canvasRef]);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !workerRef) return;
-
-    const listener = (evt: any) => {
-      const canvas = canvasRef.current;
-      if (!canvas || !workerRef) return;
-
-      // if (evt.isComposing || evt.keyCode === 229) return;
-
-      // workerRef.postMessage({ kind: "resize", data: [width, height] });
-      // workerRef?.postMessage({ kind: "keydown", data: evt.keyCode });
-    };
-
-    window.addEventListener("keydown", listener);
-
-    return () => window.removeEventListener("keydown", listener);
-  }, [canvasRef, workerRef]);
 
   return (
     <div
