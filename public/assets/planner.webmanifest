@@ -1,0 +1,15 @@
+{
+  "name": "Planner",
+  "short_name": "Planner",
+  "start_url": "../planner/",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "A planner.",
+  "icons": [
+    {
+      "src": "/assets/b-button.png",
+      "sizes": "160x160",
+      "type": "image/png"
+    }
+  ]
+}

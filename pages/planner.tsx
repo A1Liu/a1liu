@@ -1,4 +1,5 @@
 import React from "react";
+import Head from "next/head";
 import Link from "next/link";
 import shallow from "zustand/shallow";
 import type { Message, OutMessage } from "src/planner.worker";
@@ -44,6 +45,14 @@ const Planner: React.VFC = () => {
   const toast = useToast();
 
   React.useEffect(() => {
+    if ("serviceWorker" in window.navigator) {
+      window.navigator.serviceWorker.register("/assets/planner.serviceworker.js").then(() => {
+        console.log("Service Worker Registered");
+      });
+    }
+  }, []);
+
+  React.useEffect(() => {
     // Writing this in a different way doesn't work. URL constructor call
     // must be passed directly to worker constructor.
     const worker = new Worker(
@@ -70,7 +79,32 @@ const Planner: React.VFC = () => {
     cb.initWorker(worker);
   }, [cb, toast]);
 
-  return <div className={styles.wrapper}></div>;
+  return (
+    <div className={styles.wrapper}>
+      <Head>
+        <link
+          key="pwa-link"
+          rel="manifest"
+          href="/assets/planner.webmanifest"
+        />
+      </Head>
+
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div className={css.muiButton} style={{ alignSelf: "center" }}>
+          Hello World!
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Planner;
