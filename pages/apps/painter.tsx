@@ -8,7 +8,7 @@ import type { WebGl } from "components/webgl";
 import styles from "./painter.module.css";
 import css from "components/util.module.css";
 import * as wasm from "components/wasm";
-import { useToast, ToastColors } from "components/errors";
+import { useToast, ToastColors } from "src/errors";
 import cx from "classnames";
 import create from "zustand";
 
