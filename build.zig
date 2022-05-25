@@ -15,7 +15,7 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime outp
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
     if (mode == .Debug) {
         // Output straight to assets folder during dev to make things easier
-        program.setOutputDir(output_dir orelse "./public/assets");
+        program.setOutputDir(output_dir orelse "./public/apps");
     } else {
         program.strip = true;
     }

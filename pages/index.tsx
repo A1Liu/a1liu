@@ -5,7 +5,7 @@ const Index = () => {
   return (
     <Layout>
       <img
-        src={"/assets/pfp.jpg"}
+        src={"/apps/pfp.jpg"}
         alt="a picture of me"
         style={{
           width: "200px",

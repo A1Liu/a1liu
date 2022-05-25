@@ -1,23 +1,23 @@
 @font-face {
   font-family: "Computer Modern";
-  src: url("/assets/fonts/latex/cmunrm.ttf");
+  src: url("/apps/fonts/latex/cmunrm.ttf");
 }
 
 @font-face {
   font-family: "Computer Modern";
-  src: url("/assets/fonts/latex/cmunbx.ttf");
+  src: url("/apps/fonts/latex/cmunbx.ttf");
   font-weight: bold;
 }
 
 @font-face {
   font-family: "Computer Modern";
-  src: url("/assets/fonts/latex/cmunti.ttf");
+  src: url("/apps/fonts/latex/cmunti.ttf");
   font-style: italic;
 }
 
 @font-face {
   font-family: "Computer Modern Typewriter";
-  src: url("/assets/fonts/latex/cmuntb.ttf");
+  src: url("/apps/fonts/latex/cmuntb.ttf");
 }
 
 .wrapper {
