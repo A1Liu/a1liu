@@ -1,9 +1,9 @@
 import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
-import * as wasm from "components/wasm";
+import * as wasm from "src/wasm";
 import { postToast } from "src/errors";
-import { defer } from "components/util";
+import { defer } from "src/util";
 import cx from "classnames";
 import create from "zustand";
 

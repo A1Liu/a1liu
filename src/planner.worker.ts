@@ -1,4 +1,4 @@
-import * as wasm from "components/wasm";
+import * as wasm from "src/wasm";
 
 // TODO actually set up the message type
 export type Message =

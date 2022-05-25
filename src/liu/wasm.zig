@@ -7,7 +7,7 @@ const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
 pub const Obj = enum(u32) {
-    // These are kept up to date with components/wasm.ts
+    // These are kept up to date with src/wasm.ts
 
     jsundefined,
     jsnull,

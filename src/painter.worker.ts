@@ -1,6 +1,6 @@
-import * as GL from "components/webgl";
-import type { WebGl } from "components/webgl";
-import * as wasm from "components/wasm";
+import * as GL from "src/webgl";
+import type { WebGl } from "src/webgl";
+import * as wasm from "src/wasm";
 
 export type Number2 = [number, number];
 export type Number3 = [number, number, number];

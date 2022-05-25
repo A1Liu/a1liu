@@ -1,4 +1,4 @@
-import Layout from "components/layout";
+import Layout from "src/layout";
 import Link from "next/link";
 
 const Index = () => {
