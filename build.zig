@@ -9,7 +9,7 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime outp
     const vers = b.version(0, 0, 0);
     const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
 
-    program.addPackagePath("liu", "components/zig/lib.zig");
+    program.addPackagePath("liu", "src/liu/lib.zig");
     program.setBuildMode(mode);
 
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
