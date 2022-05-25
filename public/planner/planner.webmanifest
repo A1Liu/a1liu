@@ -1,10 +1,11 @@
 {
   "name": "Planner",
   "short_name": "Planner",
-  "start_url": "/planner/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
   "description": "A planner.",
+  "theme_color": "#fff",
   "icons": [
     {
       "src": "/planner/b-button.png",

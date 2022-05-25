@@ -48,7 +48,7 @@ const Planner: React.VFC = () => {
     const serviceWorker = window.navigator.serviceWorker;
     if (!serviceWorker) return;
 
-    serviceWorker.register("/planner/planner.serviceworker.js").then(() => {
+    serviceWorker.register("/planner/sw.js").then(() => {
       console.log("Service Worker Registered");
     });
   }, []);

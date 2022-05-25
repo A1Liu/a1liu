@@ -50,7 +50,7 @@ const Index = () => {
         </li>
 
         <li>
-          <Link href="/kilordle/">
+          <Link href="/apps/kilordle/">
             <a>Kilordle Clone</a>
           </Link>{" "}
           - Clone of{" "}
@@ -62,7 +62,7 @@ const Index = () => {
         </li>
 
         <li>
-          <Link href="/painter/">
+          <Link href="/apps/painter/">
             <a>Painter</a>
           </Link>{" "}
           - Tiny WebGL2 drawing app
