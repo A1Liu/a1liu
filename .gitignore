@@ -6,9 +6,6 @@ zig-out
 
 # IDK why Zig outputs this crap but IDK how to disable it.
 *.wasm
-*.o
-*.so
-*.so.0
 
 # dependencies
 /node_modules

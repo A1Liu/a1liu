@@ -1,6 +1,10 @@
 __pycache__
 *.pyc
 
+*.o
+*.so
+*.so.0
+
 /local/*
 !/local/.gitkeep
 !/local/preconf

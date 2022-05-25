@@ -41,7 +41,6 @@ jobs:
       - name: Build
         run: |
           zig build -Drelease-small
-          cp zig-out/lib/*.wasm public/assets/
           yarn build
           yarn export
           touch out/.nojekyll
