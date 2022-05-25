@@ -6,7 +6,8 @@ self.addEventListener("install", (e) => {
         cache.addAll([
           "/planner/",
           "/planner/index.html",
-          "/assets/b-button.png",
+          "/planner/b-button.png",
+          "/planner/planner.wasm",
         ])
       )
   );

@@ -5,7 +5,7 @@ const Arch = std.Target.Cpu.Arch;
 const Builder = bld.Builder;
 const Mode = std.builtin.Mode;
 
-fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8) *bld.LibExeObjStep {
+fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime output_dir: ?[]const u8) *bld.LibExeObjStep {
     const vers = b.version(0, 0, 0);
     const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
 
@@ -15,7 +15,7 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8) *bld.LibExeOb
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
     if (mode == .Debug) {
         // Output straight to assets folder during dev to make things easier
-        program.setOutputDir("./public/assets");
+        program.setOutputDir(output_dir orelse "./public/assets");
     } else {
         program.strip = true;
     }
@@ -31,7 +31,7 @@ pub fn build(b: *Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    _ = wasmProgram(b, mode, "kilordle");
-    _ = wasmProgram(b, mode, "painter");
-    _ = wasmProgram(b, mode, "planner");
+    _ = wasmProgram(b, mode, "kilordle", null);
+    _ = wasmProgram(b, mode, "painter", null);
+    _ = wasmProgram(b, mode, "planner", "./public/planner");
 }

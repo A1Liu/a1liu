@@ -45,11 +45,12 @@ const Planner: React.VFC = () => {
   const toast = useToast();
 
   React.useEffect(() => {
-    if ("serviceWorker" in window.navigator) {
-      window.navigator.serviceWorker.register("/assets/planner.serviceworker.js").then(() => {
-        console.log("Service Worker Registered");
-      });
-    }
+    const serviceWorker = window.navigator.serviceWorker;
+    if (!serviceWorker) return;
+
+    serviceWorker.register("/planner/planner.serviceworker.js").then(() => {
+      console.log("Service Worker Registered");
+    });
   }, []);
 
   React.useEffect(() => {
@@ -85,7 +86,7 @@ const Planner: React.VFC = () => {
         <link
           key="pwa-link"
           rel="manifest"
-          href="/assets/planner.webmanifest"
+          href="/planner/planner.webmanifest"
         />
       </Head>
 
