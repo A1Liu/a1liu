@@ -1,14 +1,15 @@
 {
   "name": "Planner",
   "short_name": "Planner",
-  "start_url": ".",
+  "description": "A planner.",
+  "start_url": "/apps/planner/",
+  "scope": "/apps/planner/",
   "display": "standalone",
   "background_color": "#fff",
-  "description": "A planner.",
-  "theme_color": "#fff",
+  "theme_color": "#1976D2",
   "icons": [
     {
-      "src": "/planner/b-button.png",
+      "src": "/apps/planner/b-button.png",
       "sizes": "192x192",
       "type": "image/png"
     }

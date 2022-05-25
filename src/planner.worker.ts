@@ -41,7 +41,7 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm("/planner/planner.wasm", {
+  const wasmRef = await wasm.fetchWasm("/apps/planner/planner.wasm", {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({}),
     imports: {},

@@ -48,9 +48,13 @@ const Planner: React.VFC = () => {
     const serviceWorker = window.navigator.serviceWorker;
     if (!serviceWorker) return;
 
-    serviceWorker.register("/planner/sw.js").then(() => {
-      console.log("Service Worker Registered");
-    });
+    serviceWorker
+      .register("/apps/planner/planner.serviceworker.js", {
+        scope: "/apps/planner/",
+      })
+      .then(() => {
+        console.log("Service Worker Registered");
+      });
   }, []);
 
   React.useEffect(() => {
@@ -86,8 +90,11 @@ const Planner: React.VFC = () => {
         <link
           key="pwa-link"
           rel="manifest"
-          href="/planner/planner.webmanifest"
+          href="/apps/planner/planner.webmanifest"
         />
+
+  
+        <meta key="theme-color" name="theme-color" content="#1976D2" />
       </Head>
 
       <div
