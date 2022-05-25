@@ -7,7 +7,7 @@ self.addEventListener("install", (e) => {
           "/apps/planner/",
           "/apps/planner/b-button.png",
           "/apps/planner/planner.wasm",
-          "/apps/planner/planner.serviceworker.js",
+          "/apps/planner/sw.js",
         ])
       )
   );

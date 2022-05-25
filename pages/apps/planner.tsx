@@ -49,7 +49,7 @@ const Planner: React.VFC = () => {
     if (!serviceWorker) return;
 
     serviceWorker
-      .register("/apps/planner/planner.serviceworker.js", {
+      .register("/apps/planner/sw.js", {
         scope: "/apps/planner/",
       })
       .then(() => {
