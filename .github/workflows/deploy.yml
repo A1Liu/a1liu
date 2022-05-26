@@ -41,6 +41,7 @@ jobs:
       - name: Build
         run: |
           zig build -Drelease-small
+          rm -rf public/**/*.o public/**/*.so public/**/*.so.0
           yarn build
           yarn export
           touch out/.nojekyll
