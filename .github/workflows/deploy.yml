@@ -45,6 +45,10 @@ jobs:
           yarn export
           touch out/.nojekyll
           echo a1liu.com >> out/CNAME
+          echo /local >> out/.gitignore
+          echo /programs >> out/.gitignore
+          echo /install >> out/.gitignore
+          echo README.md >> out/.gitignore
 
       - name: Deploy
         run: |
