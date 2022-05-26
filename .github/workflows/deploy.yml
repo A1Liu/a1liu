@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: |
           zig build -Drelease-small
-          rm -rf public/**/*.o public/**/*.so public/**/*.so.0
+          rm public/**/*.o public/**/*.so public/**/*.so.0
           rm -rf public/local public/programs public/install public/README.md
           yarn build
           yarn export
