@@ -38,13 +38,24 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build
+      - name: Build Zig
+        run: zig build -Drelease-small
+
+      - name: Clean garbage
         run: |
-          zig build -Drelease-small
-          rm public/**/*.o public/**/*.so public/**/*.so.0
+          find . -name "*.o" -type f -delete
+          find . -name "*.so" -type f -delete
+          find . -name "*.so.0" -type f -delete
           rm -rf public/local public/programs public/install public/README.md
-          yarn build
-          yarn export
+
+      - name: Build Site
+        run: yarn build
+
+      - name: Export Size
+        run: yarn export
+
+      - name: Add Github files
+        run: |
           touch out/.nojekyll
           echo a1liu.com >> out/CNAME
 
