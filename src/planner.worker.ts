@@ -49,7 +49,6 @@ const init = async () => {
 
   wasmRef.abi.init();
 
-  postMessage({ kind: "success", data: "WebGL2 context initialized!" });
   postMessage({ kind: "initDone" });
 
   main(wasmRef);

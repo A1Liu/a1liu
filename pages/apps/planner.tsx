@@ -9,7 +9,7 @@ import type { WebGl } from "src/webgl";
 import styles from "./planner.module.css";
 import css from "src/util.module.css";
 import * as wasm from "src/wasm";
-import { useToast, ToastColors } from "src/errors";
+import { useToast, ToastColors, ToastCallbacks } from "src/errors";
 import cx from "classnames";
 import create from "zustand";
 
@@ -40,6 +40,27 @@ const useStable = (): Pick<PlannerState, "cb" | "workerRef"> => {
   return useStore(selectStable, shallow);
 };
 
+const handleMessage = (
+  ev: MessageEvent<OutMessage>,
+  cb: PlannerCb,
+  toast: ToastCallbacks
+) => {
+  const message = ev.data;
+  switch (message.kind) {
+    case "initDone":
+      break;
+
+    default:
+      if (typeof message.data === "string") {
+        const color = ToastColors[message.kind] ?? "info";
+        toast.add(color, null, message.data);
+      }
+
+      console.log(message.data);
+      break;
+  }
+};
+
 const Planner: React.VFC = () => {
   const { cb, workerRef } = useStable();
   const toast = useToast();
@@ -47,28 +68,12 @@ const Planner: React.VFC = () => {
   React.useEffect(() => {
     // Writing this in a different way doesn't work. URL constructor call
     // must be passed directly to worker constructor.
-    const worker = new Worker(
-      new URL("src/planner.worker.ts", import.meta.url)
-    );
+    const w = new Worker(new URL("src/planner.worker.ts", import.meta.url));
 
-    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
-      const message = ev.data;
-      switch (message.kind) {
-        case "initDone":
-          break;
+    w.onmessage = (ev: MessageEvent<OutMessage>) =>
+      handleMessage(ev, cb, toast);
 
-        default:
-          if (typeof message.data === "string") {
-            const color = ToastColors[message.kind] ?? "info";
-            toast.add(color, null, message.data);
-          }
-
-          console.log(message.data);
-          break;
-      }
-    };
-
-    cb.initWorker(worker);
+    cb.initWorker(w);
   }, [cb, toast]);
 
   return (

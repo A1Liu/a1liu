@@ -45,7 +45,7 @@ interface ToastData {
   text: string;
 }
 
-interface ToastCallbacks {
+export interface ToastCallbacks {
   add: AddToast;
 }
 
