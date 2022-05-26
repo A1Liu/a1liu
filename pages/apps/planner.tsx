@@ -45,19 +45,6 @@ const Planner: React.VFC = () => {
   const toast = useToast();
 
   React.useEffect(() => {
-    const serviceWorker = window.navigator.serviceWorker;
-    if (!serviceWorker) return;
-
-    serviceWorker
-      .register("/apps/planner/sw.js", {
-        scope: "/apps/planner/",
-      })
-      .then(() => {
-        console.log("Service Worker Registered");
-      });
-  }, []);
-
-  React.useEffect(() => {
     // Writing this in a different way doesn't work. URL constructor call
     // must be passed directly to worker constructor.
     const worker = new Worker(
@@ -93,7 +80,6 @@ const Planner: React.VFC = () => {
           href="/apps/planner/planner.webmanifest"
         />
 
-  
         <meta key="theme-color" name="theme-color" content="#1976D2" />
       </Head>
 
