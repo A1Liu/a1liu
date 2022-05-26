@@ -42,14 +42,11 @@ jobs:
         run: |
           zig build -Drelease-small
           rm -rf public/**/*.o public/**/*.so public/**/*.so.0
+          rm -rf public/local public/programs public/install public/README.md
           yarn build
           yarn export
           touch out/.nojekyll
           echo a1liu.com >> out/CNAME
-          echo /local >> out/.gitignore
-          echo /programs >> out/.gitignore
-          echo /install >> out/.gitignore
-          echo README.md >> out/.gitignore
 
       - name: Deploy
         run: |
