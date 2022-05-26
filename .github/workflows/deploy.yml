@@ -43,9 +43,9 @@ jobs:
 
       - name: Clean garbage
         run: |
-          find . -name "*.o" -type f -delete
-          find . -name "*.so" -type f -delete
-          find . -name "*.so.0" -type f -delete
+          find public/ -name "*.o" -delete
+          find public/ -name "*.so" -delete
+          find public/ -name "*.so.0" -delete
           rm -rf public/local public/programs public/install public/README.md
 
       - name: Build Site
