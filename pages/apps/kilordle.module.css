@@ -19,7 +19,14 @@
   align-items: center;
   border-bottom: 4px solid gray;
 
-  padding: 4px 16px 4px 16px;
+  @media max-sm {
+    padding: 4px 8px 4px 4px;
+  }
+
+  @media min-sm {
+    position: relative;
+    padding: 4px 16px 4px 16px;
+  }
 }
 
 .submitWindow {
@@ -30,6 +37,15 @@
   flex-direction: row;
   align-items: center;
   gap: 4px;
+
+  @media max-sm {
+  }
+
+  @media min-sm {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0%);
+  }
 }
 
 .statsBox {
@@ -37,6 +53,8 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
+
+  margin-left: auto;
 }
 
 .letterBox {
@@ -108,39 +126,51 @@
   flex-direction: column;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 
-  @media max-sm {
-    font-size: 30px;
-  }
-  @media min-sm {
-    font-size: 2em;
-  }
+  font-weight: bold;
+  padding: 1em 4px 1em 4px;
 
-  padding: 1em 0px 1em 0px;
+  font-size: 24px;
 }
 
 .keyboardRow {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 0.25em;
+  gap: 4px;
+  justify-content: space-between;
 
-  text-decoration: none;
-  color: black;
+  width: 100%;
+  max-width: 500px;
+}
+
+.middleRow {
+  @media max-sm {
+    padding: 0px 8px 0px 8px;
+  }
+
+  @media min-sm {
+    padding: 0px 16px 0px 16px;
+  }
 }
 
 .keyBox {
-  composes: letterBox;
+  border-radius: 8px;
+  border: 1px solid gray;
 
-  width: auto;
-  min-width: 1em;
+  height: 58px;
   padding: 4px;
+  text-decoration: none;
+  color: black;
 
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  flex-grow: 1;
+  flex-basis: 0;
+  text-transform: uppercase;
 }
 
 .yellow {
@@ -155,7 +185,7 @@
   background-color: gray;
 }
 
-/* https://css-tricks.com/snippets/css/shake-css-keyframe-animation/ */ 
+/* https://css-tricks.com/snippets/css/shake-css-keyframe-animation/ */
 .shake {
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   transform: translate3d(0, 0, 0);

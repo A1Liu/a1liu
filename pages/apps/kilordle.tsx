@@ -94,13 +94,8 @@ const useStore = create<KilordleState>((set, get) => {
     const state = get();
     const { word, foundLetters, submissionCount, wasmRef } = get();
 
-    if (word.length < 5) {
-      return;
-    }
-
-    if (!wasmRef) {
-      return;
-    }
+    if (word.length < 5) return;
+    if (!wasmRef) return;
 
     const chars = word.split("");
     const codes = chars.map((c) => c.charCodeAt(0));
@@ -122,9 +117,7 @@ const useStore = create<KilordleState>((set, get) => {
       });
 
       if (foundCount > 0) {
-        set({
-          foundLetters: { ...foundLetters, ...newFounds },
-        });
+        set({ foundLetters: { ...foundLetters, ...newFounds } });
       }
 
       set({
@@ -194,8 +187,6 @@ const TopBar: React.VFC = () => {
 
   return (
     <div className={css.topBar}>
-      <div></div>
-
       <div className={cx(css.submitWindow, submitError && css.shake)}>
         <div className={css.letterBox}>{word[0]}</div>
         <div className={css.letterBox}>{word[1]}</div>
@@ -244,7 +235,10 @@ const Keyboard: React.VFC = () => {
     <div ref={keyboardRef} className={css.keyboard}>
       {KEYROWS.map((row, idx) => {
         return (
-          <div key={idx} className={css.keyboardRow}>
+          <div
+            key={idx}
+            className={cx(css.keyboardRow, idx === 1 && css.middleRow)}
+          >
             {row.map((key) => {
               return (
                 <button
@@ -360,11 +354,7 @@ export const Kilordle: React.VFC = () => {
   return (
     <div className={css.wrapper}>
       <Head>
-        <link
-          key="pwa-link"
-          rel="manifest"
-          href="/apps/kilordle.webmanifest"
-        />
+        <link key="pwa-link" rel="manifest" href="/apps/kilordle.webmanifest" />
 
         <meta key="theme-color" name="theme-color" content="#1976D2" />
       </Head>
