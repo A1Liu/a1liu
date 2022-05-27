@@ -1,0 +1,17 @@
+{
+  "name": "Kilordle",
+  "short_name": "Kilordle",
+  "description": "Kilordle.",
+  "start_url": "/apps/kilordle/",
+  "scope": "/apps/kilordle/",
+  "display": "standalone",
+  "background_color": "#fff",
+  "theme_color": "#1976D2",
+  "icons": [
+    {
+      "src": "/apps/kilordle/k-emoji.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

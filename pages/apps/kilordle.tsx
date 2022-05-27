@@ -1,4 +1,5 @@
 import React from "react";
+import Head from "next/head";
 import type { Dispatch, SetStateAction } from "react";
 import css from "./kilordle.module.css";
 import * as wasm from "src/wasm";
@@ -358,6 +359,16 @@ export const Kilordle: React.VFC = () => {
 
   return (
     <div className={css.wrapper}>
+      <Head>
+        <link
+          key="pwa-link"
+          rel="manifest"
+          href="/apps/kilordle.webmanifest"
+        />
+
+        <meta key="theme-color" name="theme-color" content="#1976D2" />
+      </Head>
+
       <TopBar />
       <div className={css.centerArea}>
         <PuzzleArea />
