@@ -9,10 +9,8 @@ let resolve: null | ((msg: Message[]) => void) = null;
 const messages: Message[] = [];
 onmessage = (event: MessageEvent<Message>) => {
   messages.push(event.data);
-  if (resolve) {
-    resolve(messages.splice(0, messages.length));
-    resolve = null;
-  }
+  resolve?.(messages.splice(0, messages.length));
+  resolve = null;
 };
 
 const waitForMessage = (): Promise<Message[]> => {
@@ -32,11 +30,47 @@ interface EventDisplayData {
   endTime: number;
 }
 
-interface Event {
+interface PClass {
+  // Public-facing integer
+  id: number;
 }
+
+export interface PObject {
+  classId: number;
+
+  begin: Date;
+  end: Date;
+}
+
+const makeDate = (hours: number): Date => {
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(0);
+  date.setSeconds(0);
+
+  return date;
+};
+
+const classes: Record<number, PClass> = {
+  [1]: { id: 1 },
+};
+
+const output: PObject[] = [
+  {
+    classId: 1,
+    begin: makeDate(10),
+    end: makeDate(11),
+  },
+  {
+    classId: 1,
+    begin: makeDate(8),
+    end: makeDate(9),
+  },
+];
 
 export type OutMessage =
   | { kind: "initDone"; data?: void }
+  | { kind: "sendData"; data: PObject[] }
   | { kind: "showEvents"; data: EventDisplayData[] }
   | { kind: string; data: any };
 
@@ -65,6 +99,7 @@ const init = async () => {
   wasmRef.abi.init();
 
   postMessage({ kind: "initDone" });
+  postMessage({ kind: "sendData", data: output });
 
   main(wasmRef);
 };

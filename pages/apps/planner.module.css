@@ -18,4 +18,34 @@
 .content {
   height: 100%;
   flex-grow: 1;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+
+  border-left: 1px solid black;
+  flex-grow: 1;
+}
+
+.event {
+  border: 2px solid #1976d2;
+  background-color: #1976d2;
+  border-radius: 8px;
+  height: 50px;
+  width: 100%;
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
 }
