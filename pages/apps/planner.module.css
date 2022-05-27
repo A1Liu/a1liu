@@ -8,3 +8,16 @@
   flex-direction: row;
   flex-wrap: nowrap;
 }
+
+.sidebar {
+  height: 100%;
+  min-width: 300px;
+  width: 300px;
+}
+
+.content {
+  height: 100%;
+  flex-grow: 1;
+}
+
+

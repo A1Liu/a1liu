@@ -21,8 +21,23 @@ const waitForMessage = (): Promise<Message[]> => {
   return p;
 };
 
+interface EventDisplayData {
+  // Day of week, sunday = 0, saturday = 6
+  day: number;
+
+  // Time of day in minutes, inclusive; min = 0, max = 1339
+  beginTime: number;
+
+  // Time of day in minutes, exclusive; min = 0, max = 1440
+  endTime: number;
+}
+
+interface Event {
+}
+
 export type OutMessage =
   | { kind: "initDone"; data?: void }
+  | { kind: "showEvents"; data: EventDisplayData[] }
   | { kind: string; data: any };
 
 const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {

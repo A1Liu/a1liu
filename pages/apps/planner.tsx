@@ -88,20 +88,9 @@ const Planner: React.VFC = () => {
         <meta key="theme-color" name="theme-color" content="#1976D2" />
       </Head>
 
-      <div
-        style={{
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className={css.muiButton} style={{ alignSelf: "center" }}>
-          Hello World!
-        </div>
-      </div>
+      <div className={styles.sidebar}></div>
+
+      <div className={styles.content}>Content</div>
     </div>
   );
 };
