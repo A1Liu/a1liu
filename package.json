@@ -29,11 +29,7 @@
   "eslintConfig": {
     "extends": "next/core-web-vitals",
     "rules": {
-      "@next/next/no-img-element": "off",
-      "semi": [
-        1,
-        "always"
-      ]
+      "@next/next/no-img-element": "off"
     }
   },
   "browserslist": [

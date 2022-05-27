@@ -1,0 +1,7 @@
+html,
+body,
+#__next,
+canvas {
+    height: 100%;
+    width: 100%;
+}
