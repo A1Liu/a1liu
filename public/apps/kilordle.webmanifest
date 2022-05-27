@@ -9,7 +9,7 @@
   "theme_color": "#1976D2",
   "icons": [
     {
-      "src": "/apps/kilordle/k-emoji.svg",
+      "src": "/apps/k-emoji.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
