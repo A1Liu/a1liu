@@ -8,7 +8,6 @@ const ArrayList = std.ArrayList;
 
 pub const Obj = enum(u32) {
     // These are kept up to date with src/wasm.ts
-
     jsundefined,
     jsnull,
 
@@ -22,6 +21,9 @@ pub const Obj = enum(u32) {
     F32Array,
 
     _,
+
+    pub const objSet = ext.objSet;
+    pub const arrayPush = ext.arrayPush;
 };
 
 const ext = struct {
@@ -30,6 +32,7 @@ const ext = struct {
 
     extern fn makeArray() Obj;
     extern fn makeObj() Obj;
+
     extern fn arrayPush(arr: Obj, obj: Obj) void;
     extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 
@@ -50,8 +53,6 @@ pub const setWatermark = ext.setWatermark;
 pub const out = struct {
     pub const array = ext.makeArray;
     pub const obj = ext.makeObj;
-    pub const arrayPush = ext.arrayPush;
-    pub const objSet = ext.objSet;
 
     pub fn slice(data: anytype) Obj {
         const ptr: ?*const anyopaque = ptr: {

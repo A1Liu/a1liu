@@ -85,11 +85,11 @@ fn setPuzzles(puzzles: []Puzzle) void {
         const filled = wasm.out.string(&puzzle.filled);
         const submits = wasm.out.string(puzzle.submits);
 
-        wasm.out.objSet(obj, keys.solution, solution);
-        wasm.out.objSet(obj, keys.filled, filled);
-        wasm.out.objSet(obj, keys.submits, submits);
+        obj.objSet(keys.solution, solution);
+        obj.objSet(keys.filled, filled);
+        obj.objSet(keys.submits, submits);
 
-        wasm.out.arrayPush(arr, obj);
+        arr.arrayPush(obj);
     }
 
     ext.setPuzzles(arr);
