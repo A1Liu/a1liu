@@ -157,7 +157,6 @@ const useStore = create<KilordleState>((set, get) => {
     set({
       word: "",
       submissionCount: 0,
-      wordsLeft: 0,
       submitError: false,
       puzzles: [],
       foundLetters: {},
