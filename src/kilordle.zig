@@ -44,7 +44,10 @@ const Puzzle = struct {
     submits: []u8,
 };
 
-const Match = union(enum) {
+// The values matter here, because we use the enum value for an ordered
+// comparison later on in the file
+const MatchKind = enum(u8) { none = 0, letter = 1, exact = 2 };
+const Match = union(MatchKind) {
     none: void,
     exact: void,
     letter: u8,
@@ -240,7 +243,10 @@ pub fn submitWord(word: [5]u8) !bool {
 
                 switch (new_matches[idx]) {
                     .none => continue,
-                    .exact => unreachable,
+                    .exact => {
+                        wasm.out.post(.err, "hello {s} {s}", .{ wordle.text, submit });
+                        unreachable;
+                    },
                     .letter => |submit_idx| {
                         // Uppercase means the output text should be orange.
                         submit_letters[submit_idx] = submit[submit_idx] - 'a' + 'A';
