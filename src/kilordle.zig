@@ -98,12 +98,12 @@ fn setPuzzles(puzzles: []Puzzle) void {
     ext.setPuzzles(arr);
 }
 
-fn searchList(word: []const u8, dict: []const u8) bool {
+fn searchList(word: [5]u8, dict: []const u8) bool {
     var word_index: u32 = 0;
     while (word_index < dict.len) : (word_index += 6) {
         const dict_slice = dict[word_index..][0..5];
 
-        if (std.mem.eql(u8, word, dict_slice)) {
+        if (std.mem.eql(u8, &word, dict_slice)) {
             return true;
         }
     }
@@ -153,8 +153,8 @@ pub fn submitWord(word: [5]u8) !bool {
         }
     }
 
-    const is_wordle = searchList(&word, wordles);
-    if (!is_wordle and !searchList(&word, wordle_words)) {
+    const is_wordle = searchList(word, wordles);
+    if (!is_wordle and !searchList(word, wordle_words)) {
         return false;
     }
 
