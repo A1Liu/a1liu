@@ -6,9 +6,6 @@ const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
 
-var wordles: []const u8 = undefined;
-var wordle_words: []const u8 = undefined;
-
 const ArrayList = std.ArrayList;
 
 const ext = struct {
@@ -47,23 +44,27 @@ const Puzzle = struct {
     submits: []u8,
 };
 
-const MatchKind = enum(u8) { none, letter, exact };
-const Match = union(MatchKind) {
+const Match = union(enum) {
     none: void,
     exact: void,
     letter: u8,
 };
 
-var wordles_left: ArrayList(Wordle) = undefined;
-var submissions: ArrayList([5]u8) = undefined;
-
-var keys: struct {
+const Keys = struct {
     solution: wasm.Obj,
     filled: wasm.Obj,
     submits: wasm.Obj,
-} = undefined;
+};
 
-fn makeKeys() @TypeOf(keys) {
+// Initialized at start of program
+var wordles: []const u8 = undefined;
+var wordle_words: []const u8 = undefined;
+var keys: Keys = undefined;
+
+var wordles_left: ArrayList(Wordle) = undefined;
+var submissions: ArrayList([5]u8) = undefined;
+
+fn makeKeys() Keys {
     return .{
         .solution = wasm.out.string("solution"),
         .filled = wasm.out.string("filled"),
@@ -71,15 +72,7 @@ fn makeKeys() @TypeOf(keys) {
     };
 }
 
-fn setWordsLeft(count: usize) void {
-    if (builtin.target.cpu.arch != .wasm32) return;
-
-    ext.setWordsLeft(count);
-}
-
 fn setPuzzles(puzzles: []Puzzle) void {
-    if (builtin.target.cpu.arch != .wasm32) return;
-
     const mark = wasm.watermark();
     defer wasm.setWatermark(mark);
 
@@ -199,7 +192,8 @@ pub fn submitWord(word: [5]u8) !bool {
             _ = top_values.pop();
         }
 
-        // write-back would be no-op
+        // write-back would be no-op; this also guarantees that the read and
+        // write pointers don't alias, for whatever that's worth
         if (read_head == write_head) {
             write_head += 1;
             continue;
@@ -274,7 +268,7 @@ pub fn submitWord(word: [5]u8) !bool {
     }
 
     setPuzzles(puzzles.items);
-    setWordsLeft(wordles_left.items.len);
+    ext.setWordsLeft(wordles_left.items.len);
     ext.resetSubmission();
     ext.incrementSubmissionCount();
 
@@ -318,7 +312,7 @@ fn initData() !void {
         wordles_left.appendAssumeCapacity(wordle);
     }
 
-    setWordsLeft(wordles_left.items.len);
+    ext.setWordsLeft(wordles_left.items.len);
 }
 
 export fn reset() void {
