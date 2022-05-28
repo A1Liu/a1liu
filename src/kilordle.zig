@@ -101,7 +101,7 @@ fn setPuzzles(puzzles: []Puzzle) void {
 fn searchList(word: []const u8, dict: []const u8) bool {
     var word_index: u32 = 0;
     while (word_index < dict.len) : (word_index += 6) {
-        const dict_slice = dict[word_index..(word_index + 5)];
+        const dict_slice = dict[word_index..][0..5];
 
         if (std.mem.eql(u8, word, dict_slice)) {
             return true;
@@ -315,7 +315,7 @@ fn initData() !void {
             .places_found = 0,
         };
 
-        std.mem.copy(u8, &wordle.text, wordles[word_index..(word_index + 5)]);
+        wordle.text = wordles[word_index..][0..5].*;
         wordles_left.appendAssumeCapacity(wordle);
     }
 
