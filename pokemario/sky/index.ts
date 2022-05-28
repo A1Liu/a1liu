@@ -6,14 +6,20 @@ import { SkyBackground } from "./sky";
 export class Landscape extends SpriteGroup {
   constructor(game: Game) {
     super([
-      new SkyBackground({
-        x: 0,
-        y: 0,
-      }),
-      new SkyBackground({
-        x: game.width,
-        y: 0,
-      }),
+      new SkyBackground(
+        {
+          x: 0,
+          y: 0,
+        },
+        game
+      ),
+      new SkyBackground(
+        {
+          x: game.width,
+          y: 0,
+        },
+        game
+      ),
       // new SkyBackground({
       //   x: game.width,
       //   y: 0,
