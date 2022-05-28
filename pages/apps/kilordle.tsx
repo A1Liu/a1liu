@@ -1,7 +1,8 @@
 import React from "react";
 import Head from "next/head";
 import type { Dispatch, SetStateAction } from "react";
-import css from "./kilordle.module.css";
+import styles from "./kilordle.module.css";
+import css from "src/util.module.css";
 import * as wasm from "src/wasm";
 import { postToast } from "src/errors";
 import { defer } from "src/util";
@@ -27,7 +28,10 @@ interface KilordleCb {
   setPuzzles: (puzzles: PuzzleWasmData[]) => void;
   setWordsLeft: (wordsLeft: number) => void;
   setWasmRef: (wasmRef: wasm.Ref) => void;
+  reset: () => void;
   clearError: () => void;
+  incrementSubmissionCount: () => void;
+  resetSubmission: () => void;
 }
 
 interface KilordleState {
@@ -100,31 +104,28 @@ const useStore = create<KilordleState>((set, get) => {
     const chars = word.split("");
     const codes = chars.map((c) => c.charCodeAt(0));
 
-    defer(() => wasmRef.abi.submitWord(...codes)).then((success: boolean) => {
-      if (!success) {
+    defer(() => {
+      if (!wasmRef.abi.submitWord(...codes)) {
         set({ submitError: true });
         return;
       }
 
       const newFounds: Record<string, true> = {};
-      let foundCount = 0;
-
       chars.forEach((letter) => {
-        if (!foundLetters[letter]) {
-          newFounds[letter] = true;
-          foundCount += 1;
-        }
+        newFounds[letter] = true;
       });
 
-      if (foundCount > 0) {
-        set({ foundLetters: { ...foundLetters, ...newFounds } });
-      }
+      set({ foundLetters: { ...foundLetters, ...newFounds } });
+    });
+  };
 
-      set({
-        word: "",
-        submissionCount: submissionCount + 1,
-        submitError: false,
-      });
+  const incrementSubmissionCount = (): void =>
+    set((state) => ({ submissionCount: state.submissionCount + 1 }));
+
+  const resetSubmission = (): void => {
+    set({
+      word: "",
+      submitError: false,
     });
   };
 
@@ -147,6 +148,22 @@ const useStore = create<KilordleState>((set, get) => {
 
   const setWasmRef = (wasmRef: wasm.Ref) => set({ wasmRef });
 
+  const reset = (): void => {
+    const { wasmRef } = get();
+    if (!wasmRef) return;
+
+    wasmRef.abi.reset();
+
+    set({
+      word: "",
+      submissionCount: 0,
+      wordsLeft: 0,
+      submitError: false,
+      puzzles: [],
+      foundLetters: {},
+    });
+  };
+
   return {
     word: "",
     wasmRef: undefined,
@@ -163,6 +180,9 @@ const useStore = create<KilordleState>((set, get) => {
       setWordsLeft,
       clearError,
       setWasmRef,
+      reset,
+      incrementSubmissionCount,
+      resetSubmission,
     },
   };
 });
@@ -186,16 +206,16 @@ const TopBar: React.VFC = () => {
   }, [cb, submitError]);
 
   return (
-    <div className={css.topBar}>
-      <div className={cx(css.submitWindow, submitError && css.shake)}>
-        <div className={css.letterBox}>{word[0]}</div>
-        <div className={css.letterBox}>{word[1]}</div>
-        <div className={css.letterBox}>{word[2]}</div>
-        <div className={css.letterBox}>{word[3]}</div>
-        <div className={css.letterBox}>{word[4]}</div>
+    <div className={styles.topBar}>
+      <div className={cx(styles.submitWindow, submitError && styles.shake)}>
+        <div className={styles.letterBox}>{word[0]}</div>
+        <div className={styles.letterBox}>{word[1]}</div>
+        <div className={styles.letterBox}>{word[2]}</div>
+        <div className={styles.letterBox}>{word[3]}</div>
+        <div className={styles.letterBox}>{word[4]}</div>
       </div>
 
-      <div className={css.statsBox}>
+      <div className={styles.statsBox}>
         <div>Guesses: {submissionCount}</div>
         <div>Words: {wordsLeft}</div>
       </div>
@@ -232,18 +252,21 @@ const Keyboard: React.VFC = () => {
   }, [cb]);
 
   return (
-    <div ref={keyboardRef} className={css.keyboard}>
+    <div ref={keyboardRef} className={styles.keyboard}>
       {KEYROWS.map((row, idx) => {
         return (
           <div
             key={idx}
-            className={cx(css.keyboardRow, idx === 1 && css.middleRow)}
+            className={cx(styles.keyboardRow, idx === 1 && styles.middleRow)}
           >
             {row.map((key) => {
               return (
                 <button
                   key={key}
-                  className={cx(css.keyBox, foundLetters[key] && css.gray)}
+                  className={cx(
+                    styles.keyBox,
+                    foundLetters[key] && styles.gray
+                  )}
                   onClick={() => pressKey(key, cb)}
                 >
                   {key}
@@ -259,8 +282,8 @@ const Keyboard: React.VFC = () => {
 
 const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
   return (
-    <div className={css.puzzle}>
-      <div className={css.filledBox}>
+    <div className={styles.puzzle}>
+      <div className={styles.filledBox}>
         {puzzle.filled.split("").map((letter, idx) => {
           const lower = letter.toLowerCase();
           const isLower = letter === lower;
@@ -271,7 +294,10 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
           // lowercase letters and space are output as white and uppercase
           // are green.
           return (
-            <div key={idx} className={cx(css.letterBox, isLower || css.green)}>
+            <div
+              key={idx}
+              className={cx(styles.letterBox, isLower || styles.green)}
+            >
               {letter.toUpperCase()}
             </div>
           );
@@ -279,7 +305,7 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
       </div>
 
       {puzzle.submits.map((submit) => (
-        <div key={submit} className={css.submitBox}>
+        <div key={submit} className={styles.submitBox}>
           {submit.split("").map((letter, idx) => {
             const upper = letter.toUpperCase();
             const isUpper = letter === upper;
@@ -287,7 +313,7 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
             return (
               <div
                 key={idx}
-                className={cx(css.letterBox, isUpper && css.yellow)}
+                className={cx(styles.letterBox, isUpper && styles.yellow)}
               >
                 {upper}
               </div>
@@ -300,13 +326,14 @@ const Puzzle: React.VFC<{ puzzle: PuzzleData }> = ({ puzzle }) => {
 };
 
 const PuzzleArea: React.VFC = () => {
+  const cb = useStore((state) => state.callbacks);
   const puzzles = useStore((state) => state.puzzles);
   const wordsLeft = useStore((state) => state.wordsLeft);
   const submissionCount = useStore((state) => state.submissionCount);
 
   if (submissionCount === 0) {
     return (
-      <div className={css.centerMessage}>
+      <div className={styles.centerMessage}>
         {"No submissions yet. Try typing a word and hitting 'Enter'!"}
       </div>
     );
@@ -314,14 +341,17 @@ const PuzzleArea: React.VFC = () => {
 
   if (wordsLeft === 0) {
     return (
-      <div className={css.centerMessage}>
-        {"You won! Refresh to play again."}
+      <div className={styles.centerMessage}>
+        <p>{"You won!"}</p>
+        <button className={css.muiButton} onClick={cb.reset}>
+          Play again
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={css.guessesArea}>
+    <div className={styles.guessesArea}>
       {puzzles.map((puzzle) => (
         <Puzzle key={puzzle.solution} puzzle={puzzle} />
       ))}
@@ -336,7 +366,15 @@ export const Kilordle: React.VFC = () => {
     const wasmRef = wasm.fetchWasm("/apps/kilordle.wasm", {
       postMessage: postToast,
       imports: { setPuzzles: cb.setPuzzles },
-      raw: () => ({ setWordsLeft: cb.setWordsLeft }),
+      raw: () => ({
+        resetSubmission: cb.resetSubmission,
+        incrementSubmissionCount: cb.incrementSubmissionCount,
+        setWordsLeft: cb.setWordsLeft,
+        addChar: (code: number) => {
+          const character = String.fromCharCode(code);
+          cb.addChar(character);
+        },
+      }),
     });
 
     const wordles = wasm.fetchAsset("/apps/wordles.txt");
@@ -352,7 +390,7 @@ export const Kilordle: React.VFC = () => {
   }, [cb]);
 
   return (
-    <div className={css.wrapper}>
+    <div className={styles.wrapper}>
       <Head>
         <link key="pwa-link" rel="manifest" href="/apps/kilordle.webmanifest" />
 
@@ -360,7 +398,7 @@ export const Kilordle: React.VFC = () => {
       </Head>
 
       <TopBar />
-      <div className={css.centerArea}>
+      <div className={styles.centerArea}>
         <PuzzleArea />
       </div>
       <Keyboard />

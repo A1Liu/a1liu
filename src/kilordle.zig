@@ -14,6 +14,9 @@ const ArrayList = std.ArrayList;
 const ext = struct {
     extern fn setPuzzles(obj: wasm.Obj) void;
     extern fn setWordsLeft(count: usize) void;
+    extern fn addChar(code: u32) void;
+    extern fn incrementSubmissionCount() void;
+    extern fn resetSubmission() void;
 
     fn submitWordExt(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) callconv(.C) bool {
         return submitWord([_]u8{ l0, l1, l2, l3, l4 }) catch @panic("submitWord failed");
@@ -261,6 +264,14 @@ pub fn submitWord(word: [5]u8) !bool {
 
     setPuzzles(puzzles.items);
     setWordsLeft(wordles_left.items.len);
+    ext.resetSubmission();
+    ext.incrementSubmissionCount();
+
+    if (builtin.mode != .Debug) return true;
+
+    if (puzzles.items.len == 0) return true;
+
+    for (puzzles.items[0].solution) |c| ext.addChar(c);
 
     return true;
 }
@@ -279,15 +290,7 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
     return false;
 }
 
-pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
-    wasm.initIfNecessary();
-
-    wordles = try wasm.in.bytes(l_wordles, liu.Pages);
-    wordle_words = try wasm.in.bytes(l_words, liu.Pages);
-
-    wordles_left = ArrayList(Wordle).init(liu.Pages);
-    submissions = ArrayList([5]u8).init(liu.Pages);
-
+fn initData() !void {
     const wordle_count = (wordles.len - 1) / 6 + 1;
     try wordles_left.ensureUnusedCapacity(wordle_count);
 
@@ -305,5 +308,25 @@ pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
     }
 
     setWordsLeft(wordles_left.items.len);
+}
+
+export fn reset() void {
+    wordles_left.items.len = 0;
+    submissions.items.len = 0;
+
+    initData() catch @panic("initData failed");
+}
+
+pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
+    wasm.initIfNecessary();
+
+    wordles = try wasm.in.bytes(l_wordles, liu.Pages);
+    wordle_words = try wasm.in.bytes(l_words, liu.Pages);
+
+    wordles_left = ArrayList(Wordle).init(liu.Pages);
+    submissions = ArrayList([5]u8).init(liu.Pages);
+
+    try initData();
+
     std.log.info("WASM initialized!", .{});
 }
