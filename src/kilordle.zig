@@ -242,11 +242,12 @@ pub fn submitWord(word: [5]u8) !bool {
                 }
 
                 switch (new_matches[idx]) {
+                    // if we have an exact match, it should have been handled
+                    // earlier on when we matched the remaining wordles against
+                    // the new submission
+                    .exact => unreachable,
+
                     .none => continue,
-                    .exact => {
-                        wasm.out.post(.err, "hello {s} {s}", .{ wordle.text, submit });
-                        unreachable;
-                    },
                     .letter => |submit_idx| {
                         // Uppercase means the output text should be orange.
                         submit_letters[submit_idx] = submit[submit_idx] - 'a' + 'A';
