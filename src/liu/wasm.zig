@@ -10,6 +10,7 @@ pub const Obj = enum(u32) {
     // These are kept up to date with src/wasm.ts
     jsundefined,
     jsnull,
+    jsEmptyString,
 
     log,
     info,

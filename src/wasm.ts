@@ -4,6 +4,7 @@ const decoder = new TextDecoder();
 const initialObjectBuffer: any[] = [
   undefined,
   null,
+  "",
 
   "log",
   "info",
