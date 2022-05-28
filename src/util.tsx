@@ -10,28 +10,6 @@ export async function defer<T>(cb: () => T): Promise<T> {
   return cb();
 }
 
-export const removeExtension = (filename: string): string => {
-  return filename.replace(/\.[^/.]+$/, "");
-};
-
-export const cleanJekyllSlug = (slug: string): string => {
-  const titleSlug = slug.split("-").slice(3);
-
-  const titleWords = titleSlug.map((word) => {
-    if (word.length <= 1) {
-      return word;
-    }
-
-    if (["the", "an", "is", "of", "this", "into", "my"].includes(word)) {
-      return word;
-    }
-
-    return word.substring(0, 1).toUpperCase() + word.substring(1);
-  });
-
-  return titleWords.join(" ");
-};
-
 export async function post(url: string, data: any): Promise<any> {
   const resp = await fetch(url, {
     method: "POST",
@@ -96,31 +74,5 @@ export const Scroll: React.FC<ScrollProps> = ({ children, ...props }) => {
     <div className={outerClass} style={style}>
       {inner}
     </div>
-  );
-};
-
-interface BtnProps {
-  propagate?: boolean;
-  preventDefault?: boolean;
-  background?: BackgroundColor;
-  onClick?: () => void;
-}
-
-export const Btn: React.FC<BtnProps> = ({ children, ...props }) => {
-  const className = cx(css.muiButton, backgroundColor(props.background));
-
-  const clickHandler = (
-    evt: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    if (!props.propagate) evt.stopPropagation();
-    if (!props.preventDefault) evt.preventDefault();
-
-    props.onClick?.();
-  };
-
-  return (
-    <button className={className} onClick={clickHandler}>
-      {children}
-    </button>
   );
 };
