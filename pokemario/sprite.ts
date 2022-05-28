@@ -15,14 +15,21 @@ export interface Vector2 {
   y: number;
 }
 
-export abstract class Sprite {
+export abstract class Renderable {
+  abstract tick(delta: number, game: Game): void;
+  abstract render(game: Game, ctx: CanvasRenderingContext2D): void;
+}
+
+export abstract class Sprite extends Renderable {
   image: HTMLImageElement | null = null;
 
   constructor(
     public position: Position,
     public size: Size,
     public assetPath: string
-  ) {}
+  ) {
+    super();
+  }
 
   getAssetImage() {
     if (this.image?.src !== this.assetPath) {
@@ -32,8 +39,6 @@ export abstract class Sprite {
     }
     return this.image!;
   }
-
-  abstract tick(delta: number, game: Game): void;
 
   // if the two things are juuuuuust about to collide, this will return a zero vector instead of returning undefined.
   collisionVector(other: Sprite): Vector2 | undefined {
@@ -68,6 +73,20 @@ export abstract class Sprite {
       this.size.width,
       this.size.height
     );
+  }
+}
+
+export class SpriteGroup extends Renderable {
+  constructor(public sprites: Sprite[]) {
+    super();
+  }
+
+  tick(delta: number, game: Game) {
+    this.sprites.forEach((sprite) => sprite.tick(delta, game));
+  }
+
+  render(game: Game, ctx: CanvasRenderingContext2D) {
+    this.sprites.forEach((sprite) => sprite.render(game, ctx));
   }
 }
 

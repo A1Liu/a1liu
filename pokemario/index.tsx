@@ -10,11 +10,11 @@ export default function Page() {
       return;
     }
 
-    const game = new Game();
-    const render = () => {
-      canvas.width = canvas.getBoundingClientRect().width;
-      canvas.height = canvas.getBoundingClientRect().height;
+    canvas.width = canvas.getBoundingClientRect().width;
+    canvas.height = canvas.getBoundingClientRect().height;
 
+    const game = new Game(canvas.width, canvas.height);
+    const render = () => {
       game.tick(16);
       game.render(canvas, ctx);
       requestAnimationFrame(render);
