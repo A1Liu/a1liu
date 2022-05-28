@@ -57,6 +57,20 @@ const Match = union(MatchKind) {
 var wordles_left: ArrayList(Wordle) = undefined;
 var submissions: ArrayList([5]u8) = undefined;
 
+var keys: struct {
+    solution: wasm.Obj,
+    filled: wasm.Obj,
+    submits: wasm.Obj,
+} = undefined;
+
+fn makeKeys() @TypeOf(keys) {
+    return .{
+        .solution = wasm.out.string("solution"),
+        .filled = wasm.out.string("filled"),
+        .submits = wasm.out.string("submits"),
+    };
+}
+
 fn setWordsLeft(count: usize) void {
     if (builtin.target.cpu.arch != .wasm32) return;
 
@@ -70,9 +84,6 @@ fn setPuzzles(puzzles: []Puzzle) void {
     defer wasm.setWatermark(mark);
 
     const arr = wasm.out.array();
-    const solution_key = wasm.out.string("solution");
-    const filled_key = wasm.out.string("filled");
-    const submits_key = wasm.out.string("submits");
 
     for (puzzles) |puzzle| {
         const obj = wasm.out.obj();
@@ -81,9 +92,9 @@ fn setPuzzles(puzzles: []Puzzle) void {
         const filled = wasm.out.string(&puzzle.filled);
         const submits = wasm.out.string(puzzle.submits);
 
-        wasm.out.objSet(obj, solution_key, solution);
-        wasm.out.objSet(obj, filled_key, filled);
-        wasm.out.objSet(obj, submits_key, submits);
+        wasm.out.objSet(obj, keys.solution, solution);
+        wasm.out.objSet(obj, keys.filled, filled);
+        wasm.out.objSet(obj, keys.submits, submits);
 
         wasm.out.arrayPush(arr, obj);
     }
@@ -322,6 +333,8 @@ pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
 
     wordles = try wasm.in.bytes(l_wordles, liu.Pages);
     wordle_words = try wasm.in.bytes(l_words, liu.Pages);
+
+    keys = makeKeys();
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
     submissions = ArrayList([5]u8).init(liu.Pages);
