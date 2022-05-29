@@ -60,9 +60,8 @@ export abstract class Sprite {
         if (otherY1 - selfY2 <= EPSILON || selfY1 - otherY2 <= EPSILON)
             return { x: 0, y: 0 };
 
-
         // Use bounding-box center-of-mass to calculate collision vector; this
-        // is wildly inaccurate, but, uh, meh
+        // is wildly inaccurate, but, uh, meh. Can add edge stuffs later
 
         const otherXM = (otherX1 + otherX2) / 2;
         const selfXM = (selfX1 + selfX2) / 2;
@@ -73,6 +72,15 @@ export abstract class Sprite {
             x: otherXM - selfXM,
             y: otherYM - selfYM,
         };
+    }
+
+    isStandingOn(other: Sprite): boolean {
+        const { y: otherY1 } = other.position;
+
+        const { y: selfY1 } = other.position;
+        const selfY2 = other.position.y + other.size.height;
+
+        return otherY1 - selfY2 <= EPSILON;
     }
 
     render(game: Game, ctx: CanvasRenderingContext2D) {
@@ -94,7 +102,6 @@ export abstract class Sprite {
 export class Enemy extends Sprite {
     private velocity: Vector2 = { x: 0, y: 0 };
     private anchoredOn: Sprite | undefined = undefined;
-    private isWalkLeft: boolean = true;
     private walkSpeed: number = 1.0;
 
     constructor(position: Position, size: Size, assetPath: string) {
@@ -118,11 +125,35 @@ export class Enemy extends Sprite {
                 break anchorCheck;
             }
 
-            if (vector) {
-            }
+            this.position.x += vector.x;
+            this.position.y += vector.y;
+        }
+
+        // Check for new collisions, potentially causing a new anchorage as well
+        for (const sprite of game.sprites) {
+            if (sprite === this) continue;
+            if (sprite === this.anchoredOn) continue;
+
+            const vector = this.collisionVector(sprite);
+            if (!vector) continue;
 
             this.position.x += vector.x;
             this.position.y += vector.y;
+
+            // For now, any kind of collision just straight-up stops you dead
+            // in your tracks. Obviously this is not reasonable, but like, whatever
+            //
+            // A fun side effect of this is that enemies become sticky after falling;
+            // if they hit a wall after jumping off of a thing, they immediately
+            // stick to it.
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+
+            // Collision check ordering could cause weird nonsense; the hope is
+            // that it will not come to that.
+            if (!this.anchoredOn && this.isStandingOn(sprite)) {
+                this.anchoredOn = sprite;
+            }
         }
     }
 }
