@@ -1,5 +1,7 @@
 import { Game } from "./game";
 
+export const EPSILON = 0.0001;
+
 export interface Position {
     x: number;
     y: number;
@@ -46,12 +48,30 @@ export abstract class Sprite {
         const selfY2 = other.position.y + other.size.height;
 
         // other is too far left or far right to collide
-        if (otherX1 > selfX2 || selfX1 > otherX1) return undefined;
-        if (otherY1 > selfY2 || selfY1 > otherY1) return undefined;
+        if (otherX1 + EPSILON > selfX2 || selfX1 + EPSILON > otherX2)
+            return undefined;
+        if (otherY1 + EPSILON > selfY2 || selfY1 + EPSILON > otherY2)
+            return undefined;
+
+        // Edges touch but they dont overlap; we report a collision vector
+        // of zero here.
+        if (otherX1 - selfX2 <= EPSILON || selfX1 - otherX2 <= EPSILON)
+            return { x: 0, y: 0 };
+        if (otherY1 - selfY2 <= EPSILON || selfY1 - otherY2 <= EPSILON)
+            return { x: 0, y: 0 };
+
+
+        // Use bounding-box center-of-mass to calculate collision vector; this
+        // is wildly inaccurate, but, uh, meh
+
+        const otherXM = (otherX1 + otherX2) / 2;
+        const selfXM = (selfX1 + selfX2) / 2;
+        const otherYM = (otherY1 + otherY2) / 2;
+        const selfYM = (selfY1 + selfY2) / 2;
 
         return {
-            x: otherX1 - selfX1,
-            y: otherY1 - selfY1,
+            x: otherXM - selfXM,
+            y: otherYM - selfYM,
         };
     }
 
@@ -91,19 +111,20 @@ export class Enemy extends Sprite {
         }
 
         // Check if we can still anchor
-        if (this.anchoredOn) {
-            // speed and direction!
-            const vector = this.collisionVector(this.anchoredOn);
+        anchorCheck: if (this.anchoredOn) {
+            const vector = this.collisionVector(this.anchoredOn); // speed and direction!
             if (!vector) {
                 this.anchoredOn = undefined;
-            } else {
-                this.position.x += vector.x;
-                this.position.y += vector.y;
+                break anchorCheck;
             }
+
+            if (vector) {
+            }
+
+            this.position.x += vector.x;
+            this.position.y += vector.y;
         }
     }
-
-    render(game: Game, ctx: CanvasRenderingContext2D): void {}
 }
 
 export class PokeMan extends Sprite {
@@ -112,8 +133,6 @@ export class PokeMan extends Sprite {
     }
 
     tick(delta: number, game: Game): void {}
-
-    render(game: Game, ctx: CanvasRenderingContext2D): void {}
 }
 
 export class Block extends Sprite {
@@ -124,6 +143,4 @@ export class Block extends Sprite {
     tick(delta: number, game: Game): void {
         // Do nothing
     }
-
-    render(game: Game, ctx: CanvasRenderingContext2D): void {}
 }
