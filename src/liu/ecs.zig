@@ -9,6 +9,8 @@ const liu = @import("./lib.zig");
 pub const EntityId = struct {
     index: u32,
     generation: u32,
+
+    pub const NULL: EntityId = .{ .index = std.math.maxInt(u32), .generation = 0 };
 };
 
 const Vector3 = @Vector(3, f32);
@@ -46,12 +48,8 @@ fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
         registry: *Registry,
         index: u32 = 0,
 
-        pub inline fn next(self: *Iter) ?ViewType {
-            if (self.index >= self.registry.len) {
-                return null;
-            }
-
-            const meta = &self.registry.raw(Registry.Meta)[self.index];
+        pub fn read(self: *Iter, index: u32) ViewType {
+            const meta = &self.registry.raw(Registry.Meta)[index];
 
             var value: ViewType = undefined;
             value.id = self.index;
@@ -74,15 +72,35 @@ fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
                         else => child,
                     };
 
-                    const index = Registry.typeIndex(T);
-                    if (!meta.bitset.isSet(index)) {
+                    const typeIndex = Registry.typeIndex(T);
+                    if (!meta.bitset.isSet(typeIndex)) {
                         break :value null;
                     }
 
-                    const ptr = &self.registry.raw(T)[self.index];
+                    const ptr = &self.registry.raw(T)[index];
                     break :value if (isPointer) ptr else ptr.*;
                 };
             }
+
+            return value;
+        }
+
+        pub fn get(self: *Iter, entityId: EntityId) ?ViewType {
+            const meta_slice = self.registry.raw(Registry.Meta);
+            if (entityId.index >= meta_slice.len) return null;
+
+            const meta = &meta_slice[self.index];
+            if (meta.generation > entityId.generation) return null;
+
+            return self.read(entityId.index);
+        }
+
+        pub inline fn next(self: *Iter) ?ViewType {
+            if (self.index >= self.registry.len) {
+                return null;
+            }
+
+            const value = self.read(self.index);
 
             self.index +|= 1;
 
@@ -145,7 +163,7 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
             return Self{
                 .components = components,
                 .len = 0,
-                .generation = 0,
+                .generation = 1,
                 .capacity = capacity,
                 .alloc = alloc,
             };
@@ -236,9 +254,9 @@ test "Registry: iterate" {
 
     _ = try registry.create("meh");
 
-    var iter = registry.view(View);
-    while (iter.next()) |view| {
-        try std.testing.expect(view.meta.name.len == 3);
+    var view = registry.view(View);
+    while (view.next()) |elem| {
+        try std.testing.expect(elem.meta.name.len == 3);
     }
 
     _ = registry.raw(TransformComponent);
