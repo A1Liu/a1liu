@@ -13,13 +13,21 @@ export default function Page() {
     canvas.width = canvas.getBoundingClientRect().width;
     canvas.height = canvas.getBoundingClientRect().height;
 
+    let running = true;
     const game = new Game(canvas.width, canvas.height);
     const render = () => {
+      if (!running) {
+        return;
+      }
       game.tick(16);
       game.render(canvas, ctx);
       requestAnimationFrame(render);
     };
     render();
+
+    return () => {
+      running = false;
+    };
   }, []);
 
   return (

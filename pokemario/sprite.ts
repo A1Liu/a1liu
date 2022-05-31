@@ -15,6 +15,28 @@ export interface Vector2 {
   y: number;
 }
 
+export function vec2equal(left: Vector2, right: Vector2) {
+  return left.x === right.x && left.y === right.y;
+}
+
+export function vec2mul(scalar: number, vec: Vector2): Vector2 {
+  return {
+    x: vec.x * scalar,
+    y: vec.y * scalar,
+  };
+}
+
+export function getAccelerationVector(
+  initialVelocity: Vector2,
+  terminalVelocity: Vector2,
+  duration: number
+): Vector2 {
+  return {
+    x: (terminalVelocity.x - initialVelocity.x) / duration,
+    y: (terminalVelocity.y - initialVelocity.y) / duration,
+  };
+}
+
 export abstract class Renderable {
   abstract tick(delta: number, game: Game): void;
   abstract render(game: Game, ctx: CanvasRenderingContext2D): void;
@@ -22,6 +44,10 @@ export abstract class Renderable {
 
 export abstract class Sprite extends Renderable {
   image: HTMLImageElement | null = null;
+  velocity: Vector2 = {
+    x: 0,
+    y: 0,
+  };
 
   constructor(
     public position: Position,
@@ -91,7 +117,7 @@ export class SpriteGroup extends Renderable {
 }
 
 export class Enemy extends Sprite {
-  private velocity: Vector2 = { x: 0, y: 0 };
+  velocity: Vector2 = { x: 0, y: 0 };
   private anchoredOn: Sprite | undefined = undefined;
   private isWalkLeft: boolean = true;
   private walkSpeed: number = 1.0;

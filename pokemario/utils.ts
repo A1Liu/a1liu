@@ -1,5 +1,7 @@
 import { Size } from "./sprite";
 
+export function assertType<T>(value: T) {}
+
 export function projectSize(initialSize: Size, screen: Size): Size {
   if (screen.width > screen.height) {
     return projectSizeByHeight(initialSize, screen.height);

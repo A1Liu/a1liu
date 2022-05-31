@@ -11,6 +11,10 @@ export class Game {
     this.renderables.push(new Landscape(this));
   }
 
+  destroy() {
+    this.monitor.destroy();
+  }
+
   tick(delta: number): void {
     for (const renderable of this.renderables) {
       renderable.tick(delta, this);
