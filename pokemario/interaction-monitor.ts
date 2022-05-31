@@ -21,35 +21,50 @@ export class InteractionMonitor {
   }
 
   onKeyToggle = (evt: KeyboardEvent) => {
-    // Allow refreshing
-    if (evt.key === "r" && evt.metaKey) {
+    if (evt.metaKey || evt.repeat) {
       return;
     }
 
-    evt.preventDefault();
+    let mask : number = 0;
     switch (evt.key) {
       case "Shift":
-        this.state ^= KeyboardKey.Shift;
+        mask = KeyboardKey.Shift;
         break;
+
       case "Space":
-        this.state ^= KeyboardKey.Space;
+        mask = KeyboardKey.Space;
         break;
+
       case "ArrowUp":
       case "w":
-        this.state ^= KeyboardKey.Up;
+        mask = KeyboardKey.Up;
         break;
+
       case "ArrowLeft":
       case "a":
-        this.state ^= KeyboardKey.Left;
+        mask = KeyboardKey.Left;
         break;
+
       case "ArrowDown":
       case "s":
-        this.state ^= KeyboardKey.Down;
+        mask = KeyboardKey.Down;
         break;
+
       case "ArrowRight":
       case "d":
-        this.state ^= KeyboardKey.Right;
+        mask = KeyboardKey.Right;
         break;
+
+      default:
+        return;
+    }
+
+    evt.preventDefault();
+
+    if (evt.type == 'keydown') {
+      this.state |= mask;
+    } else {
+      this.state &= ~mask;
     }
   };
 
