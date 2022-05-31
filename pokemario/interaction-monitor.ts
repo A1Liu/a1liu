@@ -21,6 +21,11 @@ export class InteractionMonitor {
   }
 
   onKeyToggle = (evt: KeyboardEvent) => {
+    // Allow refreshing
+    if (evt.key === "r" && evt.metaKey) {
+      return;
+    }
+
     evt.preventDefault();
     switch (evt.key) {
       case "Shift":
