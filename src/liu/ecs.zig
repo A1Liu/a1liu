@@ -240,6 +240,14 @@ pub fn Registry(
 
                 self.alloc.free(slice);
             }
+
+            inline for (SparseComponents) |T, SparseIdx| {
+                const list = self.rawSparse(T);
+                const mapping = &self.sparse_mapping[SparseIdx];
+
+                list.deinit(self.alloc);
+                mapping.map.deinit(self.alloc);
+            }
         }
 
         pub fn create(self: *Self, name: []const u8) !EntityId {
@@ -477,7 +485,7 @@ test "Registry: sparse" {
     defer registry.deinit();
 
     const View = struct {
-        transform: ?TransformComponent,
+        transform: ?*TransformComponent,
         move: ?*MoveComponent,
     };
 
@@ -486,6 +494,16 @@ test "Registry: sparse" {
 
     while (i < 100) : (i += 1) {
         const meh = try registry.create("meh");
+        if (i % 2 == 0) {
+            success = try registry.addComponent(meh, TransformComponent{ .i = i });
+            try std.testing.expect(success);
+        }
+
+        if (i % 4 == 0) {
+            success = try registry.addComponent(meh, Empty{});
+            try std.testing.expect(success);
+        }
+
         if (i % 8 == 0) {
             success = try registry.addComponent(meh, MoveComponent{ .i = i });
             try std.testing.expect(success);
@@ -504,6 +522,10 @@ test "Registry: sparse" {
     var sparse_count: u32 = 0;
     while (view.next()) |elem| {
         try std.testing.expect(elem.meta.name.len == 3);
+
+        if (elem.transform) |transform| {
+            try std.testing.expect(transform.i == count);
+        }
 
         if (elem.move) |move| {
             try std.testing.expect(move.i == count);
