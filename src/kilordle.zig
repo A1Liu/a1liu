@@ -6,14 +6,14 @@ const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
 
-var wordles: []const u8 = undefined;
-var wordle_words: []const u8 = undefined;
-
 const ArrayList = std.ArrayList;
 
 const ext = struct {
     extern fn setPuzzles(obj: wasm.Obj) void;
     extern fn setWordsLeft(count: usize) void;
+    extern fn addChar(code: u32) void;
+    extern fn incrementSubmissionCount() void;
+    extern fn resetSubmission() void;
 
     fn submitWordExt(l0: u8, l1: u8, l2: u8, l3: u8, l4: u8) callconv(.C) bool {
         return submitWord([_]u8{ l0, l1, l2, l3, l4 }) catch @panic("submitWord failed");
@@ -44,32 +44,42 @@ const Puzzle = struct {
     submits: []u8,
 };
 
-const MatchKind = enum(u8) { none, letter, exact };
+// The values matter here, because we use the enum value for an ordered
+// comparison later on in the file
+const MatchKind = enum(u8) { none = 0, letter = 1, exact = 2 };
 const Match = union(MatchKind) {
     none: void,
     exact: void,
     letter: u8,
 };
 
+const Keys = struct {
+    solution: wasm.Obj,
+    filled: wasm.Obj,
+    submits: wasm.Obj,
+};
+
+// Initialized at start of program
+var wordles: []const u8 = undefined;
+var wordle_words: []const u8 = undefined;
+var keys: Keys = undefined;
+
 var wordles_left: ArrayList(Wordle) = undefined;
 var submissions: ArrayList([5]u8) = undefined;
 
-fn setWordsLeft(count: usize) void {
-    if (builtin.target.cpu.arch != .wasm32) return;
-
-    ext.setWordsLeft(count);
+fn makeKeys() Keys {
+    return .{
+        .solution = wasm.out.string("solution"),
+        .filled = wasm.out.string("filled"),
+        .submits = wasm.out.string("submits"),
+    };
 }
 
 fn setPuzzles(puzzles: []Puzzle) void {
-    if (builtin.target.cpu.arch != .wasm32) return;
-
     const mark = wasm.watermark();
     defer wasm.setWatermark(mark);
 
     const arr = wasm.out.array();
-    const solution_key = wasm.out.string("solution");
-    const filled_key = wasm.out.string("filled");
-    const submits_key = wasm.out.string("submits");
 
     for (puzzles) |puzzle| {
         const obj = wasm.out.obj();
@@ -78,22 +88,22 @@ fn setPuzzles(puzzles: []Puzzle) void {
         const filled = wasm.out.string(&puzzle.filled);
         const submits = wasm.out.string(puzzle.submits);
 
-        wasm.out.objSet(obj, solution_key, solution);
-        wasm.out.objSet(obj, filled_key, filled);
-        wasm.out.objSet(obj, submits_key, submits);
+        obj.objSet(keys.solution, solution);
+        obj.objSet(keys.filled, filled);
+        obj.objSet(keys.submits, submits);
 
-        wasm.out.arrayPush(arr, obj);
+        arr.arrayPush(obj);
     }
 
     ext.setPuzzles(arr);
 }
 
-fn searchList(word: []const u8, dict: []const u8) bool {
+fn searchList(word: [5]u8, dict: []const u8) bool {
     var word_index: u32 = 0;
     while (word_index < dict.len) : (word_index += 6) {
-        const dict_slice = dict[word_index..(word_index + 5)];
+        const dict_slice = dict[word_index..][0..5];
 
-        if (std.mem.eql(u8, word, dict_slice)) {
+        if (std.mem.eql(u8, &word, dict_slice)) {
             return true;
         }
     }
@@ -143,8 +153,8 @@ pub fn submitWord(word: [5]u8) !bool {
         }
     }
 
-    const is_wordle = searchList(&word, wordles);
-    if (!is_wordle and !searchList(&word, wordle_words)) {
+    const is_wordle = searchList(word, wordles);
+    if (!is_wordle and !searchList(word, wordle_words)) {
         return false;
     }
 
@@ -185,7 +195,8 @@ pub fn submitWord(word: [5]u8) !bool {
             _ = top_values.pop();
         }
 
-        // write-back would be no-op
+        // write-back would be no-op; this also guarantees that the read and
+        // write pointers don't alias, for whatever that's worth
         if (read_head == write_head) {
             write_head += 1;
             continue;
@@ -231,8 +242,12 @@ pub fn submitWord(word: [5]u8) !bool {
                 }
 
                 switch (new_matches[idx]) {
-                    .none => continue,
+                    // if we have an exact match, it should have been handled
+                    // earlier on when we matched the remaining wordles against
+                    // the new submission
                     .exact => unreachable,
+
+                    .none => continue,
                     .letter => |submit_idx| {
                         // Uppercase means the output text should be orange.
                         submit_letters[submit_idx] = submit[submit_idx] - 'a' + 'A';
@@ -260,7 +275,15 @@ pub fn submitWord(word: [5]u8) !bool {
     }
 
     setPuzzles(puzzles.items);
-    setWordsLeft(wordles_left.items.len);
+    ext.setWordsLeft(wordles_left.items.len);
+    ext.resetSubmission();
+    ext.incrementSubmissionCount();
+
+    if (builtin.mode != .Debug) return true;
+
+    if (puzzles.items.len == 0) return true;
+
+    for (puzzles.items[0].solution) |c| ext.addChar(c);
 
     return true;
 }
@@ -279,15 +302,7 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
     return false;
 }
 
-pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
-    wasm.initIfNecessary();
-
-    wordles = try wasm.in.bytes(l_wordles, liu.Pages);
-    wordle_words = try wasm.in.bytes(l_words, liu.Pages);
-
-    wordles_left = ArrayList(Wordle).init(liu.Pages);
-    submissions = ArrayList([5]u8).init(liu.Pages);
-
+fn initData() !void {
     const wordle_count = (wordles.len - 1) / 6 + 1;
     try wordles_left.ensureUnusedCapacity(wordle_count);
 
@@ -300,10 +315,32 @@ pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
             .places_found = 0,
         };
 
-        std.mem.copy(u8, &wordle.text, wordles[word_index..(word_index + 5)]);
+        wordle.text = wordles[word_index..][0..5].*;
         wordles_left.appendAssumeCapacity(wordle);
     }
 
-    setWordsLeft(wordles_left.items.len);
+    ext.setWordsLeft(wordles_left.items.len);
+}
+
+export fn reset() void {
+    wordles_left.items.len = 0;
+    submissions.items.len = 0;
+
+    initData() catch @panic("initData failed");
+}
+
+pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
+    wasm.initIfNecessary();
+
+    wordles = try wasm.in.bytes(l_wordles, liu.Pages);
+    wordle_words = try wasm.in.bytes(l_words, liu.Pages);
+
+    keys = makeKeys();
+
+    wordles_left = ArrayList(Wordle).init(liu.Pages);
+    submissions = ArrayList([5]u8).init(liu.Pages);
+
+    try initData();
+
     std.log.info("WASM initialized!", .{});
 }

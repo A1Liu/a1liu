@@ -8,13 +8,13 @@
 # Zig folders and output
 zig-cache
 zig-out
-
-# IDK why Zig outputs this crap but IDK how to disable it.
 *.wasm
+
+# testing C code
+a.out
 
 # dependencies
 /node_modules
-
 
 # next.js
 /.next/

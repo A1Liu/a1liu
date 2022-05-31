@@ -1,6 +1,6 @@
 import "./global.css";
 import Head from "next/head";
-import { ToastCorner } from "src/errors";
+import { ToastCorner } from "src/tsx/errors";
 import { post, get } from "src/util";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";

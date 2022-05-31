@@ -7,13 +7,12 @@ export type Number3 = [number, number, number];
 export type Number4 = [number, number, number, number];
 
 export type Message =
-  | { kind: "toggleTool" }
   | { kind: "resize"; data: Number2 }
-  | { kind: "setColor"; data: Number3 }
   | { kind: "mousemove"; data: Number2 }
   | { kind: "leftclick"; data: Number2 }
   | { kind: "rightclick"; data: Number2 }
   | { kind: "keydown"; data: number }
+  | { kind: "keyup"; data: number }
   | { kind: "canvas"; offscreen: any };
 
 let resolve: null | ((msg: Message[]) => void) = null;
@@ -40,17 +39,15 @@ const waitForMessage = (): Promise<Message[]> => {
 
 export type OutMessage =
   | { kind: "initDone"; data?: void }
-  | { kind: "setTool"; data: string }
-  | { kind: "setColor"; data: Number3 }
   | { kind: string; data: any };
 
-interface PainterGlState {
+interface ErlangGlState {
   renderId: number;
   rawTrianglesLength: number;
   colorsLength: number;
 }
 
-interface PainterGl {
+interface ErlangGl {
   ctx: WebGl;
   program: WebGLProgram;
   vao: WebGLVertexArrayObject;
@@ -58,17 +55,18 @@ interface PainterGl {
   colors: WebGLBuffer;
 }
 
-const gglRef: { current: PainterGl | null } = { current: null };
-const glState: PainterGlState = {
+const gglRef: { current: ErlangGl | null } = { current: null };
+const glState: ErlangGlState = {
   rawTrianglesLength: 0,
   colorsLength: 0,
   renderId: 1,
 };
 
-const initGl = async (canvas: any): Promise<PainterGl | null> => {
+const initGl = async (canvas: any): Promise<ErlangGl | null> => {
   const ctx: WebGl = canvas?.getContext("webgl2", {
     preserveDrawingBuffer: true,
   });
+
   if (!ctx) return null;
 
   const [vertSrc, fragSrc] = await Promise.all([
@@ -134,26 +132,6 @@ const initGl = async (canvas: any): Promise<PainterGl | null> => {
   ctx.bindVertexArray(null);
 
   return { ctx, program, vao, rawTriangles, colors };
-};
-
-const readPixel = (x: number, y: number): Uint8Array | null => {
-  const ggl = gglRef.current;
-  if (!ggl) return null;
-
-  const { ctx } = ggl;
-
-  const pixel = new Uint8Array(4);
-  ctx.readPixels(
-    Math.floor(x),
-    Math.floor(y),
-    1,
-    1,
-    ctx.RGBA,
-    ctx.UNSIGNED_BYTE,
-    pixel
-  );
-
-  return pixel;
 };
 
 const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
@@ -244,32 +222,26 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
       break;
     }
 
-    case "rightclick":
+    case "rightclick": {
       const [x, y] = msg.data;
       wasmRef.abi.onRightClick(x, y);
       break;
+    }
 
     case "keydown":
-      const data = `${msg.data}`;
-      wasmRef.abi.onKey(msg.data);
+    case "keyup": {
+      const down = msg.kind === "keydown";
+      wasmRef.abi.onKey(down, msg.data);
+
+      const data = `${msg.kind}: ${msg.data}`;
+      // postMessage({ kind: "info", data });
       break;
+    }
 
     case "resize": {
       const [width, height] = msg.data;
       resize(wasmRef, width, height);
-      break;
-    }
 
-    case "setColor": {
-      const [r, g, b] = msg.data;
-      wasmRef.abi.setColor(r, g, b);
-      break;
-    }
-
-    case "toggleTool": {
-      const obj = wasmRef.abi.toggleTool();
-      const data = wasmRef.readObj(obj);
-      postMessage({ kind: "setTool", data });
       break;
     }
 
@@ -289,17 +261,9 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm("/apps/painter.wasm", {
+  const wasmRef = await wasm.fetchWasm("/apps/erlang.wasm", {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: (wasmRef: wasm.Ref) => ({
-      readPixel: (x: number, y: number): number => {
-        const pixel = readPixel(x, y);
-        return wasmRef.addObj(pixel);
-      },
-      setColorExt: (r: number, g: number, b: number): void => {
-        postMessage({ kind: "setColor", data: [r, g, b] });
-      },
-    }),
+    raw: (wasmRef: wasm.Ref) => ({}),
     imports: {
       renderExt: (tri: Float32Array | null, colors: Float32Array | null) =>
         updateState(tri, colors),
@@ -334,9 +298,10 @@ const init = async () => {
     }
 
     gglRef.current = ggl;
-
     postMessage({ kind: "success", data: "WebGL2 context initialized!" });
     postMessage({ kind: "initDone" });
+
+    wasmRef.abi.initialRender();
     break;
   }
 

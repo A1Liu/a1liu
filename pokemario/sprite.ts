@@ -1,5 +1,7 @@
 import { Game } from "./game";
 
+export const EPSILON = 0.0001;
+
 export interface Position {
   x: number;
   y: number;
@@ -80,6 +82,32 @@ export abstract class Sprite extends Renderable {
     if (otherX1 > selfX2 || selfX1 > otherX1) return undefined;
     if (otherY1 > selfY2 || selfY1 > otherY1) return undefined;
 
+    // other is too far left or far right to collide
+    if (otherX1 + EPSILON > selfX2 || selfX1 + EPSILON > otherX2)
+      return undefined;
+    if (otherY1 + EPSILON > selfY2 || selfY1 + EPSILON > otherY2)
+      return undefined;
+
+    // Edges touch but they dont overlap; we report a collision vector
+    // of zero here.
+    if (otherX1 - selfX2 <= EPSILON || selfX1 - otherX2 <= EPSILON)
+      return { x: 0, y: 0 };
+    if (otherY1 - selfY2 <= EPSILON || selfY1 - otherY2 <= EPSILON)
+      return { x: 0, y: 0 };
+
+    // Use bounding-box center-of-mass to calculate collision vector; this
+    // is wildly inaccurate, but, uh, meh. Can add edge stuffs later
+
+    const otherXM = (otherX1 + otherX2) / 2;
+    const selfXM = (selfX1 + selfX2) / 2;
+    const otherYM = (otherY1 + otherY2) / 2;
+    const selfYM = (selfY1 + selfY2) / 2;
+
+    return {
+      x: otherXM - selfXM,
+      y: otherYM - selfYM,
+    };
+
     return {
       x: otherX1 - selfX1,
       y: otherY1 - selfY1,
@@ -119,7 +147,6 @@ export class SpriteGroup extends Renderable {
 export class Enemy extends Sprite {
   velocity: Vector2 = { x: 0, y: 0 };
   private anchoredOn: Sprite | undefined = undefined;
-  private isWalkLeft: boolean = true;
   private walkSpeed: number = 1.0;
 
   constructor(position: Position, size: Size, assetPath: string) {
@@ -136,19 +163,53 @@ export class Enemy extends Sprite {
     }
 
     // Check if we can still anchor
-    if (this.anchoredOn) {
-      // speed and direction!
-      const vector = this.collisionVector(this.anchoredOn);
+    anchorCheck: if (this.anchoredOn) {
+      const vector = this.collisionVector(this.anchoredOn); // speed and direction!
       if (!vector) {
         this.anchoredOn = undefined;
-      } else {
-        this.position.x += vector.x;
-        this.position.y += vector.y;
+        break anchorCheck;
+      }
+
+      this.position.x += vector.x;
+      this.position.y += vector.y;
+    }
+
+    // Check for new collisions, potentially causing a new anchorage as well
+    for (const sprite of game.sprites) {
+      if (sprite === this) continue;
+      if (sprite === this.anchoredOn) continue;
+
+      const vector = this.collisionVector(sprite);
+      if (!vector) continue;
+
+      this.position.x += vector.x;
+      this.position.y += vector.y;
+
+      // For now, any kind of collision just straight-up stops you dead
+      // in your tracks. Obviously this is not reasonable, but like, whatever
+      //
+      // A fun side effect of this is that enemies become sticky after falling;
+      // if they hit a wall after jumping off of a thing, they immediately
+      // stick to it.
+      this.velocity.x = 0;
+      this.velocity.y = 0;
+
+      // Collision check ordering could cause weird nonsense; the hope is
+      // that it will not come to that.
+      if (!this.anchoredOn && this.isStandingOn(sprite)) {
+        this.anchoredOn = sprite;
       }
     }
   }
 
-  render(game: Game, ctx: CanvasRenderingContext2D): void {}
+  isStandingOn(other: Sprite): boolean {
+    const { y: otherY1 } = other.position;
+
+    const { y: selfY1 } = other.position;
+    const selfY2 = other.position.y + other.size.height;
+
+    return otherY1 - selfY2 <= EPSILON;
+  }
 }
 
 export class PokeMan extends Sprite {
@@ -157,8 +218,6 @@ export class PokeMan extends Sprite {
   }
 
   tick(delta: number, game: Game): void {}
-
-  render(game: Game, ctx: CanvasRenderingContext2D): void {}
 }
 
 export class Block extends Sprite {
@@ -169,6 +228,4 @@ export class Block extends Sprite {
   tick(delta: number, game: Game): void {
     // Do nothing
   }
-
-  render(game: Game, ctx: CanvasRenderingContext2D): void {}
 }

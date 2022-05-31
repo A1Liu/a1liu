@@ -34,5 +34,5 @@ pub fn build(b: *Builder) void {
 
     _ = wasmProgram(b, mode, "kilordle", null);
     _ = wasmProgram(b, mode, "painter", null);
-    _ = wasmProgram(b, mode, "planner", "./public/apps/planner");
+    _ = wasmProgram(b, mode, "erlang", null);
 }
