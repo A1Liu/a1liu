@@ -100,7 +100,48 @@ const Erlang: React.VFC = () => {
   }, [workerRef, canvasRef]);
 
   return (
-    <div className={styles.wrapper}>
+    <div
+      className={styles.wrapper}
+      onMouseMove={(evt: React.MouseEvent) => {
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "mousemove", data });
+      }}
+      onClick={(evt: React.MouseEvent) => {
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "leftclick", data });
+      }}
+      onContextMenu={(evt: React.MouseEvent) => {
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        evt.preventDefault();
+
+        const data = [evt.clientX, evt.clientY];
+        workerRef?.postMessage({ kind: "rightclick", data });
+      }}
+      onKeyDown={(evt: any) => {
+        if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
+
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        workerRef?.postMessage({ kind: "keydown", data: evt.keyCode });
+      }}
+      onKeyUp={(evt: any) => {
+        if (evt.isComposing || evt.keyCode === 229) return;
+
+        if (!canvasRef.current) return;
+        if (evt.target !== canvasRef.current) return;
+
+        workerRef?.postMessage({ kind: "keyup", data: evt.keyCode });
+      }}
+    >
       <canvas
         ref={canvasRef}
         className={styles.canvas}

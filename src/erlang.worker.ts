@@ -12,6 +12,7 @@ export type Message =
   | { kind: "leftclick"; data: Number2 }
   | { kind: "rightclick"; data: Number2 }
   | { kind: "keydown"; data: number }
+  | { kind: "keyup"; data: number }
   | { kind: "canvas"; offscreen: any };
 
 let resolve: null | ((msg: Message[]) => void) = null;
@@ -221,15 +222,27 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
       break;
     }
 
-    case "rightclick":
+    case "rightclick": {
       const [x, y] = msg.data;
       wasmRef.abi.onRightClick(x, y);
       break;
+    }
 
-    case "keydown":
-      const data = `${msg.data}`;
+    case "keyup": {
       wasmRef.abi.onKey(msg.data);
+
+      const data = `up: ${msg.data}`;
+      postMessage({ kind: "info", data });
       break;
+    }
+
+    case "keydown": {
+      wasmRef.abi.onKey(msg.data);
+
+      const data = `down: ${msg.data}`;
+      postMessage({ kind: "info", data });
+      break;
+    }
 
     case "resize": {
       const [width, height] = msg.data;
