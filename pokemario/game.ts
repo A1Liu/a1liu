@@ -3,7 +3,7 @@ import { SkyBackground } from './sky';
 
 export class Game {
     private score : number = 0;
-    private sprites: Sprite[] = [];
+    public sprites: Sprite[] = [];
 
     width = 0;
     height = 0;

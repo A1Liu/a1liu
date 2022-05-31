@@ -30,7 +30,7 @@ const Render = struct {
     const List = std.ArrayListUnmanaged;
     const Self = @This();
 
-    const TRIANGLE_SIZE: u32 = 12;
+    const LINE_SIZE: u32 = 12;
 
     dims: Vec2 = Vec2{ 0, 0 },
     triangles: List(f32) = .{},
@@ -321,8 +321,8 @@ const TriangleTool = struct {
             return;
         };
 
-        render.drawLine(temp + Render.TRIANGLE_SIZE, first, pt);
-        render.drawLine(temp + 2 * Render.TRIANGLE_SIZE, second, pt);
+        render.drawLine(temp + Render.LINE_SIZE, first, pt);
+        render.drawLine(temp + 2 * Render.LINE_SIZE, second, pt);
 
         return;
     }
