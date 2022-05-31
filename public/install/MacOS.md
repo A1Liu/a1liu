@@ -24,5 +24,11 @@
       Connect to This Mac
 
 ### Bluetooth
-Airpods should have the setting "when connecting to this macbook" set to "". Otherwise they'll keep changing what they're connected to
-randomly.
+Airpods should have the setting "when connecting to this macbook" set to "".
+Otherwise they'll keep changing what they're connected to randomly.
+
+### `/etc/hosts` Performance
+MacOS is slow when using `/etc/hosts` on multiple lines, so just put all the aliases
+for an IP address on a single line.
+
+https://superuser.com/questions/1189379/chrome-slow-to-resolve-etc-hosts-on-macos-os-x
