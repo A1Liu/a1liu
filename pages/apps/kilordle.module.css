@@ -1,7 +1,7 @@
-@value min-sm from 'src/util.module.css';
-@value max-sm from 'src/util.module.css';
-@value min-lg from 'src/util.module.css';
-@value lg from 'src/util.module.css';
+@value min-sm from 'src/tsx/util.module.css';
+@value max-sm from 'src/tsx/util.module.css';
+@value min-lg from 'src/tsx/util.module.css';
+@value lg from 'src/tsx/util.module.css';
 
 .wrapper {
   height: 100vh;

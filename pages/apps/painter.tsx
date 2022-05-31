@@ -6,9 +6,9 @@ import type { Dispatch, SetStateAction } from "react";
 import * as GL from "src/webgl";
 import type { WebGl } from "src/webgl";
 import styles from "./painter.module.css";
-import css from "src/util.module.css";
+import css from "src/tsx/util.module.css";
 import * as wasm from "src/wasm";
-import { useToast, ToastColors } from "src/errors";
+import { useToast, ToastColors } from "src/tsx/errors";
 import cx from "classnames";
 import create from "zustand";
 

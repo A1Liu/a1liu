@@ -89,9 +89,9 @@ export fn initialRender() void {
 
 fn initErr() !void {
     try render.triangles.appendSlice(liu.Pages, &.{
-        0.5,  0.5,
-        1,    1,
         -0.5, -0.5,
+        0,    0.5,
+        0.5,  -0.5,
     });
 
     try render.colors.appendSlice(liu.Pages, &.{

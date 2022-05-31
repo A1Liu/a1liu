@@ -1,4 +1,4 @@
-import Layout from "src/layout";
+import Layout from "src/tsx/layout";
 import Link from "next/link";
 
 const Index = () => {
