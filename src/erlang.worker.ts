@@ -25,11 +25,13 @@ onmessage = (event: MessageEvent<Message>) => {
 };
 
 const waitForMessage = (): Promise<Message[]> => {
-  const p: Promise<Message[]> = new Promise((r) => (resolve = r));
-  if (messages.length > 0) {
-    resolve(messages.splice(0, messages.length));
-    resolve = null;
-  }
+  const p: Promise<Message[]> = new Promise((r) => {
+    if (messages.length > 0) {
+      return r(messages.splice(0, messages.length));
+    }
+
+    resolve = r;
+  });
 
   return p;
 };
