@@ -45,7 +45,6 @@ export abstract class Renderable {
 }
 
 export abstract class Sprite extends Renderable {
-  image: HTMLImageElement | null = null;
   velocity: Vector2 = {
     x: 0,
     y: 0,
@@ -54,18 +53,9 @@ export abstract class Sprite extends Renderable {
   constructor(
     public position: Position,
     public size: Size,
-    public assetPath: string
+    public image: HTMLImageElement
   ) {
     super();
-  }
-
-  getAssetImage() {
-    if (this.image?.src !== this.assetPath) {
-      const image = new Image();
-      image.src = this.assetPath;
-      this.image = image;
-    }
-    return this.image!;
   }
 
   // if the two things are juuuuuust about to collide, this will return a zero vector instead of returning undefined.
@@ -115,7 +105,7 @@ export abstract class Sprite extends Renderable {
   }
 
   render(game: Game, ctx: CanvasRenderingContext2D) {
-    const image = this.getAssetImage();
+    const image = this.image;
     ctx.drawImage(
       image,
       0,
@@ -149,8 +139,8 @@ export class Enemy extends Sprite {
   private anchoredOn: Sprite | undefined = undefined;
   private walkSpeed: number = 1.0;
 
-  constructor(position: Position, size: Size, assetPath: string) {
-    super(position, size, assetPath);
+  constructor(position: Position, size: Size, image: HTMLImageElement) {
+    super(position, size, image);
   }
 
   tick(delta: number, game: Game): void {
@@ -213,16 +203,16 @@ export class Enemy extends Sprite {
 }
 
 export class PokeMan extends Sprite {
-  constructor(position: Position, size: Size, assetPath: string) {
-    super(position, size, assetPath);
+  constructor(position: Position, size: Size, image: HTMLImageElement) {
+    super(position, size, image);
   }
 
   tick(delta: number, game: Game): void {}
 }
 
 export class Block extends Sprite {
-  constructor(position: Position, size: Size, assetPath: string) {
-    super(position, size, assetPath);
+  constructor(position: Position, size: Size, image: HTMLImageElement) {
+    super(position, size, image);
   }
 
   tick(delta: number, game: Game): void {

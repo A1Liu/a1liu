@@ -23,6 +23,7 @@ export default function Page() {
       game.render(canvas, ctx);
       requestAnimationFrame(render);
     };
+
     render();
 
     return () => {

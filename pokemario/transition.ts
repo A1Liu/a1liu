@@ -45,8 +45,11 @@ export function applyTransition<T>(
     const targetValue = t.target[key];
 
     if (
-      (initialValue <= targetValue && currentValue >= targetValue) ||
-      (initialValue > targetValue && currentValue < targetValue)
+      initialValue === targetValue ||
+      // if we're increasing, stop when current exceeds target
+      (initialValue < targetValue && currentValue >= targetValue) ||
+      // if we're decreasing, stop when current drops below target
+      (initialValue > targetValue && currentValue <= targetValue)
     ) {
       t.state[key] = targetValue;
     } else {
