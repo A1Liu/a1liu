@@ -4,13 +4,13 @@ const decoder = new TextDecoder();
 const initialObjectBuffer: any[] = [
   undefined,
   null,
-  '',
+  "",
 
-  'log',
-  'info',
-  'warn',
-  'error',
-  'success',
+  "log",
+  "info",
+  "warn",
+  "error",
+  "success",
 
   Uint8Array,
   Float32Array,

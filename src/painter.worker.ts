@@ -1,20 +1,20 @@
-import * as GL from 'src/webgl';
-import type { WebGl } from 'src/webgl';
-import * as wasm from 'src/wasm';
+import * as GL from "src/webgl";
+import type { WebGl } from "src/webgl";
+import * as wasm from "src/wasm";
 
 export type Number2 = [number, number];
 export type Number3 = [number, number, number];
 export type Number4 = [number, number, number, number];
 
 export type Message =
-  | { kind: 'toggleTool' }
-  | { kind: 'resize'; data: Number2 }
-  | { kind: 'setColor'; data: Number3 }
-  | { kind: 'mousemove'; data: Number2 }
-  | { kind: 'leftclick'; data: Number2 }
-  | { kind: 'rightclick'; data: Number2 }
-  | { kind: 'keydown'; data: number }
-  | { kind: 'canvas'; offscreen: any };
+  | { kind: "toggleTool" }
+  | { kind: "resize"; data: Number2 }
+  | { kind: "setColor"; data: Number3 }
+  | { kind: "mousemove"; data: Number2 }
+  | { kind: "leftclick"; data: Number2 }
+  | { kind: "rightclick"; data: Number2 }
+  | { kind: "keydown"; data: number }
+  | { kind: "canvas"; offscreen: any };
 
 let resolve: null | ((msg: Message[]) => void) = null;
 const messages: Message[] = [];
@@ -39,9 +39,9 @@ const waitForMessage = (): Promise<Message[]> => {
 };
 
 export type OutMessage =
-  | { kind: 'initDone'; data?: void }
-  | { kind: 'setTool'; data: string }
-  | { kind: 'setColor'; data: Number3 }
+  | { kind: "initDone"; data?: void }
+  | { kind: "setTool"; data: string }
+  | { kind: "setColor"; data: Number3 }
   | { kind: string; data: any };
 
 interface PainterGlState {
@@ -66,14 +66,14 @@ const glState: PainterGlState = {
 };
 
 const initGl = async (canvas: any): Promise<PainterGl | null> => {
-  const ctx: WebGl = canvas?.getContext('webgl2', {
+  const ctx: WebGl = canvas?.getContext("webgl2", {
     preserveDrawingBuffer: true,
   });
   if (!ctx) return null;
 
   const [vertSrc, fragSrc] = await Promise.all([
-    fetch('/apps/painter.vert').then((r) => r.text()),
-    fetch('/apps/painter.frag').then((r) => r.text()),
+    fetch("/apps/painter.vert").then((r) => r.text()),
+    fetch("/apps/painter.frag").then((r) => r.text()),
   ]);
 
   const vertexShader = GL.createShader(ctx, ctx.VERTEX_SHADER, vertSrc);
@@ -95,8 +95,8 @@ const initGl = async (canvas: any): Promise<PainterGl | null> => {
   const posLocation = 0;
   const colorLocation = 1;
 
-  ctx.bindAttribLocation(program, posLocation, 'pos');
-  ctx.bindAttribLocation(program, colorLocation, 'color');
+  ctx.bindAttribLocation(program, posLocation, "pos");
+  ctx.bindAttribLocation(program, colorLocation, "color");
 
   ctx.bindVertexArray(vao);
 
@@ -232,44 +232,44 @@ const updateState = (
 
 const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
   switch (msg.kind) {
-    case 'mousemove': {
+    case "mousemove": {
       const [x, y] = msg.data;
       wasmRef.abi.onMove(x, y);
       break;
     }
 
-    case 'leftclick': {
+    case "leftclick": {
       const [x, y] = msg.data;
       wasmRef.abi.onClick(x, y);
       break;
     }
 
-    case 'rightclick':
+    case "rightclick":
       const [x, y] = msg.data;
       wasmRef.abi.onRightClick(x, y);
       break;
 
-    case 'keydown':
+    case "keydown":
       const data = `${msg.data}`;
       wasmRef.abi.onKey(msg.data);
       break;
 
-    case 'resize': {
+    case "resize": {
       const [width, height] = msg.data;
       resize(wasmRef, width, height);
       break;
     }
 
-    case 'setColor': {
+    case "setColor": {
       const [r, g, b] = msg.data;
       wasmRef.abi.setColor(r, g, b);
       break;
     }
 
-    case 'toggleTool': {
+    case "toggleTool": {
       const obj = wasmRef.abi.toggleTool();
       const data = wasmRef.readObj(obj);
-      postMessage({ kind: 'setTool', data });
+      postMessage({ kind: "setTool", data });
       break;
     }
 
@@ -289,7 +289,7 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm('/apps/painter.wasm', {
+  const wasmRef = await wasm.fetchWasm("/apps/painter.wasm", {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
       readPixel: (x: number, y: number): number => {
@@ -297,7 +297,7 @@ const init = async () => {
         return wasmRef.addObj(pixel);
       },
       setColorExt: (r: number, g: number, b: number): void => {
-        postMessage({ kind: 'setColor', data: [r, g, b] });
+        postMessage({ kind: "setColor", data: [r, g, b] });
       },
     }),
     imports: {
@@ -314,7 +314,7 @@ const init = async () => {
 
     captured.forEach((msg) => {
       switch (msg.kind) {
-        case 'canvas':
+        case "canvas":
           offscreen = msg.offscreen;
           break;
 
@@ -329,14 +329,14 @@ const init = async () => {
     const ggl = await initGl(offscreen);
 
     if (!ggl) {
-      postMessage({ kind: 'error', data: 'WebGL2 not supported!' });
+      postMessage({ kind: "error", data: "WebGL2 not supported!" });
       return;
     }
 
     gglRef.current = ggl;
 
-    postMessage({ kind: 'success', data: 'WebGL2 context initialized!' });
-    postMessage({ kind: 'initDone' });
+    postMessage({ kind: "success", data: "WebGL2 context initialized!" });
+    postMessage({ kind: "initDone" });
     break;
   }
 

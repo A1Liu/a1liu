@@ -59,7 +59,6 @@
     "tabWidth": 2,
     "useTabs": false,
     "quoteProps": "consistent",
-    "semi": true,
-    "singleQuote": true
+    "semi": true
   }
 }

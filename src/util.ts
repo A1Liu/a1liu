@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const timeout = (ms: number): Promise<void> =>
   new Promise((res) => setTimeout(res, ms));
@@ -10,9 +10,9 @@ export async function defer<T>(cb: () => T): Promise<T> {
 
 export async function post(url: string, data: any): Promise<any> {
   const resp = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
@@ -23,7 +23,7 @@ export async function post(url: string, data: any): Promise<any> {
 export async function get(urlString: string, query: any): Promise<any> {
   const queryString = new URLSearchParams(query).toString();
   if (queryString) {
-    urlString += '?' + queryString;
+    urlString += "?" + queryString;
   }
 
   const resp = await fetch(urlString);
