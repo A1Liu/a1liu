@@ -1,11 +1,10 @@
 import { SpriteGroup, vec2equal, vec2mul, Vector2 } from "../sprite";
 import { Game } from "../game";
 import { SkyBackground } from "./sky";
-import { TransitionManager, Transitions } from "../transition";
+import { applyTransition, Transitions } from "../transition";
 import { KeyboardKey } from "../interaction-monitor";
 
 export class Landscape extends SpriteGroup {
-  transitionManager = new TransitionManager();
   direction: "left" | "right" | null = null;
   currentVelocity: Vector2 = { x: 0, y: 0 };
   walkVelocity: Vector2;
@@ -45,7 +44,7 @@ export class Landscape extends SpriteGroup {
         : this.walkVelocity
       : { x: 0, y: 0 };
 
-    const currentVelocity = this.transitionManager.applyTransition(
+    const currentVelocity = applyTransition(
       {
         initial: vec2mul(
           this.direction === "left" ? 1 : this.direction === "right" ? -1 : 0,
