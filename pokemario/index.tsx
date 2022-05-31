@@ -26,8 +26,6 @@ export default function Page() {
 
     render();
 
-    console.log("Hello");
-
     return () => {
       running = false;
     };

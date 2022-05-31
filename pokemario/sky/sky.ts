@@ -7,7 +7,6 @@ import {ImageLoader} from '../image-loader'
 export class SkyBackground extends Sprite {
   constructor(initialPosition: Position, game: Game) {
     super(initialPosition, projectSize(skyJpg, game), ImageLoader.load(skyJpg.src));
-
   }
 
   tick(delta: number, game: Game) {
