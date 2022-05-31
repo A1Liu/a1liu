@@ -1,3 +1,5 @@
+AddressFamily inet
+
 Host github.tang
   HostName github.com
   IdentityFile ~/.ssh/id_tangym
