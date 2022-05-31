@@ -13,7 +13,14 @@ pub const EntityId = struct {
     pub const NULL: EntityId = .{ .index = std.math.maxInt(u32), .generation = 0 };
 };
 
-fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
+fn FreeEnt(comptime T: type) type {
+    return union {
+        t: T,
+        next: u32,
+    };
+}
+
+fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
     return struct {
         pub const ViewType = @Type(.{
             .Struct = .{
@@ -23,17 +30,17 @@ fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
                 .fields = std.meta.fields(InViewType) ++ [_]std.builtin.Type.StructField{
                     .{
                         .name = "id",
-                        .field_type = u32,
+                        .field_type = EntityId,
                         .default_value = null,
                         .is_comptime = false,
-                        .alignment = @alignOf(u32),
+                        .alignment = @alignOf(EntityId),
                     },
                     .{
                         .name = "meta",
-                        .field_type = *const Registry.Meta,
+                        .field_type = *const Reg.Meta,
                         .default_value = null,
                         .is_comptime = false,
-                        .alignment = @alignOf(*const Registry.Meta),
+                        .alignment = @alignOf(*const Reg.Meta),
                     },
                 },
             },
@@ -41,41 +48,69 @@ fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
 
         const Iter = @This();
 
-        registry: *Registry,
+        registry: *Reg,
         index: u32 = 0,
+        sparse: [Reg.SparseComponents.len]u32 = .{0} ** Reg.SparseComponents.len,
 
-        pub fn read(self: *Iter, index: u32) ViewType {
-            const meta = &self.registry.raw(Registry.Meta)[index];
+        // This is a separate function because there was some kind of confusing
+        // compiler behavior otherwise.
+        fn readForField(
+            self: *Iter,
+            meta: *const Reg.Meta,
+            out: *ViewType,
+            comptime name: []const u8,
+            comptime FieldT: type,
+            index: u32,
+            sparse: *[Reg.SparseComponents.len]u32,
+        ) void {
+            @field(out, name) = value: {
+                const child = switch (@typeInfo(FieldT)) {
+                    .Optional => |info| info.child,
+                    else => @compileError("Expected field to be optional, found '" ++
+                        @typeName(FieldT) ++ "'"),
+                };
+
+                const isPointer = @typeInfo(child) == .Pointer;
+                const T = switch (@typeInfo(child)) {
+                    .Pointer => |info| info.child,
+                    else => child,
+                };
+
+                const Idx = comptime Reg.typeIndex(T) orelse
+                    @compileError("field type not registered: " ++
+                    "name=" ++ name ++ ", type=" ++ @typeName(T));
+
+                if (!meta.bitset.isSet(Idx)) {
+                    break :value null;
+                }
+
+                if (comptime Reg.sparseTypeIndex(T)) |SparseIdx| {
+                    const sparse_index = sparse[SparseIdx];
+                    sparse[SparseIdx] += 1;
+
+                    const ptr = &self.registry.rawSparse(T).items[sparse_index].t;
+                    break :value if (isPointer) ptr else ptr.*;
+                }
+
+                const ptr = &self.registry.raw(T)[index];
+                _ = ptr;
+                // @compileError("Hello name=" ++ field.name ++ " type=" ++ @typeName(T) ++ "");
+                break :value if (isPointer) ptr else ptr.*;
+            };
+        }
+
+        pub fn read(self: *Iter, index: u32, sparse: *[Reg.SparseComponents.len]u32) ViewType {
+            const meta = &self.registry.raw(Reg.Meta)[index];
 
             var value: ViewType = undefined;
-            value.id = self.index;
+            value.id = .{ .index = self.index, .generation = meta.generation };
             value.meta = meta;
 
             inline for (std.meta.fields(ViewType)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
                 if (comptime std.mem.eql(u8, field.name, "meta")) continue;
 
-                @field(value, field.name) = value: {
-                    const child = switch (@typeInfo(field.field_type)) {
-                        .Optional => |info| info.child,
-                        else => @compileError("Expected field to be optional, found '" ++
-                            @typeName(field.field_type) ++ "'"),
-                    };
-
-                    const isPointer = @typeInfo(child) == .Pointer;
-                    const T = switch (@typeInfo(child)) {
-                        .Pointer => |info| info.child,
-                        else => child,
-                    };
-
-                    const typeIndex = Registry.typeIndex(T);
-                    if (!meta.bitset.isSet(typeIndex)) {
-                        break :value null;
-                    }
-
-                    const ptr = &self.registry.raw(T)[index];
-                    break :value if (isPointer) ptr else ptr.*;
-                };
+                self.readForField(meta, &value, field.name, field.field_type, index, sparse);
             }
 
             return value;
@@ -83,19 +118,33 @@ fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
 
         pub fn get(self: *Iter, id: EntityId) ?ViewType {
             const index = self.registry.indexOf(id) orelse return null;
-            return self.read(index);
+
+            var sparse: [Reg.SparseComponents.len]u32 = undefined;
+            inline for (std.meta.fields(ViewType)) |field| {
+                const SparseIdx = comptime Reg.sparseTypeIndex(field.field_type) orelse continue;
+                const mapping = self.registry.sparse_mapping[SparseIdx];
+
+                sparse[SparseIdx] = mapping.get(index) orelse 0;
+            }
+
+            return self.read(index, &sparse);
         }
 
-        pub inline fn next(self: *Iter) ?ViewType {
+        pub fn reset(self: *Iter) void {
+            self.index = 0;
+            std.mem.set(u32, &self.sparse, 0);
+        }
+
+        pub fn next(self: *Iter) ?ViewType {
             while (self.index < self.registry.len) {
                 // this enforces the index increment, even when the return
                 // happens below
                 defer self.index += 1;
 
-                const meta = &self.registry.raw(Registry.Meta)[self.index];
+                const meta = &self.registry.raw(Reg.Meta)[self.index];
                 if (meta.generation == std.math.maxInt(u32)) continue;
 
-                const value = self.read(self.index);
+                const value = self.read(self.index, &self.sparse);
                 return value;
             }
 
@@ -104,8 +153,17 @@ fn RegistryView(comptime Registry: type, comptime InViewType: type) type {
     };
 }
 
-pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
+pub fn Registry(
+    comptime InDense: []const type,
+    comptime InSparse: []const type,
+) type {
     // NOTE: for now, duplicate component types will just fail to work silently.
+
+    comptime {
+        for (InSparse) |T| {
+            if (@sizeOf(T) == 0) @compileError("Zero-sized components should be Dense (having them be dense costs less at runtime)");
+        }
+    }
 
     // comptime {
     //     for (ComponentTypes) |t, idx| {
@@ -116,50 +174,54 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
     // }
 
     return struct {
+        const Self = @This();
+
+        const Components = SparseComponents ++ DenseComponents;
+        const DenseComponents = InDense ++ [_]type{Meta};
+        const SparseComponents = InSparse;
+
         pub const Meta = struct {
             name: []const u8, // use the len field to store the generation
             generation: u32,
-            bitset: std.StaticBitSet(Components.len),
+            bitset: std.StaticBitSet(Components.len - 1),
         };
 
-        const Self = @This();
-
-        const Components = [_]type{Meta} ++ InputComponentTypes;
-        const ComponentsPointers = [Components.len][*]u8;
-
-        const MaxAlign = value: {
-            var maxAlign = 0;
-
-            for (Components) |t| {
-                const a = @alignOf(t);
-
-                if (a > maxAlign) {
-                    maxAlign = a;
-                }
-            }
-
-            break :value maxAlign;
+        const List = std.ArrayListUnmanaged;
+        const Mapping = struct {
+            free_head: u32 = std.math.maxInt(u32),
+            map: std.AutoHashMapUnmanaged(u32, u32) = .{},
         };
+
+        const DensePointers = [DenseComponents.len][*]u8;
+        const SparsePointers = [SparseComponents.len]List(u8);
 
         alloc: std.mem.Allocator,
-        components: ComponentsPointers,
+        generation: u32,
+
+        dense: DensePointers,
         len: u32,
         capacity: u32,
-        generation: u32,
         free_head: u32,
 
-        pub fn init(capacity: u32, alloc: std.mem.Allocator) !Self {
-            var components: ComponentsPointers = undefined;
+        sparse_mapping: [SparseComponents.len]Mapping,
+        sparse: SparsePointers,
 
-            inline for (Components) |T, idx| {
+        pub fn init(capacity: u32, alloc: std.mem.Allocator) !Self {
+            var dense: DensePointers = undefined;
+            inline for (DenseComponents) |T, Idx| {
                 if (@sizeOf(T) == 0) continue;
 
                 const slice = try alloc.alloc(T, capacity);
-                components[idx] = @ptrCast([*]u8, slice.ptr);
+                dense[Idx] = @ptrCast([*]u8, slice.ptr);
             }
 
+            const sparse_mapping = .{Mapping{}} ** SparseComponents.len;
+            const sparse: SparsePointers = .{.{}} ** SparseComponents.len;
+
             return Self{
-                .components = components,
+                .dense = dense,
+                .sparse_mapping = sparse_mapping,
+                .sparse = sparse,
                 .len = 0,
                 .generation = 1,
                 .capacity = capacity,
@@ -169,11 +231,11 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
         }
 
         pub fn deinit(self: *Self) void {
-            inline for (Components) |T, idx| {
+            inline for (DenseComponents) |T, idx| {
                 if (@sizeOf(T) == 0) continue;
 
                 var slice: []T = &.{};
-                slice.ptr = @ptrCast([*]T, @alignCast(@alignOf(T), self.components[idx]));
+                slice.ptr = @ptrCast([*]T, @alignCast(@alignOf(T), self.dense[idx]));
                 slice.len = self.capacity;
 
                 self.alloc.free(slice);
@@ -193,15 +255,15 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
                 if (self.len >= self.capacity) {
                     const new_capa = self.capacity + self.capacity / 2;
 
-                    inline for (Components) |T, idx| {
+                    inline for (DenseComponents) |T, idx| {
                         if (@sizeOf(T) == 0) continue;
 
                         var slice: []T = &.{};
-                        slice.ptr = @ptrCast([*]T, @alignCast(@alignOf(T), self.components[idx]));
+                        slice.ptr = @ptrCast([*]T, @alignCast(@alignOf(T), self.dense[idx]));
                         slice.len = self.capacity;
 
                         const new_mem = try self.alloc.realloc(slice, new_capa);
-                        self.components[idx] = @ptrCast([*]u8, new_mem.ptr);
+                        self.dense[idx] = @ptrCast([*]u8, new_mem.ptr);
                     }
 
                     self.capacity = new_capa;
@@ -215,7 +277,7 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
             const meta = &self.raw(Meta)[index];
             meta.name = name;
             meta.generation = self.generation;
-            meta.bitset = std.StaticBitSet(Components.len).initEmpty();
+            meta.bitset = std.StaticBitSet(Components.len - 1).initEmpty();
 
             return EntityId{ .index = index, .generation = self.generation };
         }
@@ -223,6 +285,19 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
         pub fn delete(self: *Self, id: EntityId) bool {
             const index = self.indexOf(id) orelse return false;
             const meta = &self.raw(Meta)[index];
+
+            inline for (SparseComponents) |T, SparseIdx| {
+                const Idx = comptime typeIndex(T).?;
+
+                const list = self.rawSparse(T);
+                const mapping = &self.sparse_mapping[SparseIdx];
+
+                if (meta.bitset.isSet(Idx)) {
+                    const sparse_index = mapping.map.fetchRemove(index).?.value;
+                    list.items[sparse_index] = .{ .next = mapping.free_head };
+                    mapping.free_head = sparse_index;
+                }
+            }
 
             meta.generation = std.math.maxInt(u32);
             meta.name = "";
@@ -234,29 +309,83 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
             return true;
         }
 
-        pub fn addComponent(self: *Self, id: EntityId, component: anytype) bool {
+        pub fn addComponent(self: *Self, id: EntityId, component: anytype) !bool {
+            const T = @TypeOf(component);
+            if (T == Meta) @compileError("Tried to add a Meta component");
+
             const index = self.indexOf(id) orelse return false;
 
-            const T = @TypeOf(component);
+            const Idx = comptime typeIndex(T) orelse
+                @compileError("Type not registered: " ++ @typeName(T));
 
-            self.raw(Meta)[index].bitset.set(typeIndex(T));
-            const elements = self.raw(T);
-            elements[index] = component;
+            // we defer here so that we can read the previous value before
+            // returning
+            defer self.raw(Meta)[index].bitset.set(Idx);
+
+            const SparseIdx = if (comptime sparseTypeIndex(T)) |I| I else {
+                const elements = self.raw(T);
+                elements[index] = component;
+
+                return true;
+            };
+
+            const meta = &self.raw(Meta)[index];
+            const list = self.rawSparse(T);
+            const mapping = &self.sparse_mapping[SparseIdx];
+
+            if (meta.bitset.isSet(Idx)) {
+                const sparse_index = mapping.map.get(index) orelse unreachable;
+                list.items[sparse_index] = .{ .t = component };
+
+                return true;
+            }
+
+            if (mapping.free_head != std.math.maxInt(u32)) {
+                const sparse_index = mapping.free_head;
+                mapping.free_head = list.items[sparse_index].next;
+
+                try mapping.map.put(self.alloc, index, sparse_index);
+                list.items[sparse_index] = .{ .t = component };
+                return true;
+            }
+
+            const sparse_index: u32 = @truncate(u32, list.items.len);
+            try mapping.map.put(self.alloc, index, sparse_index);
+            try list.append(self.alloc, .{ .t = component });
 
             return true;
         }
 
-        pub fn raw(self: *Self, comptime T: type) []T {
-            const index = typeIndex(T);
-
-            var slice: []T = &.{};
-            slice.len = self.len;
-
-            if (@sizeOf(T) > 0) {
-                slice.ptr = @ptrCast([*]T, @alignCast(@alignOf(T), self.components[index]));
+        fn rawSparse(self: *Self, comptime T: type) *List(FreeEnt(T)) {
+            if (comptime sparseTypeIndex(T)) |SparseIdx| {
+                const list = @ptrCast(*List(FreeEnt(T)), &self.sparse[SparseIdx]);
+                return list;
             }
 
-            return slice;
+            if (comptime denseTypeIndex(T)) |_| {
+                @compileError("Type not sparse: " ++ @typeName(T));
+            }
+
+            @compileError("Type not registered: " ++ @typeName(T));
+        }
+
+        fn raw(self: *Self, comptime T: type) []T {
+            if (comptime denseTypeIndex(T)) |Idx| {
+                var slice: []T = &.{};
+                slice.len = self.len;
+
+                if (@sizeOf(T) > 0) {
+                    slice.ptr = @ptrCast([*]T, @alignCast(@alignOf(T), self.dense[Idx]));
+                }
+
+                return slice;
+            }
+
+            if (comptime sparseTypeIndex(T)) |_| {
+                @compileError("Type not dense: " ++ @typeName(T));
+            }
+
+            @compileError("Type not registered: " ++ @typeName(T));
         }
 
         pub fn view(self: *Self, comptime ViewType: type) RegistryView(Self, ViewType) {
@@ -273,14 +402,28 @@ pub fn NewRegistryType(comptime InputComponentTypes: []const type) type {
             return id.index;
         }
 
-        fn typeIndex(comptime T: type) usize {
-            comptime {
-                for (Components) |Component, idx| {
-                    if (T == Component) return idx;
-                }
-
-                @compileError("Type not registered: " ++ @typeName(T));
+        fn typeIndex(comptime T: type) ?usize {
+            for (Components) |Component, idx| {
+                if (T == Component) return idx;
             }
+
+            return null;
+        }
+
+        fn sparseTypeIndex(comptime T: type) ?usize {
+            for (SparseComponents) |Component, idx| {
+                if (T == Component) return idx;
+            }
+
+            return null;
+        }
+
+        fn denseTypeIndex(comptime T: type) ?usize {
+            for (DenseComponents) |Component, idx| {
+                if (T == Component) return idx;
+            }
+
+            return null;
         }
     };
 }
@@ -289,9 +432,9 @@ test "Registry: iterate" {
     const TransformComponent = struct { i: u32 };
     const MoveComponent = struct {};
 
-    const Registry = NewRegistryType(&.{ TransformComponent, MoveComponent });
+    const RegistryType = Registry(&.{ TransformComponent, MoveComponent }, &.{});
 
-    var registry = try Registry.init(256, liu.Pages);
+    var registry = try RegistryType.init(256, liu.Pages);
     defer registry.deinit();
 
     var success = false;
@@ -299,7 +442,7 @@ test "Registry: iterate" {
     var i: u32 = 0;
     while (i < 257) : (i += 1) {
         const meh = try registry.create("meh");
-        success = registry.addComponent(meh, TransformComponent{ .i = meh.index });
+        success = try registry.addComponent(meh, TransformComponent{ .i = meh.index });
         try std.testing.expect(success);
     }
 
@@ -315,23 +458,74 @@ test "Registry: iterate" {
     while (view.next()) |elem| {
         try std.testing.expect(elem.meta.name.len == 3);
         if (elem.transform) |t|
-            try std.testing.expect(t.i == elem.id)
+            try std.testing.expect(t.i == elem.id.index)
         else
             try std.testing.expect(false);
 
         try std.testing.expect(elem.move == null);
     }
+}
 
-    _ = registry.raw(TransformComponent);
+test "Registry: sparse" {
+    const TransformComponent = struct { i: u32 };
+    const Empty = struct {};
+    const MoveComponent = struct { i: u32 };
+
+    const RegistryType = Registry(&.{ TransformComponent, Empty }, &.{MoveComponent});
+
+    var registry = try RegistryType.init(256, liu.Pages);
+    defer registry.deinit();
+
+    const View = struct {
+        transform: ?TransformComponent,
+        move: ?*MoveComponent,
+    };
+
+    var i: u32 = 0;
+    var success = false;
+
+    while (i < 100) : (i += 1) {
+        const meh = try registry.create("meh");
+        if (i % 8 == 0) {
+            success = try registry.addComponent(meh, MoveComponent{ .i = i });
+            try std.testing.expect(success);
+        }
+    }
+
+    const deh = try registry.create("dehh");
+
+    success = try registry.addComponent(deh, MoveComponent{ .i = 1 });
+    try std.testing.expect(success);
+
+    try std.testing.expect(registry.delete(deh));
+
+    var view = registry.view(View);
+    var count: u32 = 0;
+    var sparse_count: u32 = 0;
+    while (view.next()) |elem| {
+        try std.testing.expect(elem.meta.name.len == 3);
+
+        if (elem.move) |move| {
+            try std.testing.expect(move.i == count);
+            sparse_count += 1;
+        }
+
+        count += 1;
+    }
+
+    try std.testing.expect(count == 100);
+    try std.testing.expect(sparse_count == (100 / 8) + 1);
+
+    view.reset();
 }
 
 test "Registry: delete" {
     const TransformComponent = struct {};
     const MoveComponent = struct {};
 
-    const Registry = NewRegistryType(&.{ TransformComponent, MoveComponent });
+    const RegistryType = Registry(&.{ TransformComponent, MoveComponent }, &.{});
 
-    var registry = try Registry.init(256, liu.Pages);
+    var registry = try RegistryType.init(256, liu.Pages);
     defer registry.deinit();
 
     const View = struct {
@@ -353,5 +547,5 @@ test "Registry: delete" {
 
     try std.testing.expect(count == 1);
 
-    _ = registry.raw(TransformComponent);
+    view.reset();
 }
