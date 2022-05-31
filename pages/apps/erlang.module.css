@@ -17,4 +17,5 @@
   flex-grow: 1;
 
   cursor: default;
+  outline: 0px solid transparent;
 }

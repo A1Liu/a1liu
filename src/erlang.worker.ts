@@ -228,19 +228,13 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
       break;
     }
 
+    case "keydown":
     case "keyup": {
-      wasmRef.abi.onKey(msg.data);
+      const down = msg.kind === "keydown";
+      wasmRef.abi.onKey(down, msg.data);
 
-      const data = `up: ${msg.data}`;
-      postMessage({ kind: "info", data });
-      break;
-    }
-
-    case "keydown": {
-      wasmRef.abi.onKey(msg.data);
-
-      const data = `down: ${msg.data}`;
-      postMessage({ kind: "info", data });
+      const data = `${msg.kind}: ${msg.data}`;
+      // postMessage({ kind: "info", data });
       break;
     }
 
