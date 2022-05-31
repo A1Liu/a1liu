@@ -1,31 +1,33 @@
-import { Sprite } from './sprite';
-import { SkyBackground } from './sky';
+import { Renderable, Sprite } from "./sprite";
+import { Landscape } from "./sky";
+import { InteractionMonitor, KeyboardKey } from "./interaction-monitor";
 
 export class Game {
-    private score : number = 0;
-    public sprites: Sprite[] = [];
+  score: number = 0;
+  renderables: Renderable[] = [];
+  monitor = new InteractionMonitor();
 
-    width = 0;
-    height = 0;
+  constructor(public width: number, public height: number) {
+    this.renderables.push(new Landscape(this));
+  }
 
-    constructor() {
-        const sky = new SkyBackground();
-        this.sprites.push(sky);
+  destroy() {
+    this.monitor.destroy();
+  }
+
+  tick(delta: number): void {
+    for (const renderable of this.renderables) {
+      renderable.tick(delta, this);
     }
+  }
 
-    tick(delta: number): void {
-        for (const sprite of this.sprites) {
-            sprite.tick(delta, this)
-        }
+  render(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+    this.width = canvas.width;
+    this.height = canvas.height;
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    for (const renderable of this.renderables) {
+      renderable.render(this, ctx);
     }
-
-    render(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
-        this.width = canvas.width;
-        this.height = canvas.height;
-        ctx.clearRect(0, 0, this.width, this.height)
-
-        for (const sprite of this.sprites) {
-            sprite.render(this, ctx)
-        }
-    }
+  }
 }

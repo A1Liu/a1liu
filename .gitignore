@@ -20,6 +20,9 @@ a.out
 /.next/
 /out/
 
+# editor
+.idea
+
 # debug
 npm-debug.log*
 yarn-debug.log*

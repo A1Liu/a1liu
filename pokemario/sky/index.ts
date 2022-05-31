@@ -1,35 +1,78 @@
-import { Sprite, Vector2 } from '../sprite';
-import { Game } from '../game';
-import skyJpg from './sky.jpg';
+import { SpriteGroup, vec2equal, vec2mul, Vector2 } from "../sprite";
+import { Game } from "../game";
+import { SkyBackground } from "./sky";
+import { applyTransition, Transitions } from "../transition";
+import { KeyboardKey } from "../interaction-monitor";
 
-export class SkyBackground extends Sprite {
-    velocity: Vector2 = {
-        x: -5,
-        y: 0,
-    };
+export class Landscape extends SpriteGroup {
+  direction: "left" | "right" | null = null;
+  currentVelocity: Vector2 = { x: 0, y: 0 };
+  walkVelocity: Vector2;
+  sprintVelocity: Vector2;
 
-    constructor() {
-        super({
-            x: 0,
-            y: 0,
-        }, {
-            width: 0,
-            height: 0,
-        }, skyJpg.src)
-        this.image = new Image()
-        this.image.src = skyJpg.src
-    }
+  constructor(game: Game) {
+    super([
+      new SkyBackground(
+        {
+          x: 0,
+          y: 0,
+        },
+        game
+      ),
+      new SkyBackground(
+        {
+          x: game.width,
+          y: 0,
+        },
+        game
+      ),
+    ]);
 
-    tick(delta: number, game: Game) {
-        this.position.x += this.velocity.x
-        this.position.y += this.velocity.y
-    }
+    this.walkVelocity = { x: 0.01 * game.width, y: 0 };
+    this.sprintVelocity = vec2mul(3, this.walkVelocity);
+  }
 
-    render(game: Game, ctx: CanvasRenderingContext2D) {
-        this.size = {
-            width: game.width,
-            height: game.height,
-        }
-        super.render(game, ctx)
-    }
+  tick(delta: number, game: Game) {
+    const currentDirection = game.monitor.isPressed(KeyboardKey.Right)
+      ? "right"
+      : game.monitor.isPressed(KeyboardKey.Left)
+      ? "left"
+      : null;
+    const velocity = currentDirection
+      ? game.monitor.isPressed(KeyboardKey.Shift)
+        ? this.sprintVelocity
+        : this.walkVelocity
+      : { x: 0, y: 0 };
+
+    const currentVelocity = applyTransition(
+      {
+        initial: vec2mul(
+          this.direction === "left" ? 1 : this.direction === "right" ? -1 : 0,
+          velocity
+        ),
+        target: vec2mul(
+          currentDirection === "left"
+            ? 1
+            : currentDirection === "right"
+            ? -1
+            : 0,
+          velocity
+        ),
+        state: this.sprites[0]!.velocity,
+        transition: Transitions.linear(250),
+        update: (velocity) => {
+          this.sprites.forEach((sprite) => {
+            sprite.velocity = velocity;
+          });
+        },
+      },
+      delta
+    );
+    this.direction = currentDirection;
+    this.sprites.forEach((sprite) => {
+      sprite.velocity = currentVelocity;
+    });
+
+    super.tick(delta, game);
+  }
 }
