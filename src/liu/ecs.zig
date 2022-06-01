@@ -173,11 +173,11 @@ pub fn Registry(
 
         const InComponents = InSparse ++ InDense;
         for (InComponents) |T, idx| {
-            // NOTE: for now, this code does a bit more work than necessary.
+            // NOTE: for now, this code is a bit more verbose than necessary.
             // Unfortunately, doing `Components[0..idx]` below to filter
             // out all repeated instances causes a compiler bug.
             for (InComponents) |S, o_idx| {
-                if (idx == o_idx) continue;
+                if (o_idx >= idx) break;
                 if (T != S) continue;
 
                 @compileError("The type '" ++ @typeName(T) ++
@@ -569,7 +569,7 @@ test "Registry: delete" {
     const TransformComponent = struct {};
     const MoveComponent = struct {};
 
-    const RegistryType = Registry(&.{ TransformComponent, TransformComponent, MoveComponent }, &.{});
+    const RegistryType = Registry(&.{ TransformComponent, MoveComponent }, &.{});
 
     var registry = try RegistryType.init(256, liu.Pages);
     defer registry.deinit();
