@@ -393,13 +393,12 @@ const ClickTool = struct {
     fn rightClick(self: *Self, pt: Point) !void {
         _ = self;
 
-        var _temp = liu.Temp.init();
-        const temp = _temp.allocator();
-        defer _temp.deinit();
+        const mark = liu.TempMark;
+        defer liu.TempMark = mark;
 
         const pixPos = render.pixelPosition(pt.pos);
         const pixObj = ext.readPixel(pixPos[0], pixPos[1]);
-        const bytes = try wasm.in.bytes(pixObj, temp);
+        const bytes = try wasm.in.bytes(pixObj, liu.Temp);
 
         current_color[0] = @intToFloat(f32, bytes[0]) / 255;
         current_color[1] = @intToFloat(f32, bytes[1]) / 255;

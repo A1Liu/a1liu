@@ -88,11 +88,10 @@ pub const out = struct {
     }
 
     pub fn fmt(comptime format: []const u8, args: anytype) Obj {
-        var _temp = liu.Temp.init();
-        const temp = _temp.allocator();
-        defer _temp.deinit();
+        const mark = liu.TempMark;
+        defer liu.TempMark = mark;
 
-        const allocResult = std.fmt.allocPrint(temp, format, args);
+        const allocResult = std.fmt.allocPrint(liu.Temp, format, args);
         const data = allocResult catch @panic("failed to print");
 
         return ext.makeString(data.ptr, data.len);

@@ -1,4 +1,6 @@
 const std = @import("std");
+const root = @import("root");
+
 const mem = std.mem;
 
 const assert = std.debug.assert;
@@ -149,60 +151,17 @@ pub const Bump = struct {
     }
 };
 
-pub const Temp = struct {
-    const Self = @This();
+pub const Temp = TempAlloc.allocator;
+pub threadlocal var TempMark: Mark = Mark.ZERO;
 
-    mark: Mark,
-
-    const InitialSize = 1024 * 1024;
-
-    threadlocal var top: Mark = Mark.ZERO;
+const TempAlloc = struct {
+    const InitialSize = if (@hasDecl(root, "liu_TempAlloc_InitialSize"))
+        root.liu_TempAlloc_InitialSize
+    else
+        256 * 1024;
     threadlocal var bump = BumpState.init(InitialSize);
 
-    pub fn init() Self {
-        return .{ .mark = top };
-    }
-
-    pub fn deinit(self: *Self) void {
-        top = self.mark;
-
-        // can do some incremental sorting here too at some point
-        //                             - Albert Liu, Mar 31, 2022 Thu 02:45 EDT
-    }
-
-    pub fn allocator(self: *Self) Allocator {
-        const resize = Allocator.NoResize(Self).noResize;
-        const free = Allocator.NoOpFree(Self).noOpFree;
-
-        return Allocator.init(self, Self.allocate, resize, free);
-    }
-
-    fn allocate(
-        self: *Self,
-        len: usize,
-        ptr_align: u29,
-        len_align: u29,
-        ret_addr: usize,
-    ) Allocator.Error![]u8 {
-        _ = len_align;
-        _ = self;
-
-        return bump.allocate(&top, Pages, len, ptr_align, ret_addr);
-    }
-};
-
-pub const Frame = FrameAlloc.allocator;
-
-pub fn clearFrameAllocator() void {
-    FrameAlloc.mark = Mark.ZERO;
-}
-
-const FrameAlloc = struct {
-    const InitialSize = 2 * 1024 * 1024;
-    threadlocal var bump = BumpState.init(InitialSize);
-    threadlocal var mark = Mark.ZERO;
-
-    const allocator = Allocator.init(undefined, alloc, resize, free);
+    const allocator = Allocator.init(@intToPtr(*anyopaque, 1), alloc, resize, free);
 
     const resize = Allocator.NoResize(anyopaque).noResize;
     const free = Allocator.NoOpFree(anyopaque).noOpFree;
@@ -216,6 +175,6 @@ const FrameAlloc = struct {
     ) Allocator.Error![]u8 {
         _ = len_align;
 
-        return bump.allocate(&mark, Pages, len, ptr_align, ret_addr);
+        return bump.allocate(&TempMark, Pages, len, ptr_align, ret_addr);
     }
 };
