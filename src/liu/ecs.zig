@@ -2,6 +2,8 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
+const NULL = std.math.maxInt(u32);
+
 pub const EntityId = struct {
     index: u32,
     generation: u32,
@@ -145,7 +147,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 defer self.index += 1;
 
                 const meta = &self.registry.raw(Reg.Meta)[self.index];
-                if (meta.generation == std.math.maxInt(u32)) continue;
+                if (meta.generation == NULL) continue;
 
                 const value = read(self.registry, self.index, &self.sparse);
                 return value;
@@ -195,14 +197,14 @@ pub fn Registry(
         const SparseComponents = InSparse;
 
         pub const Meta = struct {
-            name: []const u8, // use the len field to store the generation
+            name: []const u8, // use the len field to store the next freelist element
             generation: u32,
             bitset: std.StaticBitSet(Components.len - 1),
         };
 
         const List = std.ArrayListUnmanaged;
         const Mapping = struct {
-            free_head: u32 = std.math.maxInt(u32),
+            free_head: u32 = NULL,
             map: std.AutoHashMapUnmanaged(u32, u32) = .{},
         };
 
@@ -240,7 +242,7 @@ pub fn Registry(
                 .generation = 1,
                 .capacity = capacity,
                 .alloc = alloc,
-                .free_head = std.math.maxInt(u32),
+                .free_head = NULL,
             };
         }
 
@@ -266,7 +268,7 @@ pub fn Registry(
 
         pub fn create(self: *Self, name: []const u8) !EntityId {
             const index = index: {
-                if (self.free_head != std.math.maxInt(u32)) {
+                if (self.free_head != NULL) {
                     const index = self.free_head;
                     const meta = &self.raw(Meta)[self.free_head];
                     self.free_head = @truncate(u32, meta.name.len);
@@ -321,7 +323,7 @@ pub fn Registry(
                 }
             }
 
-            meta.generation = std.math.maxInt(u32);
+            meta.generation = NULL;
             meta.name = "";
             meta.name.len = self.free_head;
 
@@ -362,7 +364,7 @@ pub fn Registry(
                 return true;
             }
 
-            if (mapping.free_head != std.math.maxInt(u32)) {
+            if (mapping.free_head != NULL) {
                 const sparse_index = mapping.free_head;
                 mapping.free_head = list.items[sparse_index].next;
 
