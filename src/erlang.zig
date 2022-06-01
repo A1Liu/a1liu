@@ -1,6 +1,8 @@
 const std = @import("std");
 const liu = @import("liu");
 
+// https://youtu.be/SFKR5rZBu-8?t=2202
+
 const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
@@ -34,12 +36,12 @@ const Render = struct {
     }
 };
 
-const TransformC = struct {
-    position: Vec2,
-    scale: f32,
+const LocationC = struct {
+    bb0: Vec2,
+    bb1: Vec2,
 };
 
-const PhysicsC = struct {};
+const CollisionClass = struct {};
 
 const MoveC = struct {
     direction: Vec2, // normalized
@@ -49,6 +51,17 @@ const MoveC = struct {
 const DecisionC = union(enum) {
     player: void,
     walk: f32,
+    jumper: f32,
+};
+
+const HealthC = struct {
+    health: f32,
+};
+
+const FlammableC = struct {
+    damage: f32,
+    timeSinceLastDamage: f32,
+    rate: f32,
 };
 
 export fn setDims(posX: f32, posY: f32) void {

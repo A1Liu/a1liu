@@ -153,48 +153,24 @@ pub const Temp = struct {
     const Self = @This();
 
     mark: Mark,
-    previous: ?*Self,
 
     const InitialSize = 1024 * 1024;
 
-    threadlocal var top: ?*Temp = null;
+    threadlocal var top: Mark = Mark.ZERO;
     threadlocal var bump = BumpState.init(InitialSize);
 
     pub fn init() Self {
-        var mark = Mark.ZERO;
-
-        if (top) |t| {
-            mark = t.mark;
-        }
-
-        return .{
-            .mark = mark,
-            .previous = top,
-        };
+        return .{ .mark = top };
     }
 
     pub fn deinit(self: *Self) void {
-        if (std.debug.runtime_safety) {
-            if (top) |t| {
-                assert(t == self or t == self.previous);
-            }
-        }
-
-        top = self.previous;
+        top = self.mark;
 
         // can do some incremental sorting here too at some point
         //                             - Albert Liu, Mar 31, 2022 Thu 02:45 EDT
     }
 
     pub fn allocator(self: *Self) Allocator {
-        if (std.debug.runtime_safety) {
-            if (top) |t| {
-                assert(t == self or t == self.previous);
-            }
-        }
-
-        top = self;
-
         const resize = Allocator.NoResize(Self).noResize;
         const free = Allocator.NoOpFree(Self).noOpFree;
 
@@ -209,8 +185,9 @@ pub const Temp = struct {
         ret_addr: usize,
     ) Allocator.Error![]u8 {
         _ = len_align;
+        _ = self;
 
-        return bump.allocate(&self.mark, Pages, len, ptr_align, ret_addr);
+        return bump.allocate(&top, Pages, len, ptr_align, ret_addr);
     }
 };
 

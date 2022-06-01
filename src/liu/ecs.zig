@@ -2,10 +2,6 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
-// https://youtu.be/SFKR5rZBu-8?t=2202
-
-// use bitset for whether a component exists
-
 pub const EntityId = struct {
     index: u32,
     generation: u32,
@@ -14,10 +10,7 @@ pub const EntityId = struct {
 };
 
 fn FreeEnt(comptime T: type) type {
-    return union {
-        t: T,
-        next: u32,
-    };
+    return union { t: T, next: u32 };
 }
 
 fn UnwrappedField(comptime FieldT: type) struct { isPointer: bool, T: type } {
