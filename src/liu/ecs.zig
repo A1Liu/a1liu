@@ -180,10 +180,9 @@ pub fn Registry(
                 if (o_idx >= idx) break;
                 if (T != S) continue;
 
-                @compileError("The type '" ++ @typeName(T) ++
-                    "' was registered multiple times. Since components " ++
-                    "are queried by-type, you can only have one of a component " ++
-                    "type for each entity.");
+                @compileError("The type '" ++ @typeName(T) ++ "' was registered " ++
+                    "multiple times. Since components are queried by-type, " ++
+                    "you can only have one of a component type for each entity.");
             }
         }
     }
