@@ -164,13 +164,11 @@ pub fn Registry(
         for (InSparse) |T| {
             if (@sizeOf(T) > 0) continue;
 
-            @compileError(
-                \\Zero-sized components should be Dense. Having them be Dense
-                \\ requires less runtime work, and also I didn't implement all
-                \\ the code for making them sparse. To be clear, there is no
-                \\ performance benefit to a component with size 0 being sparse
-                \\ instead of dense.
-            );
+            @compileError("Zero-sized components should be Dense. Having them be " ++
+                "Dense requires less runtime work, and also I didn't " ++
+                "implement all the code for making them sparse. To be clear, " ++
+                "there is no performance benefit to a component with size 0 " ++
+                "being sparse instead of dense.");
         }
 
         const InComponents = InSparse ++ InDense;
@@ -183,10 +181,9 @@ pub fn Registry(
                 if (T != S) continue;
 
                 @compileError("The type '" ++ @typeName(T) ++
-                    \\' was registered multiple times. Since components are
-                    \\ queried by-type, you can only have one of a component
-                    \\ type for each entity.
-                );
+                    "' was registered multiple times. Since components " ++
+                    "are queried by-type, you can only have one of a component " ++
+                    "type for each entity.");
             }
         }
     }
@@ -572,7 +569,7 @@ test "Registry: delete" {
     const TransformComponent = struct {};
     const MoveComponent = struct {};
 
-    const RegistryType = Registry(&.{ TransformComponent, MoveComponent }, &.{});
+    const RegistryType = Registry(&.{ TransformComponent, TransformComponent, MoveComponent }, &.{});
 
     var registry = try RegistryType.init(256, liu.Pages);
     defer registry.deinit();
