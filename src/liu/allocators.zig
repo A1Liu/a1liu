@@ -159,6 +159,7 @@ const TempAlloc = struct {
         root.liu_TempAlloc_InitialSize
     else
         256 * 1024;
+
     threadlocal var bump = BumpState.init(InitialSize);
 
     const allocator = Allocator.init(@intToPtr(*anyopaque, 1), alloc, resize, free);
@@ -178,3 +179,48 @@ const TempAlloc = struct {
         return bump.allocate(&TempMark, Pages, len, ptr_align, ret_addr);
     }
 };
+
+pub const Slab = SlabAlloc.allocator;
+pub fn slabFrameBoundary() void {
+    if (!std.debug.runtime_safety) return;
+
+    const value = @atomicLoad(u64, &SlabAlloc.next, .SeqCst);
+    @atomicStore(u64, &SlabAlloc.frame_begin, value, .SeqCst);
+}
+
+const SlabAlloc = struct {
+    // Naughty dog-inspired allocator, takes 2MB chunks from a pool, and its
+    // ownership of chunks does not outlive the frame boundary.
+
+    const MaxSlabCount = if (@hasDecl(root, "liu_SlabAlloc_MaxSlabCount"))
+        root.liu_SlabAlloc_MaxSlabCount
+    else
+        1024;
+
+    const page = [4096]u8;
+
+    var frame_begin: if (std.debug.runtime_safety) u64 else void = if (std.debug.runtime_safety)
+        0
+    else {};
+
+    var next: usize = 0;
+    var slab_begin: [*]align(1024) page = undefined;
+
+    pub fn globalInit() !void {
+        assert(next == 0);
+
+        if (std.debug.runtime_safety) {
+            assert(frame_begin == 0);
+        }
+
+        const slabs = try Pages.alignedAlloc(page, MaxSlabCount, 1024);
+        slab_begin = slabs.ptr;
+    }
+
+    pub fn allocate() ![]u8 {}
+};
+
+test "Slab" {
+    try SlabAlloc.globalInit();
+    slabFrameBoundary();
+}
