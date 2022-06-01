@@ -160,36 +160,39 @@ pub fn Registry(
     comptime InDense: []const type,
     comptime InSparse: []const type,
 ) type {
-    return struct {
-        const Self = @This();
+    comptime {
+        for (InSparse) |T| {
+            if (@sizeOf(T) > 0) continue;
 
-        comptime {
-            for (InSparse) |T| {
-                if (@sizeOf(T) == 0)
-                    @compileError(
-                        \\Zero-sized components should be Dense.
-                        \\ Having them be Dense requires less runtime work,
-                        \\ and also I didn't implement all the code for
-                        \\ making them sparse. To be clear, there is no
-                        \\ performance benefit to a component with size 0
-                        \\ being sparse instead of dense.
-                    );
-            }
+            @compileError(
+                \\Zero-sized components should be Dense. Having them be Dense
+                \\ requires less runtime work, and also I didn't implement all
+                \\ the code for making them sparse. To be clear, there is no
+                \\ performance benefit to a component with size 0 being sparse
+                \\ instead of dense.
+            );
+        }
 
-            for (Components) |T, idx| {
-                // NOTE: for now, this code does a bit more work than necessary.
-                // Unfortunately, doing `Components[0..idx]` below to filter
-                // out all repeated instances causes a compiler bug.
-                for (Components) |S, o_idx| {
-                    if (idx == o_idx) continue;
-                    if (T == S) @compileError("The type '" ++ @typeName(T) ++
-                        \\' was registered multiple times. Since components
-                        \\ are queried by-type, you can
-                        \\ only have one of a component type for each entity.
-                    );
-                }
+        const InComponents = InSparse ++ InDense;
+        for (InComponents) |T, idx| {
+            // NOTE: for now, this code does a bit more work than necessary.
+            // Unfortunately, doing `Components[0..idx]` below to filter
+            // out all repeated instances causes a compiler bug.
+            for (InComponents) |S, o_idx| {
+                if (idx == o_idx) continue;
+                if (T != S) continue;
+
+                @compileError("The type '" ++ @typeName(T) ++
+                    \\' was registered multiple times. Since components are
+                    \\ queried by-type, you can only have one of a component
+                    \\ type for each entity.
+                );
             }
         }
+    }
+
+    return struct {
+        const Self = @This();
 
         const Components = SparseComponents ++ DenseComponents;
         const DenseComponents = InDense ++ [_]type{Meta};
