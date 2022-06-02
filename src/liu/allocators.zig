@@ -192,8 +192,8 @@ const SlabAlloc = struct {
     // Naughty dog-inspired allocator, takes 2MB chunks from a pool, and its
     // ownership of chunks does not outlive the frame boundary.
 
-    const MaxSlabCount = if (@hasDecl(root, "liu_SlabAlloc_MaxSlabCount"))
-        root.liu_SlabAlloc_MaxSlabCount
+    const SlabCount = if (@hasDecl(root, "liu_SlabAlloc_SlabCount"))
+        root.liu_SlabAlloc_SlabCount
     else
         1024;
 
@@ -213,11 +213,19 @@ const SlabAlloc = struct {
             assert(frame_begin == 0);
         }
 
-        const slabs = try Pages.alignedAlloc(page, MaxSlabCount, 1024);
+        const slabs = try Pages.alignedAlloc(page, SlabCount, 1024);
         slab_begin = slabs.ptr;
     }
 
-    pub fn allocate() ![]u8 {}
+    pub fn getMem() *[4096]u8 {
+        const out = @atomicRmw(u64, &SlabAlloc.next, .Add, 1, .SeqCst);
+
+        if (std.debug.runtime_safety) {
+            assert(frame_begin - out < SlabCount);
+        }
+
+        return &slab_begin[out % SlabCount];
+    }
 };
 
 test "Slab" {
