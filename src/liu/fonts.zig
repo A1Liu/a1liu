@@ -142,64 +142,70 @@ const Raster = struct {
                 x1 = xnext;
             }
 
-            _ = x0;
-            _ = x1;
-            _ = d;
-            _ = linestart;
-        }
+            const x0floor = @floor(x0);
+            const x0i = @floatToInt(i32, x0floor);
+            const x1ceil = @ceil(x1);
+            const x1i = @floatToInt(i32, x1ceil);
 
-        //     let x0floor = x0.floor();
-        //     let x0i = x0floor as i32;
-        //     let x1ceil = x1.ceil();
-        //     let x1i = x1ceil as i32;
-        //     if x1i <= x0i + 1 {
-        //         let xmf = 0.5 * (x + xnext) - x0floor;
-        //         let linestart_x0i = linestart as isize + x0i as isize;
-        //         if linestart_x0i < 0 {
-        //             continue; // oob index
-        //         }
-        //         self.a[linestart_x0i as usize] += d - d * xmf;
-        //         self.a[linestart_x0i as usize + 1] += d * xmf;
-        //     } else {
-        //         let s = (x1 - x0).recip();
-        //         let x0f = x0 - x0floor;
-        //         let a0 = 0.5 * s * (1.0 - x0f) * (1.0 - x0f);
-        //         let x1f = x1 - x1ceil + 1.0;
-        //         let am = 0.5 * s * x1f * x1f;
-        //         let linestart_x0i = linestart as isize + x0i as isize;
-        //         if linestart_x0i < 0 {
-        //             continue; // oob index
-        //         }
-        //         self.a[linestart_x0i as usize] += d * a0;
-        //         if x1i == x0i + 2 {
-        //             self.a[linestart_x0i as usize + 1] += d * (1.0 - a0 - am);
-        //         } else {
-        //             let a1 = s * (1.5 - x0f);
-        //             self.a[linestart_x0i as usize + 1] += d * (a1 - a0);
-        //             for xi in x0i + 2..x1i - 1 {
-        //                 self.a[linestart + xi as usize] += d * s;
-        //             }
-        //             let a2 = a1 + (x1i - x0i - 3) as f32 * s;
-        //             self.a[linestart + (x1i - 1) as usize] += d * (1.0 - a2 - am);
-        //         }
-        //         self.a[linestart + x1i as usize] += d * am;
-        //     }
-        //     x = xnext;
-        // }
+            const linestart_x0i = @intCast(isize, linestart) + x0i;
+            if (linestart_x0i < 0) {
+                continue; // oob index
+            }
+
+            const start = @intCast(usize, linestart_x0i);
+
+            if (x1i <= x0i + 1) {
+                const xmf = 0.5 * (x + xnext) - x0floor;
+
+                self.a[start] += d - d * xmf;
+                self.a[start + 1] += d * xmf;
+            } else {
+                const s = 1.0 / (x1 - x0);
+                const x0f = x0 - x0floor;
+                const a0 = 0.5 * s * (1.0 - x0f) * (1.0 - x0f);
+                const x1f = x1 - x1ceil + 1.0;
+                const am = 0.5 * s * x1f * x1f;
+
+                self.a[start] += d * a0;
+
+                if (x1i == x0i + 2) {
+                    self.a[start + 1] += d * (1.0 - a0 - am);
+                } else {
+                    const a1 = s * (1.5 - x0f);
+                    self.a[start + 1] += d * (a1 - a0);
+
+                    var xi: usize = @intCast(usize, x0i) + 2;
+
+                    while (xi < x1i - 1) : (xi += 1) {
+                        self.a[linestart + xi] += d * s;
+                    }
+
+                    const a2 = a1 + @intToFloat(f32, x1i - x0i - 3) * s;
+                    self.a[linestart + @intCast(usize, x1i - 1)] += d * (1.0 - a2 - am);
+                }
+
+                self.a[linestart + @intCast(usize, x1i)] += d * am;
+            }
+
+            x = xnext;
+        }
     }
 };
 
 test "Fonts: basic" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
     const affine = Affine{ .data = .{ 0, 1, 0, 1, 0.5, 0.25 } };
     const p0 = Point{ .x = 1, .y = 0 };
     const p1 = Point{ .x = 0, .y = 1 };
 
-    var raster = try Raster.init(liu.Pages, 100, 100);
+    var raster = try Raster.init(liu.Temp, 100, 100);
     raster.drawLine(p0, p1);
 
     _ = Point.lerp(0.5, p0, p1);
     _ = affine.pt(&p1);
 
-    const out = try accumulate(liu.Pages, &.{ 0.1, 0.2 });
-    liu.Pages.free(out);
+    const out = try accumulate(liu.Temp, &.{ 0.1, 0.2 });
+    _ = out;
 }
