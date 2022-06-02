@@ -96,33 +96,26 @@ const Raster = struct {
         var p0 = _p0;
         var p1 = _p1;
 
-        var dir: f32 = if (p0.y < p1.y) 1.0 else value: {
+        const dir: f32 = if (p0.y < p1.y) 1.0 else value: {
             p0 = _p1;
             p1 = _p0;
 
             break :value -1.0;
         };
 
-        _ = self;
-        _ = dir;
-
         const dxdy = (p1.x - p0.x) / (p1.y - p0.y);
-        _ = dxdy;
-
         var x = p0.x;
-
-        //  Raph says:  "note: implicit max of 0 because usize (TODO: really true?)"
-        // Raph means:  Who tf knows. Wouldn't it be the MIN that's zero? Also,
-        //              doesn't your coordinate system start at zero anyways?
-        var y0 = @floatToInt(usize, p0.y);
-        _ = y0;
         if (p0.y < 0.0) {
             x -= p0.y * dxdy;
         }
 
         const h_f32 = @intToFloat(f32, self.h);
         const max = @floatToInt(usize, std.math.min(h_f32, @ceil(p1.y)));
-        var y: usize = y0;
+
+        //  Raph says:  "note: implicit max of 0 because usize (TODO: really true?)"
+        // Raph means:  Who tf knows. Wouldn't it be the MIN that's zero? Also,
+        //              doesn't your coordinate system start at zero anyways?
+        var y: usize = @floatToInt(usize, p0.y);
 
         while (y < max) : (y += 1) {
             const linestart = y * self.w;
@@ -131,9 +124,9 @@ const Raster = struct {
             const y_f32 = @intToFloat(f32, y);
 
             const dy = std.math.min(y_plus_1, p1.y) - std.math.max(y_f32, p0.y);
-            var xnext = x + dxdy * dy;
-
             const d = dy * dir;
+
+            const xnext = x + dxdy * dy;
 
             var x0 = xnext;
             var x1 = x;
@@ -152,13 +145,13 @@ const Raster = struct {
                 continue; // oob index
             }
 
-            const start = @intCast(usize, linestart_x0i);
+            const linestart_x0 = @intCast(usize, linestart_x0i);
 
             if (x1i <= x0i + 1) {
                 const xmf = 0.5 * (x + xnext) - x0floor;
 
-                self.a[start] += d - d * xmf;
-                self.a[start + 1] += d * xmf;
+                self.a[linestart_x0] += d - d * xmf;
+                self.a[linestart_x0 + 1] += d * xmf;
             } else {
                 const s = 1.0 / (x1 - x0);
                 const x0f = x0 - x0floor;
@@ -166,13 +159,13 @@ const Raster = struct {
                 const x1f = x1 - x1ceil + 1.0;
                 const am = 0.5 * s * x1f * x1f;
 
-                self.a[start] += d * a0;
+                self.a[linestart_x0] += d * a0;
 
                 if (x1i == x0i + 2) {
-                    self.a[start + 1] += d * (1.0 - a0 - am);
+                    self.a[linestart_x0 + 1] += d * (1.0 - a0 - am);
                 } else {
                     const a1 = s * (1.5 - x0f);
-                    self.a[start + 1] += d * (a1 - a0);
+                    self.a[linestart_x0 + 1] += d * (a1 - a0);
 
                     var xi: usize = @intCast(usize, x0i) + 2;
 
