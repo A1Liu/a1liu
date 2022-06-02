@@ -39,7 +39,8 @@ const Point = struct {
         const d0 = liu.Vec2{ p0.x, p0.y };
         const d1 = liu.Vec2{ p1.x, p1.y };
 
-        return Point{ .data = d0 + t * (d1 - d0) };
+        const data = d0 + t * (d1 - d0);
+        return Point{ .x = data[0], .y = data[1] };
     }
 };
 
@@ -70,7 +71,8 @@ const Affine = struct {
         const v3 = liu.Vec2{ p.y, p.y };
         const v4 = liu.Vec2{ z.data[4], z.data[5] };
 
-        return Point{ .data = v0 * v1 + v2 * v3 + v4 };
+        const data = v0 * v1 + v2 * v3 + v4;
+        return Point{ .x = data[0], .y = data[1] };
     }
 };
 
@@ -79,7 +81,7 @@ const Raster = struct {
     h: usize,
     a: []f32,
 
-    pub fn new(alloc: Allocator, w: usize, h: usize) !Raster {
+    pub fn init(alloc: Allocator, w: usize, h: usize) !Raster {
         const a = try alloc.alloc(f32, w * h + 4);
         std.mem.set(f32, a, 0.0);
 
@@ -87,14 +89,14 @@ const Raster = struct {
     }
 
     pub fn drawLine(self: *Raster, _p0: Point, _p1: Point) void {
-        var p0 = _p0;
-        var p1 = _p1;
-
-        if (@fabs(p0.y - p1.y) <= EPSILON) {
+        if (@fabs(_p0.y - _p1.y) <= EPSILON) {
             return;
         }
 
-        var dir = if (p0.y < p1.y) 1.0 else value: {
+        var p0 = _p0;
+        var p1 = _p1;
+
+        var dir: f32 = if (p0.y < p1.y) 1.0 else value: {
             p0 = _p1;
             p1 = _p0;
 
@@ -106,17 +108,46 @@ const Raster = struct {
 
         const dxdy = (p1.x - p0.x) / (p1.y - p0.y);
         _ = dxdy;
-        // let mut x = p0.x;
-        // let y0 = p0.y as usize; // note: implicit max of 0 because usize (TODO: really true?)
-        // if p0.y < 0.0 {
-        //     x -= p0.y * dxdy;
-        // }
-        // for y in y0..self.h.min(p1.y.ceil() as usize) {
-        //     let linestart = y * self.w;
-        //     let dy = ((y + 1) as f32).min(p1.y) - (y as f32).max(p0.y);
-        //     let xnext = x + dxdy * dy;
-        //     let d = dy * dir;
-        //     let (x0, x1) = if x < xnext { (x, xnext) } else { (xnext, x) };
+
+        var x = p0.x;
+
+        //  Raph says:  "note: implicit max of 0 because usize (TODO: really true?)"
+        // Raph means:  Who tf knows. Wouldn't it be the MIN that's zero? Also,
+        //              doesn't your coordinate system start at zero anyways?
+        var y0 = @floatToInt(usize, p0.y);
+        _ = y0;
+        if (p0.y < 0.0) {
+            x -= p0.y * dxdy;
+        }
+
+        const h_f32 = @intToFloat(f32, self.h);
+        const max = @floatToInt(usize, std.math.min(h_f32, @ceil(p1.y)));
+        var y: usize = y0;
+
+        while (y < max) : (y += 1) {
+            const linestart = y * self.w;
+
+            const y_plus_1 = @intToFloat(f32, y + 1);
+            const y_f32 = @intToFloat(f32, y);
+
+            const dy = std.math.min(y_plus_1, p1.y) - std.math.max(y_f32, p0.y);
+            var xnext = x + dxdy * dy;
+
+            const d = dy * dir;
+
+            var x0 = xnext;
+            var x1 = x;
+            if (x < xnext) {
+                x0 = x;
+                x1 = xnext;
+            }
+
+            _ = x0;
+            _ = x1;
+            _ = d;
+            _ = linestart;
+        }
+
         //     let x0floor = x0.floor();
         //     let x0i = x0floor as i32;
         //     let x1ceil = x1.ceil();
@@ -160,8 +191,11 @@ const Raster = struct {
 
 test "Fonts: basic" {
     const affine = Affine{ .data = .{ 0, 1, 0, 1, 0.5, 0.25 } };
-    const p0 = Point.init(1, 0);
-    const p1 = Point.init(0, 1);
+    const p0 = Point{ .x = 1, .y = 0 };
+    const p1 = Point{ .x = 0, .y = 1 };
+
+    var raster = try Raster.init(liu.Pages, 100, 100);
+    raster.drawLine(p0, p1);
 
     _ = Point.lerp(0.5, p0, p1);
     _ = affine.pt(&p1);

@@ -15,3 +15,11 @@ pub usingnamespace buffers;
 pub usingnamespace math;
 pub usingnamespace interface;
 pub usingnamespace ecs;
+
+// NOTE: this forces the compiler to run the tests in the listed folders when
+// running `zig test src/liu/lib.zig
+test {
+    _ = fonts;
+    _ = sdf;
+    _ = img;
+}
