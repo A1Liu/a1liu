@@ -76,6 +76,32 @@ const Affine = struct {
     }
 };
 
+const Metrics = struct {
+    l: i32,
+    t: i32,
+    r: i32,
+    b: i32,
+
+    pub fn width(self: *const Metrics) usize {
+        return @intCast(usize, self.r - self.l);
+    }
+
+    pub fn height(self: *const Metrics) usize {
+        return @intCast(usize, self.b - self.t);
+    }
+};
+
+pub const VMetrics = struct {
+    ascent: f32,
+    descent: f32,
+    line_gap: f32,
+};
+
+pub const HMetrics = struct {
+    advance_width: f32,
+    left_side_bearing: f32,
+};
+
 const Raster = struct {
     w: usize,
     h: usize,
