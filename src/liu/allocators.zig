@@ -185,7 +185,7 @@ pub fn slabFrameBoundary() void {
     if (!std.debug.runtime_safety) return;
 
     const value = @atomicLoad(u64, &SlabAlloc.next, .SeqCst);
-    @atomicStore(u64, &SlabAlloc.frame_begin, value, .SeqCst);
+    SlabAlloc.frame_begin = value;
 }
 
 const SlabAlloc = struct {
@@ -199,8 +199,8 @@ const SlabAlloc = struct {
 
     const page = [4096]u8;
 
-    var frame_begin: if (std.debug.runtime_safety) u64 else void = if (std.debug.runtime_safety)
-        0
+    var frame_begin: if (std.debug.runtime_safety) ?u64 else void = if (std.debug.runtime_safety)
+        null
     else {};
 
     var next: usize = 0;
@@ -210,7 +210,7 @@ const SlabAlloc = struct {
         assert(next == 0);
 
         if (std.debug.runtime_safety) {
-            assert(frame_begin == 0);
+            assert(frame_begin == null);
         }
 
         const slabs = try Pages.alignedAlloc(page, SlabCount, 1024);
@@ -221,7 +221,9 @@ const SlabAlloc = struct {
         const out = @atomicRmw(u64, &SlabAlloc.next, .Add, 1, .SeqCst);
 
         if (std.debug.runtime_safety) {
-            assert(frame_begin - out < SlabCount);
+            if (frame_begin) |begin| {
+                assert(begin - out < SlabCount);
+            }
         }
 
         return &slab_begin[out % SlabCount];
