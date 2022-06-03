@@ -210,6 +210,50 @@ const Raster = struct {
             x = xnext;
         }
     }
+
+    pub fn drawQuad(self: *Raster, p0: Point, p1: Point, p2: Point) void {
+        const devx = p0.x - 2.0 * p1.x + p2.x;
+        const devy = p0.y - 2.0 * p1.y + p2.y;
+
+        const devsq = devx * devx + devy * devy;
+        if (devsq < 0.333) {
+            self.drawLine(p0, p2);
+            return;
+        }
+
+        // I'm pretty sure `tol` here stands for tolerance but the original code
+        // says `tol` and i dont wanna change it without knowing what `tol`
+        // actually stands for
+        const tol = 3.0;
+
+        const n = n: {
+            // No idea what these interim values are, but having it be
+            // written the other way seems dumb idk
+            const idk0 = devx * devx + devy * devy;
+            const idk1 = tol * idk0;
+            const idk2 = @floor(@sqrt(@sqrt(idk1)));
+            const idk3 = 1 + @floatToInt(usize, idk2);
+
+            break :n idk3;
+        };
+
+        var p = p0;
+        const nrecip = 1 / @intToFloat(f32, n);
+        var t: f32 = 0.0;
+
+        var i: u32 = 0;
+        while (i < n - 1) : (i += 1) {
+            t += nrecip;
+            const a = Point.lerp(t, p0, p1);
+            const b = Point.lerp(t, p1, p2);
+            const pn = Point.lerp(t, a, b);
+            self.drawLine(p, pn);
+
+            p = pn;
+        }
+
+        self.drawLine(p, p2);
+    }
 };
 
 const FontParseError = error{
@@ -293,7 +337,7 @@ test "Fonts: basic" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const bytes = @embedFile("font-rs/fonts/notomono-hinted/NotoMono-Regular.ttf");
+    const bytes = @embedFile("raph/fonts/notomono-hinted/NotoMono-Regular.ttf");
 
     const f = try Font.init(bytes);
     _ = f;
@@ -301,9 +345,11 @@ test "Fonts: basic" {
     const affine = Affine{ .data = .{ 0, 1, 0, 1, 0.5, 0.25 } };
     const p0 = Point{ .x = 1, .y = 0 };
     const p1 = Point{ .x = 0, .y = 1 };
+    const p2 = Point{ .x = 0, .y = 0 };
 
     var raster = try Raster.init(liu.Temp, 100, 100);
     raster.drawLine(p0, p1);
+    raster.drawQuad(p0, p1, p2);
 
     _ = Point.lerp(0.5, p0, p1);
     _ = affine.pt(&p1);
