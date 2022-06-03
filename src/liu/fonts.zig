@@ -239,42 +239,44 @@ fn read(bytes: []const u8, comptime T: type) ?T {
 const Font = struct {
     version: u32,
     head: []const u8,
+    maxp: []const u8,
 
     pub fn init(data: []const u8) FontParseError!Font {
         const HeadErr = error.HeaderInvalid;
         const version = read(data[0..], u32) orelse return HeadErr;
         const num_tables = read(data[4..], u16) orelse return HeadErr;
 
-        const RangeName = enum(u32) { Head, _ };
-        const Count = std.meta.tags(RangeName).len;
+        const Tag = enum(u32) { head, maxp, _ };
+        const Count = std.meta.fields(Tag).len;
         var tags: [Count]?[]const u8 = .{null} ** Count;
 
         var i: u16 = 0;
-        while (i < num_tables) : (i += 1) {
+        table_loop: while (i < num_tables) : (i += 1) {
             const header = data[12 + i * 16 ..][0..16];
 
             const offset = read(header[8..], u32) orelse return HeadErr;
             const length = read(header[12..], u32) orelse return HeadErr;
 
-            if (offset > data.len) {
-                return error.OffsetInvalid;
-            }
-
-            if (offset + length > data.len) {
-                return error.OffsetLengthInvalid;
-            }
+            if (offset > data.len) return error.OffsetInvalid;
+            if (offset + length > data.len) return error.OffsetLengthInvalid;
 
             const table_data = data[offset..(offset + length)];
 
             if (std.mem.eql(u8, header[0..4], "head")) {
-                tags[@enumToInt(RangeName.Head)] = table_data;
-                continue;
+                tags[@enumToInt(Tag.head)] = table_data;
+                continue :table_loop;
+            }
+
+            if (std.mem.eql(u8, header[0..4], "maxp")) {
+                tags[@enumToInt(Tag.maxp)] = table_data;
+                continue :table_loop;
             }
         }
 
         return Font{
             .version = version,
-            .head = tags[@enumToInt(RangeName.Head)] orelse return HeadErr,
+            .head = tags[@enumToInt(Tag.head)] orelse return HeadErr,
+            .maxp = tags[@enumToInt(Tag.maxp)] orelse return HeadErr,
         };
     }
 };
