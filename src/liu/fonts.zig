@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
 const EPSILON: f32 = 0.000001;
@@ -211,9 +212,81 @@ const Raster = struct {
     }
 };
 
+const FontParseError = error{
+    HeaderInvalid,
+    OffsetInvalid,
+    OffsetLengthInvalid,
+};
+
+const native_endian = builtin.target.cpu.arch.endian();
+fn read(bytes: []const u8, comptime T: type) ?T {
+    const Size = @sizeOf(T);
+
+    if (bytes.len < Size) return null;
+
+    switch (@typeInfo(T)) {
+        .Int => {
+            var value: T = @bitCast(T, bytes[0..Size].*);
+            if (native_endian != .Big) value = @byteSwap(T, value);
+
+            return value;
+        },
+
+        else => @compileError("input type is not allowed (only allows integers right now)"),
+    }
+}
+
+const Font = struct {
+    version: u32,
+    head: []const u8,
+
+    pub fn init(data: []const u8) FontParseError!Font {
+        const HeadErr = error.HeaderInvalid;
+        const version = read(data[0..], u32) orelse return HeadErr;
+        const num_tables = read(data[4..], u16) orelse return HeadErr;
+
+        const RangeName = enum(u32) { Head, _ };
+        const Count = std.meta.tags(RangeName).len;
+        var tags: [Count]?[]const u8 = .{null} ** Count;
+
+        var i: u16 = 0;
+        while (i < num_tables) : (i += 1) {
+            const header = data[12 + i * 16 ..][0..16];
+
+            const offset = read(header[8..], u32) orelse return HeadErr;
+            const length = read(header[12..], u32) orelse return HeadErr;
+
+            if (offset > data.len) {
+                return error.OffsetInvalid;
+            }
+
+            if (offset + length > data.len) {
+                return error.OffsetLengthInvalid;
+            }
+
+            const table_data = data[offset..(offset + length)];
+
+            if (std.mem.eql(u8, header[0..4], "head")) {
+                tags[@enumToInt(RangeName.Head)] = table_data;
+                continue;
+            }
+        }
+
+        return Font{
+            .version = version,
+            .head = tags[@enumToInt(RangeName.Head)] orelse return HeadErr,
+        };
+    }
+};
+
 test "Fonts: basic" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
+
+    const bytes = @embedFile("font-rs/fonts/notomono-hinted/NotoMono-Regular.ttf");
+
+    const f = try Font.init(bytes);
+    _ = f;
 
     const affine = Affine{ .data = .{ 0, 1, 0, 1, 0.5, 0.25 } };
     const p0 = Point{ .x = 1, .y = 0 };
@@ -225,6 +298,6 @@ test "Fonts: basic" {
     _ = Point.lerp(0.5, p0, p1);
     _ = affine.pt(&p1);
 
-    const out = try accumulate(liu.Temp, &.{ 0.1, 0.2 });
+    const out = try accumulate(liu.Temp, raster.a);
     _ = out;
 }
