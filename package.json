@@ -1,10 +1,16 @@
 {
   "name": "A1Liu",
+  "type": "module",
   "scripts": {
-    "dev": "next dev -p 1337",
-    "build": "next build",
-    "export": "next export",
-    "lint": "next lint --fix",
+    "dev": "svelte-kit dev -p 1337",
+    "build": "svelte-kit build",
+    "package": "svelte-kit package",
+    "preview": "svelte-kit preview",
+    "prepare": "svelte-kit sync",
+    "check": "svelte-check --tsconfig ./jsconfig.json",
+    "check:watch": "svelte-check --tsconfig ./jsconfig.json --watch",
+    "lint": "prettier --check --plugin-search-dir=. .",
+    "format": "prettier --write --plugin-search-dir=. .",
     "clean": "rm -rf .next out zig-cache zig-out"
   },
   "dependencies": {
@@ -16,16 +22,15 @@
     "zustand": "3.7.1"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "12.0.7",
-    "@types/node": "16.11.9",
-    "@types/react": "17.0.35",
-    "eslint": "7",
-    "eslint-config-next": "12.0.3",
-    "next-pwa": "5.5.2",
-    "postcss-flexbugs-fixes": "5.0.2",
-    "postcss-preset-env": "7.0.1",
-    "prettier": "2.6.2",
-    "typescript": "4.4.4"
+    "@sveltejs/adapter-auto": "next",
+    "@sveltejs/kit": "next",
+    "prettier": "2.5.1",
+    "prettier-plugin-svelte": "2.5.0",
+    "svelte": "3.44.0",
+    "svelte-check": "2.2.6",
+    "svelte-preprocess": "4.10.1",
+    "tslib": "2.3.1",
+    "typescript": "4.6.2"
   },
   "eslintConfig": {
     "extends": "next/core-web-vitals",
@@ -40,21 +45,6 @@
     "not ie 11",
     "not op_mini all"
   ],
-  "postcss": {
-    "plugins": {
-      "postcss-flexbugs-fixes": {},
-      "postcss-preset-env": {
-        "autoprefixer": {
-          "flexbox": "no-2009"
-        },
-        "stage": 3,
-        "features": {
-          "nesting-rules": true,
-          "custom-properties": false
-        }
-      }
-    }
-  },
   "prettier": {
     "trailingComma": "es5",
     "tabWidth": 2,
