@@ -271,6 +271,14 @@ const Font = struct {
                 tags[@enumToInt(Tag.maxp)] = table_data;
                 continue :table_loop;
             }
+
+            // This breaks... idk why
+            // inline for (comptime std.meta.fields(Tag)) |field| {
+            //     if (std.mem.eql(u8, header[0..4], field.name)) {
+            //         tags[field.value] = table_data;
+            //         continue :table_loop;
+            //     }
+            // }
         }
 
         return Font{
