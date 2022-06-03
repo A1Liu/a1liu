@@ -285,14 +285,21 @@ const Font = struct {
     head: []const u8,
     maxp: []const u8,
 
+    loca: ?[]const u8,
+    glyf: ?[]const u8,
+    cmap: ?[]const u8,
+    hhea: ?[]const u8,
+    hmtx: ?[]const u8,
+
     const TagDescriptor = struct {
         name: [4]u8,
         value: usize,
     };
 
-    const Tag = enum(u16) { head, maxp, _ };
+    const Tag = enum(u16) { head, maxp, loca, glyf, cmap, hhea, hmtx, _ };
     const TagData: []const TagDescriptor = tags: {
         var data: []const TagDescriptor = &.{};
+
         for (std.meta.fields(Tag)) |field| {
             data = data ++ [_]TagDescriptor{.{ .name = field.name[0..4].*, .value = field.value }};
         }
@@ -341,6 +348,12 @@ const Font = struct {
             .version = version,
             .head = tags[@enumToInt(Tag.head)] orelse return HeadErr,
             .maxp = tags[@enumToInt(Tag.maxp)] orelse return HeadErr,
+
+            .loca = tags[@enumToInt(Tag.loca)] orelse return HeadErr,
+            .glyf = tags[@enumToInt(Tag.glyf)] orelse return HeadErr,
+            .cmap = tags[@enumToInt(Tag.cmap)] orelse return HeadErr,
+            .hhea = tags[@enumToInt(Tag.hhea)] orelse return HeadErr,
+            .hmtx = tags[@enumToInt(Tag.hmtx)] orelse return HeadErr,
         };
     }
 };
