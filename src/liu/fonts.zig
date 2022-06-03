@@ -311,7 +311,8 @@ const Font = struct {
 
         var i: u16 = 0;
         table_loop: while (i < num_tables) : (i += 1) {
-            const header = data[12 + i * 16 ..][0..16];
+            const entry_begin = 12 + i * 16;
+            const header = data[entry_begin..][0..16];
 
             const offset = read(header[8..], u32) orelse return HeadErr;
             const length = read(header[12..], u32) orelse return HeadErr;
