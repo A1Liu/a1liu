@@ -285,13 +285,28 @@ const Font = struct {
     head: []const u8,
     maxp: []const u8,
 
+    const TagDescriptor = struct {
+        name: [4]u8,
+        value: usize,
+    };
+
+    const Tag = enum(u32) { head, maxp, _ };
+    const TagData: []const TagDescriptor = tags: {
+        var data: []const TagDescriptor = &.{};
+        for (std.meta.fields(Tag)) |field| {
+            data = data ++ [_]TagDescriptor{.{ .name = field.name[0..4].*, .value = field.value }};
+        }
+
+        break :tags data;
+    };
+
+    const Count = std.meta.fields(Tag).len;
+
     pub fn init(data: []const u8) FontParseError!Font {
         const HeadErr = error.HeaderInvalid;
         const version = read(data[0..], u32) orelse return HeadErr;
         const num_tables = read(data[4..], u16) orelse return HeadErr;
 
-        const Tag = enum(u32) { head, maxp, _ };
-        const Count = std.meta.fields(Tag).len;
         var tags: [Count]?[]const u8 = .{null} ** Count;
 
         var i: u16 = 0;
@@ -306,23 +321,19 @@ const Font = struct {
 
             const table_data = data[offset..(offset + length)];
 
-            if (std.mem.eql(u8, header[0..4], "head")) {
-                tags[@enumToInt(Tag.head)] = table_data;
-                continue :table_loop;
-            }
-
-            if (std.mem.eql(u8, header[0..4], "maxp")) {
-                tags[@enumToInt(Tag.maxp)] = table_data;
-                continue :table_loop;
-            }
-
-            // This breaks... idk why
+            // Ideally the code below should use:
+            //
+            // ```
             // inline for (comptime std.meta.fields(Tag)) |field| {
-            //     if (std.mem.eql(u8, header[0..4], field.name)) {
-            //         tags[field.value] = table_data;
-            //         continue :table_loop;
-            //     }
-            // }
+            // ```
+            //
+            // But that seg-faults. Seems like a compiler bug.
+            for (TagData) |field| {
+                if (std.mem.eql(u8, header[0..4], &field.name)) {
+                    tags[field.value] = table_data;
+                    continue :table_loop;
+                }
+            }
         }
 
         return Font{
