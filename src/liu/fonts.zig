@@ -290,7 +290,7 @@ const Font = struct {
         value: usize,
     };
 
-    const Tag = enum(u32) { head, maxp, _ };
+    const Tag = enum(u16) { head, maxp, _ };
     const TagData: []const TagDescriptor = tags: {
         var data: []const TagDescriptor = &.{};
         for (std.meta.fields(Tag)) |field| {
@@ -325,7 +325,7 @@ const Font = struct {
             // Ideally the code below should use:
             //
             // ```
-            // inline for (comptime std.meta.fields(Tag)) |field| {
+            // inline for (std.meta.fields(Tag)) |field| {
             // ```
             //
             // But that seg-faults. Seems like a compiler bug.
