@@ -7,7 +7,8 @@ const EPSILON: f32 = 0.000001;
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
-// https://github.com/raphlinus/font-rs
+// Parser - https://github.com/RazrFalcon/ttf-parser
+// Raster - https://github.com/raphlinus/font-rs
 
 pub fn accumulate(alloc: Allocator, src: []const f32) ![]u8 {
     var acc: f32 = 0.0;
@@ -260,6 +261,7 @@ const FontParseError = error{
     HeaderInvalid,
     OffsetInvalid,
     OffsetLengthInvalid,
+    Unknown,
 };
 
 const native_endian = builtin.target.cpu.arch.endian();
@@ -284,30 +286,27 @@ const Font = struct {
     version: u32,
     head: []const u8,
     maxp: []const u8,
+    cmap: []const u8,
 
     loca: ?[]const u8,
     glyf: ?[]const u8,
-    cmap: ?[]const u8,
     hhea: ?[]const u8,
     hmtx: ?[]const u8,
 
-    const TagDescriptor = struct {
-        name: [4]u8,
-        value: usize,
-    };
+    const TagDescriptor = struct { tag: u32, value: usize };
 
     const Tag = enum(u16) { head, maxp, loca, glyf, cmap, hhea, hmtx, _ };
+    const Count = std.meta.fields(Tag).len;
+
     const TagData: []const TagDescriptor = tags: {
         var data: []const TagDescriptor = &.{};
 
         for (std.meta.fields(Tag)) |field| {
-            data = data ++ [_]TagDescriptor{.{ .name = field.name[0..4].*, .value = field.value }};
+            data = data ++ [_]TagDescriptor{.{ .tag = @bitCast(u32, field.name[0..4].*), .value = field.value }};
         }
 
         break :tags data;
     };
-
-    const Count = std.meta.fields(Tag).len;
 
     pub fn init(data: []const u8) FontParseError!Font {
         const HeadErr = error.HeaderInvalid;
@@ -327,7 +326,9 @@ const Font = struct {
             if (offset > data.len) return error.OffsetInvalid;
             if (offset + length > data.len) return error.OffsetLengthInvalid;
 
-            const table_data = data[offset..(offset + length)];
+            const table_data = data[offset..][0..length];
+
+            const tag = @bitCast(u32, header[0..4].*);
 
             // Ideally the code below should use:
             //
@@ -337,7 +338,7 @@ const Font = struct {
             //
             // But that seg-faults. Seems like a compiler bug.
             for (TagData) |field| {
-                if (std.mem.eql(u8, header[0..4], &field.name)) {
+                if (tag == field.tag) {
                     tags[field.value] = table_data;
                     continue :table_loop;
                 }
@@ -348,13 +349,51 @@ const Font = struct {
             .version = version,
             .head = tags[@enumToInt(Tag.head)] orelse return HeadErr,
             .maxp = tags[@enumToInt(Tag.maxp)] orelse return HeadErr,
-
-            .loca = tags[@enumToInt(Tag.loca)] orelse return HeadErr,
-            .glyf = tags[@enumToInt(Tag.glyf)] orelse return HeadErr,
             .cmap = tags[@enumToInt(Tag.cmap)] orelse return HeadErr,
-            .hhea = tags[@enumToInt(Tag.hhea)] orelse return HeadErr,
-            .hmtx = tags[@enumToInt(Tag.hmtx)] orelse return HeadErr,
+
+            .loca = tags[@enumToInt(Tag.loca)],
+            .glyf = tags[@enumToInt(Tag.glyf)],
+            .hhea = tags[@enumToInt(Tag.hhea)],
+            .hmtx = tags[@enumToInt(Tag.hmtx)],
         };
+    }
+
+    // IDK what to do here yet
+    pub fn getGlyphId(self: *const Font, code_point: u32) FontParseError!?u16 {
+        if (code_point > std.math.maxInt(u16)) {
+            return null;
+        }
+
+        const num_tables = read(self.cmap[0..], u16) orelse return error.OffsetInvalid;
+        if (self.cmap.len < 4 + num_tables * 8) {
+            return error.OffsetLengthInvalid;
+        }
+
+        // const encoding = encoding: {
+        //     var i: u16 = 0;
+        //     while (i < num_tables) : (i += 1) {
+        //         const offset = 8 * i + 4;
+
+        //         const table = self.cmap[offset..][0..8];
+
+        //         const subtable_offset = read(table[4..], u32) orelse return error.OffsetInvalid;
+        //         const subtable_len = read(self.cmap[(subtable_offset + 2)..], u16) orelse
+        //             return error.OffsetInvalid;
+        //         const subtable = self.cmap[subtable_offset..][0..subtable_len];
+
+        //         const format = read(subtable[0..], u16) orelse return error.OffsetInvalid;
+
+        //         std.debug.print("\nasdf: {}\n", .{format});
+
+        //         if (format == 4) break :encoding subtable;
+        //     }
+
+        //     return error.Unknown;
+        // };
+
+        // _ = encoding;
+
+        return 12;
     }
 };
 
@@ -362,10 +401,10 @@ test "Fonts: basic" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const bytes = @embedFile("raph/fonts/notomono-hinted/NotoMono-Regular.ttf");
+    const bytes = @embedFile("../../public/apps/fonts/cour.ttf");
 
     const f = try Font.init(bytes);
-    _ = f;
+    _ = try f.getGlyphId('A');
 
     const affine = Affine{ .data = .{ 0, 1, 0, 1, 0.5, 0.25 } };
     const p0 = Point{ .x = 1, .y = 0 };
