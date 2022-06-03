@@ -286,9 +286,9 @@ const Font = struct {
     version: u32,
     head: []const u8,
     maxp: []const u8,
-    cmap: []const u8,
 
     loca: ?[]const u8,
+    cmap: ?[]const u8,
     glyf: ?[]const u8,
     hhea: ?[]const u8,
     hmtx: ?[]const u8,
@@ -349,9 +349,9 @@ const Font = struct {
             .version = version,
             .head = tags[@enumToInt(Tag.head)] orelse return HeadErr,
             .maxp = tags[@enumToInt(Tag.maxp)] orelse return HeadErr,
-            .cmap = tags[@enumToInt(Tag.cmap)] orelse return HeadErr,
 
             .loca = tags[@enumToInt(Tag.loca)],
+            .cmap = tags[@enumToInt(Tag.cmap)],
             .glyf = tags[@enumToInt(Tag.glyf)],
             .hhea = tags[@enumToInt(Tag.hhea)],
             .hmtx = tags[@enumToInt(Tag.hmtx)],
@@ -364,10 +364,10 @@ const Font = struct {
             return null;
         }
 
-        const num_tables = read(self.cmap[0..], u16) orelse return error.OffsetInvalid;
-        if (self.cmap.len < 4 + num_tables * 8) {
-            return error.OffsetLengthInvalid;
-        }
+        // const num_tables = read(self.cmap[0..], u16) orelse return error.OffsetInvalid;
+        // if (self.cmap.len < 4 + num_tables * 8) {
+        //     return error.OffsetLengthInvalid;
+        // }
 
         // const encoding = encoding: {
         //     var i: u16 = 0;
@@ -392,6 +392,7 @@ const Font = struct {
         // };
 
         // _ = encoding;
+        _ = self;
 
         return 12;
     }
