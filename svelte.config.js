@@ -1,4 +1,5 @@
 import adapter from "@sveltejs/adapter-static";
+import path from "path";
 import preprocess from "svelte-preprocess";
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -18,6 +19,15 @@ const config = {
     },
     files: {
       assets: "public",
+      lib: "src",
+    },
+
+    vite: {
+      resolve: {
+        alias: {
+          "@lib": path.resolve("./src"),
+        },
+      },
     },
   },
 };

@@ -8,12 +8,17 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "paths": {
+      "$lib":["src"],
+      "$lib/*":["src/*"],
+      "@lib": ["src"],
+      "@lib/*":["src/*"],
+    }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
+    "src/*.ts",
+    "src/*.tsx"
   ],
   "exclude": [
     "node_modules",

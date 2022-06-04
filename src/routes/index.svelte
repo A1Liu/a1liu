@@ -23,7 +23,7 @@
     <h2>What I&apos;m Doing Now</h2>
     <p>
       Slowly learning things here and there while working on
-      <a href="/painter/">Painter</a>{" "}and other projects.
+      <a href="/">Painter</a>{" "}and other projects.
     </p>
 
     <h2>Projects</h2>
@@ -50,7 +50,7 @@
       </li>
 
       <li>
-        <a href="/apps/painter/">Painter</a>{" "}
+        <a href="/">Painter</a>{" "}
         - Tiny WebGL2 drawing app
       </li>
     </ul>
@@ -58,8 +58,6 @@
 </div>
 
 <style lang="postcss">
-  $min-lg: (min-width: 992px);
-
   .fullscreen {
     background-color: #e6e6e6;
     position: fixed;
@@ -93,7 +91,7 @@
     padding: 0 16px;
     width: 100%;
 
-    @media $min-lg {
+    @media (--min-lg) {
       padding: 0;
       flex-basis: 66.666667%;
       width: 66.666667%;
@@ -131,7 +129,7 @@
     width: 100%;
     padding: 50px;
 
-    @media $min-lg {
+    @media (--min-lg) {
       width: 66.666667%;
       box-shadow: inset -15px 0 15px -15px #282c34,
         inset 15px 0 15px -15px #282c34;

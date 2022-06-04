@@ -11,13 +11,14 @@
     "check:watch": "svelte-check --tsconfig ./jsconfig.json --watch",
     "lint": "prettier --check --plugin-search-dir=. .",
     "format": "prettier --write --plugin-search-dir=. src/routes",
-    "clean": "rm -rf .next out zig-cache zig-out"
+    "clean": "rm -rf .svelte-kit out zig-cache zig-out"
   },
   "dependencies": {},
   "devDependencies": {
     "@sveltejs/adapter-static": "next",
     "@sveltejs/kit": "next",
     "postcss": "8.4.14",
+    "postcss-custom-media": "8.0.1",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-load-config": "4.0.1",
     "postcss-preset-env": "7.0.1",
@@ -46,7 +47,9 @@
   "postcss": {
     "plugins": {
       "postcss-flexbugs-fixes": {},
-      "postcss-simple-vars": {},
+      "postcss-custom-media": {
+        "importFrom": "src/tsx/media-queries.css"
+      },
       "postcss-preset-env": {
         "autoprefixer": {
           "flexbox": "no-2009"
@@ -56,7 +59,8 @@
           "nesting-rules": true,
           "custom-properties": false
         }
-      }
+      },
+      "postcss-simple-vars": {}
     }
   },
   "prettier": {
