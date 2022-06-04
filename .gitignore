@@ -16,8 +16,8 @@ a.out
 # dependencies
 /node_modules
 
-# next.js
-/.next/
+# Svelte
+/.svelte-kit
 /out/
 
 # editor

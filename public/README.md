@@ -18,8 +18,7 @@ please see `install/README.md`.
 │   └── undo ----- Scripts that undo their counterpart in `install`
 ├── programs ===== Configurations used by programs that I use
 ├── pages -------- Next.js routes
-├── public ======= Next.js Assets folder
-└── shells ------- Configurations used by shell sessions
+└── shells ======= Configurations used by shell sessions
 ```
 
 ### Environment Variables

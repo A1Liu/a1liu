@@ -1,31 +1,35 @@
 {
   "name": "A1Liu",
+  "type": "module",
   "scripts": {
-    "dev": "next dev -p 1337",
-    "build": "next build",
-    "export": "next export",
-    "lint": "next lint --fix",
-    "clean": "rm -rf .next out zig-cache zig-out"
+    "dev": "svelte-kit dev -p 1337",
+    "build": "svelte-kit build",
+    "package": "svelte-kit package",
+    "preview": "svelte-kit preview",
+    "prepare": "svelte-kit sync",
+    "check": "svelte-check --tsconfig ./jsconfig.json",
+    "check:watch": "svelte-check --tsconfig ./jsconfig.json --watch",
+    "lint": "prettier --check --plugin-search-dir=. .",
+    "format": "prettier --write --plugin-search-dir=. src/routes src/svelte",
+    "clean": "rm -rf .svelte-kit out zig-cache zig-out"
   },
-  "dependencies": {
-    "classnames": "2.3.1",
-    "next": "12.1.6",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-query": "3.34.16",
-    "zustand": "3.7.1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@next/bundle-analyzer": "12.0.7",
-    "@types/node": "16.11.9",
-    "@types/react": "17.0.35",
-    "eslint": "7",
-    "eslint-config-next": "12.0.3",
-    "next-pwa": "5.5.2",
+    "@sveltejs/adapter-static": "next",
+    "@sveltejs/kit": "next",
+    "postcss": "8.4.14",
+    "postcss-custom-media": "8.0.1",
     "postcss-flexbugs-fixes": "5.0.2",
+    "postcss-load-config": "4.0.1",
     "postcss-preset-env": "7.0.1",
-    "prettier": "2.6.2",
-    "typescript": "4.4.4"
+    "postcss-simple-vars": "6.0.3",
+    "prettier": "2.5.1",
+    "prettier-plugin-svelte": "2.5.0",
+    "svelte": "3.44.0",
+    "svelte-check": "2.2.6",
+    "svelte-preprocess": "4.10.1",
+    "tslib": "2.3.1",
+    "typescript": "4.6.2"
   },
   "eslintConfig": {
     "extends": "next/core-web-vitals",
@@ -43,6 +47,9 @@
   "postcss": {
     "plugins": {
       "postcss-flexbugs-fixes": {},
+      "postcss-custom-media": {
+        "importFrom": "src/svelte/media-queries.css"
+      },
       "postcss-preset-env": {
         "autoprefixer": {
           "flexbox": "no-2009"
@@ -52,7 +59,8 @@
           "nesting-rules": true,
           "custom-properties": false
         }
-      }
+      },
+      "postcss-simple-vars": {}
     }
   },
   "prettier": {

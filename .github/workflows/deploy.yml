@@ -43,10 +43,9 @@ jobs:
 
       - name: Clean garbage
         run: |
-          find public/ -name "*.o" -delete
-          find public/ -name "*.so" -delete
-          find public/ -name "*.so.0" -delete
-          rm -rf public/local public/programs public/install public/README.md
+          find src/static/ -name "*.o" -delete
+          find src/static/ -name "*.so" -delete
+          find src/static/ -name "*.so.0" -delete
 
       - name: Build Site
         run: yarn build

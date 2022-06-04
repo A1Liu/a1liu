@@ -5,7 +5,9 @@ const Arch = std.Target.Cpu.Arch;
 const Builder = bld.Builder;
 const Mode = std.builtin.Mode;
 
-fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime output_dir: ?[]const u8) *bld.LibExeObjStep {
+var mode: Mode = undefined;
+
+fn wasmProgram(b: *Builder, comptime name: []const u8, comptime output_dir: ?[]const u8) *bld.LibExeObjStep {
     const vers = b.version(0, 0, 0);
     const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
 
@@ -14,8 +16,8 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime outp
 
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
-    // Output straight to public folder by default to make things easier
-    program.setOutputDir(output_dir orelse "./public/apps");
+    // Output straight to static folder by default to make things easier
+    program.setOutputDir(output_dir orelse "./src/static/apps");
 
     if (mode != .Debug) {
         program.strip = true;
@@ -30,9 +32,9 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime outp
 pub fn build(b: *Builder) void {
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const mode = b.standardReleaseOptions();
+    mode = b.standardReleaseOptions();
 
-    _ = wasmProgram(b, mode, "kilordle", null);
-    _ = wasmProgram(b, mode, "painter", null);
-    _ = wasmProgram(b, mode, "erlang", null);
+    _ = wasmProgram(b, "kilordle", null);
+    _ = wasmProgram(b, "painter", null);
+    _ = wasmProgram(b, "erlang", null);
 }

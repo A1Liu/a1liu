@@ -23,7 +23,7 @@ html {
   text-align: left;
 }
 
-html, body, #__next {
+html, body, #__svelte {
   height: 100%;
   width: 100%;
 }
