@@ -35,9 +35,9 @@ jobs:
 
       - name: Clean garbage
         run: |
-          find src/static/ -name "*.o" -delete
-          find src/static/ -name "*.so" -delete
-          find src/static/ -name "*.so.0" -delete
+          find static/ -name "*.o" -delete
+          find static/ -name "*.so" -delete
+          find static/ -name "*.so.0" -delete
 
       - name: Build Site
         run: yarn build
