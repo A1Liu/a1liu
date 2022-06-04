@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Somehow path modification on MacOS fucks up the shell. No idea how to fix
+# right now. This is possible culprit for Vim termguicolors not ever working
+# in Tmux.
+# https://superuser.com/questions/544989/does-tmux-sort-the-path-variable
+
 # Takes as arguments:
 # 1. path to source
 # 2. command that should be available after source
