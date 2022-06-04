@@ -14,8 +14,8 @@ fn wasmProgram(b: *Builder, mode: Mode, comptime name: []const u8, comptime outp
 
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
-    // Output straight to public folder by default to make things easier
-    program.setOutputDir(output_dir orelse "./public/apps");
+    // Output straight to static folder by default to make things easier
+    program.setOutputDir(output_dir orelse "./src/static/apps");
 
     if (mode != .Debug) {
         program.strip = true;

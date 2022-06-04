@@ -18,7 +18,7 @@ const config = {
       default: true,
     },
     files: {
-      assets: "public",
+      assets: "src/static",
       lib: "src",
     },
 

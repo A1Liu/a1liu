@@ -1,11 +1,6 @@
 __pycache__
 *.pyc
 
-# IDK why Zig outputs this crap but IDK how to disable it.
-*.o
-*.so
-*.so.0
-
 /local/*
 !/local/.gitkeep
 !/local/preconf
