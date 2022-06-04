@@ -1,4 +1,5 @@
 import * as GL from "@lib/ts/webgl";
+import type { WebGl } from "@lib/ts/webgl";
 import * as wasm from "@lib/ts/wasm";
 
 export type Number2 = [number, number];
