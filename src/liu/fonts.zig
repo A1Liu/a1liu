@@ -6,6 +6,7 @@ const EPSILON: f32 = 0.000001;
 
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
+const read = liu.packed_asset.read;
 
 // Parser - https://github.com/RazrFalcon/ttf-parser
 // Raster - https://github.com/raphlinus/font-rs
@@ -263,24 +264,6 @@ const FontParseError = error{
     OffsetLengthInvalid,
     Unknown,
 };
-
-const native_endian = builtin.target.cpu.arch.endian();
-fn read(bytes: []const u8, comptime T: type) ?T {
-    const Size = @sizeOf(T);
-
-    if (bytes.len < Size) return null;
-
-    switch (@typeInfo(T)) {
-        .Int => {
-            var value: T = @bitCast(T, bytes[0..Size].*);
-            if (native_endian != .Big) value = @byteSwap(T, value);
-
-            return value;
-        },
-
-        else => @compileError("input type is not allowed (only allows integers right now)"),
-    }
-}
 
 const Font = struct {
     version: u32,

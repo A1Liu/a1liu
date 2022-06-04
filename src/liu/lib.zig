@@ -4,6 +4,8 @@ const math = @import("./math.zig");
 const interface = @import("./interface.zig");
 const ecs = @import("./ecs.zig");
 
+pub const packed_asset = @import("./packed_asset.zig");
+
 pub const fonts = @import("./fonts.zig");
 pub const sdf = @import("./sdf.zig");
 pub const img = @import("./img.zig");
