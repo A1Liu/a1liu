@@ -20,7 +20,7 @@ const config = {
     files: {
       assets: "src/static",
       lib: "src",
-      serviceWorker: "src/svelte/service-worker.js"
+      serviceWorker: "src/svelte/service-worker.ts"
     },
 
     vite: {
