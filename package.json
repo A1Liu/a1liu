@@ -48,7 +48,7 @@
     "plugins": {
       "postcss-flexbugs-fixes": {},
       "postcss-custom-media": {
-        "importFrom": "src/media-queries.css"
+        "importFrom": "src/svelte/media-queries.css"
       },
       "postcss-preset-env": {
         "autoprefixer": {

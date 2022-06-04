@@ -248,7 +248,7 @@
 </div>
 
 <style lang="postcss">
-  @import "@lib/util.module.css";
+  @import "@lib/svelte/util.module.css";
 
   .wrapper {
     height: 100vh;
