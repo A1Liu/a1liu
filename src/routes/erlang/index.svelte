@@ -55,14 +55,14 @@
     if (evt.target !== canvas) return;
 
     const data = [evt.clientX, evt.clientY];
-    worker?.postMessage({ kind: "mousemove", data });
+    worker.postMessage({ kind: "mousemove", data });
   }}
   on:click={(evt) => {
     if (!canvas) return;
     if (evt.target !== canvas) return;
 
     const data = [evt.clientX, evt.clientY];
-    worker?.postMessage({ kind: "leftclick", data });
+    worker.postMessage({ kind: "leftclick", data });
   }}
   on:contextmenu={(evt) => {
     if (!canvas) return;
@@ -71,7 +71,7 @@
     evt.preventDefault();
 
     const data = [evt.clientX, evt.clientY];
-    worker?.postMessage({ kind: "rightclick", data });
+    worker.postMessage({ kind: "rightclick", data });
   }}
   on:keydown={(evt) => {
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
@@ -79,7 +79,7 @@
     if (!canvas) return;
     if (evt.target !== canvas) return;
 
-    worker?.postMessage({ kind: "keydown", data: evt.keyCode });
+    worker.postMessage({ kind: "keydown", data: evt.keyCode });
   }}
   on:keyup={(evt) => {
     if (evt.isComposing || evt.keyCode === 229) return;
@@ -87,7 +87,7 @@
     if (!canvas) return;
     if (evt.target !== canvas) return;
 
-    worker?.postMessage({ kind: "keyup", data: evt.keyCode });
+    worker.postMessage({ kind: "keyup", data: evt.keyCode });
   }}
 >
   <canvas

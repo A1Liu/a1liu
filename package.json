@@ -7,16 +7,16 @@
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",
     "prepare": "svelte-kit sync",
-    "check": "svelte-check --tsconfig ./jsconfig.json",
-    "check:watch": "svelte-check --tsconfig ./jsconfig.json --watch",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check --plugin-search-dir=. .",
     "format": "prettier --write --plugin-search-dir=. src/routes src/svelte",
     "clean": "rm -rf .svelte-kit out zig-cache zig-out"
   },
   "dependencies": {},
   "devDependencies": {
-    "@sveltejs/adapter-static": "next",
-    "@sveltejs/kit": "next",
+    "@sveltejs/adapter-static": "1.0.0-next.34",
+    "@sveltejs/kit": "1.0.0-next.348",
     "postcss": "8.4.14",
     "postcss-custom-media": "8.0.1",
     "postcss-flexbugs-fixes": "5.0.2",
@@ -26,9 +26,7 @@
     "prettier": "2.5.1",
     "prettier-plugin-svelte": "2.5.0",
     "svelte": "3.44.0",
-    "svelte-check": "2.2.6",
     "svelte-preprocess": "4.10.1",
-    "tslib": "2.3.1",
     "typescript": "4.6.2"
   },
   "eslintConfig": {
@@ -69,5 +67,37 @@
     "useTabs": false,
     "quoteProps": "consistent",
     "semi": true
+  },
+  "tsconfig": {
+    "extends": "./.svelte-kit/tsconfig.json",
+    "compilerOptions": {
+      "allowJs": true,
+      "checkJs": true,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "skipLibCheck": true,
+      "sourceMap": true,
+      "strict": true,
+      "paths": {
+        "$lib": [
+          "src"
+        ],
+        "$lib/*": [
+          "src/*"
+        ],
+        "@lib": [
+          "src"
+        ],
+        "@lib/*": [
+          "src/*"
+        ]
+      }
+    },
+    "exclude": [
+      "node_modules",
+      "./src/static",
+      "./public"
+    ]
   }
 }
