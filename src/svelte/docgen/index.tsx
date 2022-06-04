@@ -21,7 +21,6 @@ export const Docgen: React.FC = (props) => {
   );
 };
 
-
 export const Latex: React.FC = (props) => {
   return (
     <>
