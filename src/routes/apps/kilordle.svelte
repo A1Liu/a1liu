@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import * as wasm from "@lib/wasm";
-  import { postToast } from "@lib/tsx/errors";
-  import { defer } from "@lib/util";
+  import * as wasm from "@lib/ts/wasm";
+  import { postToast } from "@lib/ts/errors";
+  import { defer } from "@lib/ts/util";
 
   interface PuzzleData {
     solution: string;
@@ -250,7 +250,7 @@
 </div>
 
 <style lang="postcss">
-  @import "@lib/tsx/util.module.css";
+  @import "@lib/util.module.css";
 
   .wrapper {
     height: 100vh;

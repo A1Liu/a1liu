@@ -16,10 +16,6 @@
       "@lib/*":["src/*"],
     }
   },
-  "include": [
-    "src/*.ts",
-    "src/*.tsx"
-  ],
   "exclude": [
     "node_modules",
     "./src/static",

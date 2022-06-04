@@ -48,7 +48,7 @@
     "plugins": {
       "postcss-flexbugs-fixes": {},
       "postcss-custom-media": {
-        "importFrom": "src/tsx/media-queries.css"
+        "importFrom": "src/media-queries.css"
       },
       "postcss-preset-env": {
         "autoprefixer": {
