@@ -1,7 +1,7 @@
-import { build, files, timestamp } from "$service-worker";
+import { build, files, version } from "$service-worker";
 
 const worker = self as unknown as any;
-const FILES = `cache${timestamp}`;
+const FILES = `cache${version}`;
 const to_cache = build.concat(files);
 const staticAssets = new Set(to_cache);
 
@@ -32,7 +32,7 @@ worker.addEventListener("activate", (event) => {
 
 // attempt to process HTTP requests and rely on the cache if offline
 async function fetchAndCache(request: Request) {
-  const cache = await caches.open(`offline${timestamp}`);
+  const cache = await caches.open(`offline${version}`);
   try {
     const response = await fetch(request);
     cache.put(request, response.clone());
