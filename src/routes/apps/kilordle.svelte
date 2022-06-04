@@ -157,6 +157,7 @@
 
 <svelte:head>
   <link rel="manifest" href="/apps/kilordle.webmanifest" />
+  <link rel="shortcut icon" href="/apps/k-emoji.svg" />
   <meta name="theme-color" content="#1976D2" />
 </svelte:head>
 
