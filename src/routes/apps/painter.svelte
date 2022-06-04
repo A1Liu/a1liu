@@ -29,6 +29,43 @@
     return urlString;
   })();
 
+  const recordButtonHandler = (evt) => {
+    if (navigator.userAgent.indexOf("Firefox") != -1) {
+      addToast(
+        "warn",
+        5 * 1000,
+        "Recording on Firefox isn't supported right now"
+      );
+
+      return;
+    }
+
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      mediaRecorder = null;
+      return;
+    }
+
+    const stream = canvas.captureStream(24);
+    mediaRecorder = new MediaRecorder(stream);
+    const recordedChunks = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = (e) => {
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      if (recordingUrl) {
+        URL.revokeObjectURL(recordingUrl);
+      }
+
+      recordingUrl = URL.createObjectURL(blob);
+    };
+
+    mediaRecorder.start();
+  };
+
   $: {
     const [r, g, b] = color;
     const colorStyle = `rgb(${r * 255}, ${g * 255}, ${b * 255})`;
@@ -89,7 +126,7 @@
     worker.postMessage({ kind: "canvas", offscreen }, [offscreen]);
 
     return () => {
-    window.removeEventListener("resize", listener);
+      window.removeEventListener("resize", listener);
     };
   });
 </script>
@@ -134,11 +171,7 @@
     bind:this={canvas}
     class="canvas"
     contentEditable
-    on:dblclick={(evt) => {
-      evt.preventDefault();
-      evt.stopPropagation();
-    return false;
-    }}
+    on:mousedown={(evt) => evt.preventDefault()}
   />
 
   <div class="configBox">
@@ -184,44 +217,7 @@
       </div>
 
       <div class="configRow">
-        <button
-          class="muiButton"
-          on:click={() => {
-            if (navigator.userAgent.indexOf("Firefox") != -1) {
-              addToast(
-                "warn",
-                5 * 1000,
-                "Recording on Firefox isn't supported right now"
-              );
-
-              return;
-            }
-
-            if (mediaRecorder) {
-              mediaRecorder.stop();
-              mediaRecorder = null;
-            } else {
-              const stream = canvas.captureStream(24);
-              mediaRecorder = new MediaRecorder(stream);
-              const recordedChunks = [];
-
-              mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) recordedChunks.push(e.data);
-              };
-
-              mediaRecorder.onstop = (e) => {
-                const blob = new Blob(recordedChunks, { type: "video/webm" });
-                if (recordingUrl) {
-                  URL.revokeObjectURL(recordingUrl);
-                }
-
-                recordingUrl = URL.createObjectURL(blob);
-              };
-
-              mediaRecorder.start();
-            }
-          }}
-        >
+        <button class="muiButton" on:click={recordButtonHandler}>
           {mediaRecorder ? "stop" : "record"}
         </button>
 
@@ -275,7 +271,7 @@
     flex-grow: 1;
 
     cursor: default;
-  outline: 0px solid transparent;
+    outline: 0px solid transparent;
   }
 
   .configBox {
