@@ -206,7 +206,7 @@
 
                 <div
                   class="letterBox"
-                  class:green={letter.toLowerCase() == letter}
+                  class:green={letter.toLowerCase() !== letter}
                 >
                   {letter}
                 </div>
