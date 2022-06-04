@@ -60,5 +60,7 @@ if [[ $CFG_ENV != 1 ]]; then
   export LINUX_GOPATH="/usr/local/go/bin"
   export PATH="${LINUX_GOPATH}:${GOPATH}:${GOPATH}/bin:${PATH}"
 
+  export PATH="/opt/homebrew/bin:$PATH"
+
   export PATH="~/.rbenv/bin:${PATH}"
 fi
