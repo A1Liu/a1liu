@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import * as wasm from "@lib/ts/wasm";
-  import { postToast } from "@lib/ts/errors";
+  import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import { defer } from "@lib/ts/util";
 
   interface PuzzleData {
@@ -30,9 +30,9 @@
   let keyboard: any = undefined;
 
   const reset = () => {
-  if (!wasmRef) return;
+    if (!wasmRef) return;
 
-  wasmRef.abi.reset();
+    wasmRef.abi.reset();
 
     word = "";
     submissionCount = 0;
@@ -106,10 +106,6 @@
     }
   }
 
-  $: {
-    console.log(puzzles);
-  }
-
   onMount(() => {
     const wordles = wasm.fetchAsset("/apps/wordles.txt");
     const words = wasm.fetchAsset("/apps/wordle-words.txt");
@@ -163,6 +159,8 @@
   <link rel="manifest" href="/apps/kilordle.webmanifest" />
   <meta name="theme-color" content="#1976D2" />
 </svelte:head>
+
+<Toast />
 
 <div class="wrapper">
   <div class="topBar">
