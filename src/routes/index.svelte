@@ -46,7 +46,7 @@
           someone else&apos;s idea
         </a>
         , which was inspired by{" "}
-        <a href="https://www.powerlanguage.co.uk/wordle/">Wordle</a>
+        <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a>
       </li>
 
       <li>
