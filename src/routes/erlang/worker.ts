@@ -70,8 +70,8 @@ const initGl = async (canvas: any): Promise<ErlangGl | null> => {
   if (!ctx) return null;
 
   const [vertSrc, fragSrc] = await Promise.all([
-    fetch("/apps/painter.vert").then((r) => r.text()),
-    fetch("/apps/painter.frag").then((r) => r.text()),
+    fetch("/painter/painter.vert").then((r) => r.text()),
+    fetch("/painter/painter.frag").then((r) => r.text()),
   ]);
 
   const vertexShader = GL.createShader(ctx, ctx.VERTEX_SHADER, vertSrc);
@@ -261,7 +261,7 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm("/apps/erlang.wasm", {
+  const wasmRef = await wasm.fetchWasm("/erlang/erlang.wasm", {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({}),
     imports: {

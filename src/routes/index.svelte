@@ -10,7 +10,7 @@
   </div>
 
   <div class="main">
-    <img src={"/apps/pfp.jpg"} alt="me" />
+    <img src={"/pfp.jpg"} alt="me" />
 
     <h2>About Me</h2>
     <p>
@@ -23,7 +23,7 @@
     <h2>What I&apos;m Doing Now</h2>
     <p>
       Slowly learning things here and there while working on
-      <a href="/">Painter</a>{" "}and other projects.
+      <a href="/painter/">Painter</a>{" "}and other projects.
     </p>
 
     <h2>Projects</h2>
@@ -40,7 +40,7 @@
       </li>
 
       <li>
-        <a href="/apps/kilordle/">Kilordle Clone</a>{" "}
+        <a href="/kilordle/">Kilordle Clone</a>{" "}
         - Clone of{" "}
         <a href="https://jonesnxt.github.io/kilordle/">
           someone else&apos;s idea
@@ -50,7 +50,7 @@
       </li>
 
       <li>
-        <a href="/">Painter</a>{" "}
+        <a href="/painter/">Painter</a>{" "}
         - Tiny WebGL2 drawing app
       </li>
     </ul>

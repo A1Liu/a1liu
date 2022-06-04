@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import MyWorker from "@lib/painter.worker?worker";
+  import MyWorker from "./worker?worker";
   import Toast, { ToastColors, addToast } from "@lib/svelte/errors.svelte";
   import * as wasm from "@lib/ts/wasm";
   import * as GL from "@lib/ts/webgl";

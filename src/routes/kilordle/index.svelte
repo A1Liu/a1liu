@@ -107,9 +107,9 @@
   }
 
   onMount(() => {
-    const wordles = wasm.fetchAsset("/apps/wordles.txt");
-    const words = wasm.fetchAsset("/apps/wordle-words.txt");
-    const wasmPromise = wasm.fetchWasm("/apps/kilordle.wasm", {
+    const wordles = wasm.fetchAsset("/kilordle/wordles.txt");
+    const words = wasm.fetchAsset("/kilordle/wordle-words.txt");
+    const wasmPromise = wasm.fetchWasm("/kilordle/kilordle.wasm", {
       postMessage: postToast,
       imports: { setPuzzles: (p: PuzzleData[]) => (puzzles = p) },
       raw: () => ({
@@ -156,8 +156,8 @@
 </script>
 
 <svelte:head>
-  <link rel="manifest" href="/apps/kilordle.webmanifest" />
-  <link rel="shortcut icon" href="/apps/k-emoji.svg" />
+  <link rel="manifest" href="/kilordle/kilordle.webmanifest" />
+  <link rel="shortcut icon" href="/kilordle/k-emoji.svg" />
   <meta name="theme-color" content="#1976D2" />
 </svelte:head>
 

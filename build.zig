@@ -7,9 +7,15 @@ const Mode = std.builtin.Mode;
 
 var mode: Mode = undefined;
 
-fn wasmProgram(b: *Builder, comptime name: []const u8, comptime output_dir: ?[]const u8) *bld.LibExeObjStep {
+const ProgData = struct {
+    name: []const u8,
+    output: []const u8,
+    root: []const u8,
+};
+
+fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
     const vers = b.version(0, 0, 0);
-    const program = b.addSharedLibrary(name, "src/" ++ name ++ ".zig", vers);
+    const program = b.addSharedLibrary(prog.name, prog.root, vers);
 
     program.addPackagePath("liu", "src/liu/lib.zig");
     program.setBuildMode(mode);
@@ -17,7 +23,7 @@ fn wasmProgram(b: *Builder, comptime name: []const u8, comptime output_dir: ?[]c
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
     // Output straight to static folder by default to make things easier
-    program.setOutputDir(output_dir orelse "./src/static/apps");
+    program.setOutputDir(prog.output);
 
     if (mode != .Debug) {
         program.strip = true;
@@ -34,7 +40,21 @@ pub fn build(b: *Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     mode = b.standardReleaseOptions();
 
-    _ = wasmProgram(b, "kilordle", null);
-    _ = wasmProgram(b, "painter", null);
-    _ = wasmProgram(b, "erlang", null);
+    _ = wasmProgram(b, .{
+        .name = "kilordle",
+        .root = "./src/routes/kilordle/kilordle.zig",
+        .output = "./src/static/kilordle/",
+    });
+
+    _ = wasmProgram(b, .{
+        .name = "painter",
+        .root = "./src/routes/painter/painter.zig",
+        .output = "./src/static/painter/",
+    });
+
+    _ = wasmProgram(b, .{
+        .name = "erlang",
+        .root = "./src/routes/erlang/erlang.zig",
+        .output = "./src/static/erlang/",
+    });
 }
