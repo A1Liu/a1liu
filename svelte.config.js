@@ -18,9 +18,9 @@ const config = {
       default: true,
     },
     files: {
-      assets: "src/static",
-      lib: "src",
-      serviceWorker: "src/svelte/service-worker.ts"
+      assets: "./static",
+      lib: "./src",
+      serviceWorker: "./src/svelte/service-worker.ts"
     },
 
     vite: {

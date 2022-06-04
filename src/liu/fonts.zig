@@ -402,7 +402,7 @@ test "Fonts: basic" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const bytes = @embedFile("../static/fonts/cour.ttf");
+    const bytes = @embedFile("../../static/fonts/cour.ttf");
 
     const f = try Font.init(bytes);
     _ = try f.getGlyphId('A');

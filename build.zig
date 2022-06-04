@@ -43,18 +43,18 @@ pub fn build(b: *Builder) void {
     _ = wasmProgram(b, .{
         .name = "kilordle",
         .root = "./src/routes/kilordle/kilordle.zig",
-        .output = "./src/static/kilordle/",
+        .output = "./static/kilordle/",
     });
 
     _ = wasmProgram(b, .{
         .name = "painter",
         .root = "./src/routes/painter/painter.zig",
-        .output = "./src/static/painter/",
+        .output = "./static/painter/",
     });
 
     _ = wasmProgram(b, .{
         .name = "erlang",
         .root = "./src/routes/erlang/erlang.zig",
-        .output = "./src/static/erlang/",
+        .output = "./static/erlang/",
     });
 }
