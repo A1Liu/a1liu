@@ -59,11 +59,11 @@ const Header = extern struct {
 
 pub const Spec = struct {
     Type: type,
-    Info: []const Info,
-    EncodeInfo: []const EncodeInfo,
-    Header: Header,
+    type_info: []const TypeInfo,
+    encoder_info: []const EncoderInfo,
+    header: Header,
 
-    pub const Info = enum(u8) {
+    pub const TypeInfo = enum(u8) {
         // zig fmt: off
         pu8, pu16, pu32, pu64,
         pi8, pi16, pi32, pi64,
@@ -108,8 +108,8 @@ pub const Spec = struct {
         }
     };
 
-    pub const EncodeInfo = struct {
-        type_info: Info,
+    pub const EncoderInfo = struct {
+        type_info: TypeInfo,
         field_offset: u32 = 0, // ignored when it doesn't apply
     };
 
@@ -125,23 +125,23 @@ pub const Spec = struct {
                 .spec_len = spec_len,
             };
 
-            var info: []const Info = &.{};
+            var info: []const TypeInfo = &.{};
             for (encode_info) |e| {
-                info = info ++ &[_]Info{e.type_info};
+                info = info ++ &[_]TypeInfo{e.type_info};
             }
 
             return .{
                 .Type = ExternType,
-                .EncodeInfo = encode_info,
-                .Info = info,
-                .Header = header,
+                .encoder_info = encode_info,
+                .type_info = info,
+                .header = header,
             };
         }
     }
 
-    pub fn decodeInfo(comptime T: type) []const Info {
+    pub fn decodeInfo(comptime T: type) []const TypeInfo {
         const encode_info = makeInfo(T, null);
-        var info: []const Info = &.{};
+        var info: []const TypeInfo = &.{};
         for (encode_info) |e| {
             info = info ++ &.{e.type_info};
         }
@@ -156,7 +156,7 @@ pub const Spec = struct {
         }
     }
 
-    fn makeInfo(comptime Extern: type, comptime Base: ?type) []const EncodeInfo {
+    fn makeInfo(comptime Extern: type, comptime Base: ?type) []const EncoderInfo {
         if (native_endian != .Little)
             @compileError("target platform must be little endian");
 
@@ -170,7 +170,7 @@ pub const Spec = struct {
         comptime {
             const info = switch (@typeInfo(Extern)) {
                 .Int => |info| {
-                    const type_info: Spec.Info = switch (info.bits) {
+                    const type_info: TypeInfo = switch (info.bits) {
                         8 => if (info.signedness == .signed) .pi8 else .pu8,
                         16 => if (info.signedness == .signed) .pi16 else .pu16,
                         32 => if (info.signedness == .signed) .pi32 else .pu32,
@@ -178,7 +178,7 @@ pub const Spec = struct {
                         else => @compileError("doesn't handle non-standard integer sizes"),
                     };
 
-                    return &.{EncodeInfo{ .type_info = type_info }};
+                    return &.{EncoderInfo{ .type_info = type_info }};
                 },
 
                 .Struct => |info| info,
@@ -201,14 +201,14 @@ pub const Spec = struct {
                     break :b if (isInternalSlice(B)) null else std.meta.Child(B);
                 } else null;
                 const elem_type = makeInfo(Extern.SliceType, ElemBase);
-                const slice_info = Spec.EncodeInfo{
+                const slice_info = Spec.EncoderInfo{
                     .type_info = .uslice_of_next,
                 };
 
-                return &[_]EncodeInfo{slice_info} ++ elem_type;
+                return &[_]EncoderInfo{slice_info} ++ elem_type;
             }
 
-            const spec_info: Spec.Info = switch (@alignOf(Extern)) {
+            const spec_info: TypeInfo = switch (@alignOf(Extern)) {
                 1 => .ustruct_open_1,
                 2 => .ustruct_open_2,
                 4 => .ustruct_open_4,
@@ -216,9 +216,9 @@ pub const Spec = struct {
                 else => unreachable,
             };
 
-            const val = EncodeInfo{ .type_info = spec_info };
+            const val = EncoderInfo{ .type_info = spec_info };
 
-            var spec: []const Spec.EncodeInfo = &[_]EncodeInfo{val};
+            var spec: []const Spec.EncoderInfo = &[_]EncoderInfo{val};
 
             if (Base) |B| {
                 var b: B = undefined;
@@ -229,12 +229,12 @@ pub const Spec = struct {
 
                     for (encode_info) |e| {
                         const offset = e.field_offset + @offsetOf(B, field.name);
-                        const new_info = EncodeInfo{
+                        const new_info = EncoderInfo{
                             .type_info = e.type_info,
                             .field_offset = offset,
                         };
 
-                        spec = spec ++ &[_]EncodeInfo{new_info};
+                        spec = spec ++ &[_]EncoderInfo{new_info};
                     }
                 }
             } else {
@@ -243,7 +243,7 @@ pub const Spec = struct {
                 }
             }
 
-            return spec ++ &[_]Spec.EncodeInfo{.{ .type_info = .ustruct_close }};
+            return spec ++ &[_]Spec.EncoderInfo{.{ .type_info = .ustruct_close }};
         }
     }
 
@@ -344,14 +344,14 @@ const Encoder = struct {
     next_slice_offset: u32 = 0,
 
     header: Header,
-    spec: []const Spec.EncodeInfo,
+    spec: []const Spec.EncoderInfo,
     spec_index: u32 = 0,
     object: [*]const u8,
 
     const Self = @This();
 
     const SliceInfo = struct {
-        spec: []const Spec.Info,
+        spec: []const Spec.TypeInfo,
         data: [*]const u8,
         obj_left: u32,
     };
@@ -365,8 +365,8 @@ const Encoder = struct {
         const spec = Spec.fromType(T);
 
         return .{
-            .header = spec.Header,
-            .spec = spec.EncodeInfo,
+            .header = spec.header,
+            .spec = spec.encoder_info,
             .object = @ptrCast([*]const u8, value),
         };
     }
@@ -506,7 +506,7 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
         @compileError("chunk size must be aligned to 8 bytes");
 
     const spec = Spec.fromType(@TypeOf(value));
-    if (comptime chunk_size < spec.Header.data_begin)
+    if (comptime chunk_size < spec.header.data_begin)
         @compileError("chunk size should be at least enough bytes to hold the header");
 
     const ChunkT = [chunk_size]u8;
@@ -553,8 +553,8 @@ pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType
     if (spec_end > header.data_begin) return error.InvalidData;
 
     const spec = Spec.fromType(T);
-    const asset_spec = @ptrCast([]const Spec.Info, bytes[16..spec_end]);
-    if (!std.mem.eql(Spec.Info, spec.Info, asset_spec)) return error.TypeMismatch;
+    const asset_spec = @ptrCast([]const Spec.TypeInfo, bytes[16..spec_end]);
+    if (!std.mem.eql(Spec.TypeInfo, spec.type_info, asset_spec)) return error.TypeMismatch;
 
     // TODO validation code
 
@@ -578,9 +578,9 @@ test "Packed Asset: spec generation" {
     const spec = Spec.fromType(TestE);
     const spec2 = Spec.fromType(Test);
 
-    try std.testing.expectEqualSlices(Spec.Info, spec.Info, spec2.Info);
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, spec2.type_info);
 
-    try std.testing.expectEqualSlices(Spec.Info, spec.Info, &.{
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
         .ustruct_open_4,
         .uslice_of_next,
         .pu8,
@@ -602,7 +602,7 @@ test "Packed Asset: spec encode/decode simple" {
 
     // std.debug.print("specInfo: {any}\n", .{spec.Info});
 
-    try std.testing.expectEqualSlices(Spec.Info, spec.Info, &.{
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
         .ustruct_open_8,
         .pu64,
         .ustruct_open_1,
@@ -642,7 +642,7 @@ test "Packed Asset: encode/decode extern" {
 
     const spec = Spec.fromType(Test);
 
-    try std.testing.expectEqualSlices(Spec.Info, spec.Info, &.{
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
         .ustruct_open_8,
         .pu64,
         .pu8,
@@ -722,10 +722,10 @@ test "Packed Asset: spec encode/decode multiple chunks" {
 
     // std.debug.print("specInfo: {any}\n", .{spec.Info});
 
-    try std.testing.expectEqual(spec.Info[0], .ustruct_open_8);
-    try std.testing.expectEqual(spec.Info[spec.Info.len - 1], .ustruct_close);
+    try std.testing.expectEqual(spec.type_info[0], .ustruct_open_8);
+    try std.testing.expectEqual(spec.type_info[spec.type_info.len - 1], .ustruct_close);
 
-    try std.testing.expectEqualSlices(Spec.Info, spec.Info[1..(spec.Info.len - 1)], &.{
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info[1..(spec.type_info.len - 1)], &.{
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
