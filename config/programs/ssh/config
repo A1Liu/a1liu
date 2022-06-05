@@ -2,5 +2,6 @@
 #  HostName github.com
 #  IdentityFile ~/.ssh/id_tangym
 
-Host *
-  IdentityFile ~/.ssh/id_aliu
+# Host *
+IdentityFile ~/.ssh/id_aliu
+AddressFamily inet
