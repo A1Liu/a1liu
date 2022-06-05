@@ -1,3 +1,27 @@
+//! Packed asset format. Poorly suited for highly-nested data, or data whose
+//! schema changes often. Doesn't handle very many types, as the intention
+//! is to store Plain-old-data, and not anything crazier than that.
+//!
+//! Stores the type of of the assets in the file, and checks that the stored
+//! type and the requested type are the same before continuing.
+//!
+//! Passed-in type and all its child types must obey the following rules:
+//! - must be struct, integer, float, or slice
+//! - must have a maximum alignment of 8
+//! - must not be recursive.
+//!
+//! Only supports little-endian platforms
+//!
+//! Does not track memory safety, but all offsets are positive, so you at
+//! least can't have cycles.
+
+// Algorithm generates spec array first, which is what gets stored; then other algo
+// reads from spec array and does decisions.
+//
+// Spec generation implicitly excludes recursive types at compile time. This
+// makes things easier, but maybe is bad for usability. For sure, the compile
+// error is atrocious.
+
 const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
@@ -79,7 +103,7 @@ pub const Spec = struct {
 
     pub const EncodeInfo = struct {
         type_info: Info,
-        field_offset: ?u32 = null, // ignored when it doesn't apply
+        field_offset: u32 = 0, // ignored when it doesn't apply
     };
 
     pub fn fromType(comptime T: type) @This() {
@@ -183,7 +207,7 @@ pub const Spec = struct {
                             );
 
                             for (encode_info) |e| {
-                                const offset = e.field_offset orelse 0;
+                                const offset = e.field_offset;
                                 const new_info = EncodeInfo{
                                     .type_info = e.type_info,
                                     .field_offset = offset + @offsetOf(B, field.name),
@@ -236,8 +260,10 @@ pub const Spec = struct {
 
             var translated: []const StructField = &.{};
 
+            var no_change = true;
             for (info.fields) |field| {
                 const FieldT = translateType(field.field_type);
+                if (FieldT != field.field_type) no_change = false;
 
                 const to_add = StructField{
                     .name = field.name,
@@ -251,6 +277,10 @@ pub const Spec = struct {
             }
 
             if (info.layout == .Extern) {
+                if (no_change) {
+                    return T;
+                }
+
                 return @Type(.{
                     .Struct = .{
                         .layout = .Extern,
@@ -301,31 +331,23 @@ pub const Spec = struct {
     }
 };
 
-// pass in Type
-// Type must be extern struct, integer, float, or u32_slice
-// Child types must also obey above rule
-// Accesses are bounds-checked
-// Asset data is in-place mutated
-// maximum alignment is 8
-
-// Require platform to be little-endian
-
-// Does not track memory safety, but all offsets are positive, so you at
-// least can't have cycles.
-
-// Algorithm generates spec array first, which is what gets stored; then other algo
-// reads from spec array and does decisions.
-//
-// Spec generation implicitly excludes recursive types at compile time. This
-// makes things easier, but maybe is bad for usability. For sure, the compile
-// error is atrocious.
+const Header = extern struct {
+    magic: [4]u8 = "aliu"[0..4].*,
+    version: u32 = Version,
+    data_begin: u32,
+    spec_len: u32,
+};
 
 const Encoder = struct {
-    spec: []const Spec.EncodeInfo,
     file_offset: u32 = 0,
 
+    // const ObjectEncoder = struct {
+    spec: []const Spec.EncodeInfo,
+    spec_index: u32 = 0,
     object: [*]const u8,
     object_base: u32 = 0,
+    object_len: u32,
+    // };
 
     const Result = union(enum) {
         done: u32,
@@ -336,12 +358,12 @@ const Encoder = struct {
         return .{
             .spec = Spec.fromType(T).EncodeInfo,
             .object = @ptrCast([*]const u8, value),
+            .object_len = @sizeOf(T),
         };
     }
 
     fn encode(self: *@This(), chunk: []align(8) u8) Result {
         std.debug.assert(chunk.len % 8 == 0);
-        // std.debug.assert(chunk.len >= 512);
 
         const len = @truncate(u32, chunk.len);
 
@@ -376,7 +398,9 @@ const Encoder = struct {
             self.object_base = data_begin;
         }
 
-        for (self.spec) |s, i| {
+        while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
+            const s = self.spec[self.spec_index];
+
             if (s.type_info == .ustruct_close) {
                 continue;
             }
@@ -389,15 +413,12 @@ const Encoder = struct {
 
             cursor = aligned_cursor;
 
-            if (cursor == len) {
-                self.spec = self.spec[i..];
-                return .not_done;
-            }
-
-            const object_offset = s.field_offset orelse cursor - self.object_base;
-
-            const field_mem = self.object + object_offset;
+            const field_mem = self.object + s.field_offset;
             if (s.type_info.pSize()) |size| {
+                if (cursor + size > len) {
+                    return .not_done;
+                }
+
                 switch (size) {
                     1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
                     2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
@@ -412,7 +433,18 @@ const Encoder = struct {
                 continue;
             }
 
-            // TODO slice encode
+            switch (s.type_info) {
+                .uslice_of_next => {
+                    if (cursor + 8 > len) {
+                        return .not_done;
+                    }
+
+                    // TODO: slices
+                },
+
+                // struct_open doesn't have any data
+                else => continue,
+            }
         }
 
         return .{ .done = cursor };
@@ -428,6 +460,21 @@ fn Encoded(comptime chunk_size: u32) type {
 
         pub fn len(self: *const @This()) usize {
             return self.chunks.len * chunk_size + self.last.len;
+        }
+
+        pub fn copyContiguous(self: *const @This(), alloc: std.mem.Allocator) ![]align(8) u8 {
+            const bytes = try alloc.alignedAlloc(u8, 8, self.len());
+            for (self.chunks) |chunk, i| {
+                const begin = i * ChunkSize;
+                std.mem.copy(u8, bytes[begin..], chunk);
+            }
+
+            {
+                const begin = self.chunks.len * ChunkSize;
+                std.mem.copy(u8, bytes[begin..], self.last);
+            }
+
+            return bytes;
         }
     };
 }
@@ -472,7 +519,7 @@ const AssetError = error{
 };
 
 pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType(T).Type {
-    if (bytes.len < 16) {
+    if (bytes.len < @sizeOf(Header)) {
         return error.NotAsset;
     }
 
@@ -572,6 +619,41 @@ test "Packed Asset: spec encode/decode simple" {
     try std.testing.expectEqual(value.field2.wasd, t.field2.wasd);
 }
 
+test "Packed Asset: encode/decode extern" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const TestE = extern struct {
+        data: u64,
+        field: u8,
+    };
+
+    const Test = struct {
+        field: u8,
+        data: u64,
+    };
+
+    const spec = Spec.fromType(Test);
+
+    try std.testing.expectEqualSlices(Spec.Info, spec.Info, &.{
+        .ustruct_open_8,
+        .pu64,
+        .pu8,
+        .ustruct_close,
+    });
+
+    const t: TestE = .{ .field = 123, .data = 12398145 };
+    const encoded = try tempEncode(t, 24);
+
+    try std.testing.expect(encoded.chunks.len == 1);
+
+    const bytes = try encoded.copyContiguous(liu.Temp);
+
+    const value = try parse(TestE, bytes);
+
+    try std.testing.expectEqual(value.*, t);
+}
+
 test "Packed Asset: spec encode/decode multiple chunks" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
@@ -654,18 +736,7 @@ test "Packed Asset: spec encode/decode multiple chunks" {
 
     try std.testing.expect(encoded.chunks.len == 1);
 
-    const len = encoded.len();
-
-    const bytes = try liu.Temp.alignedAlloc(u8, 8, len);
-    for (encoded.chunks) |chunk, i| {
-        const begin = i * @TypeOf(encoded).ChunkSize;
-        std.mem.copy(u8, bytes[begin..], chunk);
-    }
-
-    {
-        const begin = encoded.chunks.len * @TypeOf(encoded).ChunkSize;
-        std.mem.copy(u8, bytes[begin..], encoded.last);
-    }
+    const bytes = try encoded.copyContiguous(liu.Temp);
 
     const value = try parse(Test, bytes);
 
