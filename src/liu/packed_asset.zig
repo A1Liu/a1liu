@@ -152,7 +152,7 @@ pub const Spec = struct {
             @compileError("what does align=0 even mean");
 
         comptime {
-            switch (@typeInfo(Extern)) {
+            const info = switch (@typeInfo(Extern)) {
                 .Int => |info| {
                     const type_info: Spec.Info = switch (info.bits) {
                         8 => if (info.signedness == .signed) .pi8 else .pu8,
@@ -165,76 +165,74 @@ pub const Spec = struct {
                     return &.{EncodeInfo{ .type_info = type_info }};
                 },
 
-                .Struct => |info| {
-                    // There's an argument you could make that this should actually
-                    // accept only packed and not extern. Extern is easier to
-                    // implement.
-                    //                      - Albert Liu, Jun 04, 2022 Sat 14:48 PDT
-                    if (info.layout != .Extern)
-                        @compileError("struct must be laid out using extern format");
-
-                    if (isInternalSlice(Extern)) {
-                        const ElemBase = if (Base) |B| b: {
-                            break :b if (isInternalSlice(B)) null else std.meta.Child(B);
-                        } else null;
-                        const elem_type = makeInfo(Extern.SliceType, ElemBase);
-                        const slice_info = Spec.EncodeInfo{
-                            .type_info = .uslice_of_next,
-                        };
-
-                        return &[_]EncodeInfo{slice_info} ++ elem_type;
-                    }
-
-                    const spec_info: Spec.Info = switch (@alignOf(Extern)) {
-                        1 => .ustruct_open_1,
-                        2 => .ustruct_open_2,
-                        4 => .ustruct_open_4,
-                        8 => .ustruct_open_8,
-                        else => unreachable,
-                    };
-
-                    const val = EncodeInfo{ .type_info = spec_info };
-
-                    var spec: []const Spec.EncodeInfo = &[_]EncodeInfo{val};
-
-                    if (Base) |B| {
-                        var b: B = undefined;
-
-                        for (info.fields) |field| {
-                            const encode_info = makeInfo(
-                                field.field_type,
-                                @TypeOf(@field(b, field.name)),
-                            );
-
-                            for (encode_info) |e| {
-                                const offset = e.field_offset;
-                                const new_info = EncodeInfo{
-                                    .type_info = e.type_info,
-                                    .field_offset = offset + @offsetOf(B, field.name),
-                                };
-
-                                spec = spec ++ &[_]EncodeInfo{new_info};
-                            }
-                        }
-                    } else {
-                        for (info.fields) |field| {
-                            spec = spec ++ makeInfo(field.field_type, null);
-                        }
-                    }
-
-                    return spec ++ &[_]Spec.EncodeInfo{.{ .type_info = .ustruct_close }};
-                },
+                .Struct => |info| info,
 
                 .Pointer => @compileError("Native pointers are unsupported. " ++
                     "If you're looking for slices, use the custom wrapper type instead"),
 
                 else => @compileError("Unsupported type: " ++ @typeName(Extern)),
+            };
+
+            // There's an argument you could make that this should actually
+            // accept only packed and not extern. Extern is easier to
+            // implement.
+            //                      - Albert Liu, Jun 04, 2022 Sat 14:48 PDT
+            if (info.layout != .Extern)
+                @compileError("struct must be laid out using extern format");
+
+            if (isInternalSlice(Extern)) {
+                const ElemBase = if (Base) |B| b: {
+                    break :b if (isInternalSlice(B)) null else std.meta.Child(B);
+                } else null;
+                const elem_type = makeInfo(Extern.SliceType, ElemBase);
+                const slice_info = Spec.EncodeInfo{
+                    .type_info = .uslice_of_next,
+                };
+
+                return &[_]EncodeInfo{slice_info} ++ elem_type;
             }
+
+            const spec_info: Spec.Info = switch (@alignOf(Extern)) {
+                1 => .ustruct_open_1,
+                2 => .ustruct_open_2,
+                4 => .ustruct_open_4,
+                8 => .ustruct_open_8,
+                else => unreachable,
+            };
+
+            const val = EncodeInfo{ .type_info = spec_info };
+
+            var spec: []const Spec.EncodeInfo = &[_]EncodeInfo{val};
+
+            if (Base) |B| {
+                var b: B = undefined;
+
+                for (info.fields) |field| {
+                    const BField = @TypeOf(@field(b, field.name));
+                    const encode_info = makeInfo(field.field_type, BField);
+
+                    for (encode_info) |e| {
+                        const offset = e.field_offset + @offsetOf(B, field.name);
+                        const new_info = EncodeInfo{
+                            .type_info = e.type_info,
+                            .field_offset = offset,
+                        };
+
+                        spec = spec ++ &[_]EncodeInfo{new_info};
+                    }
+                }
+            } else {
+                for (info.fields) |field| {
+                    spec = spec ++ makeInfo(field.field_type, null);
+                }
+            }
+
+            return spec ++ &[_]Spec.EncodeInfo{.{ .type_info = .ustruct_close }};
         }
     }
 
     fn translateType(comptime T: type) type {
-        const StructField = std.builtin.Type.StructField;
+        const Field = std.builtin.Type.StructField;
 
         comptime {
             const info = switch (@typeInfo(T)) {
@@ -254,18 +252,16 @@ pub const Spec = struct {
                 else => @compileError("type is not compatible with serialization"),
             };
 
-            if (isInternalSlice(T)) {
-                return T;
-            }
+            if (isInternalSlice(T)) return T;
 
-            var translated: []const StructField = &.{};
+            var translated: []const Field = &.{};
 
             var no_change = true;
             for (info.fields) |field| {
                 const FieldT = translateType(field.field_type);
                 if (FieldT != field.field_type) no_change = false;
 
-                const to_add = StructField{
+                const to_add = Field{
                     .name = field.name,
                     .field_type = FieldT,
                     .default_value = null,
@@ -273,13 +269,11 @@ pub const Spec = struct {
                     .alignment = @alignOf(FieldT),
                 };
 
-                translated = translated ++ &[_]StructField{to_add};
+                translated = translated ++ &[_]Field{to_add};
             }
 
             if (info.layout == .Extern) {
-                if (no_change) {
-                    return T;
-                }
+                if (no_change) return T;
 
                 return @Type(.{
                     .Struct = .{
@@ -291,24 +285,29 @@ pub const Spec = struct {
                 });
             }
 
-            var fields: []const StructField = &.{};
+            var fields: []const Field = &.{};
 
-            // We allow the extern code below to validate alignment, here
-            // we simply sort the fields by alignment.
+            // These alignments won't necessarily be valid later in the process,
+            // so we make sure that all fields of all alignments are included
+            // (that's why the first comparison is >= 8, and the last is <= 1).
+            //
+            // Also, this process here is just for sorting fields by alignment,
+            // it's not using sort because sorting Fields isn't really
+            // allowed at compile-time.
             for (translated) |field| {
-                if (field.alignment >= 8) fields = fields ++ &[_]StructField{field};
+                if (field.alignment >= 8) fields = fields ++ &[_]Field{field};
             }
 
             for (translated) |field| {
-                if (field.alignment == 4) fields = fields ++ &[_]StructField{field};
+                if (field.alignment == 4) fields = fields ++ &[_]Field{field};
             }
 
             for (translated) |field| {
-                if (field.alignment == 2) fields = fields ++ &[_]StructField{field};
+                if (field.alignment == 2) fields = fields ++ &[_]Field{field};
             }
 
             for (translated) |field| {
-                if (field.alignment <= 1) fields = fields ++ &[_]StructField{field};
+                if (field.alignment <= 1) fields = fields ++ &[_]Field{field};
             }
 
             return @Type(.{
@@ -359,6 +358,15 @@ const Encoder = struct {
         };
     }
 
+    fn alignUp(cursor: u32, alignment: u32, chunk: []align(8) u8) u32 {
+        const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
+
+        // fill padding with zeroes
+        std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
+
+        return aligned_cursor;
+    }
+
     fn encodeObj(self: *Self, cursor_: u32, chunk: []align(8) u8) ?u32 {
         const len = @truncate(u32, chunk.len);
         var cursor = cursor_;
@@ -366,58 +374,52 @@ const Encoder = struct {
         while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
             const s = self.spec[self.spec_index];
 
-            if (s.type_info == .ustruct_close) {
-                continue;
-            }
+            const alignment = if (s.type_info == .ustruct_close)
+                self.spec[0].type_info.alignment()
+            else
+                s.type_info.alignment();
 
-            const alignment = s.type_info.alignment();
-            const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
-
-            // fill padding with zeroes
-            std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
-
-            cursor = aligned_cursor;
+            cursor = alignUp(cursor, alignment, chunk);
 
             const field_mem = self.object + s.field_offset;
-            if (s.type_info.pSize()) |size| {
+
+            slice: {
+                const size: u8 = switch (s.type_info) {
+                    .pu8, .pi8 => 1,
+                    .pu16, .pi16 => 2,
+                    .pu32, .pi32, .pf32 => 4,
+                    .pu64, .pi64, .pf64 => 8,
+
+                    .uslice_of_next => break :slice,
+
+                    // ustruct_* doesn't have any data
+                    else => continue,
+                };
                 // NOTE: We don't have to do partial writes of fields here,
                 // because we maintain the invariants that chunks are aligned
                 // to 8 bytes and all primitive data has a maximum alignment/size of 8.
-                if (cursor + size > len) {
-                    return null;
-                }
+                if (cursor + size > len) return null;
 
                 switch (size) {
                     1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
                     2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
                     4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
                     8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
-                    else => {
-                        unreachable;
-                    },
+                    else => unreachable,
                 }
 
                 cursor += size;
                 continue;
             }
 
-            switch (s.type_info) {
-                .uslice_of_next => {
-                    if (cursor + 8 > len) {
-                        return null;
-                    }
+            if (cursor + 8 > len) return null;
 
-                    // TODO: slices
+            // TODO: slices
 
-                    // need to store the pre-calculated next offset,
-                    // then parse the spec and update the next_offset value
-                    // then add the slice information to the slice list for
-                    // further processing
-                },
-
-                // struct_open doesn't have any data
-                else => continue,
-            }
+            // need to store the pre-calculated next offset,
+            // then parse the spec and update the next_offset value
+            // then add the slice information to the slice list for
+            // further processing
         }
 
         return cursor;
@@ -528,39 +530,26 @@ const AssetError = error{
 };
 
 pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType(T).Type {
-    if (bytes.len < @sizeOf(Header)) {
-        return error.NotAsset;
-    }
+    if (bytes.len < @sizeOf(Header)) return error.NotAsset;
 
-    // magic number
-    if (!std.mem.eql(u8, bytes[0..4], "aliu")) {
-        return error.NotAsset;
-    }
+    const header = @ptrCast(*const Header, bytes[0..16]);
 
-    const version = @bitCast(u32, bytes[4..8].*);
-    if (version > Version) {
-        return error.VersionMismatch;
-    }
+    if (!std.mem.eql(u8, &header.magic, "aliu")) return error.NotAsset;
+    if (header.version > Version) return error.VersionMismatch;
 
-    const data_begin = @bitCast(u32, bytes[8..12].*);
-    if (data_begin > bytes.len) return error.OutOfBounds;
-    if (data_begin % 8 != 0) return error.InvalidData;
+    if (header.data_begin > bytes.len) return error.OutOfBounds;
+    if (header.data_begin % 8 != 0) return error.InvalidData;
 
-    const spec_len = @bitCast(u32, bytes[12..16].*);
-    const spec_end = 16 + spec_len;
-    if (spec_end > data_begin) {
-        return error.InvalidData;
-    }
+    const spec_end = 16 + header.spec_len;
+    if (spec_end > header.data_begin) return error.InvalidData;
 
     const spec = Spec.fromType(T);
     const asset_spec = @ptrCast([]const Spec.Info, bytes[16..spec_end]);
-    if (!std.mem.eql(Spec.Info, spec.Info, asset_spec)) {
-        return error.TypeMismatch;
-    }
+    if (!std.mem.eql(Spec.Info, spec.Info, asset_spec)) return error.TypeMismatch;
 
     // TODO validation code
 
-    return @ptrCast(*const spec.Type, bytes[data_begin..]);
+    return @ptrCast(*const spec.Type, bytes[header.data_begin..]);
 }
 
 test "Packed Asset: spec generation" {
