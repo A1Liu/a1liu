@@ -422,12 +422,12 @@ const Encoder = struct {
 fn Encoded(comptime chunk_size: u32) type {
     return struct {
         chunks: []*align(8) [chunk_size]u8,
-        last_size: u32,
+        last: []align(8) const u8,
 
         pub const ChunkSize = chunk_size;
 
         pub fn len(self: *const @This()) usize {
-            return (self.chunks.len - 1) * chunk_size + self.last_size;
+            return self.chunks.len * chunk_size + self.last.len;
         }
     };
 }
@@ -452,13 +452,13 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
         const chunk_ = try liu.Temp.alignedAlloc(ChunkT, 8, 1);
         const chunk = &chunk_[0];
 
-        try list.append(chunk);
-
         switch (encoder.encode(chunk)) {
             .done => |size| {
-                return Encoded(chunk_size){ .chunks = list.items, .last_size = size };
+                return Encoded(chunk_size){ .chunks = list.items, .last = chunk[0..size] };
             },
-            .not_done => {},
+            .not_done => {
+                try list.append(chunk);
+            },
         }
     }
 }
@@ -471,7 +471,7 @@ const AssetError = error{
     OutOfBounds,
 };
 
-pub fn parse(comptime T: type, bytes: []align(8) u8) !*Spec.fromType(T).Type {
+pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType(T).Type {
     if (bytes.len < 16) {
         return error.NotAsset;
     }
@@ -504,10 +504,13 @@ pub fn parse(comptime T: type, bytes: []align(8) u8) !*Spec.fromType(T).Type {
 
     // TODO validation code
 
-    return @ptrCast(*spec.Type, bytes[data_begin..]);
+    return @ptrCast(*const spec.Type, bytes[data_begin..]);
 }
 
 test "Packed Asset: spec generation" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
     const TestE = extern struct {
         data: U32Slice(u8),
         field: u8,
@@ -532,6 +535,9 @@ test "Packed Asset: spec generation" {
 }
 
 test "Packed Asset: spec encode/decode simple" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
     const Test = struct {
         field: u8,
         field2: struct { asdf: u8, wasd: u8 },
@@ -554,21 +560,21 @@ test "Packed Asset: spec encode/decode simple" {
     const t: Test = .{ .field = 13, .field2 = .{ .asdf = 100, .wasd = 255 } };
     const encoded = try tempEncode(t, null);
 
-    try std.testing.expect(encoded.chunks.len == 1);
+    try std.testing.expect(encoded.chunks.len == 0);
 
-    const bytes = encoded.chunks[0][0..encoded.last_size];
-    const value = try parse(Test, bytes);
+    const value = try parse(Test, encoded.last);
 
     // std.debug.print("{any} {any}\n", .{ t, value.* });
 
     try std.testing.expect(value.field == t.field);
     try std.testing.expect(value.field2.asdf == t.field2.asdf);
     try std.testing.expect(value.field2.wasd == t.field2.wasd);
-
-    _ = encoded;
 }
 
 test "Packed Asset: spec encode/decode multiple chunks" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
     const Test = struct {
         field0: u64 = 0,
         field1: u64 = 1,
@@ -645,24 +651,24 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     const t: Test = .{};
     const encoded = try tempEncode(t, 304);
 
-    try std.testing.expect(encoded.chunks.len == 2);
+    try std.testing.expect(encoded.chunks.len == 1);
 
     const len = encoded.len();
 
     const bytes = try liu.Temp.alignedAlloc(u8, 8, len);
     for (encoded.chunks) |chunk, i| {
-        const c: []const u8 = if (i == encoded.chunks.len - 1)
-            chunk[0..encoded.last_size]
-        else
-            chunk;
-
         const begin = i * @TypeOf(encoded).ChunkSize;
-        std.mem.copy(u8, bytes[begin..], c);
+        std.mem.copy(u8, bytes[begin..], chunk);
+    }
+
+    {
+        const begin = encoded.chunks.len * @TypeOf(encoded).ChunkSize;
+        std.mem.copy(u8, bytes[begin..], encoded.last);
     }
 
     const value = try parse(Test, bytes);
 
-    const values = @ptrCast(*[50]u64, value);
+    const values = @ptrCast(*const [50]u64, value);
     for (values) |v, i| {
         try std.testing.expect(v == i);
     }
