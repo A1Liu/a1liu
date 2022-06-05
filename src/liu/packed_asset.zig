@@ -340,14 +340,71 @@ const Header = extern struct {
 
 const Encoder = struct {
     file_offset: u32 = 0,
+    obj_enc: ObjectEncoder,
 
-    // const ObjectEncoder = struct {
-    spec: []const Spec.EncodeInfo,
-    spec_index: u32 = 0,
-    object: [*]const u8,
-    object_base: u32 = 0,
-    object_len: u32,
-    // };
+    const ObjectEncoder = struct {
+        spec: []const Spec.EncodeInfo,
+        spec_index: u32 = 0,
+        object: [*]const u8,
+        object_base: u32 = 0,
+        object_len: u32,
+
+        fn encode(self: *@This(), cursor_: u32, chunk: []align(8) u8) ?u32 {
+            const len = @truncate(u32, chunk.len);
+            var cursor = cursor_;
+
+            while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
+                const s = self.spec[self.spec_index];
+
+                if (s.type_info == .ustruct_close) {
+                    continue;
+                }
+
+                const alignment = s.type_info.alignment();
+                const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
+
+                // fill padding with zeroes
+                std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
+
+                cursor = aligned_cursor;
+
+                const field_mem = self.object + s.field_offset;
+                if (s.type_info.pSize()) |size| {
+                    if (cursor + size > len) {
+                        return null;
+                    }
+
+                    switch (size) {
+                        1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
+                        2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
+                        4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
+                        8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
+                        else => {
+                            unreachable;
+                        },
+                    }
+
+                    cursor += size;
+                    continue;
+                }
+
+                switch (s.type_info) {
+                    .uslice_of_next => {
+                        if (cursor + 8 > len) {
+                            return null;
+                        }
+
+                        // TODO: slices
+                    },
+
+                    // struct_open doesn't have any data
+                    else => continue,
+                }
+            }
+
+            return cursor;
+        }
+    };
 
     const Result = union(enum) {
         done: u32,
@@ -356,9 +413,11 @@ const Encoder = struct {
 
     fn init(comptime T: type, value: *const T) @This() {
         return .{
-            .spec = Spec.fromType(T).EncodeInfo,
-            .object = @ptrCast([*]const u8, value),
-            .object_len = @sizeOf(T),
+            .obj_enc = .{
+                .spec = Spec.fromType(T).EncodeInfo,
+                .object = @ptrCast([*]const u8, value),
+                .object_len = @sizeOf(T),
+            },
         };
     }
 
@@ -398,56 +457,11 @@ const Encoder = struct {
             self.object_base = data_begin;
         }
 
-        while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
-            const s = self.spec[self.spec_index];
-
-            if (s.type_info == .ustruct_close) {
-                continue;
-            }
-
-            const alignment = s.type_info.alignment();
-            const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
-
-            // fill padding with zeroes
-            std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
-
-            cursor = aligned_cursor;
-
-            const field_mem = self.object + s.field_offset;
-            if (s.type_info.pSize()) |size| {
-                if (cursor + size > len) {
-                    return .not_done;
-                }
-
-                switch (size) {
-                    1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
-                    2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
-                    4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
-                    8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
-                    else => {
-                        unreachable;
-                    },
-                }
-
-                cursor += size;
-                continue;
-            }
-
-            switch (s.type_info) {
-                .uslice_of_next => {
-                    if (cursor + 8 > len) {
-                        return .not_done;
-                    }
-
-                    // TODO: slices
-                },
-
-                // struct_open doesn't have any data
-                else => continue,
-            }
+        if (self.obj_enc.encode(cursor, chunk)) |c| {
+            return .{ .done = c };
         }
 
-        return .{ .done = cursor };
+        return .notdone;
     }
 };
 
