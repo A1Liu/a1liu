@@ -296,27 +296,19 @@ pub const Spec = struct {
             // We allow the extern code below to validate alignment, here
             // we simply sort the fields by alignment.
             for (translated) |field| {
-                if (field.alignment >= 8) {
-                    fields = fields ++ &[_]StructField{field};
-                }
+                if (field.alignment >= 8) fields = fields ++ &[_]StructField{field};
             }
 
             for (translated) |field| {
-                if (field.alignment == 4) {
-                    fields = fields ++ &[_]StructField{field};
-                }
+                if (field.alignment == 4) fields = fields ++ &[_]StructField{field};
             }
 
             for (translated) |field| {
-                if (field.alignment == 2) {
-                    fields = fields ++ &[_]StructField{field};
-                }
+                if (field.alignment == 2) fields = fields ++ &[_]StructField{field};
             }
 
             for (translated) |field| {
-                if (field.alignment <= 1) {
-                    fields = fields ++ &[_]StructField{field};
-                }
+                if (field.alignment <= 1) fields = fields ++ &[_]StructField{field};
             }
 
             return @Type(.{
@@ -338,12 +330,36 @@ const Header = extern struct {
     spec_len: u32,
 };
 
-const ObjectEncoder = struct {
+const Encoder = struct {
+    file_offset: u32 = 0,
+    slice_data: std.ArrayListUnmanaged(SliceInfo) = .{},
+    next_offset: u32 = 0,
+
     spec: []const Spec.EncodeInfo,
     spec_index: u32 = 0,
     object: [*]const u8,
 
-    fn encode(self: *@This(), cursor_: u32, chunk: []align(8) u8) ?u32 {
+    const Self = @This();
+
+    const SliceInfo = struct {
+        spec: []const Spec.Info,
+        data: [*]const u8,
+        obj_left: u32,
+    };
+
+    const Result = union(enum) {
+        done: u32,
+        not_done: void,
+    };
+
+    fn init(comptime T: type, value: *const T) Self {
+        return .{
+            .spec = Spec.fromType(T).EncodeInfo,
+            .object = @ptrCast([*]const u8, value),
+        };
+    }
+
+    fn encodeObj(self: *Self, cursor_: u32, chunk: []align(8) u8) ?u32 {
         const len = @truncate(u32, chunk.len);
         var cursor = cursor_;
 
@@ -364,6 +380,9 @@ const ObjectEncoder = struct {
 
             const field_mem = self.object + s.field_offset;
             if (s.type_info.pSize()) |size| {
+                // NOTE: We don't have to do partial writes of fields here,
+                // because we maintain the invariants that chunks are aligned
+                // to 8 bytes and all primitive data has a maximum alignment/size of 8.
                 if (cursor + size > len) {
                     return null;
                 }
@@ -389,6 +408,11 @@ const ObjectEncoder = struct {
                     }
 
                     // TODO: slices
+
+                    // need to store the pre-calculated next offset,
+                    // then parse the spec and update the next_offset value
+                    // then add the slice information to the slice list for
+                    // further processing
                 },
 
                 // struct_open doesn't have any data
@@ -398,27 +422,8 @@ const ObjectEncoder = struct {
 
         return cursor;
     }
-};
 
-const Encoder = struct {
-    file_offset: u32 = 0,
-    obj_enc: ObjectEncoder,
-
-    const Result = union(enum) {
-        done: u32,
-        not_done: void,
-    };
-
-    fn init(comptime T: type, value: *const T) @This() {
-        return .{
-            .obj_enc = .{
-                .spec = Spec.fromType(T).EncodeInfo,
-                .object = @ptrCast([*]const u8, value),
-            },
-        };
-    }
-
-    fn encode(self: *@This(), chunk: []align(8) u8) Result {
+    fn encode(self: *Self, chunk: []align(8) u8) Result {
         std.debug.assert(chunk.len % 8 == 0);
 
         const len = @truncate(u32, chunk.len);
@@ -426,11 +431,11 @@ const Encoder = struct {
         var cursor: u32 = 0;
         defer self.file_offset += len;
 
-        // We're in the first chunk, at offset 0. We can safely assume that the
-        // object encoder has the spec of the root type in its spec field.
-        // At this point, we need to output the header of the file.
+        // We're in the first chunk, at offset 0. We can safely assume that we
+        // have the spec of the root type in its spec field. At this point, we
+        // need to output the header of the file.
         if (self.file_offset == 0) {
-            const spec_len = @truncate(u32, self.obj_enc.spec.len);
+            const spec_len = @truncate(u32, self.spec.len);
             const data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8));
 
             @ptrCast(*Header, chunk[0..16]).* = .{
@@ -439,7 +444,7 @@ const Encoder = struct {
             };
 
             // spec array
-            for (self.obj_enc.spec) |s, i| {
+            for (self.spec) |s, i| {
                 chunk[i + 16] = @enumToInt(s.type_info);
             }
 
@@ -449,11 +454,9 @@ const Encoder = struct {
             cursor = data_begin;
         }
 
-        if (self.obj_enc.encode(cursor, chunk)) |c| {
-            return .{ .done = c };
-        }
+        cursor = self.encodeObj(cursor, chunk) orelse return .not_done;
 
-        return .not_done;
+        return .{ .done = cursor };
     }
 };
 

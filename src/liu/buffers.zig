@@ -12,7 +12,8 @@ pub fn RingBuffer(comptime T: type, comptime len_opt: ?usize) type {
             const Buffer = [buffer_len]T;
             const Alloc = void;
 
-            const resizeAssumeEmpty = @compileError("this method is only available for dynamically sized RingBuffer values");
+            const resizeAssumeEmpty = @compileError("this method is only available " ++
+                "for dynamically sized RingBuffer values");
 
             fn init() Self {
                 return Self{
