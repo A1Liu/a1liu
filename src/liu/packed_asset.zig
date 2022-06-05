@@ -523,15 +523,16 @@ test "Packed Asset: spec generation" {
 
     const spec = Spec.fromType(TestE);
     const spec2 = Spec.fromType(Test);
-    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info, spec2.Info));
 
-    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info, &.{
+    try std.testing.expectEqualSlices(Spec.Info, spec.Info, spec2.Info);
+
+    try std.testing.expectEqualSlices(Spec.Info, spec.Info, &.{
         .ustruct_open_4,
         .uslice_of_next,
         .pu8,
         .pu8,
         .ustruct_close,
-    }));
+    });
 }
 
 test "Packed Asset: spec encode/decode simple" {
@@ -539,25 +540,25 @@ test "Packed Asset: spec encode/decode simple" {
     defer liu.TempMark = mark;
 
     const Test = struct {
-        field: u8,
         field2: struct { asdf: u8, wasd: u8 },
+        field: u64,
     };
 
     const spec = Spec.fromType(Test);
 
     // std.debug.print("specInfo: {any}\n", .{spec.Info});
 
-    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info, &.{
-        .ustruct_open_1,
-        .pu8,
+    try std.testing.expectEqualSlices(Spec.Info, spec.Info, &.{
+        .ustruct_open_8,
+        .pu64,
         .ustruct_open_1,
         .pu8,
         .pu8,
         .ustruct_close,
         .ustruct_close,
-    }));
+    });
 
-    const t: Test = .{ .field = 13, .field2 = .{ .asdf = 100, .wasd = 255 } };
+    const t: Test = .{ .field = 120303113, .field2 = .{ .asdf = 100, .wasd = 255 } };
     const encoded = try tempEncode(t, null);
 
     try std.testing.expect(encoded.chunks.len == 0);
@@ -566,9 +567,9 @@ test "Packed Asset: spec encode/decode simple" {
 
     // std.debug.print("{any} {any}\n", .{ t, value.* });
 
-    try std.testing.expect(value.field == t.field);
-    try std.testing.expect(value.field2.asdf == t.field2.asdf);
-    try std.testing.expect(value.field2.wasd == t.field2.wasd);
+    try std.testing.expectEqual(value.field, t.field);
+    try std.testing.expectEqual(value.field2.asdf, t.field2.asdf);
+    try std.testing.expectEqual(value.field2.wasd, t.field2.wasd);
 }
 
 test "Packed Asset: spec encode/decode multiple chunks" {
@@ -632,10 +633,10 @@ test "Packed Asset: spec encode/decode multiple chunks" {
 
     // std.debug.print("specInfo: {any}\n", .{spec.Info});
 
-    try std.testing.expect(spec.Info[0] == .ustruct_open_8);
-    try std.testing.expect(spec.Info[spec.Info.len - 1] == .ustruct_close);
+    try std.testing.expectEqual(spec.Info[0], .ustruct_open_8);
+    try std.testing.expectEqual(spec.Info[spec.Info.len - 1], .ustruct_close);
 
-    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info[1..(spec.Info.len - 1)], &.{
+    try std.testing.expectEqualSlices(Spec.Info, spec.Info[1..(spec.Info.len - 1)], &.{
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
@@ -646,7 +647,7 @@ test "Packed Asset: spec encode/decode multiple chunks" {
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
-    }));
+    });
 
     const t: Test = .{};
     const encoded = try tempEncode(t, 304);
@@ -670,6 +671,6 @@ test "Packed Asset: spec encode/decode multiple chunks" {
 
     const values = @ptrCast(*const [50]u64, value);
     for (values) |v, i| {
-        try std.testing.expect(v == i);
+        try std.testing.expectEqual(v, i);
     }
 }
