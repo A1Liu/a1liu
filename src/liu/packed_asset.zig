@@ -338,73 +338,71 @@ const Header = extern struct {
     spec_len: u32,
 };
 
-const Encoder = struct {
-    file_offset: u32 = 0,
-    obj_enc: ObjectEncoder,
+const ObjectEncoder = struct {
+    spec: []const Spec.EncodeInfo,
+    spec_index: u32 = 0,
+    object: [*]const u8,
 
-    const ObjectEncoder = struct {
-        spec: []const Spec.EncodeInfo,
-        spec_index: u32 = 0,
-        object: [*]const u8,
-        object_base: u32 = 0,
-        object_len: u32,
+    fn encode(self: *@This(), cursor_: u32, chunk: []align(8) u8) ?u32 {
+        const len = @truncate(u32, chunk.len);
+        var cursor = cursor_;
 
-        fn encode(self: *@This(), cursor_: u32, chunk: []align(8) u8) ?u32 {
-            const len = @truncate(u32, chunk.len);
-            var cursor = cursor_;
+        while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
+            const s = self.spec[self.spec_index];
 
-            while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
-                const s = self.spec[self.spec_index];
+            if (s.type_info == .ustruct_close) {
+                continue;
+            }
 
-                if (s.type_info == .ustruct_close) {
-                    continue;
+            const alignment = s.type_info.alignment();
+            const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
+
+            // fill padding with zeroes
+            std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
+
+            cursor = aligned_cursor;
+
+            const field_mem = self.object + s.field_offset;
+            if (s.type_info.pSize()) |size| {
+                if (cursor + size > len) {
+                    return null;
                 }
 
-                const alignment = s.type_info.alignment();
-                const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
+                switch (size) {
+                    1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
+                    2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
+                    4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
+                    8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
+                    else => {
+                        unreachable;
+                    },
+                }
 
-                // fill padding with zeroes
-                std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
+                cursor += size;
+                continue;
+            }
 
-                cursor = aligned_cursor;
-
-                const field_mem = self.object + s.field_offset;
-                if (s.type_info.pSize()) |size| {
-                    if (cursor + size > len) {
+            switch (s.type_info) {
+                .uslice_of_next => {
+                    if (cursor + 8 > len) {
                         return null;
                     }
 
-                    switch (size) {
-                        1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
-                        2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
-                        4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
-                        8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
-                        else => {
-                            unreachable;
-                        },
-                    }
+                    // TODO: slices
+                },
 
-                    cursor += size;
-                    continue;
-                }
-
-                switch (s.type_info) {
-                    .uslice_of_next => {
-                        if (cursor + 8 > len) {
-                            return null;
-                        }
-
-                        // TODO: slices
-                    },
-
-                    // struct_open doesn't have any data
-                    else => continue,
-                }
+                // struct_open doesn't have any data
+                else => continue,
             }
-
-            return cursor;
         }
-    };
+
+        return cursor;
+    }
+};
+
+const Encoder = struct {
+    file_offset: u32 = 0,
+    obj_enc: ObjectEncoder,
 
     const Result = union(enum) {
         done: u32,
@@ -416,7 +414,6 @@ const Encoder = struct {
             .obj_enc = .{
                 .spec = Spec.fromType(T).EncodeInfo,
                 .object = @ptrCast([*]const u8, value),
-                .object_len = @sizeOf(T),
             },
         };
     }
@@ -429,39 +426,34 @@ const Encoder = struct {
         var cursor: u32 = 0;
         defer self.file_offset += len;
 
-        if (self.file_offset == 0) { // output header:
-            // TODO: Ensure that the chunk is large enough to output the header.
-
-            // magic number: aliu
-            chunk[0..4].* = "aliu"[0..4].*;
-
-            // version number
-            chunk[4..8].* = @bitCast([4]u8, Version);
-
-            // data begin
-            const spec_len = @truncate(u32, self.spec.len);
+        // We're in the first chunk, at offset 0. We can safely assume that the
+        // object encoder has the spec of the root type in its spec field.
+        // At this point, we need to output the header of the file.
+        if (self.file_offset == 0) {
+            const spec_len = @truncate(u32, self.obj_enc.spec.len);
             const data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8));
-            chunk[8..12].* = @bitCast([4]u8, data_begin);
 
-            // spec len
-            chunk[12..16].* = @bitCast([4]u8, spec_len);
+            @ptrCast(*Header, chunk[0..16]).* = .{
+                .data_begin = data_begin,
+                .spec_len = spec_len,
+            };
 
             // spec array
-            for (self.spec) |s, i| {
+            for (self.obj_enc.spec) |s, i| {
                 chunk[i + 16] = @enumToInt(s.type_info);
             }
 
+            // fill out padding between spec and data begin with zeros
             std.mem.set(u8, chunk[(16 + spec_len)..data_begin], 0);
 
             cursor = data_begin;
-            self.object_base = data_begin;
         }
 
         if (self.obj_enc.encode(cursor, chunk)) |c| {
             return .{ .done = c };
         }
 
-        return .notdone;
+        return .not_done;
     }
 };
 
@@ -500,7 +492,7 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
         @compileError("chunk size must be aligned to 8 bytes");
 
     const spec = Spec.fromType(@TypeOf(value));
-    if (comptime chunk_size < std.mem.alignForward(spec.Info.len + 16, 8))
+    if (comptime chunk_size < std.mem.alignForward(spec.Info.len + @sizeOf(Header), 8))
         @compileError("chunk size should be at least enough bytes to hold the header");
 
     const ChunkT = [chunk_size]u8;
