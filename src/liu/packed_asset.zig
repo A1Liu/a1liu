@@ -52,8 +52,6 @@ pub const Spec = struct {
                 .pu32, .pi32, .pf32 => 4,
                 .pu64, .pi64, .pf64 => 8,
 
-                .uslice_of_next => 4,
-
                 else => null,
             };
         }
