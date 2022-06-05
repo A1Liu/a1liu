@@ -35,7 +35,7 @@ pub fn U32Slice(comptime T: type) type {
         pub const SliceType = T;
         const LiuPackedAssetDummyField: *const u8 = &SliceMarker;
 
-        pub fn slice(self: *@This()) []T {
+        pub fn slice(self: *const @This()) []const T {
             const address = @ptrToInt(self);
 
             var out: []T = &.{};
@@ -71,8 +71,9 @@ pub const Spec = struct {
 
         uslice_of_next, // align 4, size 8
 
+        // alignment comes from trailing number
         ustruct_open_1, ustruct_open_2, ustruct_open_4, ustruct_open_8,
-        ustruct_close,
+        ustruct_close_1, ustruct_close_2, ustruct_close_4, ustruct_close_8,
         _,
         // zig fmt: on
 
@@ -84,6 +85,34 @@ pub const Spec = struct {
                 .pu64, .pi64, .pf64 => 8,
 
                 else => null,
+            };
+        }
+
+        const Desc = struct {
+            alignment: u16,
+            kind: union(enum) { struct_close, struct_open, slice_of_next, prim: u8, unknown },
+        };
+
+        fn descriptor(self: @This()) Desc {
+            return switch (self) {
+                .pu8, .pi8 => .{ .alignment = 1, .kind = .{ .prim = 1 } },
+                .pu16, .pi16 => .{ .alignment = 2, .kind = .{ .prim = 2 } },
+                .pu32, .pi32, .pf32 => .{ .alignment = 4, .kind = .{ .prim = 4 } },
+                .pu64, .pi64, .pf64 => .{ .alignment = 8, .kind = .{ .prim = 8 } },
+
+                .uslice_of_next => .{ .alignment = 4, .kind = .slice_of_next },
+
+                .ustruct_open_1 => .{ .alignment = 1, .kind = .struct_open },
+                .ustruct_open_2 => .{ .alignment = 2, .kind = .struct_open },
+                .ustruct_open_4 => .{ .alignment = 4, .kind = .struct_open },
+                .ustruct_open_8 => .{ .alignment = 8, .kind = .struct_open },
+
+                .ustruct_close_1 => .{ .alignment = 1, .kind = .struct_close },
+                .ustruct_close_2 => .{ .alignment = 2, .kind = .struct_close },
+                .ustruct_close_4 => .{ .alignment = 4, .kind = .struct_close },
+                .ustruct_close_8 => .{ .alignment = 8, .kind = .struct_close },
+
+                else => .{ .alignment = 8, .kind = .unknown },
             };
         }
 
@@ -101,7 +130,10 @@ pub const Spec = struct {
                 .ustruct_open_4 => 4,
                 .ustruct_open_8 => 8,
 
-                .ustruct_close => 0,
+                .ustruct_close_1 => 1,
+                .ustruct_close_2 => 2,
+                .ustruct_close_4 => 4,
+                .ustruct_close_8 => 8,
 
                 else => 0,
             };
@@ -204,15 +236,15 @@ pub const Spec = struct {
                 return &[_]EncoderInfo{slice_info} ++ elem_type;
             }
 
-            const spec_info: TypeInfo = switch (@alignOf(Extern)) {
-                1 => .ustruct_open_1,
-                2 => .ustruct_open_2,
-                4 => .ustruct_open_4,
-                8 => .ustruct_open_8,
+            const spec_info: [2]TypeInfo = switch (@alignOf(Extern)) {
+                1 => .{ .ustruct_open_1, .ustruct_close_1 },
+                2 => .{ .ustruct_open_2, .ustruct_close_2 },
+                4 => .{ .ustruct_open_4, .ustruct_close_4 },
+                8 => .{ .ustruct_open_8, .ustruct_close_8 },
                 else => unreachable,
             };
 
-            const val = EncoderInfo{ .type_info = spec_info };
+            const val = EncoderInfo{ .type_info = spec_info[0] };
 
             var spec: []const Spec.EncoderInfo = &[_]EncoderInfo{val};
 
@@ -239,7 +271,7 @@ pub const Spec = struct {
                 }
             }
 
-            return spec ++ &[_]Spec.EncoderInfo{.{ .type_info = .ustruct_close }};
+            return spec ++ &[_]Spec.EncoderInfo{.{ .type_info = spec_info[1] }};
         }
     }
 
@@ -334,10 +366,77 @@ pub const Spec = struct {
     }
 };
 
+const EncoderInfoIter = struct {
+    info: []const Spec.EncoderInfo,
+    index: usize = 0,
+    struct_count: u32 = 0,
+
+    const SA = struct {
+        size: u32,
+        alignment: u32,
+        slice_info: ?[]const Spec.TypeInfo = null,
+    };
+
+    fn next(self: *@This()) ?SA {
+        if (self.index >= self.info) {
+            return null;
+        }
+
+        var alignment: u32 = 0;
+
+        while (self.index < self.info.len) {
+            defer self.index += 1; // handle index increment on return or break
+
+            const info = self.info[self.index].type_info.descriptor();
+            alignment = std.math.max(alignment, info.alignment);
+
+            switch (info.kind) {
+                .prim => |size| return .{ .size = size, .alignment = alignment },
+                .struct_open => self.struct_count += 1,
+                .struct_close => {
+                    self.struct_count -= 1;
+
+                    if (self.struct_count == 0)
+                        self.index = self.info.len;
+
+                    return .{
+                        .size = 0,
+                        .alignment = alignment,
+                    };
+                },
+
+                .slice_of_next => {
+                    const remainder = self.info[(self.index + 1)..];
+                    var iter: @This() = .{ .info = remainder };
+
+                    while (iter.next()) |_| {}
+
+                    self.index += iter.index;
+
+                    return .{
+                        .size = 8,
+                        .alignment = alignment,
+                        .slice_info = remainder[0..iter.index],
+                    };
+                },
+
+                else => {},
+            }
+
+            if (self.struct_count == 0) {
+                self.index = self.info.len;
+                break;
+            }
+        }
+
+        return null;
+    }
+};
+
 const Encoder = struct {
     file_offset: u32 = 0,
     slice_data: std.ArrayListUnmanaged(SliceInfo) = .{},
-    next_slice_offset: u32 = 0,
+    next_slice_offset: u32,
 
     header: Header,
     spec: []const Spec.EncoderInfo,
@@ -364,6 +463,7 @@ const Encoder = struct {
             .header = spec.header,
             .spec = spec.encoder_info,
             .object = @ptrCast([*]const u8, value),
+            .next_slice_offset = 0,
         };
     }
 
@@ -383,10 +483,7 @@ const Encoder = struct {
         while (self.spec_index < self.spec.len) : (self.spec_index += 1) {
             const s = self.spec[self.spec_index];
 
-            const alignment = if (s.type_info == .ustruct_close)
-                self.spec[0].type_info.alignment()
-            else
-                s.type_info.alignment();
+            const alignment = s.type_info.alignment();
 
             cursor = alignUp(cursor, alignment, chunk);
 
@@ -423,6 +520,8 @@ const Encoder = struct {
             }
 
             if (cursor + 8 > len) return null;
+
+            std.debug.assert(false);
 
             // TODO: slices
 
@@ -581,7 +680,7 @@ test "Packed Asset: spec generation" {
         .uslice_of_next,
         .pu8,
         .pu8,
-        .ustruct_close,
+        .ustruct_close_4,
     });
 }
 
@@ -604,8 +703,8 @@ test "Packed Asset: spec encode/decode simple" {
         .ustruct_open_1,
         .pu8,
         .pu8,
-        .ustruct_close,
-        .ustruct_close,
+        .ustruct_close_1,
+        .ustruct_close_8,
     });
 
     const t: Test = .{ .field = 120303113, .field2 = .{ .asdf = 100, .wasd = 255 } };
@@ -642,7 +741,7 @@ test "Packed Asset: encode/decode extern" {
         .ustruct_open_8,
         .pu64,
         .pu8,
-        .ustruct_close,
+        .ustruct_close_8,
     });
 
     const t: TestE = .{ .field = 123, .data = 12398145 };
@@ -719,7 +818,7 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     // std.debug.print("specInfo: {any}\n", .{spec.Info});
 
     try std.testing.expectEqual(spec.type_info[0], .ustruct_open_8);
-    try std.testing.expectEqual(spec.type_info[spec.type_info.len - 1], .ustruct_close);
+    try std.testing.expectEqual(spec.type_info[spec.type_info.len - 1], .ustruct_close_8);
 
     try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info[1..(spec.type_info.len - 1)], &.{
         .pu64, .pu64, .pu64, .pu64, .pu64,
@@ -746,5 +845,45 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     const values = @ptrCast(*const [50]u64, value);
     for (values) |v, i| {
         try std.testing.expectEqual(v, i);
+    }
+}
+
+test "Packed Asset: spec encode/decode slices" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const Test = struct {
+        field: u16,
+        data: []const u8,
+    };
+
+    const spec = Spec.fromType(Test);
+
+    // std.debug.print("specInfo: {any}\n", .{spec.Info});
+
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
+        .ustruct_open_4,
+        .uslice_of_next,
+        .pu8,
+        .pu16,
+        .ustruct_close_4,
+    });
+
+    const t: Test = .{
+        .field = 16,
+        .data = &.{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+    };
+    const encoded = try tempEncode(t, 1024);
+
+    try std.testing.expect(encoded.chunks.len == 0);
+
+    const bytes = try encoded.copyContiguous(liu.Temp);
+
+    const value = try parse(Test, bytes);
+
+    try std.testing.expectEqual(t.field, value.field);
+
+    for (value.data.slice()) |v, i| {
+        try std.testing.expectEqual(v, @truncate(u8, i));
     }
 }
