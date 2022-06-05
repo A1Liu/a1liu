@@ -2,15 +2,14 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
-const HiddenDummy: u8 = 0;
-
+const SliceMarker: u8 = 0;
 pub fn U32Slice(comptime T: type) type {
     return extern struct {
         word_offset: u32,
         len: u32,
 
         pub const SliceType = T;
-        const LiuPackedAssetDummyField: *const u8 = &HiddenDummy;
+        const LiuPackedAssetDummyField: *const u8 = &SliceMarker;
 
         pub fn slice(self: *@This()) []T {
             const address = @ptrToInt(self);
@@ -31,6 +30,43 @@ const native_endian = builtin.target.cpu.arch.endian();
 pub const Spec = struct {
     Type: type,
     Info: []const Info,
+    EncodeInfo: []const EncodeInfo,
+
+    pub const Info = enum(u8) {
+        // zig fmt: off
+        pu8, pu16, pu32, pu64,
+        pi8, pi16, pi32, pi64,
+        pf32, pf64,
+
+        uslice_of_next, // align 4, size 8
+
+        ustruct_open_1, ustruct_open_2, ustruct_open_4, ustruct_open_8,
+        ustruct_close,
+        // zig fmt: on
+
+        fn alignment(self: @This()) u16 {
+            return switch (self) {
+                .pu8, .pi8 => 1,
+                .pu16, .pi16 => 2,
+                .pu32, .pi32, .pf32 => 4,
+                .pu64, .pi64, .pf64 => 8,
+
+                .uslice_of_next => 4,
+
+                .ustruct_open_1 => 1,
+                .ustruct_open_2 => 2,
+                .ustruct_open_4 => 4,
+                .ustruct_open_8 => 8,
+
+                .ustruct_close => 0,
+            };
+        }
+    };
+
+    pub const EncodeInfo = struct {
+        type_info: Info,
+        field_offset: ?u32 = null, // ignored when it doesn't apply
+    };
 
     pub fn fromType(comptime T: type) @This() {
         if (native_endian != .Little)
@@ -39,7 +75,113 @@ pub const Spec = struct {
         comptime {
             const ExternType = translateType(T);
 
-            return .{ .Type = ExternType, .Info = fromExtern(ExternType) };
+            const encode_info = makeInfo(ExternType, T);
+            var info: []const Info = &.{};
+            for (encode_info) |e| {
+                info = info ++ &[_]Info{e.type_info};
+            }
+
+            return .{ .Type = ExternType, .EncodeInfo = encode_info, .Info = info };
+        }
+    }
+
+    pub fn decodeInfo(comptime T: type) []const Info {
+        const encode_info = makeInfo(T, null);
+        var info: []const Info = &.{};
+        for (encode_info) |e| {
+            info = info ++ &.{e.type_info};
+        }
+
+        return info;
+    }
+
+    fn isInternalSlice(comptime T: type) bool {
+        comptime {
+            return @typeInfo(T) == .Struct and @hasDecl(T, "LiuPackedAssetDummyField") and
+                T.LiuPackedAssetDummyField == &SliceMarker;
+        }
+    }
+
+    fn makeInfo(comptime Extern: type, comptime Base: ?type) []const EncodeInfo {
+        if (native_endian != .Little)
+            @compileError("target platform must be little endian");
+
+        if (@sizeOf(Extern) == 0)
+            @compileError("type has size of 0, what would you even store in the asset file?");
+        if (@alignOf(Extern) > 8)
+            @compileError("maximum alignment for values is 8");
+        if (@alignOf(Extern) == 0)
+            @compileError("what does align=0 even mean");
+
+        comptime {
+            switch (@typeInfo(Extern)) {
+                .Int => |info| {
+                    if (info.signedness == .signed or info.bits != 8)
+                        @compileError("only handles u8 right now");
+
+                    return &.{EncodeInfo{ .type_info = .pu8 }};
+                },
+
+                .Struct => |info| {
+                    // There's an argument you could make that this should actually
+                    // accept only packed and not extern. Extern is easier to
+                    // implement.
+                    //                      - Albert Liu, Jun 04, 2022 Sat 14:48 PDT
+                    if (info.layout != .Extern)
+                        @compileError("struct must be laid out using extern format");
+
+                    if (isInternalSlice(Extern)) {
+                        const ElemBase = if (Base) |B| b: {
+                            break :b if (isInternalSlice(B)) null else std.meta.Child(B);
+                        } else null;
+                        const elem_type = makeInfo(Extern.SliceType, ElemBase);
+                        const slice_info = Spec.EncodeInfo{
+                            .type_info = .uslice_of_next,
+                        };
+
+                        return &[_]EncodeInfo{slice_info} ++ elem_type;
+                    }
+
+                    const spec_info: Spec.Info = switch (@alignOf(Extern)) {
+                        1 => .ustruct_open_1,
+                        2 => .ustruct_open_2,
+                        4 => .ustruct_open_4,
+                        8 => .ustruct_open_8,
+                        else => unreachable,
+                    };
+
+                    const val = EncodeInfo{ .type_info = spec_info };
+
+                    var spec: []const Spec.EncodeInfo = &[_]EncodeInfo{val};
+
+                    if (Base) |B| {
+                        var b: B = undefined;
+
+                        for (info.fields) |field| {
+                            const encode_info = makeInfo(
+                                field.field_type,
+                                @TypeOf(@field(b, field.name)),
+                            );
+                            const first_info = EncodeInfo{
+                                .type_info = encode_info[0].type_info,
+                                .field_offset = @offsetOf(B, field.name),
+                            };
+                            spec = spec ++ &[_]EncodeInfo{first_info} ++ encode_info[1..];
+                        }
+                    } else {
+                        for (info.fields) |field| {
+                            spec = spec ++ makeInfo(field.field_type, null);
+                        }
+                    }
+
+                    return spec ++ &[_]Spec.EncodeInfo{.{ .type_info = .ustruct_close }};
+                },
+
+                .Pointer => @compileError("Native pointers are unsupported. " ++
+                    "If you're looking for slices, use the custom wrapper type instead"),
+
+                else => @compileError("Unsupported type: " ++ @typeName(Extern)),
+            }
         }
     }
 
@@ -47,17 +189,11 @@ pub const Spec = struct {
         const StructField = std.builtin.Type.StructField;
 
         comptime {
-            const in_fields = switch (@typeInfo(T)) {
+            const info = switch (@typeInfo(T)) {
                 .Int => return T,
                 .Float => return T,
 
-                .Struct => |info| fields: {
-                    if (info.layout == .Extern) {
-                        return T;
-                    }
-
-                    break :fields info.fields;
-                },
+                .Struct => |info| info,
 
                 .Pointer => |info| {
                     if (info.size == .Slice) {
@@ -70,9 +206,13 @@ pub const Spec = struct {
                 else => @compileError("type is not compatible with serialization"),
             };
 
+            if (isInternalSlice(T)) {
+                return T;
+            }
+
             var translated: []const StructField = &.{};
 
-            for (in_fields) |field| {
+            for (info.fields) |field| {
                 const FieldT = translateType(field.field_type);
 
                 const to_add = StructField{
@@ -84,6 +224,17 @@ pub const Spec = struct {
                 };
 
                 translated = translated ++ &[_]StructField{to_add};
+            }
+
+            if (info.layout == .Extern) {
+                return @Type(.{
+                    .Struct = .{
+                        .layout = .Extern,
+                        .decls = &.{},
+                        .is_tuple = false,
+                        .fields = translated,
+                    },
+                });
             }
 
             var fields: []const StructField = &.{};
@@ -124,106 +275,6 @@ pub const Spec = struct {
             });
         }
     }
-
-    pub fn fromExtern(comptime T: type) []const Spec.Info {
-        if (native_endian != .Little)
-            @compileError("target platform must be little endian");
-
-        if (@sizeOf(T) == 0)
-            @compileError("type has size of 0, what would you even store in the asset file?");
-        if (@alignOf(T) > 8)
-            @compileError("maximum alignment for values is 8");
-        if (@alignOf(T) == 0)
-            @compileError("what does align=0 even mean");
-
-        comptime {
-            switch (@typeInfo(T)) {
-                .Int => |info| {
-                    if (info.signedness == .signed or info.bits != 8)
-                        @compileError("only handles u8 right now");
-
-                    return &.{.pu8};
-                },
-
-                .Struct => |info| {
-                    // There's an argument you could make that this should actually
-                    // accept only packed and not extern. Extern is easier to
-                    // implement.
-                    //                      - Albert Liu, Jun 04, 2022 Sat 14:48 PDT
-                    if (info.layout != .Extern)
-                        @compileError("struct must be laid out using extern format");
-
-                    if (@hasDecl(T, "LiuPackedAssetDummyField")) {
-                        if (T.LiuPackedAssetDummyField == &HiddenDummy) {
-                            return &[_]Spec.Info{.uslice_of_next} ++ fromExtern(T.SliceType);
-                        }
-                    }
-
-                    const val: Spec.Info = switch (@alignOf(T)) {
-                        1 => .ustruct_open_1,
-                        2 => .ustruct_open_2,
-                        4 => .ustruct_open_4,
-                        8 => .ustruct_open_8,
-                        else => unreachable,
-                    };
-
-                    var spec: []const Spec.Info = &[_]Spec.Info{val};
-                    for (info.fields) |field| {
-                        spec = spec ++ fromExtern(field.field_type);
-                    }
-
-                    return spec ++ &[_]Spec.Info{.ustruct_close};
-                },
-
-                .Pointer => @compileError("Native pointers are unsupported. " ++
-                    "If you're looking for slices, use the custom wrapper type instead"),
-
-                else => @compileError("Unsupported type: " ++ @typeName(T)),
-            }
-        }
-    }
-
-    pub const Info = enum(u8) {
-        pu8,
-        pu16,
-        pu32,
-        pu64,
-
-        pi8,
-        pi16,
-        pi32,
-        pi64,
-
-        pf32,
-        pf64,
-
-        uslice_of_next, // align 4, size 8
-
-        ustruct_open_1,
-        ustruct_open_2,
-        ustruct_open_4,
-        ustruct_open_8,
-
-        ustruct_close,
-
-        fn alignment(self: @This()) u16 {
-            return switch (self) {
-                .pu8, .pi8 => 1,
-                .pu16, .pi16 => 2,
-                .pu32, .pi32, .pf32 => 4,
-                .pu64, .pi64, .pf64 => 8,
-
-                .uslice_of_next => 4,
-
-                .ustruct_open_1 => 1,
-                .ustruct_open_2 => 2,
-                .ustruct_open_4 => 4,
-                .ustruct_open_8 => 8,
-
-                .ustruct_close => 0,
-            };
-        }
-    };
 };
 
 // pass in Type
@@ -256,7 +307,7 @@ const Encoder = struct {
     };
 
     fn init(comptime T: type, value: *T) @This() {
-        return .{ .spec = Spec.fromExtern(T), .object = &value };
+        return .{ .spec = Spec.fromType(T), .object = &value };
     }
 
     fn encode(self: *@This(), chunk: []align(8) u8) Result {
@@ -372,11 +423,11 @@ test "Packed Asset: spec generation" {
         data: []u8,
     };
 
-    const spec = Spec.fromExtern(TestE);
+    const spec = Spec.fromType(TestE);
     const spec2 = Spec.fromType(Test);
-    try std.testing.expect(std.mem.eql(Spec.Info, spec, spec2.Info));
+    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info, spec2.Info));
 
-    try std.testing.expect(std.mem.eql(Spec.Info, spec, &.{
+    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info, &.{
         .ustruct_open_4,
         .uslice_of_next,
         .pu8,
