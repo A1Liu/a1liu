@@ -47,14 +47,21 @@ pub fn U32Slice(comptime T: type) type {
     };
 }
 
-const Version: u32 = 0;
-
 const native_endian = builtin.target.cpu.arch.endian();
+
+const Version: u32 = 0;
+const Header = extern struct {
+    magic: [4]u8 = "aliu"[0..4].*,
+    version: u32 = Version,
+    data_begin: u32,
+    spec_len: u32,
+};
 
 pub const Spec = struct {
     Type: type,
     Info: []const Info,
     EncodeInfo: []const EncodeInfo,
+    Header: Header,
 
     pub const Info = enum(u8) {
         // zig fmt: off
@@ -107,19 +114,28 @@ pub const Spec = struct {
     };
 
     pub fn fromType(comptime T: type) @This() {
-        if (native_endian != .Little)
-            @compileError("target platform must be little endian");
-
         comptime {
             const ExternType = translateType(T);
 
             const encode_info = makeInfo(ExternType, T);
+
+            const spec_len = @truncate(u32, encode_info.len);
+            const header = Header{
+                .data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8)),
+                .spec_len = spec_len,
+            };
+
             var info: []const Info = &.{};
             for (encode_info) |e| {
                 info = info ++ &[_]Info{e.type_info};
             }
 
-            return .{ .Type = ExternType, .EncodeInfo = encode_info, .Info = info };
+            return .{
+                .Type = ExternType,
+                .EncodeInfo = encode_info,
+                .Info = info,
+                .Header = header,
+            };
         }
     }
 
@@ -322,18 +338,12 @@ pub const Spec = struct {
     }
 };
 
-const Header = extern struct {
-    magic: [4]u8 = "aliu"[0..4].*,
-    version: u32 = Version,
-    data_begin: u32,
-    spec_len: u32,
-};
-
 const Encoder = struct {
     file_offset: u32 = 0,
     slice_data: std.ArrayListUnmanaged(SliceInfo) = .{},
-    next_offset: u32 = 0,
+    next_slice_offset: u32 = 0,
 
+    header: Header,
     spec: []const Spec.EncodeInfo,
     spec_index: u32 = 0,
     object: [*]const u8,
@@ -352,8 +362,11 @@ const Encoder = struct {
     };
 
     fn init(comptime T: type, value: *const T) Self {
+        const spec = Spec.fromType(T);
+
         return .{
-            .spec = Spec.fromType(T).EncodeInfo,
+            .header = spec.Header,
+            .spec = spec.EncodeInfo,
             .object = @ptrCast([*]const u8, value),
         };
     }
@@ -395,6 +408,7 @@ const Encoder = struct {
                     // ustruct_* doesn't have any data
                     else => continue,
                 };
+
                 // NOTE: We don't have to do partial writes of fields here,
                 // because we maintain the invariants that chunks are aligned
                 // to 8 bytes and all primitive data has a maximum alignment/size of 8.
@@ -437,13 +451,8 @@ const Encoder = struct {
         // have the spec of the root type in its spec field. At this point, we
         // need to output the header of the file.
         if (self.file_offset == 0) {
-            const spec_len = @truncate(u32, self.spec.len);
-            const data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8));
-
-            @ptrCast(*Header, chunk[0..16]).* = .{
-                .data_begin = data_begin,
-                .spec_len = spec_len,
-            };
+            const header = self.header;
+            @ptrCast(*Header, chunk[0..16]).* = header;
 
             // spec array
             for (self.spec) |s, i| {
@@ -451,9 +460,9 @@ const Encoder = struct {
             }
 
             // fill out padding between spec and data begin with zeros
-            std.mem.set(u8, chunk[(16 + spec_len)..data_begin], 0);
+            std.mem.set(u8, chunk[(16 + header.spec_len)..header.data_begin], 0);
 
-            cursor = data_begin;
+            cursor = header.data_begin;
         }
 
         cursor = self.encodeObj(cursor, chunk) orelse return .not_done;
@@ -497,7 +506,7 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
         @compileError("chunk size must be aligned to 8 bytes");
 
     const spec = Spec.fromType(@TypeOf(value));
-    if (comptime chunk_size < std.mem.alignForward(spec.Info.len + @sizeOf(Header), 8))
+    if (comptime chunk_size < spec.Header.data_begin)
         @compileError("chunk size should be at least enough bytes to hold the header");
 
     const ChunkT = [chunk_size]u8;
