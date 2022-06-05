@@ -108,10 +108,7 @@ pub const Spec = struct {
         }
     };
 
-    pub const EncoderInfo = struct {
-        type_info: TypeInfo,
-        field_offset: u32 = 0, // ignored when it doesn't apply
-    };
+    pub const EncoderInfo = struct { type_info: TypeInfo, offset: u32 = 0 };
 
     pub fn fromType(comptime T: type) @This() {
         comptime {
@@ -190,8 +187,7 @@ pub const Spec = struct {
             };
 
             // There's an argument you could make that this should actually
-            // accept only packed and not extern. Extern is easier to
-            // implement.
+            // accept only packed and not extern. Extern is easier to implement.
             //                      - Albert Liu, Jun 04, 2022 Sat 14:48 PDT
             if (info.layout != .Extern)
                 @compileError("struct must be laid out using extern format");
@@ -228,10 +224,10 @@ pub const Spec = struct {
                     const encode_info = makeInfo(field.field_type, BField);
 
                     for (encode_info) |e| {
-                        const offset = e.field_offset + @offsetOf(B, field.name);
+                        const offset = e.offset + @offsetOf(B, field.name);
                         const new_info = EncoderInfo{
                             .type_info = e.type_info,
-                            .field_offset = offset,
+                            .offset = offset,
                         };
 
                         spec = spec ++ &[_]EncoderInfo{new_info};
@@ -394,7 +390,7 @@ const Encoder = struct {
 
             cursor = alignUp(cursor, alignment, chunk);
 
-            const field_mem = self.object + s.field_offset;
+            const field_mem = self.object + s.offset;
 
             slice: {
                 const size: u8 = switch (s.type_info) {
