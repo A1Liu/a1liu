@@ -60,8 +60,10 @@ const Keys = struct {
 };
 
 // Initialized at start of program
-var wordles: []const u8 = undefined;
-var wordle_words: []const u8 = undefined;
+var wordles: [5][]const u8 = undefined;
+var wordle_words: [5][]const u8 = undefined;
+// var wordles: []const u8 = undefined;
+// var wordle_words: []const u8 = undefined;
 var keys: Keys = undefined;
 
 var wordles_left: ArrayList(Wordle) = undefined;
@@ -98,14 +100,27 @@ fn setPuzzles(puzzles: []Puzzle) void {
     ext.setPuzzles(arr);
 }
 
-fn searchList(word: [5]u8, dict: []const u8) bool {
-    var word_index: u32 = 0;
-    while (word_index < dict.len) : (word_index += 6) {
-        const dict_slice = dict[word_index..][0..5];
+// wordle-words: binary search for first 2, linear for last 3
+fn searchList(word: [5]u8, dict: [5][]const u8) bool {
+    var start: u32 = 0;
+    var end: u32 = dict[0].len;
 
-        if (std.mem.eql(u8, &word, dict_slice)) {
-            return true;
+    for (word) |letter, idx| {
+        const letter_dict = dict[idx][0..end];
+
+        // find loop
+        found: {
+            for (letter_dict[start..]) |l, offset| {
+                if (l == letter) {
+                    start += offset;
+                    break :found;
+                }
+            }
+
+            return false;
         }
+
+        if (idx == 4) return true;
     }
 
     return false;
@@ -302,11 +317,13 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
 }
 
 fn initData() !void {
-    const wordle_count = (wordles.len - 1) / 6 + 1;
+    const wordle_count = wordles[0].len;
+    std.log.info("{}", .{wordles[0].len});
+
     try wordles_left.ensureUnusedCapacity(wordle_count);
 
-    var word_index: u32 = 0;
-    while ((word_index + 5) < wordles.len) : (word_index += 6) {
+    var i: u32 = 0;
+    while (i < wordle_count) : (i += 1) {
         var wordle = Wordle{
             .text = undefined,
             .matches = .{.none} ** 5,
@@ -314,7 +331,10 @@ fn initData() !void {
             .places_found = 0,
         };
 
-        wordle.text = wordles[word_index..][0..5].*;
+        for (wordle.text) |*slot, idx| {
+            slot.* = wordles[idx][i];
+        }
+
         wordles_left.appendAssumeCapacity(wordle);
     }
 
@@ -328,11 +348,27 @@ export fn reset() void {
     initData() catch @panic("initData failed");
 }
 
+fn initDict(dict: *[5][]const u8, data: []const u8) void {
+    const len = data.len / 5 - 1;
+
+    var start: usize = 0;
+    var end: usize = len;
+
+    for (dict) |*slot| {
+        slot.* = data[start..end];
+        start += len + 1;
+        end += len + 1;
+    }
+}
+
 pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
     wasm.initIfNecessary();
 
-    wordles = try wasm.in.bytes(l_wordles, liu.Pages);
-    wordle_words = try wasm.in.bytes(l_words, liu.Pages);
+    const wordle_data = try wasm.in.bytes(l_wordles, liu.Pages);
+    initDict(&wordles, wordle_data);
+
+    const word_data = try wasm.in.bytes(l_words, liu.Pages);
+    initDict(&wordle_words, word_data);
 
     keys = makeKeys();
 
@@ -341,5 +377,6 @@ pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
 
     try initData();
 
+    // std.log.info("{}", .{wordles[0].len});
     std.log.info("WASM initialized!", .{});
 }
