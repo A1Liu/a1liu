@@ -42,7 +42,21 @@ pub const Spec = struct {
 
         ustruct_open_1, ustruct_open_2, ustruct_open_4, ustruct_open_8,
         ustruct_close,
+        _,
         // zig fmt: on
+
+        fn pSize(self: @This()) ?u8 {
+            return switch (self) {
+                .pu8, .pi8 => 1,
+                .pu16, .pi16 => 2,
+                .pu32, .pi32, .pf32 => 4,
+                .pu64, .pi64, .pf64 => 8,
+
+                .uslice_of_next => 4,
+
+                else => null,
+            };
+        }
 
         fn alignment(self: @This()) u16 {
             return switch (self) {
@@ -59,6 +73,8 @@ pub const Spec = struct {
                 .ustruct_open_8 => 8,
 
                 .ustruct_close => 0,
+
+                else => 0,
             };
         }
     };
@@ -297,17 +313,22 @@ pub const Spec = struct {
 // error is atrocious.
 
 const Encoder = struct {
-    spec: []const Spec.Info,
-    object: *const anyopaque,
-    offset: u32 = 0,
+    spec: []const Spec.EncodeInfo,
+    file_offset: u32 = 0,
+
+    object: [*]const u8,
+    object_base: u32 = 0,
 
     const Result = union(enum) {
         done: u32,
         not_done: void,
     };
 
-    fn init(comptime T: type, value: *T) @This() {
-        return .{ .spec = Spec.fromType(T), .object = &value };
+    fn init(comptime T: type, value: *const T) @This() {
+        return .{
+            .spec = Spec.fromType(T).EncodeInfo,
+            .object = @ptrCast([*]const u8, value),
+        };
     }
 
     fn encode(self: *@This(), chunk: []align(8) u8) Result {
@@ -317,21 +338,20 @@ const Encoder = struct {
         const len = @truncate(u32, chunk.len);
 
         var cursor: u32 = 0;
-        defer self.offset = len;
+        defer self.file_offset += len;
 
-        if (self.offset == 0) { // output header:
+        if (self.file_offset == 0) { // output header:
             // TODO: Ensure that the chunk is large enough to output the header.
 
             // magic number: aliu
             chunk[0..4].* = "aliu"[0..4].*;
 
-            const spec_len = @truncate(u32, self.spec.len);
-            const data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8));
-
             // version number
             chunk[4..8].* = @bitCast([4]u8, Version);
 
             // data begin
+            const spec_len = @truncate(u32, self.spec.len);
+            const data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8));
             chunk[8..12].* = @bitCast([4]u8, data_begin);
 
             // spec len
@@ -339,16 +359,21 @@ const Encoder = struct {
 
             // spec array
             for (self.spec) |s, i| {
-                chunk[i + 16] = @enumToInt(s);
+                chunk[i + 16] = @enumToInt(s.type_info);
             }
 
             std.mem.set(u8, chunk[(16 + spec_len)..data_begin], 0);
 
             cursor = data_begin;
+            self.object_base = data_begin;
         }
 
         for (self.spec) |s, i| {
-            const alignment = s.alignment();
+            if (s.type_info == .ustruct_close) {
+                continue;
+            }
+
+            const alignment = s.type_info.alignment();
             const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
 
             // fill padding with zeroes
@@ -362,6 +387,23 @@ const Encoder = struct {
             }
 
             // TODO encode lol
+            const object_offset = s.field_offset orelse cursor - self.object_base;
+
+            const field_mem = self.object + object_offset;
+            if (s.type_info.pSize()) |size| {
+                switch (size) {
+                    1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
+                    2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
+                    4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
+                    8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
+                    else => {
+                        unreachable;
+                    },
+                }
+
+                cursor += size;
+            }
+
             _ = s;
         }
 
@@ -405,11 +447,48 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
     }
 }
 
-pub fn parse(comptime T: type, bytes: []align(8) u8) ?T {
-    _ = T;
-    _ = bytes;
+const AssetError = error{
+    NotAsset,
+    VersionMismatch,
+    InvalidData,
+    TypeMismatch,
+    OutOfBounds,
+};
 
-    return null;
+pub fn parse(comptime T: type, bytes: []align(8) u8) !*Spec.fromType(T).Type {
+    if (bytes.len < 16) {
+        return error.NotAsset;
+    }
+
+    // magic number
+    if (!std.mem.eql(u8, bytes[0..4], "aliu")) {
+        return error.NotAsset;
+    }
+
+    const version = @bitCast(u32, bytes[4..8].*);
+    if (version > Version) {
+        return error.VersionMismatch;
+    }
+
+    const data_begin = @bitCast(u32, bytes[8..12].*);
+    if (data_begin > bytes.len) return error.OutOfBounds;
+    if (data_begin % 8 != 0) return error.InvalidData;
+
+    const spec_len = @bitCast(u32, bytes[12..16].*);
+    const spec_end = 16 + spec_len;
+    if (spec_end > data_begin) {
+        return error.InvalidData;
+    }
+
+    const spec = Spec.fromType(T);
+    const asset_spec = @ptrCast([]const Spec.Info, bytes[16..spec_end]);
+    if (!std.mem.eql(Spec.Info, spec.Info, asset_spec)) {
+        return error.TypeMismatch;
+    }
+
+    // TODO validation code
+
+    return @ptrCast(*spec.Type, bytes[data_begin..]);
 }
 
 test "Packed Asset: spec generation" {
@@ -434,4 +513,37 @@ test "Packed Asset: spec generation" {
         .pu8,
         .ustruct_close,
     }));
+}
+
+test "Packed Asset: spec encode/decode simple" {
+    const Test = struct {
+        field: u8,
+        field2: u8,
+    };
+
+    const spec = Spec.fromType(Test);
+    try std.testing.expect(std.mem.eql(Spec.Info, spec.Info, &.{
+        .ustruct_open_1,
+        .pu8,
+        .pu8,
+        .ustruct_close,
+    }));
+
+    const t: Test = .{ .field = 13, .field2 = 12 };
+    const encoded = try tempEncode(t, null);
+
+    std.debug.print("len={} size={}\n", .{ encoded.chunks.len, encoded.last_size });
+    try std.testing.expect(encoded.chunks.len == 1);
+
+    const bytes = encoded.chunks[0][0..encoded.last_size];
+    const value = try parse(Test, bytes);
+
+    std.debug.print("{any} {any}\n", .{ t, value.* });
+
+    try std.testing.expect(value.field == t.field);
+    try std.testing.expect(value.field2 == t.field2);
+
+    std.debug.print("{}\n", .{std.fmt.fmtSliceHexLower(bytes)});
+
+    _ = encoded;
 }
