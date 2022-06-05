@@ -24,4 +24,5 @@ test {
     _ = fonts;
     _ = sdf;
     _ = img;
+    _ = packed_asset;
 }
