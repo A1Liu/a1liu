@@ -109,90 +109,61 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     defer liu.TempMark = mark;
 
     const Test = struct {
-        field0: u64 = 0,
-        field1: u64 = 1,
-        field2: u64 = 2,
-        field3: u64 = 3,
-        field4: u64 = 4,
-        field5: u64 = 5,
-        field6: u64 = 6,
-        field7: u64 = 7,
-        field8: u64 = 8,
-        field9: u64 = 9,
-        field10: u64 = 10,
-        field11: u64 = 11,
-        field12: u64 = 12,
-        field13: u64 = 13,
-        field14: u64 = 14,
-        field15: u64 = 15,
-        field16: u64 = 16,
-        field17: u64 = 17,
-        field18: u64 = 18,
-        field19: u64 = 19,
-        field20: u64 = 20,
-        field21: u64 = 21,
-        field22: u64 = 22,
-        field23: u64 = 23,
-        field24: u64 = 24,
-        field25: u64 = 25,
-        field26: u64 = 26,
-        field27: u64 = 27,
-        field28: u64 = 28,
-        field29: u64 = 29,
-        field30: u64 = 30,
-        field31: u64 = 31,
-        field32: u64 = 32,
-        field33: u64 = 33,
-        field34: u64 = 34,
-        field35: u64 = 35,
-        field36: u64 = 36,
-        field37: u64 = 37,
-        field38: u64 = 38,
-        field39: u64 = 39,
-        field40: u64 = 40,
-        field41: u64 = 41,
-        field42: u64 = 42,
-        field43: u64 = 43,
-        field44: u64 = 44,
-        field45: u64 = 45,
-        field46: u64 = 46,
-        field47: u64 = 47,
-        field48: u64 = 48,
-        field49: u64 = 49,
+        field: u16,
+        data: []const u64,
     };
 
     const spec = Spec.fromType(Test);
     const type_info = spec.typeInfo();
 
-    try std.testing.expectEqual(type_info[0], .ustruct_open_8);
-    try std.testing.expectEqual(type_info[type_info.len - 1], .ustruct_close_8);
-
-    try std.testing.expectEqualSlices(TypeInfo, type_info[1..(type_info.len - 1)], &.{
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
+    try std.testing.expectEqualSlices(TypeInfo, type_info, &.{
+        .ustruct_open_4,
+        .uslice_of_next,
+        .pu64,
+        .pu16,
+        .ustruct_close_4,
     });
 
-    const t: Test = .{};
-    const encoded = try tempEncode(t, 304);
+    const t: Test = .{
+        .field = 16,
+        .data = &.{
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        },
+    };
+    const encoded = try tempEncode(t, 32);
 
-    try std.testing.expect(encoded.chunks.len == 1);
+    try std.testing.expectEqual(encoded.chunks.len, 41);
 
     const bytes = try encoded.copyContiguous(liu.Temp);
 
     const value = try parse(Test, bytes);
 
-    const values = @ptrCast(*const [50]u64, value);
-    for (values) |v, i| {
-        try std.testing.expectEqual(v, i);
-    }
+    try std.testing.expectEqual(t.field, value.field);
+
+    const slice = value.data.slice();
+
+    const begin = @ptrToInt(slice.ptr);
+    const end = @ptrToInt(slice.ptr + slice.len);
+
+    try std.testing.expect(begin > @ptrToInt(bytes.ptr));
+    try std.testing.expect(end <= @ptrToInt(bytes.ptr + bytes.len));
+
+    try std.testing.expectEqualSlices(u64, t.data, slice);
 }
 
 test "Packed Asset: alignment" {
@@ -287,4 +258,121 @@ test "Packed Asset: spec encode/decode slices" {
     try std.testing.expect(end <= @ptrToInt(bytes.ptr + bytes.len));
 
     try std.testing.expectEqualSlices(u8, t.data, slice);
+}
+
+test "Packed Asset: spec branch quota" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const Test = struct {
+        field1: u64,
+        field2: u64,
+        field3: u64,
+        field4: u64,
+        field5: u64,
+        field6: u64,
+        field7: u64,
+        field8: u64,
+        field9: u64,
+        field10: u64,
+        field11: u64,
+        field12: u64,
+        field13: u64,
+        field14: u64,
+        field15: u64,
+        field16: u64,
+        field17: u64,
+        field18: u64,
+        field19: u64,
+        field20: u64,
+        field21: u64,
+        field22: u64,
+        field23: u64,
+        field24: u64,
+        field25: u64,
+        field26: u64,
+        field27: u64,
+        field28: u64,
+        field29: u64,
+        field30: u64,
+        field31: u64,
+        field32: u64,
+        field33: u64,
+        field34: u64,
+        field35: u64,
+        field36: u64,
+        field37: u64,
+        field38: u64,
+        field39: u64,
+        field40: u64,
+        field41: u64,
+        field42: u64,
+        field43: u64,
+        field44: u64,
+        field45: u64,
+        field46: u64,
+        field47: u64,
+        field48: u64,
+        field49: u64,
+        field50: u64,
+        field51: u64,
+        field52: u64,
+        field53: u64,
+        field54: u64,
+        field55: u64,
+        field56: u64,
+
+        // Boundary
+        // field57: u64,
+        // field58: u64,
+        // field59: u64,
+        // field60: u64,
+        // field61: u64,
+        // field62: u64,
+        // field63: u64,
+        // field64: u64,
+        // field65: u64,
+        // field66: u64,
+        // field67: u64,
+        // field68: u64,
+        // field69: u64,
+        // field70: u64,
+        // field71: u64,
+        // field72: u64,
+        // field73: u64,
+        // field74: u64,
+        // field75: u64,
+        // field76: u64,
+        // field77: u64,
+        // field78: u64,
+        // field79: u64,
+        // field80: u64,
+        // field81: u64,
+        // field82: u64,
+        // field83: u64,
+        // field84: u64,
+        // field85: u64,
+        // field86: u64,
+        // field87: u64,
+        // field88: u64,
+        // field89: u64,
+        // field90: u64,
+        // field91: u64,
+        // field92: u64,
+        // field93: u64,
+        // field94: u64,
+        // field95: u64,
+        // field96: u64,
+        // field97: u64,
+        // field98: u64,
+        // field99: u64,
+        // field100: u64,
+    };
+
+    const Wrap = struct {
+        field: Test,
+    };
+
+    const spec = Spec.fromType(Wrap);
+    _ = spec;
 }

@@ -74,6 +74,8 @@ const Header = extern struct {
     spec_len: u32,
 };
 
+pub const EncoderInfo = struct { type_info: TypeInfo, offset: u32 = 0 };
+
 pub const TypeInfo = enum(u8) {
     const ALIGN_2: u8 = 4;
     const ALIGN_4: u8 = 8;
@@ -116,18 +118,19 @@ pub const TypeInfo = enum(u8) {
     }
 
     pub fn alignment(self: @This()) u16 {
-        const val = @enumToInt(self);
-        const a2: u4 = @boolToInt(val >= ALIGN_2);
-        const a4: u4 = @boolToInt(val >= ALIGN_4);
-        const a8: u4 = @boolToInt(val >= ALIGN_8);
+        return switch (self) {
+            .pu8, .pi8, .ustruct_open_1, .ustruct_close_1 => 1,
 
-        const alignment_ = @intCast(u16, 1) << (a2 + a4 + a8);
+            .pu16, .pi16, .ustruct_open_2, .ustruct_close_2 => 2,
 
-        return alignment_;
+            .pu32, .pi32, .pf32, .uslice_of_next, .ustruct_open_4, .ustruct_close_4 => 4,
+
+            .pu64, .pi64, .pf64, .ustruct_open_8, .ustruct_close_8 => 8,
+
+            else => unreachable,
+        };
     }
 };
-
-pub const EncoderInfo = struct { type_info: TypeInfo, offset: u32 = 0 };
 
 pub const Spec = struct {
     Type: type,
@@ -239,6 +242,9 @@ pub const Spec = struct {
             for (info.fields) |field| {
                 const BField = @TypeOf(@field(b, field.name));
                 const encode_info = makeInfo(field.field_type, BField);
+
+                // Empirically, this reduces the number of branches needed at
+                // compile time.
                 if (encode_info.len == 1) {
                     // This means its a primitive
 
@@ -270,13 +276,6 @@ pub const Spec = struct {
     }
 
     fn translateType(comptime T: type) type {
-        if (@sizeOf(T) == 0)
-            @compileError("type has size of 0, what would you even store in the asset file?");
-        if (@alignOf(T) > 8)
-            @compileError("maximum alignment for values is 8");
-        if (@alignOf(T) == 0)
-            @compileError("what does align=0 even mean");
-
         const Field = std.builtin.Type.StructField;
 
         comptime {
@@ -287,15 +286,27 @@ pub const Spec = struct {
                 .Struct => |info| info,
 
                 .Pointer => |info| {
-                    if (info.size == .Slice) {
+                    if (info.size == .Slice)
                         return U32Slice(translateType(info.child));
-                    }
 
                     @compileError("only slices allowed right now");
                 },
 
                 else => @compileError("type is not compatible with serialization"),
             };
+
+            // These only need to be checked for structs, because
+            // Ints are checked again anyways in makeInfo
+            // Floats always follow these rules
+            // Pointers to anything are checked in the recursive call to translateType
+            //      or in makeInfo
+            // Everything else will fail anyways
+            if (@sizeOf(T) == 0)
+                @compileError("type has size of 0, what would you even store in the asset file?");
+            if (@alignOf(T) > 8)
+                @compileError("maximum alignment for values is 8");
+            if (@alignOf(T) == 0)
+                @compileError("what does align=0 even mean");
 
             if (isInternalSlice(T)) return T;
 
@@ -401,11 +412,10 @@ const EncoderInfoIter = struct {
     };
 
     fn peek(self: *@This()) ?SA {
-        // Writing it this way reduces the number of compile-time branches,
-        // and so it should reduce the quota cost of this function
         const is_cancelled = self.index != 0 and self.struct_count == 0;
-        const has_data = self.index < self.info.len;
-        if (is_cancelled or !has_data) return null;
+        const has_more_data = self.index < self.info.len;
+
+        if (is_cancelled or !has_more_data) return null;
 
         var sa = SA{ .size = 0, .alignment = 0 };
         var index: usize = self.index;
@@ -418,9 +428,10 @@ const EncoderInfoIter = struct {
 
         {
             // Equivalent to max operation:
-            // std.math.max(sa.alignment, encoder_info.type_info.alignment());
+            // const alignment_ = encoder_info.type_info.alignment();
+            // sa.alignment = std.math.max(sa.alignment, alignment_);
             //
-            // This reduces the number of comptime branches
+            // Empirically, this reduces the number of comptime branches.
 
             const val = @enumToInt(encoder_info.type_info);
             const a2: u4 = @boolToInt(val >= TypeInfo.ALIGN_2);
