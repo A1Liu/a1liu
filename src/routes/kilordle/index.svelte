@@ -107,8 +107,9 @@
   }
 
   onMount(() => {
+    // NOTE: we use RTF file extension here, even though this file is binary,
+    // because RTF is gzip'd by Github Pages. For non-gzip files, use `.bin`
     const data = wasm.fetchAsset("/kilordle/data.rtf");
-    // const words = wasm.fetchAsset("/kilordle/wordle-words.txt");
     const wasmPromise = wasm.fetchWasm("/kilordle/kilordle.wasm", {
       postMessage: postToast,
       imports: { setPuzzles: (p: PuzzleData[]) => (puzzles = p) },
@@ -126,7 +127,7 @@
       }),
     });
 
-    Promise.all([wasmPromise,  data]).then(([ref, data]) => {
+    Promise.all([wasmPromise, data]).then(([ref, data]) => {
       const dataId = ref.addObj(data);
 
       ref.abi.init(dataId);
