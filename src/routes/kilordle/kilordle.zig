@@ -1,6 +1,9 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("liu");
+const assets = @import("assets").kilordle;
+
+const Spec = assets.Spec;
 
 const wasm = liu.wasm;
 pub const WasmCommand = void;
@@ -57,20 +60,6 @@ const Keys = struct {
     solution: wasm.Obj,
     filled: wasm.Obj,
     submits: wasm.Obj,
-};
-
-const Spec = struct {
-    word0: []const u8,
-    word1: []const u8,
-    word2: []const u8,
-    word3: []const u8,
-    word4: []const u8,
-
-    wordle0: []const u8,
-    wordle1: []const u8,
-    wordle2: []const u8,
-    wordle3: []const u8,
-    wordle4: []const u8,
 };
 
 // Initialized at start of program

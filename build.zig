@@ -23,6 +23,8 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
     const program = b.addSharedLibrary(prog.name, prog.root, vers);
 
     program.addPackagePath("liu", "src/liu/lib.zig");
+    program.addPackagePath("assets", "src/assets.zig");
+
     program.setBuildMode(mode);
 
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
