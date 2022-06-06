@@ -366,101 +366,100 @@ pub const Spec = struct {
     }
 };
 
-const EncoderInfoIter = struct {
-    info: []const Spec.EncoderInfo,
-    index: usize = 0,
-    struct_count: u32 = 0,
-
-    const SA = struct {
-        next_index: usize,
-        size: u32,
-        alignment: u32,
-        offset: u32 = 0,
-        slice_info: ?[]const Spec.EncoderInfo = null,
-    };
-
-    fn peek(self: *@This()) ?SA {
-        if (self.index >= self.info.len) {
-            return null;
-        }
-
-        var sa = SA{ .size = 0, .alignment = 0, .next_index = 0 };
-        var index: usize = self.index;
-
-        while (index < self.info.len) : (index += 1) {
-            // defer index += 1; // handle index increment on return or break
-
-            const encoder_info = self.info[index];
-            const info = encoder_info.type_info.descriptor();
-            sa.next_index = index + 1;
-            sa.alignment = std.math.max(sa.alignment, info.alignment);
-            sa.offset = encoder_info.offset;
-
-            keep_going: {
-                switch (info.kind) {
-                    .prim => |size| sa.size = size,
-                    .struct_open => {
-                        self.struct_count += 1;
-                        break :keep_going;
-                    },
-                    .struct_close => {
-                        self.struct_count -= 1;
-
-                        if (self.struct_count == 0)
-                            sa.next_index = self.info.len;
-
-                        sa.size = 0;
-                    },
-
-                    .slice_of_next => {
-                        const remainder = self.info[(index + 1)..];
-                        var iter: @This() = .{ .info = remainder };
-
-                        while (iter.peek()) |sa_| {
-                            iter.index = sa_.next_index;
-                        }
-
-                        sa.next_index += iter.index;
-                        sa.size = 8;
-                        sa.slice_info = remainder[0..iter.index];
-                    },
-
-                    else => break :keep_going,
-                }
-
-                return sa;
-            }
-
-            if (self.struct_count == 0) {
-                self.index = self.info.len;
-                break;
-            }
-        }
-
-        return null;
-    }
-};
-
 const Encoder = struct {
+    header: Header,
+
     file_offset: u32 = 0,
     slice_data: std.ArrayListUnmanaged(SliceInfo) = .{},
+    next_slice_data: u32 = 0,
     next_slice_offset: u32,
 
-    header: Header,
     iter: EncoderInfoIter,
     object: [*]const u8,
+    object_size: u32,
+    obj_left: u32 = 1,
 
     const Self = @This();
 
     const SliceInfo = struct {
-        spec: []const Spec.TypeInfo,
+        spec: []const Spec.EncoderInfo,
         data: [*]const u8,
         obj_left: u32,
+        offset: u32,
     };
 
     const Result = union(enum) {
         done: u32,
         not_done: void,
+    };
+
+    const ObjectDesc = struct {
+        spec: []const Spec.EncoderInfo,
+        size: u32,
+        alignment: u32,
+    };
+
+    const EncoderInfoIter = struct {
+        info: []const Spec.EncoderInfo,
+        index: usize = 0,
+        struct_count: u32 = 0,
+
+        const SA = struct {
+            next_index: usize,
+            size: u32,
+            alignment: u32,
+            offset: u32 = 0,
+            slice_info: ?ObjectDesc = null,
+        };
+
+        fn peek(self: *@This()) ?SA {
+            if (self.index != 0 and self.struct_count == 0) return null;
+
+            var sa = SA{ .size = 0, .alignment = 0, .next_index = 0 };
+            var index: usize = self.index;
+
+            while (index < self.info.len) : (index += 1) {
+                // defer index += 1; // handle index increment on return or break
+
+                const encoder_info = self.info[index];
+                const desc = encoder_info.type_info.descriptor();
+                sa.next_index = index + 1;
+                sa.alignment = std.math.max(sa.alignment, desc.alignment);
+                sa.offset = encoder_info.offset;
+
+                switch (desc.kind) {
+                    .prim => |size| sa.size = size,
+                    .struct_open => {
+                        self.struct_count += 1;
+                        continue;
+                    },
+
+                    .struct_close => {
+                        self.struct_count -= 1;
+
+                        sa.size = 0;
+
+                        return sa;
+                    },
+
+                    .slice_of_next => {
+                        const remainder = self.info[(index + 1)..];
+                        var info = objectInfo(remainder);
+                        info.alignment = alignUp(info.alignment, 4);
+
+                        sa.next_index += info.spec.len;
+                        sa.size = 8;
+                        sa.slice_info = info;
+                    },
+
+                    .unknown => continue,
+                }
+
+                return sa;
+            }
+
+            return null;
+        }
     };
 
     fn init(comptime T: type, value: *const T) Self {
@@ -470,25 +469,42 @@ const Encoder = struct {
             .header = spec.header,
             .iter = .{ .info = spec.encoder_info },
             .object = @ptrCast([*]const u8, value),
-            .next_slice_offset = 0,
+            .next_slice_offset = undefined,
+            .object_size = undefined,
         };
     }
 
-    fn alignUp(cursor: u32, alignment: u32, chunk: []align(8) u8) u32 {
-        const aligned_cursor = @truncate(u32, std.mem.alignForward(cursor, alignment));
-
-        // fill padding with zeroes
-        std.mem.set(u8, chunk[cursor..aligned_cursor], 0);
-
-        return aligned_cursor;
+    fn alignUp(cursor: u32, alignment: u32) u32 {
+        return @truncate(u32, std.mem.alignForward(cursor, alignment));
     }
 
-    fn encodeObj(self: *Self, cursor_: u32, chunk: []align(8) u8) ?u32 {
+    fn objectInfo(spec: []const Spec.EncoderInfo) ObjectDesc {
+        var iter: EncoderInfoIter = .{ .info = spec };
+        var alignment: u32 = 0;
+        var total_size: u32 = 0;
+
+        while (iter.peek()) |sa| {
+            alignment = std.math.max(alignment, sa.alignment);
+            total_size = alignUp(total_size, sa.alignment);
+            total_size += sa.size;
+            iter.index = sa.next_index;
+        }
+
+        return .{
+            .spec = spec[0..iter.index],
+            .size = total_size,
+            .alignment = alignment,
+        };
+    }
+
+    fn encodeObj(self: *Self, cursor_: u32, chunk: []align(8) u8) !?u32 {
         const len = @truncate(u32, chunk.len);
         var cursor = cursor_;
 
         while (self.iter.peek()) |sa| {
-            cursor = alignUp(cursor, sa.alignment, chunk);
+            const aligned = alignUp(cursor, sa.alignment);
+            std.mem.set(u8, chunk[cursor..aligned], 0); // fill padding with zeroes
+            cursor = aligned;
 
             const field_mem = self.object + sa.offset;
 
@@ -497,17 +513,35 @@ const Encoder = struct {
             // to 8 bytes and all primitive data has a maximum alignment/size of 8.
             if (cursor + sa.size > len) return null;
 
+            defer cursor += sa.size;
             self.iter.index = sa.next_index;
 
-            if (sa.slice_info) |slice| {
-                _ = slice;
-                std.debug.assert(false);
+            if (sa.slice_info) |info| {
+                const raw_slice = @bitCast([]const u8, field_mem[0..@sizeOf([]const u8)].*);
+
+                const offset = alignUp(self.next_slice_offset, info.alignment);
+                const obj_left = @truncate(u32, raw_slice.len);
+                try self.slice_data.append(liu.Pages, SliceInfo{
+                    .spec = info.spec,
+                    .data = raw_slice.ptr,
+                    .obj_left = obj_left,
+                    .offset = offset,
+                });
+
+                const current_offset = cursor + self.file_offset + 8;
+                std.debug.assert((offset - current_offset) % 4 == 0);
+                chunk[cursor..][0..4].* = @bitCast([4]u8, (offset - current_offset) / 4);
+                chunk[cursor..][4..8].* = @bitCast([4]u8, obj_left);
+
+                self.next_slice_offset = offset + info.size * obj_left;
+
                 // TODO: slices
 
                 // need to store the pre-calculated next offset,
                 // then parse the spec and update the next_offset value
                 // then add the slice information to the slice list for
                 // further processing
+                continue;
             }
 
             switch (sa.size) {
@@ -518,14 +552,12 @@ const Encoder = struct {
                 8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
                 else => unreachable,
             }
-
-            cursor += sa.size;
         }
 
         return cursor;
     }
 
-    fn encode(self: *Self, chunk: []align(8) u8) Result {
+    fn encode(self: *Self, chunk: []align(8) u8) !Result {
         std.debug.assert(chunk.len % 8 == 0);
 
         const len = @truncate(u32, chunk.len);
@@ -549,11 +581,23 @@ const Encoder = struct {
             std.mem.set(u8, chunk[(16 + header.spec_len)..header.data_begin], 0);
 
             cursor = header.data_begin;
+            self.next_slice_offset = header.data_begin + objectInfo(self.iter.info).size;
         }
 
-        cursor = self.encodeObj(cursor, chunk) orelse return .not_done;
+        while (true) {
+            const new_cursor = try self.encodeObj(cursor, chunk);
+            cursor = new_cursor orelse return Result.not_done;
 
-        return .{ .done = cursor };
+            if (self.next_slice_data >= self.slice_data.items.len)
+                break;
+
+            if (self.next_slice_data < self.slice_data.items.len) {
+                // const slice_data =self.slice_data[self.next_slice_data];
+                // self.
+            }
+        }
+
+        return Result{ .done = cursor };
     }
 };
 
@@ -605,7 +649,7 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
         const chunk_ = try liu.Temp.alignedAlloc(ChunkT, 8, 1);
         const chunk = &chunk_[0];
 
-        switch (encoder.encode(chunk)) {
+        switch (try encoder.encode(chunk)) {
             .done => |size| {
                 return Encoded(chunk_size){ .chunks = list.items, .last = chunk[0..size] };
             },
