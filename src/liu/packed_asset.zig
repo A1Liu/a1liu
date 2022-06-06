@@ -429,8 +429,11 @@ const Encoder = struct {
         };
 
         fn peek(self: *@This()) ?SA {
-            if (self.index != 0 and self.struct_count == 0) return null;
-            if (self.index >= self.info.len) return null;
+            // Writing it this way reduces the number of compile-time branches,
+            // and so it should reduce the quota cost of this function
+            const is_cancelled = self.index != 0 and self.struct_count == 0;
+            const has_data = self.index < self.info.len;
+            if (is_cancelled or !has_data) return null;
 
             var sa = SA{ .size = 0, .alignment = 0 };
             var index: usize = self.index;
@@ -460,8 +463,16 @@ const Encoder = struct {
 
             sa.type_info = encoder_info.type_info;
             sa.next_index = index + 1;
-            sa.alignment = std.math.max(sa.alignment, desc.alignment);
             sa.offset = encoder_info.offset;
+
+            {
+                // Equivalent to max operation:
+                // std.math.max(sa.alignment, desc.alignment);
+                //
+                // This reduces the number of comptime branches
+                const cmp: u16 = @boolToInt(sa.alignment > desc.alignment);
+                sa.alignment = cmp * sa.alignment + (1 - cmp) * desc.alignment;
+            }
 
             switch (desc.kind) {
                 .prim => |size| sa.size = size,
@@ -750,5 +761,5 @@ pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType
 }
 
 test {
-    _ = @import("./packed_asset_test.zig");
+    _ = @import("./test_packed_asset.zig");
 }
