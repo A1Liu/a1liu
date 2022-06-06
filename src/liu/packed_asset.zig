@@ -22,6 +22,21 @@
 // makes things easier, but maybe is bad for usability. For sure, the compile
 // error is atrocious.
 
+// TODO
+// 1. Validation of input data in parser: slice ranges and object sizes/alignments
+// 2. Refactorings to simplify a bit where possible
+// 3. Array types? Technically this just requires more zig type translation stuff,
+//      No additional requirements at runtime, because arrays are stored the
+//      same as fields in memory
+// 4. Optimization pass in encoder to speed up instances of reasonably packed
+//      data? (slices, packed structs, etc)
+// 5. Encode data in enum int value of type_info using comptime function
+//    - Bottom 2 bits = alignment -> faster alignment checking, but enum
+//      is no longer contiguous
+//    - alignment based on ranges -> slightly slower alignment checking,
+//      enum is contiguous, but potentially harder to maintain; can use
+//      enum constants to produce typechecking errors?
+
 const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
@@ -98,29 +113,6 @@ pub const Spec = struct {
             alignment: u16,
             kind: union(enum) { struct_close, struct_open, slice_of_next, prim: u8 },
         };
-
-        fn descriptor(self: @This()) Desc {
-            return switch (self) {
-                .pu8, .pi8 => .{ .alignment = 1, .kind = .{ .prim = 1 } },
-                .pu16, .pi16 => .{ .alignment = 2, .kind = .{ .prim = 2 } },
-                .pu32, .pi32, .pf32 => .{ .alignment = 4, .kind = .{ .prim = 4 } },
-                .pu64, .pi64, .pf64 => .{ .alignment = 8, .kind = .{ .prim = 8 } },
-
-                .uslice_of_next => .{ .alignment = 4, .kind = .slice_of_next },
-
-                .ustruct_open_1 => .{ .alignment = 1, .kind = .struct_open },
-                .ustruct_open_2 => .{ .alignment = 2, .kind = .struct_open },
-                .ustruct_open_4 => .{ .alignment = 4, .kind = .struct_open },
-                .ustruct_open_8 => .{ .alignment = 8, .kind = .struct_open },
-
-                .ustruct_close_1 => .{ .alignment = 1, .kind = .struct_close },
-                .ustruct_close_2 => .{ .alignment = 2, .kind = .struct_close },
-                .ustruct_close_4 => .{ .alignment = 4, .kind = .struct_close },
-                .ustruct_close_8 => .{ .alignment = 8, .kind = .struct_close },
-
-                else => unreachable,
-            };
-        }
 
         fn alignment(self: @This()) u16 {
             return switch (self) {
