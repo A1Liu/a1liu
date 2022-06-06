@@ -107,8 +107,8 @@
   }
 
   onMount(() => {
-    // NOTE: we use RTF file extension here, even though this file is binary,
-    // because RTF is gzip'd by Github Pages. For non-gzip files, use `.bin`
+    // NOTE: we use RTF file extension here, even though this file is technically
+    // binary, because RTF is gzip'd by Github Pages. For non-gzip files, use `.bin`
     const data = wasm.fetchAsset("/kilordle/data.rtf");
     const wasmPromise = wasm.fetchWasm("/kilordle/kilordle.wasm", {
       postMessage: postToast,
