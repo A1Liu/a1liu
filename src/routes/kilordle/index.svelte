@@ -107,7 +107,7 @@
   }
 
   onMount(() => {
-    const data = wasm.fetchAsset("/kilordle/data.bin");
+    const data = wasm.fetchAsset("/kilordle/data.rtf");
     // const words = wasm.fetchAsset("/kilordle/wordle-words.txt");
     const wasmPromise = wasm.fetchWasm("/kilordle/kilordle.wasm", {
       postMessage: postToast,
