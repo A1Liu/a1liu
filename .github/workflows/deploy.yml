@@ -25,7 +25,8 @@ jobs:
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1
         with:
-          version: 0.9.1
+          # version: 0.9.1
+          version: master
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
