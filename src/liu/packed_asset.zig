@@ -25,12 +25,16 @@
 // TODO
 // 1. Validation of input data in parser: slice ranges and object sizes/alignments
 // 2. Refactorings to simplify a bit where possible
-// 3. Array types? Technically this just requires more zig type translation stuff,
+// 3. Refactor stuff to reduce usages of control flow, as basically everything
+//      uses a backwards branch somewhere or another. switch seems to always
+//      use 3? idk, if uses 1, func call uses 1, loops use 1 per iteration,
+//      unconditional named break to scope uses 1
+// 4. Array types? Technically this just requires more zig type translation stuff,
 //      No additional requirements at runtime, because arrays are stored the
 //      same as fields in memory
-// 4. Optimization pass in encoder to speed up instances of reasonably packed
+// 5. Optimization pass in encoder to speed up instances of reasonably packed
 //      data? (slices, packed structs, etc)
-// 5. Encode data in enum int value of type_info using comptime function
+// 6. Encode data in enum int value of type_info using comptime function
 //    - Bottom 2 bits = alignment -> faster alignment checking, but enum
 //      is no longer contiguous
 //    - alignment based on ranges -> slightly slower alignment checking,
