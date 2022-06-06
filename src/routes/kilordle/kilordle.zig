@@ -19,8 +19,8 @@ const ext = struct {
         return submitWord([_]u8{ l0, l1, l2, l3, l4 }) catch @panic("submitWord failed");
     }
 
-    fn initExt(l_wordles: wasm.Obj, l_words: wasm.Obj) callconv(.C) void {
-        init(l_wordles, l_words) catch @panic("init failed");
+    fn initExt(l_asset: wasm.Obj) callconv(.C) void {
+        init(l_asset) catch @panic("init failed");
     }
 };
 
@@ -59,7 +59,7 @@ const Keys = struct {
     submits: wasm.Obj,
 };
 
-pub const Spec = liu.packed_asset.Spec.fromType(struct {
+const Spec = struct {
     word0: []const u8,
     word1: []const u8,
     word2: []const u8,
@@ -71,7 +71,7 @@ pub const Spec = liu.packed_asset.Spec.fromType(struct {
     wordle2: []const u8,
     wordle3: []const u8,
     wordle4: []const u8,
-});
+};
 
 // Initialized at start of program
 var wordles: [5][]const u8 = undefined;
@@ -375,14 +375,23 @@ fn initDict(dict: *[5][]const u8, data: []const u8) void {
     }
 }
 
-pub fn init(l_wordles: wasm.Obj, l_words: wasm.Obj) !void {
+pub fn init(l_asset: wasm.Obj) !void {
     wasm.initIfNecessary();
 
-    const wordle_data = try wasm.in.bytes(l_wordles, liu.Pages);
-    initDict(&wordles, wordle_data);
+    const asset_data = try wasm.in.alignedBytes(l_asset, liu.Pages, 8);
+    const parsed = try liu.packed_asset.parse(Spec, asset_data);
 
-    const word_data = try wasm.in.bytes(l_words, liu.Pages);
-    initDict(&wordle_words, word_data);
+    wordles[0] = parsed.wordle0.slice();
+    wordles[1] = parsed.wordle1.slice();
+    wordles[2] = parsed.wordle2.slice();
+    wordles[3] = parsed.wordle3.slice();
+    wordles[4] = parsed.wordle4.slice();
+
+    wordle_words[0] = parsed.word0.slice();
+    wordle_words[1] = parsed.word1.slice();
+    wordle_words[2] = parsed.word2.slice();
+    wordle_words[3] = parsed.word3.slice();
+    wordle_words[4] = parsed.word4.slice();
 
     keys = makeKeys();
 

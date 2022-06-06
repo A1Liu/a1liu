@@ -107,8 +107,8 @@
   }
 
   onMount(() => {
-    const wordles = wasm.fetchAsset("/kilordle/wordles.txt");
-    const words = wasm.fetchAsset("/kilordle/wordle-words.txt");
+    const data = wasm.fetchAsset("/kilordle/data.bin");
+    // const words = wasm.fetchAsset("/kilordle/wordle-words.txt");
     const wasmPromise = wasm.fetchWasm("/kilordle/kilordle.wasm", {
       postMessage: postToast,
       imports: { setPuzzles: (p: PuzzleData[]) => (puzzles = p) },
@@ -126,11 +126,10 @@
       }),
     });
 
-    Promise.all([wasmPromise, wordles, words]).then(([ref, wordles, words]) => {
-      const wordlesId = ref.addObj(wordles);
-      const wordsId = ref.addObj(words);
+    Promise.all([wasmPromise,  data]).then(([ref, data]) => {
+      const dataId = ref.addObj(data);
 
-      ref.abi.init(wordlesId, wordsId);
+      ref.abi.init(dataId);
       wasmRef = ref;
     });
 

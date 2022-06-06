@@ -112,9 +112,13 @@ pub const out = struct {
 
 pub const in = struct {
     pub fn bytes(obj: Obj, alloc: Allocator) ![]u8 {
+        return alignedBytes(obj, alloc, null);
+    }
+
+    pub fn alignedBytes(obj: Obj, alloc: Allocator, comptime alignment: ?u29) ![]align(alignment orelse 1) u8 {
         if (builtin.target.cpu.arch != .wasm32) return &.{};
         const len = ext.objMapLen(obj);
-        const data = try alloc.alloc(u8, len);
+        const data = try alloc.alignedAlloc(u8, alignment, len);
 
         ext.readObjMapBytes(obj, data.ptr);
 
