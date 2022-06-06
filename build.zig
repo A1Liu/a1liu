@@ -88,16 +88,12 @@ pub fn main() !void {
 }
 
 // Experimenting with comptime branch quota
+// fn erro() !void {}
 // test {
 //     comptime {
 //         var i: u32 = 0;
-//         while (i < 500) : (i += 1) {
-//             if (i > 10) {
-//                 if (i < 10) {
-//                     @compileLog("Hello");
-//                     i = i;
-//                 }
-//             }
+//         while (i < 333) : (i += 1) {
+//             try erro();
 //         }
 //     }
 // }

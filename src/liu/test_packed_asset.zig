@@ -3,6 +3,7 @@ const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
 const Spec = liu.packed_asset.Spec;
+const TypeInfo = liu.packed_asset.TypeInfo;
 const tempEncode = liu.packed_asset.tempEncode;
 const parse = liu.packed_asset.parse;
 const U32Slice = liu.packed_asset.U32Slice;
@@ -24,9 +25,9 @@ test "Packed Asset: spec generation" {
     const spec = Spec.fromType(TestE);
     const spec2 = Spec.fromType(Test);
 
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.typeInfo(), spec2.typeInfo());
+    try std.testing.expectEqualSlices(TypeInfo, spec.typeInfo(), spec2.typeInfo());
 
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.typeInfo(), &.{
+    try std.testing.expectEqualSlices(TypeInfo, spec.typeInfo(), &.{
         .ustruct_open_4,
         .uslice_of_next,
         .pu8,
@@ -46,7 +47,7 @@ test "Packed Asset: spec encode/decode simple" {
 
     const spec = Spec.fromType(Test);
 
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.typeInfo(), &.{
+    try std.testing.expectEqualSlices(TypeInfo, spec.typeInfo(), &.{
         .ustruct_open_8,
         .pu64,
         .ustruct_open_1,
@@ -84,7 +85,7 @@ test "Packed Asset: encode/decode extern" {
 
     const spec = Spec.fromType(Test);
 
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.typeInfo(), &.{
+    try std.testing.expectEqualSlices(TypeInfo, spec.typeInfo(), &.{
         .ustruct_open_8,
         .pu64,
         .pu8,
@@ -166,7 +167,7 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     try std.testing.expectEqual(type_info[0], .ustruct_open_8);
     try std.testing.expectEqual(type_info[type_info.len - 1], .ustruct_close_8);
 
-    try std.testing.expectEqualSlices(Spec.TypeInfo, type_info[1..(type_info.len - 1)], &.{
+    try std.testing.expectEqualSlices(TypeInfo, type_info[1..(type_info.len - 1)], &.{
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
         .pu64, .pu64, .pu64, .pu64, .pu64,
@@ -194,6 +195,55 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     }
 }
 
+test "Packed Asset: alignment" {
+    const aligned_1: []const TypeInfo = &.{
+        .pu8,
+        .pi8,
+        .ustruct_open_1, // struct alignment comes from trailing number
+        .ustruct_close_1,
+    };
+
+    for (aligned_1) |t| {
+        try std.testing.expectEqual(t.alignment(), 1);
+    }
+
+    const aligned_2: []const TypeInfo = &.{
+        .pu16,
+        .pi16,
+        .ustruct_open_2,
+        .ustruct_close_2,
+    };
+
+    for (aligned_2) |t| {
+        try std.testing.expectEqual(t.alignment(), 2);
+    }
+
+    const aligned_4: []const TypeInfo = &.{
+        .pu32,
+        .pi32,
+        .pf32,
+        .uslice_of_next, // align 4, size 8
+        .ustruct_open_4,
+        .ustruct_close_4,
+    };
+
+    for (aligned_4) |t| {
+        try std.testing.expectEqual(t.alignment(), 4);
+    }
+
+    const aligned_8: []const TypeInfo = &.{
+        .pu64,
+        .pi64,
+        .pf64,
+        .ustruct_open_8,
+        .ustruct_close_8,
+    };
+
+    for (aligned_8) |t| {
+        try std.testing.expectEqual(t.alignment(), 8);
+    }
+}
+
 test "Packed Asset: spec encode/decode slices" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
@@ -206,7 +256,7 @@ test "Packed Asset: spec encode/decode slices" {
     const spec = Spec.fromType(Test);
     const type_info = spec.typeInfo();
 
-    try std.testing.expectEqualSlices(Spec.TypeInfo, type_info, &.{
+    try std.testing.expectEqualSlices(TypeInfo, type_info, &.{
         .ustruct_open_4,
         .uslice_of_next,
         .pu8,
