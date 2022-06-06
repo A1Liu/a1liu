@@ -9,11 +9,6 @@ const Mode = std.builtin.Mode;
 
 var mode: Mode = undefined;
 
-// TODO Asset generator file (src/asset_gen.zig), that stores the definitions
-// of created assets and the code to re-generate them from valid data,
-// where the valid data is easier to reason about than the produced
-// asset files. Ideally the valid data is human-readable.
-
 const ProgData = struct {
     name: []const u8,
     output: []const u8,

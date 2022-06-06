@@ -1,6 +1,10 @@
 const std = @import("std");
 const liu = @import("./liu/lib.zig");
 
+// This file stores the specifications of created assets and the code to
+// re-generate them from valid data, where the valid data is easier to reason
+// about than the produced asset files. Ideally the valid data is human-readable.
+
 const assert = std.debug.assert;
 const Allocator = std.mem.Allocator;
 
