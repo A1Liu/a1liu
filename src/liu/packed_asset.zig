@@ -120,11 +120,6 @@ pub const Spec = struct {
             };
         }
 
-        const Desc = struct {
-            alignment: u16,
-            kind: union(enum) { struct_close, struct_open, slice_of_next, prim: u8 },
-        };
-
         fn alignment(self: @This()) u16 {
             return switch (self) {
                 .pu8, .pi8 => 1,
