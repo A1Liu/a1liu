@@ -26,6 +26,8 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
+const assert = std.debug.assert;
+
 const SliceMarker: u8 = 0;
 pub fn U32Slice(comptime T: type) type {
     return extern struct {
@@ -39,7 +41,7 @@ pub fn U32Slice(comptime T: type) type {
             const address = @ptrToInt(self);
 
             var out: []T = &.{};
-            out.ptr = @intToPtr([*]T, 4 * self.word_offset + address + 8);
+            out.ptr = @intToPtr([*]T, 4 * self.word_offset + address);
             out.len = self.len;
 
             return out;
@@ -59,9 +61,13 @@ const Header = extern struct {
 
 pub const Spec = struct {
     Type: type,
-    type_info: []const TypeInfo,
     encoder_info: []const EncoderInfo,
     header: Header,
+
+    comptime {
+        if (native_endian != .Little)
+            @compileError("target platform must be little endian");
+    }
 
     pub const TypeInfo = enum(u8) {
         // zig fmt: off
@@ -90,7 +96,7 @@ pub const Spec = struct {
 
         const Desc = struct {
             alignment: u16,
-            kind: union(enum) { struct_close, struct_open, slice_of_next, prim: u8, unknown },
+            kind: union(enum) { struct_close, struct_open, slice_of_next, prim: u8 },
         };
 
         fn descriptor(self: @This()) Desc {
@@ -112,7 +118,7 @@ pub const Spec = struct {
                 .ustruct_close_4 => .{ .alignment = 4, .kind = .struct_close },
                 .ustruct_close_8 => .{ .alignment = 8, .kind = .struct_close },
 
-                else => .{ .alignment = 8, .kind = .unknown },
+                else => unreachable,
             };
         }
 
@@ -142,6 +148,17 @@ pub const Spec = struct {
 
     pub const EncoderInfo = struct { type_info: TypeInfo, offset: u32 = 0 };
 
+    pub fn typeInfo(comptime self: @This()) []const TypeInfo {
+        comptime {
+            var info: []const TypeInfo = &.{};
+            for (self.encoder_info) |e| {
+                info = info ++ &[_]TypeInfo{e.type_info};
+            }
+
+            return info;
+        }
+    }
+
     pub fn fromType(comptime T: type) @This() {
         comptime {
             const ExternType = translateType(T);
@@ -154,28 +171,12 @@ pub const Spec = struct {
                 .spec_len = spec_len,
             };
 
-            var info: []const TypeInfo = &.{};
-            for (encode_info) |e| {
-                info = info ++ &[_]TypeInfo{e.type_info};
-            }
-
             return .{
                 .Type = ExternType,
                 .encoder_info = encode_info,
-                .type_info = info,
                 .header = header,
             };
         }
-    }
-
-    pub fn decodeInfo(comptime T: type) []const TypeInfo {
-        const encode_info = makeInfo(T, null);
-        var info: []const TypeInfo = &.{};
-        for (encode_info) |e| {
-            info = info ++ &.{e.type_info};
-        }
-
-        return info;
     }
 
     fn isInternalSlice(comptime T: type) bool {
@@ -185,16 +186,8 @@ pub const Spec = struct {
         }
     }
 
-    fn makeInfo(comptime Extern: type, comptime Base: ?type) []const EncoderInfo {
-        if (native_endian != .Little)
-            @compileError("target platform must be little endian");
-
-        if (@sizeOf(Extern) == 0)
-            @compileError("type has size of 0, what would you even store in the asset file?");
-        if (@alignOf(Extern) > 8)
-            @compileError("maximum alignment for values is 8");
-        if (@alignOf(Extern) == 0)
-            @compileError("what does align=0 even mean");
+    fn makeInfo(comptime Extern: type, comptime Base: type) []const EncoderInfo {
+        // @compileLog(Extern, Base);
 
         comptime {
             const info = switch (@typeInfo(Extern)) {
@@ -225,9 +218,11 @@ pub const Spec = struct {
                 @compileError("struct must be laid out using extern format");
 
             if (isInternalSlice(Extern)) {
-                const ElemBase = if (Base) |B| b: {
-                    break :b if (isInternalSlice(B)) null else std.meta.Child(B);
-                } else null;
+                const ElemBase = if (isInternalSlice(Base))
+                    Extern.SliceType
+                else
+                    std.meta.Child(Base);
+
                 const elem_type = makeInfo(Extern.SliceType, ElemBase);
                 const slice_info = Spec.EncoderInfo{
                     .type_info = .uslice_of_next,
@@ -248,26 +243,34 @@ pub const Spec = struct {
 
             var spec: []const Spec.EncoderInfo = &[_]EncoderInfo{val};
 
-            if (Base) |B| {
-                var b: B = undefined;
+            var b: Base = undefined;
 
-                for (info.fields) |field| {
-                    const BField = @TypeOf(@field(b, field.name));
-                    const encode_info = makeInfo(field.field_type, BField);
+            for (info.fields) |field| {
+                const BField = @TypeOf(@field(b, field.name));
+                const encode_info = makeInfo(field.field_type, BField);
+                if (encode_info.len == 1) {
+                    // This means its a primitive
 
-                    for (encode_info) |e| {
-                        const offset = e.offset + @offsetOf(B, field.name);
-                        const new_info = EncoderInfo{
-                            .type_info = e.type_info,
-                            .offset = offset,
-                        };
+                    const new_info = EncoderInfo{
+                        .type_info = encode_info[0].type_info,
+                        .offset = @offsetOf(Base, field.name),
+                    };
 
-                        spec = spec ++ &[_]EncoderInfo{new_info};
-                    }
+                    spec = spec ++ &[_]EncoderInfo{new_info};
+                    continue;
                 }
-            } else {
-                for (info.fields) |field| {
-                    spec = spec ++ makeInfo(field.field_type, null);
+
+                var iter = Encoder.EncoderInfoIter{ .info = encode_info };
+                while (iter.peek()) |sa| : (iter.index = sa.next_index) {
+                    const offset = sa.offset + @offsetOf(Base, field.name);
+                    const new_info = EncoderInfo{
+                        .type_info = sa.type_info,
+                        .offset = offset,
+                    };
+
+                    spec = spec ++ &[_]EncoderInfo{new_info};
+                    if (sa.slice_info) |slice_info|
+                        spec = spec ++ slice_info.spec;
                 }
             }
 
@@ -276,6 +279,13 @@ pub const Spec = struct {
     }
 
     fn translateType(comptime T: type) type {
+        if (@sizeOf(T) == 0)
+            @compileError("type has size of 0, what would you even store in the asset file?");
+        if (@alignOf(T) > 8)
+            @compileError("maximum alignment for values is 8");
+        if (@alignOf(T) == 0)
+            @compileError("what does align=0 even mean");
+
         const Field = std.builtin.Type.StructField;
 
         comptime {
@@ -300,10 +310,15 @@ pub const Spec = struct {
 
             var translated: []const Field = &.{};
 
-            var no_change = true;
+            // NOTE: we use change_count instead of a boolean here, even though
+            // the eventual data we need is just a boolean, because it allows
+            // us to prevent a branch during comptime. Maybe this is necessary,
+            // maybe its not, it's unclear. We're hovering right at that 1000
+            // mark right now for one of the test cases.
+            var change_count: usize = 0;
             for (info.fields) |field| {
                 const FieldT = translateType(field.field_type);
-                if (FieldT != field.field_type) no_change = false;
+                change_count += @boolToInt(FieldT != field.field_type);
 
                 const to_add = Field{
                     .name = field.name,
@@ -317,29 +332,23 @@ pub const Spec = struct {
             }
 
             if (info.layout == .Extern) {
-                if (no_change) return T;
+                if (change_count == 0) return T;
 
-                return @Type(.{
-                    .Struct = .{
-                        .layout = .Extern,
-                        .decls = &.{},
-                        .is_tuple = false,
-                        .fields = translated,
-                    },
-                });
+                return @Type(.{ .Struct = .{
+                    .layout = .Extern,
+                    .decls = &.{},
+                    .is_tuple = false,
+                    .fields = translated,
+                } });
             }
 
             var fields: []const Field = &.{};
 
-            // These alignments won't necessarily be valid later in the process,
-            // so we make sure that all fields of all alignments are included
-            // (that's why the first comparison is >= 8, and the last is <= 1).
-            //
-            // Also, this process here is just for sorting fields by alignment,
+            // This process is just for sorting fields by alignment,
             // it's not using sort because sorting Fields isn't really
             // allowed at compile-time.
             for (translated) |field| {
-                if (field.alignment >= 8) fields = fields ++ &[_]Field{field};
+                if (field.alignment == 8) fields = fields ++ &[_]Field{field};
             }
 
             for (translated) |field| {
@@ -351,17 +360,15 @@ pub const Spec = struct {
             }
 
             for (translated) |field| {
-                if (field.alignment <= 1) fields = fields ++ &[_]Field{field};
+                if (field.alignment == 1) fields = fields ++ &[_]Field{field};
             }
 
-            return @Type(.{
-                .Struct = .{
-                    .layout = .Extern,
-                    .decls = &.{},
-                    .is_tuple = false,
-                    .fields = fields,
-                },
-            });
+            return @Type(.{ .Struct = .{
+                .layout = .Extern,
+                .decls = &.{},
+                .is_tuple = false,
+                .fields = fields,
+            } });
         }
     }
 };
@@ -397,7 +404,7 @@ const Encoder = struct {
     const ObjectDesc = struct {
         spec: []const Spec.EncoderInfo,
         size: u32,
-        alignment: u32,
+        alignment: u16,
     };
 
     const EncoderInfoIter = struct {
@@ -406,60 +413,76 @@ const Encoder = struct {
         struct_count: u32 = 0,
 
         const SA = struct {
-            next_index: usize,
+            next_index: usize = undefined,
+            type_info: Spec.TypeInfo = undefined,
             size: u32,
-            alignment: u32,
+            alignment: u16,
             offset: u32 = 0,
             slice_info: ?ObjectDesc = null,
         };
 
+        const Desc = struct {
+            alignment: u16,
+            kind: union(enum) { struct_close, struct_open, slice_of_next, prim: u8 },
+        };
+
         fn peek(self: *@This()) ?SA {
             if (self.index != 0 and self.struct_count == 0) return null;
+            if (self.index >= self.info.len) return null;
 
-            var sa = SA{ .size = 0, .alignment = 0, .next_index = 0 };
+            var sa = SA{ .size = 0, .alignment = 0 };
             var index: usize = self.index;
 
-            while (index < self.info.len) : (index += 1) {
-                // defer index += 1; // handle index increment on return or break
+            const encoder_info = self.info[index];
 
-                const encoder_info = self.info[index];
-                const desc = encoder_info.type_info.descriptor();
-                sa.next_index = index + 1;
-                sa.alignment = std.math.max(sa.alignment, desc.alignment);
-                sa.offset = encoder_info.offset;
+            const desc: Desc = switch (encoder_info.type_info) {
+                .pu8, .pi8 => .{ .alignment = 1, .kind = .{ .prim = 1 } },
+                .pu16, .pi16 => .{ .alignment = 2, .kind = .{ .prim = 2 } },
+                .pu32, .pi32, .pf32 => .{ .alignment = 4, .kind = .{ .prim = 4 } },
+                .pu64, .pi64, .pf64 => .{ .alignment = 8, .kind = .{ .prim = 8 } },
 
-                switch (desc.kind) {
-                    .prim => |size| sa.size = size,
-                    .struct_open => {
-                        self.struct_count += 1;
-                        continue;
-                    },
+                .uslice_of_next => .{ .alignment = 4, .kind = .slice_of_next },
 
-                    .struct_close => {
-                        self.struct_count -= 1;
+                .ustruct_open_1 => .{ .alignment = 1, .kind = .struct_open },
+                .ustruct_open_2 => .{ .alignment = 2, .kind = .struct_open },
+                .ustruct_open_4 => .{ .alignment = 4, .kind = .struct_open },
+                .ustruct_open_8 => .{ .alignment = 8, .kind = .struct_open },
 
-                        sa.size = 0;
+                .ustruct_close_1 => .{ .alignment = 1, .kind = .struct_close },
+                .ustruct_close_2 => .{ .alignment = 2, .kind = .struct_close },
+                .ustruct_close_4 => .{ .alignment = 4, .kind = .struct_close },
+                .ustruct_close_8 => .{ .alignment = 8, .kind = .struct_close },
 
-                        return sa;
-                    },
+                else => unreachable,
+            };
 
-                    .slice_of_next => {
-                        const remainder = self.info[(index + 1)..];
-                        var info = objectInfo(remainder);
-                        info.alignment = alignUp(info.alignment, 4);
+            sa.type_info = encoder_info.type_info;
+            sa.next_index = index + 1;
+            sa.alignment = std.math.max(sa.alignment, desc.alignment);
+            sa.offset = encoder_info.offset;
 
-                        sa.next_index += info.spec.len;
-                        sa.size = 8;
-                        sa.slice_info = info;
-                    },
+            switch (desc.kind) {
+                .prim => |size| sa.size = size,
+                .struct_open => self.struct_count += 1,
 
-                    .unknown => continue,
-                }
+                .struct_close => {
+                    self.struct_count -= 1;
 
-                return sa;
+                    sa.size = 0;
+                },
+
+                .slice_of_next => {
+                    const remainder = self.info[(index + 1)..];
+                    var info = objectInfo(remainder);
+                    info.alignment = std.math.max(info.alignment, 4);
+
+                    sa.next_index += info.spec.len;
+                    sa.size = 8;
+                    sa.slice_info = info;
+                },
             }
 
-            return null;
+            return sa;
         }
     };
 
@@ -477,13 +500,13 @@ const Encoder = struct {
         };
     }
 
-    fn alignUp(cursor: u32, alignment: u32) u32 {
+    fn alignUp(cursor: u32, alignment: u16) u32 {
         return @truncate(u32, std.mem.alignForward(cursor, alignment));
     }
 
     fn objectInfo(spec: []const Spec.EncoderInfo) ObjectDesc {
         var iter: EncoderInfoIter = .{ .info = spec };
-        var alignment: u32 = 0;
+        var alignment: u16 = 0;
         var total_size: u32 = 0;
 
         while (iter.peek()) |sa| {
@@ -533,13 +556,13 @@ const Encoder = struct {
                         .offset = offset,
                     });
 
-                    const current_offset = cursor + self.file_offset + 8;
-                    const offset_from_edge = offset - current_offset;
-                    std.debug.assert((offset_from_edge) % 4 == 0);
+                    const current_offset = cursor + self.file_offset;
+                    const relative_offset = offset - current_offset;
+                    assert(relative_offset % 4 == 0);
 
                     self.next_slice_offset = offset + info.size * obj_left;
 
-                    break :offset offset_from_edge;
+                    break :offset relative_offset;
                 };
 
                 chunk[cursor..][0..4].* = @bitCast([4]u8, offset / 4);
@@ -568,7 +591,7 @@ const Encoder = struct {
     }
 
     fn encode(self: *Self, chunk: []align(8) u8) !Result {
-        std.debug.assert(chunk.len % 8 == 0);
+        assert(chunk.len % 8 == 0);
 
         const len = @truncate(u32, chunk.len);
 
@@ -580,6 +603,9 @@ const Encoder = struct {
         // need to output the header of the file.
         if (self.file_offset == 0) {
             const header = self.header;
+
+            assert(self.next_slice_offset == header.data_begin + self.object_size);
+
             @ptrCast(*Header, chunk[0..16]).* = header;
 
             // spec array
@@ -589,10 +615,7 @@ const Encoder = struct {
 
             // fill out padding between spec and data begin with zeros
             std.mem.set(u8, chunk[(16 + header.spec_len)..header.data_begin], 0);
-
             cursor = header.data_begin;
-
-            std.debug.assert(self.next_slice_offset == header.data_begin + self.object_size);
         }
 
         while (true) {
@@ -600,6 +623,7 @@ const Encoder = struct {
                 const new_cursor = try self.encodeObj(cursor, chunk);
                 cursor = new_cursor orelse return Result.not_done;
 
+                self.iter = .{ .info = self.iter.info };
                 self.object += self.object_size;
                 self.obj_left -= 1;
             }
@@ -615,6 +639,7 @@ const Encoder = struct {
             }
 
             self.iter = .{ .info = slice_data.spec };
+            self.object = slice_data.data;
             self.object_size = slice_data.obj_size;
             self.obj_left = slice_data.obj_left;
 
@@ -623,7 +648,7 @@ const Encoder = struct {
             const aligned = alignUp(cursor, alignment);
             std.mem.set(u8, chunk[cursor..aligned], 0); // fill padding with zeroes
             cursor = aligned;
-            std.debug.assert(aligned + self.file_offset == slice_data.offset);
+            assert(aligned + self.file_offset == slice_data.offset);
         }
 
         return Result{ .done = cursor };
@@ -711,247 +736,17 @@ pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType
     const spec_end = 16 + header.spec_len;
     if (spec_end > header.data_begin) return error.InvalidData;
 
-    const spec = Spec.fromType(T);
+    const spec = comptime Spec.fromType(T);
+    const type_info = comptime spec.typeInfo();
+
     const asset_spec = @ptrCast([]const Spec.TypeInfo, bytes[16..spec_end]);
-    if (!std.mem.eql(Spec.TypeInfo, spec.type_info, asset_spec)) return error.TypeMismatch;
+    if (!std.mem.eql(Spec.TypeInfo, type_info, asset_spec)) return error.TypeMismatch;
 
     // TODO validation code
 
     return @ptrCast(*const spec.Type, bytes[header.data_begin..]);
 }
 
-test "Packed Asset: spec generation" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
-    const TestE = extern struct {
-        data: U32Slice(u8),
-        field: u8,
-    };
-
-    const Test = struct {
-        field: u8,
-        data: []u8,
-    };
-
-    const spec = Spec.fromType(TestE);
-    const spec2 = Spec.fromType(Test);
-
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, spec2.type_info);
-
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
-        .ustruct_open_4,
-        .uslice_of_next,
-        .pu8,
-        .pu8,
-        .ustruct_close_4,
-    });
-}
-
-test "Packed Asset: spec encode/decode simple" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
-    const Test = struct {
-        field2: struct { asdf: u8, wasd: u8 },
-        field: u64,
-    };
-
-    const spec = Spec.fromType(Test);
-
-    // std.debug.print("specInfo: {any}\n", .{spec.Info});
-
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
-        .ustruct_open_8,
-        .pu64,
-        .ustruct_open_1,
-        .pu8,
-        .pu8,
-        .ustruct_close_1,
-        .ustruct_close_8,
-    });
-
-    const t: Test = .{ .field = 120303113, .field2 = .{ .asdf = 100, .wasd = 255 } };
-    const encoded = try tempEncode(t, null);
-
-    try std.testing.expect(encoded.chunks.len == 0);
-
-    const value = try parse(Test, encoded.last);
-
-    // std.debug.print("{any} {any}\n", .{ t, value.* });
-
-    try std.testing.expectEqual(value.field, t.field);
-    try std.testing.expectEqual(value.field2.asdf, t.field2.asdf);
-    try std.testing.expectEqual(value.field2.wasd, t.field2.wasd);
-}
-
-test "Packed Asset: encode/decode extern" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
-    const TestE = extern struct {
-        data: u64,
-        field: u8,
-    };
-
-    const Test = struct {
-        field: u8,
-        data: u64,
-    };
-
-    const spec = Spec.fromType(Test);
-
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
-        .ustruct_open_8,
-        .pu64,
-        .pu8,
-        .ustruct_close_8,
-    });
-
-    const t: TestE = .{ .field = 123, .data = 12398145 };
-    const encoded = try tempEncode(t, 24);
-
-    try std.testing.expect(encoded.chunks.len == 1);
-
-    const bytes = try encoded.copyContiguous(liu.Temp);
-
-    const value = try parse(TestE, bytes);
-
-    try std.testing.expectEqual(value.*, t);
-}
-
-test "Packed Asset: spec encode/decode multiple chunks" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
-    const Test = struct {
-        field0: u64 = 0,
-        field1: u64 = 1,
-        field2: u64 = 2,
-        field3: u64 = 3,
-        field4: u64 = 4,
-        field5: u64 = 5,
-        field6: u64 = 6,
-        field7: u64 = 7,
-        field8: u64 = 8,
-        field9: u64 = 9,
-        field10: u64 = 10,
-        field11: u64 = 11,
-        field12: u64 = 12,
-        field13: u64 = 13,
-        field14: u64 = 14,
-        field15: u64 = 15,
-        field16: u64 = 16,
-        field17: u64 = 17,
-        field18: u64 = 18,
-        field19: u64 = 19,
-        field20: u64 = 20,
-        field21: u64 = 21,
-        field22: u64 = 22,
-        field23: u64 = 23,
-        field24: u64 = 24,
-        field25: u64 = 25,
-        field26: u64 = 26,
-        field27: u64 = 27,
-        field28: u64 = 28,
-        field29: u64 = 29,
-        field30: u64 = 30,
-        field31: u64 = 31,
-        field32: u64 = 32,
-        field33: u64 = 33,
-        field34: u64 = 34,
-        field35: u64 = 35,
-        field36: u64 = 36,
-        field37: u64 = 37,
-        field38: u64 = 38,
-        field39: u64 = 39,
-        field40: u64 = 40,
-        field41: u64 = 41,
-        field42: u64 = 42,
-        field43: u64 = 43,
-        field44: u64 = 44,
-        field45: u64 = 45,
-        field46: u64 = 46,
-        field47: u64 = 47,
-        field48: u64 = 48,
-        field49: u64 = 49,
-    };
-
-    const spec = Spec.fromType(Test);
-
-    // std.debug.print("specInfo: {any}\n", .{spec.Info});
-
-    try std.testing.expectEqual(spec.type_info[0], .ustruct_open_8);
-    try std.testing.expectEqual(spec.type_info[spec.type_info.len - 1], .ustruct_close_8);
-
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info[1..(spec.type_info.len - 1)], &.{
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-        .pu64, .pu64, .pu64, .pu64, .pu64,
-    });
-
-    const t: Test = .{};
-    const encoded = try tempEncode(t, 304);
-
-    try std.testing.expect(encoded.chunks.len == 1);
-
-    const bytes = try encoded.copyContiguous(liu.Temp);
-
-    const value = try parse(Test, bytes);
-
-    const values = @ptrCast(*const [50]u64, value);
-    for (values) |v, i| {
-        try std.testing.expectEqual(v, i);
-    }
-}
-
-test "Packed Asset: spec encode/decode slices" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
-    const Test = struct {
-        field: u16,
-        data: []const u8,
-    };
-
-    const spec = Spec.fromType(Test);
-
-    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
-        .ustruct_open_4,
-        .uslice_of_next,
-        .pu8,
-        .pu16,
-        .ustruct_close_4,
-    });
-
-    const t: Test = .{
-        .field = 16,
-        .data = &.{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-    };
-    const encoded = try tempEncode(t, 1024);
-
-    try std.testing.expect(encoded.chunks.len == 0);
-
-    const bytes = try encoded.copyContiguous(liu.Temp);
-
-    const value = try parse(Test, bytes);
-
-    try std.testing.expectEqual(t.field, value.field);
-
-    const slice = value.data.slice();
-
-    const begin = @ptrToInt(slice.ptr);
-    const end = @ptrToInt(slice.ptr + slice.len);
-
-    try std.testing.expect(begin > @ptrToInt(bytes.ptr));
-    try std.testing.expect(end <= @ptrToInt(bytes.ptr + bytes.len));
-
-    try std.testing.expectEqualSlices(u8, t.data, slice);
+test {
+    _ = @import("./packed_asset_test.zig");
 }
