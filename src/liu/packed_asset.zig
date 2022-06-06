@@ -513,6 +513,10 @@ const Encoder = struct {
         };
     }
 
+    fn deinit(self: *Self) void {
+        self.slice_data.deinit(liu.Pages);
+    }
+
     fn alignUp(cursor: u32, alignment: u16) u32 {
         return @truncate(u32, std.mem.alignForward(cursor, alignment));
     }
@@ -710,6 +714,8 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
     const ChunkPtrT = *align(8) ChunkT;
 
     var encoder = Encoder.init(@TypeOf(value), &value);
+    defer encoder.deinit();
+
     var list = std.ArrayList(ChunkPtrT).init(liu.Temp);
 
     while (true) {
