@@ -78,9 +78,11 @@ pub const TypeInfo = enum(u8) {
     const ALIGN_4: u8 = 8;
     const ALIGN_8: u8 = 14;
 
+    // struct open/close alignment comes from trailing number
+
     pu8,
     pi8,
-    ustruct_open_1, // struct alignment comes from trailing number
+    ustruct_open_1,
     ustruct_close_1,
 
     pu16 = ALIGN_2,
@@ -515,16 +517,21 @@ const Encoder = struct {
             // to 8 bytes and all primitive data has a maximum alignment/size of 8.
             if (cursor + sa.size > len) return null;
 
+            const out = chunk[cursor..];
+
             defer cursor += sa.size;
             self.iter.index = sa.next_index;
 
             if (sa.slice_info) |info| {
-                const raw_slice = @bitCast([]const u8, field_mem[0..@sizeOf([]const u8)].*);
+                const raw_slice = @bitCast([]const u8, field_mem[0..@sizeOf([]u8)].*);
 
                 const obj_left = @truncate(u32, raw_slice.len);
                 const offset = if (obj_left == 0) 0 else offset: {
-                    const offset =
-                        @truncate(u32, std.mem.alignForward(self.next_slice_offset, info.alignment));
+                    const offset = @truncate(u32, std.mem.alignForward(
+                        self.next_slice_offset,
+                        info.alignment,
+                    ));
+
                     try self.slice_data.append(liu.Pages, SliceInfo{
                         .spec = info.spec,
                         .data = raw_slice.ptr,
@@ -542,20 +549,13 @@ const Encoder = struct {
                     break :offset relative_offset;
                 };
 
-                chunk[cursor..][0..4].* = @bitCast([4]u8, offset / 4);
-                chunk[cursor..][4..8].* = @bitCast([4]u8, obj_left);
+                out[0..4].* = @bitCast([4]u8, offset / 4);
+                out[4..8].* = @bitCast([4]u8, obj_left);
 
                 continue;
             }
 
-            switch (sa.size) {
-                0 => {},
-                1 => chunk[cursor..][0..1].* = field_mem[0..1].*,
-                2 => chunk[cursor..][0..2].* = field_mem[0..2].*,
-                4 => chunk[cursor..][0..4].* = field_mem[0..4].*,
-                8 => chunk[cursor..][0..8].* = field_mem[0..8].*,
-                else => unreachable,
-            }
+            std.mem.copy(u8, out[0..sa.size], field_mem[0..sa.size]);
         }
 
         return cursor;
