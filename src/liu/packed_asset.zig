@@ -385,6 +385,7 @@ const Encoder = struct {
         spec: []const Spec.EncoderInfo,
         data: [*]const u8,
         obj_left: u32,
+        obj_size: u32,
         offset: u32,
     };
 
@@ -465,12 +466,14 @@ const Encoder = struct {
     fn init(comptime T: type, value: *const T) Self {
         const spec = Spec.fromType(T);
 
+        const obj_info = objectInfo(spec.encoder_info);
+
         return .{
             .header = spec.header,
             .iter = .{ .info = spec.encoder_info },
             .object = @ptrCast([*]const u8, value),
-            .next_slice_offset = undefined,
-            .object_size = undefined,
+            .object_size = obj_info.size,
+            .next_slice_offset = spec.header.data_begin + obj_info.size,
         };
     }
 
@@ -519,21 +522,28 @@ const Encoder = struct {
             if (sa.slice_info) |info| {
                 const raw_slice = @bitCast([]const u8, field_mem[0..@sizeOf([]const u8)].*);
 
-                const offset = alignUp(self.next_slice_offset, info.alignment);
                 const obj_left = @truncate(u32, raw_slice.len);
-                try self.slice_data.append(liu.Pages, SliceInfo{
-                    .spec = info.spec,
-                    .data = raw_slice.ptr,
-                    .obj_left = obj_left,
-                    .offset = offset,
-                });
+                const offset = if (obj_left == 0) 0 else offset: {
+                    const offset = alignUp(self.next_slice_offset, info.alignment);
+                    try self.slice_data.append(liu.Pages, SliceInfo{
+                        .spec = info.spec,
+                        .data = raw_slice.ptr,
+                        .obj_size = info.size,
+                        .obj_left = obj_left,
+                        .offset = offset,
+                    });
 
-                const current_offset = cursor + self.file_offset + 8;
-                std.debug.assert((offset - current_offset) % 4 == 0);
-                chunk[cursor..][0..4].* = @bitCast([4]u8, (offset - current_offset) / 4);
+                    const current_offset = cursor + self.file_offset + 8;
+                    const offset_from_edge = offset - current_offset;
+                    std.debug.assert((offset_from_edge) % 4 == 0);
+
+                    self.next_slice_offset = offset + info.size * obj_left;
+
+                    break :offset offset_from_edge;
+                };
+
+                chunk[cursor..][0..4].* = @bitCast([4]u8, offset / 4);
                 chunk[cursor..][4..8].* = @bitCast([4]u8, obj_left);
-
-                self.next_slice_offset = offset + info.size * obj_left;
 
                 // TODO: slices
 
@@ -581,20 +591,39 @@ const Encoder = struct {
             std.mem.set(u8, chunk[(16 + header.spec_len)..header.data_begin], 0);
 
             cursor = header.data_begin;
-            self.next_slice_offset = header.data_begin + objectInfo(self.iter.info).size;
+
+            std.debug.assert(self.next_slice_offset == header.data_begin + self.object_size);
         }
 
         while (true) {
-            const new_cursor = try self.encodeObj(cursor, chunk);
-            cursor = new_cursor orelse return Result.not_done;
+            while (self.obj_left > 0) {
+                const new_cursor = try self.encodeObj(cursor, chunk);
+                cursor = new_cursor orelse return Result.not_done;
 
-            if (self.next_slice_data >= self.slice_data.items.len)
-                break;
-
-            if (self.next_slice_data < self.slice_data.items.len) {
-                // const slice_data =self.slice_data[self.next_slice_data];
-                // self.
+                self.object += self.object_size;
+                self.obj_left -= 1;
             }
+
+            if (self.next_slice_data >= self.slice_data.items.len) break;
+
+            const slice_data = self.slice_data.items[self.next_slice_data];
+            self.next_slice_data += 1;
+
+            if (self.next_slice_data >= self.slice_data.items.len) {
+                self.next_slice_data = 0;
+                self.slice_data.items.len = 0;
+            }
+
+            self.iter = .{ .info = slice_data.spec };
+            self.object_size = slice_data.obj_size;
+            self.obj_left = slice_data.obj_left;
+
+            const alignment = std.math.max(4, slice_data.spec[0].type_info.alignment());
+
+            const aligned = alignUp(cursor, alignment);
+            std.mem.set(u8, chunk[cursor..aligned], 0); // fill padding with zeroes
+            cursor = aligned;
+            std.debug.assert(aligned + self.file_offset == slice_data.offset);
         }
 
         return Result{ .done = cursor };
@@ -883,42 +912,46 @@ test "Packed Asset: spec encode/decode multiple chunks" {
     }
 }
 
-// test "Packed Asset: spec encode/decode slices" {
-//     const mark = liu.TempMark;
-//     defer liu.TempMark = mark;
-//
-//     const Test = struct {
-//         field: u16,
-//         data: []const u8,
-//     };
-//
-//     const spec = Spec.fromType(Test);
-//
-//     // std.debug.print("specInfo: {any}\n", .{spec.Info});
-//
-//     try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
-//         .ustruct_open_4,
-//         .uslice_of_next,
-//         .pu8,
-//         .pu16,
-//         .ustruct_close_4,
-//     });
-//
-//     const t: Test = .{
-//         .field = 16,
-//         .data = &.{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-//     };
-//     const encoded = try tempEncode(t, 1024);
-//
-//     try std.testing.expect(encoded.chunks.len == 0);
-//
-//     const bytes = try encoded.copyContiguous(liu.Temp);
-//
-//     const value = try parse(Test, bytes);
-//
-//     try std.testing.expectEqual(t.field, value.field);
-//
-//     for (value.data.slice()) |v, i| {
-//         try std.testing.expectEqual(v, @truncate(u8, i));
-//     }
-// }
+test "Packed Asset: spec encode/decode slices" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const Test = struct {
+        field: u16,
+        data: []const u8,
+    };
+
+    const spec = Spec.fromType(Test);
+
+    try std.testing.expectEqualSlices(Spec.TypeInfo, spec.type_info, &.{
+        .ustruct_open_4,
+        .uslice_of_next,
+        .pu8,
+        .pu16,
+        .ustruct_close_4,
+    });
+
+    const t: Test = .{
+        .field = 16,
+        .data = &.{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+    };
+    const encoded = try tempEncode(t, 1024);
+
+    try std.testing.expect(encoded.chunks.len == 0);
+
+    const bytes = try encoded.copyContiguous(liu.Temp);
+
+    const value = try parse(Test, bytes);
+
+    try std.testing.expectEqual(t.field, value.field);
+
+    const slice = value.data.slice();
+
+    const begin = @ptrToInt(slice.ptr);
+    const end = @ptrToInt(slice.ptr + slice.len);
+
+    try std.testing.expect(begin > @ptrToInt(bytes.ptr));
+    try std.testing.expect(end <= @ptrToInt(bytes.ptr + bytes.len));
+
+    try std.testing.expectEqualSlices(u8, t.data, slice);
+}
