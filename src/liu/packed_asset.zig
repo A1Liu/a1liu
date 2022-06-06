@@ -85,18 +85,29 @@ pub const Spec = struct {
     }
 
     pub const TypeInfo = enum(u8) {
-        // zig fmt: off
-        pu8, pu16, pu32, pu64,
-        pi8, pi16, pi32, pi64,
-        pf32, pf64,
+        pu8,
+        pu16,
+        pu32,
+        pu64,
+        pi8,
+        pi16,
+        pi32,
+        pi64,
+        pf32,
+        pf64,
 
         uslice_of_next, // align 4, size 8
 
         // alignment comes from trailing number
-        ustruct_open_1, ustruct_open_2, ustruct_open_4, ustruct_open_8,
-        ustruct_close_1, ustruct_close_2, ustruct_close_4, ustruct_close_8,
+        ustruct_open_1,
+        ustruct_open_2,
+        ustruct_open_4,
+        ustruct_open_8,
+        ustruct_close_1,
+        ustruct_close_2,
+        ustruct_close_4,
+        ustruct_close_8,
         _,
-        // zig fmt: on
 
         fn pSize(self: @This()) ?u8 {
             return switch (self) {
