@@ -1,4 +1,5 @@
 const std = @import("std");
+const liu = @import("src/liu/lib.zig");
 const assets = @import("src/assets.zig");
 
 const bld = std.build;
@@ -43,10 +44,29 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
     return program;
 }
 
-pub fn build(b: *Builder) void {
+pub fn build(b: *Builder) !void {
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     mode = b.standardReleaseOptions();
+
+    // const cache_dir = "./.zig/zig-cache";
+    // const out_dir = "./.zig/zig-out";
+    // const cwd = std.fs.cwd();
+
+    // try cwd.makePath(cache_dir);
+    // try cwd.makePath(out_dir ++ "/lib");
+    // try cwd.makePath(out_dir ++ "/bin");
+    // try cwd.makePath(out_dir ++ "/include");
+
+    // b.install_prefix = try cwd.realpathAlloc(liu.Temp, "./.zig/zig-out");
+    // b.install_path = try cwd.realpathAlloc(liu.Temp, "./.zig/zig-out");
+    // b.lib_dir = try cwd.realpathAlloc(liu.Temp, out_dir ++ "/lib");
+    // b.exe_dir = try cwd.realpathAlloc(liu.Temp, out_dir ++ "/bin");
+    // b.h_dir = try cwd.realpathAlloc(liu.Temp, out_dir ++ "/include");
+    // b.dest_dir = try cwd.realpathAlloc(liu.Temp, "./.zig");
+    // b.cache_root = try cwd.realpathAlloc(liu.Temp, "./.zig/zig-cache");
+
+    // b.override_dest_dir = "./.zig";
 
     _ = wasmProgram(b, .{
         .name = "kilordle",

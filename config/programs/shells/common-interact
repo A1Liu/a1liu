@@ -6,6 +6,7 @@ alias :q=exit
 alias :ex=vim
 alias vi=vim
 alias di='VIM_DEBUG=1 vim'
+alias zigb='zig build -p .zig/zig-out --cache-dir .zig/zig-cache'
 
 alias rmbranch='git branch | grep -v "main" | grep -v "master" | xargs git branch -D'
 

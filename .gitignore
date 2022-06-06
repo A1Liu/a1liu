@@ -16,9 +16,9 @@ a.out
 # dependencies
 /node_modules
 
-# Svelte
+# Svelte output
 /.svelte-kit
-/out/
+/.out
 
 # editor
 .idea

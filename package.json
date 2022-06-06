@@ -11,7 +11,7 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check --plugin-search-dir=. .",
     "format": "prettier --write --plugin-search-dir=. src/routes src/svelte",
-    "clean": "rm -rf .svelte-kit out zig-cache zig-out"
+    "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
   },
   "dependencies": {},
   "devDependencies": {

@@ -10,8 +10,8 @@ const config = {
 
   kit: {
     adapter: adapter({
-      pages: "out",
-      assets: "out",
+      pages: ".out",
+      assets: ".out",
     }),
     trailingSlash: "always",
     prerender: {
