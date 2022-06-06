@@ -59,6 +59,20 @@ const Keys = struct {
     submits: wasm.Obj,
 };
 
+pub const Spec = liu.packed_asset.Spec.fromType(struct {
+    word0: []const u8,
+    word1: []const u8,
+    word2: []const u8,
+    word3: []const u8,
+    word4: []const u8,
+
+    wordle0: []const u8,
+    wordle1: []const u8,
+    wordle2: []const u8,
+    wordle3: []const u8,
+    wordle4: []const u8,
+});
+
 // Initialized at start of program
 var wordles: [5][]const u8 = undefined;
 var wordle_words: [5][]const u8 = undefined;
