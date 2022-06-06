@@ -1,4 +1,5 @@
 const std = @import("std");
+const assets = @import("src/assets.zig");
 
 const bld = std.build;
 const Arch = std.Target.Cpu.Arch;
@@ -65,3 +66,23 @@ pub fn build(b: *Builder) void {
         .output = "./static/erlang/",
     });
 }
+
+// For running scripts/etc.
+pub fn main() !void {
+    try assets.kilordle.generate();
+}
+
+// Experimenting with comptime branch quota
+// test {
+//     comptime {
+//         var i: u32 = 0;
+//         while (i < 500) : (i += 1) {
+//             if (i > 10) {
+//                 if (i < 10) {
+//                     @compileLog("Hello");
+//                     i = i;
+//                 }
+//             }
+//         }
+//     }
+// }
