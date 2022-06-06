@@ -14,13 +14,11 @@
 //!
 //! Does not track memory safety, but all offsets are positive, so you at
 //! least can't have cycles.
-
-// Algorithm generates spec array first, which is what gets stored; then other algo
-// reads from spec array and does decisions.
-//
-// Spec generation implicitly excludes recursive types at compile time. This
-// makes things easier, but maybe is bad for usability. For sure, the compile
-// error is atrocious.
+//!
+//! Spec generation implicitly excludes recursive types at compile time, because
+//! the specification of each struct contains the full specification of each
+//! of its fields inline. Unfortunately, the compile error for this is an
+//! entirely unhelpful branch quota error.
 
 // TODO
 // 1. Validation of input data in parser: slice ranges and object sizes/alignments
@@ -30,12 +28,6 @@
 //      same as fields in memory
 // 5. Optimization pass in encoder to speed up instances of reasonably packed
 //      data? (slices, packed structs, etc)
-// 6. Encode data in enum int value of type_info using comptime function
-//    - Bottom 2 bits = alignment -> faster alignment checking, but enum
-//      is no longer contiguous
-//    - alignment based on ranges -> slightly slower alignment checking,
-//      enum is contiguous, but potentially harder to maintain; can use
-//      enum constants to produce typechecking errors?
 
 const std = @import("std");
 const builtin = @import("builtin");
@@ -43,14 +35,21 @@ const liu = @import("./lib.zig");
 
 const assert = std.debug.assert;
 
-const SliceMarker: u8 = 0;
+const Marker: u8 = 0;
+fn isInternalType(comptime T: type) bool {
+    comptime {
+        return @typeInfo(T) == .Struct and @hasDecl(T, "LiuPackedAssetDummyField") and
+            T.LiuPackedAssetDummyField == &Marker;
+    }
+}
+
 pub fn U32Slice(comptime T: type) type {
     return extern struct {
         word_offset: u32,
         len: u32,
 
         pub const SliceType = T;
-        const LiuPackedAssetDummyField: *const u8 = &SliceMarker;
+        const LiuPackedAssetDummyField: *const u8 = &Marker;
 
         pub fn slice(self: *const @This()) []const T {
             const address = @ptrToInt(self);
@@ -63,8 +62,6 @@ pub fn U32Slice(comptime T: type) type {
         }
     };
 }
-
-const native_endian = builtin.target.cpu.arch.endian();
 
 const Version: u32 = 0;
 const Header = extern struct {
@@ -106,17 +103,6 @@ pub const TypeInfo = enum(u8) {
 
     _,
 
-    fn pSize(self: @This()) ?u8 {
-        return switch (self) {
-            .pu8, .pi8 => 1,
-            .pu16, .pi16 => 2,
-            .pu32, .pi32, .pf32 => 4,
-            .pu64, .pi64, .pf64 => 8,
-
-            else => null,
-        };
-    }
-
     pub fn alignment(self: @This()) u16 {
         return switch (self) {
             .pu8, .pi8, .ustruct_open_1, .ustruct_close_1 => 1,
@@ -138,6 +124,7 @@ pub const Spec = struct {
     header: Header,
 
     comptime {
+        const native_endian = builtin.target.cpu.arch.endian();
         if (native_endian != .Little)
             @compileError("target platform must be little endian");
     }
@@ -160,10 +147,8 @@ pub const Spec = struct {
             const encode_info = makeInfo(ExternType, T);
 
             const spec_len = @truncate(u32, encode_info.len);
-            const header = Header{
-                .data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8)),
-                .spec_len = spec_len,
-            };
+            const data_begin = @truncate(u32, std.mem.alignForward(16 + spec_len, 8));
+            const header = Header{ .data_begin = data_begin, .spec_len = spec_len };
 
             return .{
                 .Type = ExternType,
@@ -173,18 +158,11 @@ pub const Spec = struct {
         }
     }
 
-    fn isInternalSlice(comptime T: type) bool {
-        comptime {
-            return @typeInfo(T) == .Struct and @hasDecl(T, "LiuPackedAssetDummyField") and
-                T.LiuPackedAssetDummyField == &SliceMarker;
-        }
-    }
-
-    fn makeInfo(comptime Extern: type, comptime Base: type) []const EncoderInfo {
-        // @compileLog(Extern, Base);
+    fn makeInfo(comptime T: type, comptime Base: type) []const EncoderInfo {
+        // @compileLog(T, Base);
 
         comptime {
-            const info = switch (@typeInfo(Extern)) {
+            const info = switch (@typeInfo(T)) {
                 .Int => |info| {
                     const type_info: TypeInfo = switch (info.bits) {
                         8 => if (info.signedness == .signed) .pi8 else .pu8,
@@ -202,7 +180,7 @@ pub const Spec = struct {
                 .Pointer => @compileError("Native pointers are unsupported. " ++
                     "If you're looking for slices, use the custom wrapper type instead"),
 
-                else => @compileError("Unsupported type: " ++ @typeName(Extern)),
+                else => @compileError("Unsupported type: " ++ @typeName(T)),
             };
 
             // There's an argument you could make that this should actually
@@ -211,13 +189,10 @@ pub const Spec = struct {
             if (info.layout != .Extern)
                 @compileError("struct must be laid out using extern format");
 
-            if (isInternalSlice(Extern)) {
-                const ElemBase = if (isInternalSlice(Base))
-                    Extern.SliceType
-                else
-                    std.meta.Child(Base);
+            if (isInternalType(T)) {
+                const ElemBase = if (isInternalType(Base)) T.SliceType else std.meta.Child(Base);
 
-                const elem_type = makeInfo(Extern.SliceType, ElemBase);
+                const elem_type = makeInfo(T.SliceType, ElemBase);
                 const slice_info = EncoderInfo{
                     .type_info = .uslice_of_next,
                 };
@@ -225,7 +200,7 @@ pub const Spec = struct {
                 return &[_]EncoderInfo{slice_info} ++ elem_type;
             }
 
-            const spec_info: [2]TypeInfo = switch (@alignOf(Extern)) {
+            const spec_info: [2]TypeInfo = switch (@alignOf(T)) {
                 1 => .{ .ustruct_open_1, .ustruct_close_1 },
                 2 => .{ .ustruct_open_2, .ustruct_close_2 },
                 4 => .{ .ustruct_open_4, .ustruct_close_4 },
@@ -308,7 +283,7 @@ pub const Spec = struct {
             if (@alignOf(T) == 0)
                 @compileError("what does align=0 even mean");
 
-            if (isInternalSlice(T)) return T;
+            if (isInternalType(T)) return T;
 
             var translated: []const Field = &.{};
 
@@ -384,7 +359,6 @@ fn objectInfo(spec: []const EncoderInfo) ObjectInfo {
     while (iter.peek()) |sa| {
         alignment = std.math.max(alignment, sa.alignment);
 
-        // Uses this form to reduce branch count on comptime execution
         total_size = @truncate(u32, std.mem.alignForward(total_size, sa.alignment));
         total_size += sa.size;
         iter.index = sa.next_index;
@@ -739,6 +713,10 @@ pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType
     if (!std.mem.eql(TypeInfo, type_info, asset_spec)) return error.TypeMismatch;
 
     // TODO validation code
+    // var list = std.ArrayList(u8).init(liu.Pages);
+    // defer list.deinit();
+    // while () {
+    // }
 
     return @ptrCast(*const spec.Type, bytes[header.data_begin..]);
 }
