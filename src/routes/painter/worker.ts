@@ -1,5 +1,6 @@
 import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
+import { WorkerCtx } from "@lib/ts/util";
 import * as wasm from "@lib/ts/wasm";
 
 export type Number2 = [number, number];
@@ -16,27 +17,8 @@ export type Message =
   | { kind: "keydown"; data: number }
   | { kind: "canvas"; offscreen: any };
 
-let resolve: null | ((msg: Message[]) => void) = null;
-const messages: Message[] = [];
-onmessage = (event: MessageEvent<Message>) => {
-  messages.push(event.data);
-  if (resolve) {
-    resolve(messages.splice(0, messages.length));
-    resolve = null;
-  }
-};
-
-const waitForMessage = (): Promise<Message[]> => {
-  const p: Promise<Message[]> = new Promise((r) => {
-    if (messages.length > 0) {
-      return r(messages.splice(0, messages.length));
-    }
-
-    resolve = r;
-  });
-
-  return p;
-};
+const ctx = new WorkerCtx<Message>();
+onmessage = ctx.onmessageCallback();
 
 export type OutMessage =
   | { kind: "initDone"; data?: void }
@@ -282,7 +264,7 @@ const main = async (wasmRef: wasm.Ref) => {
   requestAnimationFrame(render);
 
   while (true) {
-    const captured = await waitForMessage();
+    const captured = await ctx.msgWait();
 
     captured.forEach((msg) => handleMessage(wasmRef, msg));
   }
@@ -309,7 +291,7 @@ const init = async () => {
   wasmRef.abi.init();
 
   while (true) {
-    const captured = await waitForMessage();
+    const captured = await ctx.msgWait();
     let offscreen = null;
 
     captured.forEach((msg) => {

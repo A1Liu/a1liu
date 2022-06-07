@@ -28,3 +28,30 @@ export async function get(urlString: string, query: any): Promise<any> {
 
   return resp.json();
 }
+
+export class WorkerCtx<T> {
+  private messages: T[] = [];
+  private resolve: ((t: T) => void) | null = null;
+
+  onmessageCallback(): (event: MessageEvent<T>) => void {
+    return (event) => {
+      this.messages.push(event.data);
+      if (this.resolve) {
+        this.resolve(this.messages.splice(0, this.messages.length));
+        this.resolve = null;
+      }
+    };
+  }
+
+  async msgWait(): Promise<T[]> {
+    const p: Promise<T[]> = new Promise((r) => {
+      if (this.messages.length > 0) {
+        return r(this.messages.splice(0, this.messages.length));
+      }
+
+      this.resolve = r;
+    });
+
+    return p;
+  }
+}

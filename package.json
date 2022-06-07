@@ -93,11 +93,6 @@
           "src/*"
         ]
       }
-    },
-    "exclude": [
-      "node_modules",
-      "./src/static",
-      "./public"
-    ]
+    }
   }
 }

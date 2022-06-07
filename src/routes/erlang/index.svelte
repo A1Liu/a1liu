@@ -3,7 +3,6 @@
   import MyWorker from "./worker?worker";
   import Toast, { ToastColors, addToast } from "@lib/svelte/errors.svelte";
   import * as wasm from "@lib/ts/wasm";
-  import * as GL from "@lib/ts/webgl";
 
   let worker = undefined;
   let canvas: any = undefined;
