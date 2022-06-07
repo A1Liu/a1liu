@@ -376,3 +376,36 @@ test "Packed Asset: spec branch quota" {
     const spec = Spec.fromType(Wrap);
     _ = spec;
 }
+
+test "Packed Asset: arrays" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const Test = struct { data: [10]u64 };
+
+    const spec = Spec.fromType(Test);
+    const type_info = spec.typeInfo();
+
+    const header: []const TypeInfo = &.{ .ustruct_open_8, .ustruct_open_8 };
+    const footer: []const TypeInfo = &.{ .ustruct_close_8, .ustruct_close_8 };
+
+    try std.testing.expectEqualSlices(TypeInfo, type_info, header ++ &[_]TypeInfo{
+        .pu64, .pu64, .pu64, .pu64, .pu64,
+        .pu64, .pu64, .pu64, .pu64, .pu64,
+    } ++ footer);
+
+    const t: Test = .{ .data = .{
+        1230,   23450923641, 33450913542, 4345893,  5234523458,
+        513459, 62312347,    712389477,   81203498, 91203948,
+    } };
+
+    const encoded = try tempEncode(t, 1024);
+
+    try std.testing.expect(encoded.chunks.len == 0);
+
+    const bytes = try encoded.copyContiguous(liu.Temp);
+
+    const value = try parse(Test, bytes);
+
+    try std.testing.expectEqualSlices(u64, &t.data, &value.data);
+}

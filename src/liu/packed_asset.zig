@@ -179,6 +179,58 @@ pub const Spec = struct {
 
                 .Struct => |info| info,
 
+                .Array => |info| {
+                    const Elem = @typeInfo(Base).Array.child;
+                    const encode_info = makeInfo(info.child, Elem);
+
+                    const spec_info: [2]TypeInfo = switch (@alignOf(info.child)) {
+                        1 => .{ .ustruct_open_1, .ustruct_close_1 },
+                        2 => .{ .ustruct_open_2, .ustruct_close_2 },
+                        4 => .{ .ustruct_open_4, .ustruct_close_4 },
+                        8 => .{ .ustruct_open_8, .ustruct_close_8 },
+                        else => unreachable,
+                    };
+
+                    const val = EncoderInfo{ .type_info = spec_info[0] };
+                    var spec: []const EncoderInfo = &[_]EncoderInfo{val};
+
+                    var i: u32 = 0;
+                    const end: u32 = info.len;
+
+                    // Empirically, this reduces the number of branches needed at
+                    // compile time.
+                    if (encode_info.len == 1) { // This means its a primitive
+                        // @compileLog(T, Elem);
+                        while (i < end) : (i += 1) {
+                            const new_info = EncoderInfo{
+                                .type_info = encode_info[0].type_info,
+                                .offset = i * @sizeOf(info.child),
+                            };
+
+                            spec = spec ++ &[_]EncoderInfo{new_info};
+                        }
+
+                        return spec ++ &[_]EncoderInfo{.{ .type_info = spec_info[1] }};
+                    }
+
+                    while (i < end) : (i += 1) {
+                        var iter = EncoderInfoIter{ .info = encode_info };
+                        while (iter.peek()) |sa| : (iter.index = sa.next_index) {
+                            const offset = sa.offset + i * @sizeOf(T);
+                            const new_info = EncoderInfo{
+                                .type_info = sa.type_info,
+                                .offset = offset,
+                            };
+
+                            spec = spec ++ &[_]EncoderInfo{new_info};
+                            if (sa.slice_info) |slice_info|
+                                spec = spec ++ slice_info.spec;
+                        }
+                    }
+
+                    return spec ++ &[_]EncoderInfo{.{ .type_info = spec_info[1] }};
+                },
+
                 .Pointer => @compileError("Native pointers are unsupported. " ++
                     "If you're looking for slices, use the custom wrapper type instead"),
 
@@ -262,6 +314,14 @@ pub const Spec = struct {
 
                 .Struct => |info| info,
 
+                .Array => |info| {
+                    if (info.sentinel != null) @compileError("we don't support sentinels");
+
+                    const Child = translateType(info.child);
+
+                    return [info.len]Child;
+                },
+
                 .Pointer => |info| {
                     if (info.size == .Slice)
                         return U32Slice(translateType(info.child));
@@ -279,7 +339,7 @@ pub const Spec = struct {
             //      or in makeInfo
             // Everything else will fail anyways
             if (@sizeOf(T) == 0)
-                @compileError("type has size of 0, what would you even store in the asset file?");
+                @compileError("type has size=0, there's no data to store");
             if (@alignOf(T) > 8)
                 @compileError("maximum alignment for values is 8");
             if (@alignOf(T) == 0)
