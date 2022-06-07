@@ -401,6 +401,14 @@ const Font = struct {
     }
 };
 
+// https://github.com/A1Liu/ted/blob/624527d690bd7019d463b51baa8fac8bea796c00/src/editor/fonts.rs#L71
+// let face = expect(ttf::Face::from_slice(COURIER, 0));
+// let (ascent, descent) = (face.ascender(), face.descender());
+// let line_gap = face.line_gap();
+// let glyph_id = unwrap(face.glyph_index('_'));
+// let rect = unwrap(face.glyph_bounding_box(glyph_id));
+// face.outline_glyph(id, &mut builder);
+
 test "Fonts: basic" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
