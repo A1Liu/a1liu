@@ -17,7 +17,7 @@
       Hi, I&apos;m Albert, and this is my website! I&apos;m a Senior at NYU
       majoring in Computer Science. This website is mainly for my own personal
       use, but feel free to use the stuff on here or copy the source code into
-      your own project! (Please read and follow the license though.)
+      your own project!
     </p>
 
     <h2>What I&apos;m Doing Now</h2>
