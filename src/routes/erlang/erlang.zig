@@ -12,28 +12,10 @@ const Vec3 = liu.Vec3;
 const Point = struct { pos: Vec2, color: Vec3 };
 
 const ext = struct {
-    extern fn renderExt(triangles: wasm.Obj, colors: wasm.Obj) void;
-};
-
-var render: Render = .{};
-const Render = struct {
-    const List = std.ArrayListUnmanaged;
-    const Self = @This();
-
-    const TRIANGLE_SIZE: u32 = 12;
-
-    dims: Vec2 = Vec2{ 0, 0 },
-    triangles: List(f32) = .{},
-    colors: List(f32) = .{},
-
-    pub fn render(self: *Self) void {
-        const mark = wasm.watermark();
-        defer wasm.setWatermark(mark);
-
-        const obj = wasm.out.slice(self.triangles.items);
-        const obj2 = wasm.out.slice(self.colors.items);
-        ext.renderExt(obj, obj2);
-    }
+    extern fn fillStyle(r: f32, g: f32, b: f32) void;
+    extern fn fillRect(x: u32, y: u32, width: u32, height: u32) void;
+    extern fn setFont(font: wasm.Obj) void;
+    extern fn fillText(text: wasm.Obj, x: u32, y: u32) void;
 };
 
 const LocationC = struct {
@@ -70,21 +52,24 @@ export fn setDims(posX: f32, posY: f32) void {
 }
 
 export fn onRightClick(posX: f32, posY: f32) void {
-    _ = posX;
-    _ = posY;
+    dims[0] = posX;
+    dims[1] = posY;
 }
 
 export fn onKey(down: bool, code: u32) void {
-    for (keys) |*key, idx| {
-        if (code == key.code) {
-            key.pressed = down;
+    var begin: u32 = 0;
 
-            const color: f32 = if (down) 0.3 else 0.5;
-            std.mem.set(f32, render.colors.items[(idx * 18)..][0..18], color);
+    for (rows) |row| {
+        const end = row.end;
 
-            render.render();
-            return;
+        for (keys[begin..row.end]) |*key| {
+            if (code == key.code) {
+                key.pressed = down;
+                return;
+            }
         }
+
+        begin = end;
     }
 }
 
@@ -98,42 +83,70 @@ export fn onClick(posX: f32, posY: f32) void {
     _ = posY;
 }
 
-export fn init() void {
+export fn init(timestamp: f64) void {
     wasm.initIfNecessary();
 
-    initErr() catch @panic("meh");
+    initErr(timestamp) catch @panic("meh");
 
     wasm.out.post(.info, "WASM initialized!", .{});
 }
 
-export fn initialRender() void {
-    render.render();
+fn initErr(timestamp: f64) !void {
+    previous_time = timestamp;
 }
 
-fn addBox(p0: Vec2, p2: Vec2) !void {
-    var verts: [12]f32 = undefined;
+var previous_time: f64 = undefined;
+var dims: Vec2 = [_]f32{ 0, 0 };
 
-    const p1 = Vec2{ p0[0], p2[1] };
-    const p3 = Vec2{ p2[0], p0[1] };
+export fn run(timestamp: f64) void {
+    const diff = timestamp - previous_time;
+    defer previous_time = timestamp;
 
-    verts[0..2].* = p0;
-    verts[2..4].* = p1;
-    verts[4..6].* = p2;
-    verts[6..8].* = p0;
-    verts[8..10].* = p2;
-    verts[10..12].* = p3;
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
 
-    var colors: [18]f32 = undefined;
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
 
-    var i: u32 = 0;
-    while (i < colors.len) : (i += 3) {
-        colors[i] = 0.5;
-        colors[i + 1] = 0.5;
-        colors[i + 2] = 0.5;
+    _ = diff;
+
+    ext.fillStyle(0.5, 0.5, 0.5);
+
+    const large_font = wasm.out.fmt("48px sans-serif", .{});
+    const small_font = wasm.out.fmt("10px sans-serif", .{});
+
+    ext.setFont(large_font);
+
+    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / diff});
+    ext.fillText(fps_message, 5, 160);
+
+    ext.setFont(small_font);
+
+    var begin: u32 = 0;
+    var topY: u32 = 5;
+
+    for (rows) |row| {
+        var leftX = row.leftX;
+        const end = row.end;
+
+        for (keys[begin..row.end]) |key| {
+            const color: f32 = if (key.pressed) 0.3 else 0.5;
+            ext.fillStyle(color, color, color);
+
+            ext.fillRect(leftX, topY, 30, 30);
+
+            ext.fillStyle(1, 1, 1);
+            const s = &[_]u8{@truncate(u8, key.code)};
+            const letter = wasm.out.fmt("{s}", .{s});
+            ext.fillText(letter, leftX + 15, topY + 10);
+
+            leftX += 35;
+        }
+
+        topY += 35;
+
+        begin = end;
     }
-
-    try render.triangles.appendSlice(liu.Pages, &verts);
-    try render.colors.appendSlice(liu.Pages, &colors);
 }
 
 const KeyBox = struct {
@@ -143,13 +156,13 @@ const KeyBox = struct {
 
 const KeyRow = struct {
     end: u32,
-    leftX: f32,
+    leftX: u32,
 };
 
 const rows: [3]KeyRow = .{
-    .{ .end = 10, .leftX = -0.99 },
-    .{ .end = 19, .leftX = -0.98 },
-    .{ .end = 26, .leftX = -0.96 },
+    .{ .end = 10, .leftX = 5 },
+    .{ .end = 19, .leftX = 10 },
+    .{ .end = 26, .leftX = 13 },
 };
 
 var keys: [26]KeyBox = [_]KeyBox{
@@ -182,36 +195,3 @@ var keys: [26]KeyBox = [_]KeyBox{
     .{ .code = 'N' },
     .{ .code = 'M' },
 };
-
-fn initErr() !void {
-    var topY: f32 = 0.95;
-
-    var begin: u32 = 0;
-    for (rows) |row| {
-        var leftX = row.leftX;
-        const end = row.end;
-
-        for (keys[begin..row.end]) |key| {
-            _ = key;
-
-            try addBox(Vec2{ leftX, topY }, Vec2{ leftX + 0.05, topY - 0.1 });
-            leftX += 0.06;
-        }
-
-        topY -= 0.12;
-
-        begin = end;
-    }
-
-    try render.triangles.appendSlice(liu.Pages, &.{
-        -0.5, -0.5,
-        0,    0.5,
-        0.5,  -0.5,
-    });
-
-    try render.colors.appendSlice(liu.Pages, &.{
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1,
-    });
-}

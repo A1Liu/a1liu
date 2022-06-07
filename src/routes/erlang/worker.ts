@@ -21,98 +21,11 @@ export type OutMessage =
   | { kind: "initDone"; data?: void }
   | { kind: string; data: any };
 
-interface ErlangGlState {
-  renderId: number;
-  rawTrianglesLength: number;
-  colorsLength: number;
-}
-
 interface ErlangGl {
   ctx: WebGl;
-  program: WebGLProgram;
-  vao: WebGLVertexArrayObject;
-  rawTriangles: WebGLBuffer;
-  colors: WebGLBuffer;
 }
 
 const gglRef: { current: ErlangGl | null } = { current: null };
-const glState: ErlangGlState = {
-  rawTrianglesLength: 0,
-  colorsLength: 0,
-  renderId: 1,
-};
-
-const initGl = async (canvas: any): Promise<ErlangGl | null> => {
-  const ctx: WebGl = canvas?.getContext("webgl2", {
-    preserveDrawingBuffer: true,
-  });
-
-  if (!ctx) return null;
-
-  const [vertSrc, fragSrc] = await Promise.all([
-    fetch("/painter/painter.vert").then((r) => r.text()),
-    fetch("/painter/painter.frag").then((r) => r.text()),
-  ]);
-
-  const vertexShader = GL.createShader(ctx, ctx.VERTEX_SHADER, vertSrc);
-  const fragmentShader = GL.createShader(ctx, ctx.FRAGMENT_SHADER, fragSrc);
-  if (!vertexShader || !fragmentShader) return null;
-
-  const program = GL.createProgram(ctx, vertexShader, fragmentShader);
-  if (!program) return null;
-
-  const vao = ctx.createVertexArray();
-  if (!vao) return null;
-
-  const rawTriangles = ctx.createBuffer();
-  if (!rawTriangles) return null;
-
-  const colors = ctx.createBuffer();
-  if (!colors) return null;
-
-  const posLocation = 0;
-  const colorLocation = 1;
-
-  ctx.bindAttribLocation(program, posLocation, "pos");
-  ctx.bindAttribLocation(program, colorLocation, "color");
-
-  ctx.bindVertexArray(vao);
-
-  ctx.enableVertexAttribArray(posLocation);
-  {
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, rawTriangles);
-
-    const size = 2; // 2 components per iteration
-    const type = ctx.FLOAT; // the data is 32bit floats
-    const normalize = false; // don't normalize the data
-    const stride = 0; // 0 = move forward size * sizeof(type)
-    const offset = 0; // start at the beginning of the buffer
-    ctx.vertexAttribPointer(posLocation, size, type, normalize, stride, offset);
-  }
-
-  ctx.enableVertexAttribArray(colorLocation);
-  {
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, colors);
-
-    const size = 3; // 2 components per iteration
-    const type = ctx.FLOAT; // the data is 32bit floats
-    const normalize = false; // don't normalize the data
-    const stride = 0; // 0 = move forward size * sizeof(type)
-    const offset = 0; // start at the beginning of the buffer
-    ctx.vertexAttribPointer(
-      colorLocation,
-      size,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-  }
-
-  ctx.bindVertexArray(null);
-
-  return { ctx, program, vao, rawTriangles, colors };
-};
 
 const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
   const ggl = gglRef.current;
@@ -128,64 +41,16 @@ const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
     ctx.canvas.width = width;
     ctx.canvas.height = height;
 
-    ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
+    // ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
     wasmRef.abi.setDims(width, height);
-
-    glState.renderId = glState.renderId + 1;
   }
 };
 
-function render() {
-  const ggl = gglRef.current;
-  if (!ggl) return;
+const initGl = async (canvas: any): Promise<ErlangGl | null> => {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
 
-  const ctx = ggl.ctx;
-
-  ctx.clearColor(1, 1, 1, 1);
-  ctx.clear(ctx.COLOR_BUFFER_BIT);
-
-  ctx.useProgram(ggl.program);
-
-  // Bind the attribute/buffer set we want.
-  ctx.bindVertexArray(ggl.vao);
-
-  {
-    const primitiveType = ctx.TRIANGLES;
-    const offset = 0;
-    ctx.drawArrays(primitiveType, offset, glState.rawTrianglesLength);
-  }
-
-  // Technically maybe we don't have to do this every frame if nothing updates.
-  // However, the media recorder seems to skip frames when we don't forcibly
-  // re-render at every opportunity. Oh well.
-  //                                - Albert Liu, May 15, 2022 Sun 02:25 EDT
-  requestAnimationFrame(render);
-}
-
-const updateState = (
-  triangles: Float32Array | null,
-  colors: Float32Array | null
-) => {
-  const ggl = gglRef.current;
-  if (!ggl) return;
-
-  const ctx = ggl.ctx;
-
-  if (triangles !== null) {
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, ggl.rawTriangles);
-    ctx.bufferData(ctx.ARRAY_BUFFER, triangles, ctx.DYNAMIC_DRAW);
-
-    glState.rawTrianglesLength = Math.floor(triangles.length / 2);
-    glState.renderId = glState.renderId + 1;
-  }
-
-  if (colors !== null) {
-    ctx.bindBuffer(ctx.ARRAY_BUFFER, ggl.colors);
-    ctx.bufferData(ctx.ARRAY_BUFFER, colors, ctx.DYNAMIC_DRAW);
-
-    glState.colorsLength = Math.floor(colors.length / 3);
-    glState.renderId = glState.renderId + 1;
-  }
+  return { ctx };
 };
 
 const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
@@ -231,6 +96,21 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
 };
 
 const main = async (wasmRef: wasm.Ref) => {
+  const ctx2d = gglRef.current.ctx;
+  const canvas = ctx2d.canvas;
+
+  function render(timestamp: number) {
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+
+    wasmRef.abi.run(timestamp);
+
+    // Technically maybe we don't have to do this every frame if nothing updates.
+    // However, the media recorder seems to skip frames when we don't forcibly
+    // re-render at every opportunity. Oh well.
+    //                                - Albert Liu, May 15, 2022 Sun 02:25 EDT
+    requestAnimationFrame(render);
+  }
+
   requestAnimationFrame(render);
 
   while (true) {
@@ -243,14 +123,31 @@ const main = async (wasmRef: wasm.Ref) => {
 const init = async () => {
   const wasmRef = await wasm.fetchWasm("/erlang/erlang.wasm", {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: (wasmRef: wasm.Ref) => ({}),
-    imports: {
-      renderExt: (tri: Float32Array | null, colors: Float32Array | null) =>
-        updateState(tri, colors),
-    },
+    raw: (wasmRef: wasm.Ref) => ({
+      setFont: (fontId: number) => {
+        const font = wasmRef.readObj(fontId);
+        gglRef.current.ctx.font = fontId;
+      },
+
+      fillText: (textId: number, x: number, y: number) => {
+        const text = wasmRef.readObj(textId);
+        gglRef.current.ctx.fillText(text, x, y);
+      },
+
+      fillStyle: (r: number, g: number, b: number) => {
+        gglRef.current.ctx.fillStyle = `rgb(${Math.floor(
+          255 * r
+        )}, ${Math.floor(255 * g)}, ${Math.floor(255 * b)})`;
+      },
+
+      fillRect: (x: number, y: number, width: number, height: number) => {
+        gglRef.current.ctx.fillRect(x, y, width, height);
+      },
+    }),
+    imports: {},
   });
 
-  wasmRef.abi.init();
+  wasmRef.abi.init(performance.now());
 
   while (true) {
     const captured = await ctx.msgWait();
@@ -281,7 +178,6 @@ const init = async () => {
     postMessage({ kind: "success", data: "WebGL2 context initialized!" });
     postMessage({ kind: "initDone" });
 
-    wasmRef.abi.initialRender();
     break;
   }
 

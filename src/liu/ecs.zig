@@ -214,8 +214,8 @@ pub fn Registry(
 
         const List = std.ArrayListUnmanaged;
         const Mapping = struct {
-            free_head: u32 = NULL,
-            map: std.AutoHashMapUnmanaged(u32, u32) = .{},
+            // index is entity ID, value is component index
+            map: std.ArrayListUnmanaged(u32) = .{},
         };
 
         const DensePointers = [DenseComponents.len][*]u8;
