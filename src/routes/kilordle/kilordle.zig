@@ -65,8 +65,6 @@ const Keys = struct {
 // Initialized at start of program
 var wordles: [5][]const u8 = undefined;
 var wordle_words: [5][]const u8 = undefined;
-// var wordles: []const u8 = undefined;
-// var wordle_words: []const u8 = undefined;
 var keys: Keys = undefined;
 
 var wordles_left: ArrayList(Wordle) = undefined;
@@ -74,9 +72,9 @@ var submissions: ArrayList([5]u8) = undefined;
 
 fn makeKeys() Keys {
     return .{
-        .solution = wasm.out.string("solution"),
-        .filled = wasm.out.string("filled"),
-        .submits = wasm.out.string("submits"),
+        .solution = wasm.make.string(.manual, "solution"),
+        .filled = wasm.make.string(.manual, "filled"),
+        .submits = wasm.make.string(.manual, "submits"),
     };
 }
 
@@ -165,7 +163,7 @@ pub fn submitWord(word: [5]u8) !bool {
     // lowercase
     for (word) |letter| {
         if (letter < 'a' or letter > 'z') {
-            wasm.out.post(.err, "invalid string {s}", .{word});
+            wasm.post(.err, "invalid string {s}", .{word});
             return false;
         }
     }

@@ -126,7 +126,7 @@ const init = async () => {
     raw: (wasmRef: wasm.Ref) => ({
       setFont: (fontId: number) => {
         const font = wasmRef.readObj(fontId);
-        gglRef.current.ctx.font = fontId;
+        gglRef.current.ctx.font = font;
       },
 
       fillText: (textId: number, x: number, y: number) => {

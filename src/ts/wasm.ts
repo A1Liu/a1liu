@@ -44,6 +44,23 @@ export const fetchAsset = async (path: string): Promise<Uint8Array> => {
   return new Uint8Array(arrayBuffer);
 };
 
+function debugLoop(
+  postMessage: any,
+  objectBuffer: any[],
+  objectMap: Map<number, any>
+) {
+  function loop() {
+    const data = {
+      objectBuffer,
+      objectMap: [...objectMap.entries()],
+    };
+    postMessage("info", JSON.stringify(data));
+
+    setTimeout(loop, 2000);
+  }
+  loop();
+}
+
 export const fetchWasm = async (
   path: string,
   importData: Imports
@@ -52,19 +69,35 @@ export const fetchWasm = async (
 
   const { postMessage, raw } = importData;
 
-  const objectBuffer = [...initialObjectBuffer]; // output data
+  const objectBuffer: any[] = [...initialObjectBuffer]; // output data
   const objectMap = new Map<number, any>(); // input data
-  let nextObjectId = 0;
+  let nextObjectId = -1;
 
-  const readObj = (id: number): any => objectBuffer[id];
+  const readObj = (id: number): any => objectBuffer[id] ?? objectMap.get(id);
 
-  const addObj = (data: any): number => {
+  const addObj = (data: any, isTemp: boolean = false): number => {
+    if (isTemp) {
+      const idx = objectBuffer.length;
+      objectBuffer.push(data);
+
+      return idx;
+    }
+
     const idx = nextObjectId;
 
-    nextObjectId += 1;
+    nextObjectId -= 1;
     objectMap.set(idx, data);
 
     return idx;
+  };
+
+  const updateObj = (obj: number, data: any): void => {
+    if (id < 0) {
+      objectMap.set(obj, data);
+      return;
+    }
+
+    objectBuffer[id] = data;
   };
 
   const ref: Ref = {
@@ -78,39 +111,34 @@ export const fetchWasm = async (
   const wasmImports = {} as any;
   Object.entries({ postMessage, ...importData.imports }).forEach(
     ([key, value]: [string, any]) => {
-      wasmImports[key] = (...args: number[]) =>
-        value(...args.map((idx) => objectBuffer[idx]));
+      wasmImports[key] = (...args: number[]) => value(...args.map(readObj));
     }
   );
 
   const env = {
-    makeString: (location: number, size: number) => {
+    makeArray: (isTemp: boolean) => addObj([], isTemp),
+    makeObj: (isTemp: boolean) => addObj({}, isTemp),
+    makeString: (location: number, size: number, isTemp: boolean) => {
       const array = new Uint8Array(ref.memory.buffer, location, size);
-      const length = objectBuffer.length;
-      objectBuffer.push(decoder.decode(array));
-
-      return length;
+      return addObj(decoder.decode(array), isTemp);
     },
-    makeView: (ty: number, location: number, size: number) => {
-      const ArrayClass = objectBuffer[ty];
+    makeView: (ty: number, location: number, size: number, isTemp: boolean) => {
+      const ArrayClass = readObj(ty);
 
       const array = new ArrayClass(ref.memory.buffer, location, size);
 
-      const length = objectBuffer.length;
-      objectBuffer.push(array);
-
-      return length;
+      return addObj(array, isTemp);
     },
 
-    objMapStringEncode: (idx: number): number => {
-      const value = objectMap.get(idx);
+    objInplaceStringEncode: (idx: number): number => {
+      const value = readObj(idx);
 
       const encodedString = encoder.encode(value);
-      objectMap.set(idx, encodedString);
+      updateObj(idx, encodedString);
 
       return encodedString.length;
     },
-    objMapLen: (idx: number): number => objectMap.get(idx).length,
+    objLen: (idx: number): number => readObj(idx).length,
     readObjMapBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
       objectMap.delete(idx);
@@ -131,35 +159,22 @@ export const fetchWasm = async (
       objectBuffer.length = idx;
     },
 
-    makeArray: () => {
-      const idx = objectBuffer.length;
-      objectBuffer.push([]);
-
-      return idx;
-    },
-    makeObj: () => {
-      const idx = objectBuffer.length;
-      objectBuffer.push({});
-
-      return idx;
-    },
-
     arrayPush: (arrayIdx: number, valueIdx: number) => {
-      const arr = objectBuffer[arrayIdx];
-      const value = objectBuffer[valueIdx];
+      const arr = readObj(arrayIdx);
+      const value = readObj(valueIdx);
 
       arr.push(value);
     },
     objSet: (objIdx: number, keyIdx: number, valueIdx: number) => {
-      const obj = objectBuffer[objIdx];
-      const key = objectBuffer[keyIdx];
-      const value = objectBuffer[valueIdx];
+      const obj = readObj(objIdx);
+      const key = readObj(keyIdx);
+      const value = readObj(valueIdx);
 
       obj[key] = value;
     },
 
     exit: (idx: number) => {
-      const value = objectBuffer[idx];
+      const value = readObj(idx);
 
       throw new Error(`Crashed: ${value}`);
     },

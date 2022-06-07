@@ -496,10 +496,10 @@ export fn onClick(posX: f32, posY: f32) void {
 export fn init() void {
     wasm.initIfNecessary();
 
-    obj_line = wasm.out.string("line");
-    obj_triangle = wasm.out.string("triangle");
-    obj_click = wasm.out.string("click");
-    obj_draw = wasm.out.string("draw");
+    obj_line = wasm.make.string(.manual, "line");
+    obj_triangle = wasm.make.string(.manual, "triangle");
+    obj_click = wasm.make.string(.manual, "click");
+    obj_draw = wasm.make.string(.manual, "draw");
 
-    wasm.out.post(.info, "WASM initialized!", .{});
+    wasm.post(.info, "WASM initialized!", .{});
 }

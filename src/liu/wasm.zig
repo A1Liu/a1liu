@@ -5,6 +5,7 @@ const builtin = @import("builtin");
 
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
+const wasm = @This();
 
 pub const Obj = enum(u32) {
     // These are kept up to date with src/wasm.ts
@@ -27,21 +28,23 @@ pub const Obj = enum(u32) {
     pub const arrayPush = ext.arrayPush;
 };
 
-const ext = struct {
-    extern fn makeString(message: [*]const u8, length: usize) Obj;
-    extern fn makeView(o: Obj, message: ?*const anyopaque, length: usize) Obj;
+const Watermark = enum(i32) { _ };
 
-    extern fn makeArray() Obj;
-    extern fn makeObj() Obj;
+const ext = struct {
+    extern fn makeString(message: [*]const u8, length: usize, is_temp: bool) Obj;
+    extern fn makeView(o: Obj, message: ?*const anyopaque, length: usize, is_temp: bool) Obj;
+
+    extern fn makeArray(is_temp: bool) Obj;
+    extern fn makeObj(is_temp: bool) Obj;
 
     extern fn arrayPush(arr: Obj, obj: Obj) void;
     extern fn objSet(obj: Obj, key: Obj, value: Obj) void;
 
-    extern fn watermark() Obj;
-    extern fn setWatermark(objIndex: Obj) void;
+    extern fn watermark() Watermark;
+    extern fn setWatermark(watermark: Watermark) void;
 
-    extern fn objMapStringEncode(idx: Obj) usize;
-    extern fn objMapLen(idx: Obj) usize;
+    extern fn objInplaceStringEncode(idx: Obj) usize;
+    extern fn objLen(idx: Obj) usize;
     extern fn readObjMapBytes(idx: Obj, begin: [*]u8) void;
 
     extern fn postMessage(tagIdx: Obj, id: Obj) void;
@@ -51,11 +54,17 @@ const ext = struct {
 pub const watermark = ext.watermark;
 pub const setWatermark = ext.setWatermark;
 
-pub const out = struct {
-    pub const array = ext.makeArray;
-    pub const obj = ext.makeObj;
+pub const Lifetime = enum {
+    manual,
+    temp,
 
-    pub fn slice(data: anytype) Obj {
+    fn isTemp(self: @This()) bool {
+        return self == .temp;
+    }
+};
+
+pub const make = struct {
+    pub fn slice(life: Lifetime, data: anytype) Obj {
         const ptr: ?*const anyopaque = ptr: {
             switch (@typeInfo(@TypeOf(data))) {
                 .Array => {},
@@ -76,69 +85,102 @@ pub const out = struct {
         const len = data.len;
 
         const T = std.meta.Elem(@TypeOf(data));
+        const is_temp = life.isTemp();
         return switch (T) {
-            u8 => ext.makeView(.U8Array, ptr, len),
-            f32 => ext.makeView(.F32Array, ptr, len),
+            u8 => ext.makeView(.U8Array, ptr, len, is_temp),
+            f32 => ext.makeView(.F32Array, ptr, len, is_temp),
             else => unreachable,
         };
     }
 
-    pub fn string(a: []const u8) Obj {
-        return ext.makeString(a.ptr, a.len);
-    }
-
-    pub fn fmt(comptime format: []const u8, args: anytype) Obj {
+    pub fn fmt(life: Lifetime, comptime format: []const u8, args: anytype) Obj {
         const mark = liu.TempMark;
         defer liu.TempMark = mark;
 
         const allocResult = std.fmt.allocPrint(liu.Temp, format, args);
         const data = allocResult catch @panic("failed to print");
 
-        return ext.makeString(data.ptr, data.len);
+        return ext.makeString(data.ptr, data.len, life.isTemp());
     }
 
-    pub fn post(level: Obj, comptime format: []const u8, args: anytype) void {
-        if (builtin.target.cpu.arch != .wasm32) {
-            std.log.info(format, args);
-            return;
-        }
+    pub fn string(life: Lifetime, a: []const u8) Obj {
+        return ext.makeString(a.ptr, a.len, life.isTemp());
+    }
 
-        const object = fmt(format, args);
-        ext.postMessage(level, object);
+    pub fn array(life: Lifetime) Obj {
+        return ext.makeArray(life.isTemp());
+    }
 
-        ext.setWatermark(object);
+    pub fn obj(life: Lifetime) Obj {
+        return ext.makeObj(life.isTemp());
+    }
+};
+
+pub fn post(level: Obj, comptime format: []const u8, args: anytype) void {
+    if (builtin.target.cpu.arch != .wasm32) {
+        std.log.info(format, args);
+        return;
+    }
+
+    const mark = watermark();
+    defer setWatermark(mark);
+
+    const object = make.fmt(.temp, format, args);
+    ext.postMessage(level, object);
+}
+
+pub const out = struct {
+    pub inline fn array() Obj {
+        return wasm.make.array(.temp);
+    }
+
+    pub inline fn obj() Obj {
+        return wasm.make.obj(.temp);
+    }
+
+    pub inline fn slice(data: anytype) Obj {
+        return wasm.make.slice(.temp, data);
+    }
+
+    pub inline fn string(a: []const u8) Obj {
+        return wasm.make.string(.temp, a);
+    }
+
+    pub inline fn fmt(comptime format: []const u8, args: anytype) Obj {
+        return wasm.make.fmt(.temp, format, args);
     }
 };
 
 pub const in = struct {
-    pub fn bytes(obj: Obj, alloc: Allocator) ![]u8 {
-        return alignedBytes(obj, alloc, null);
+    pub fn bytes(byte_object: Obj, alloc: Allocator) ![]u8 {
+        return alignedBytes(byte_object, alloc, null);
     }
 
-    pub fn alignedBytes(obj: Obj, alloc: Allocator, comptime alignment: ?u29) ![]align(alignment orelse 1) u8 {
+    pub fn alignedBytes(byte_object: Obj, alloc: Allocator, comptime alignment: ?u29) ![]align(alignment orelse 1) u8 {
         if (builtin.target.cpu.arch != .wasm32) return &.{};
-        const len = ext.objMapLen(obj);
+        const len = ext.objLen(byte_object);
         const data = try alloc.alignedAlloc(u8, alignment, len);
 
-        ext.readObjMapBytes(obj, data.ptr);
+        ext.readObjMapBytes(byte_object, data.ptr);
 
         return data;
     }
 
-    pub fn string(obj: Obj, alloc: Allocator) ![]u8 {
+    pub fn string(string_object: Obj, alloc: Allocator) ![]u8 {
         if (builtin.target.cpu.arch != .wasm32) return &.{};
-        const len = ext.objMapStringEncode(obj);
+
+        const len = ext.objInplaceStringEncode(string_object);
         const data = try alloc.alloc(u8, len);
 
-        ext.readObjMapBytes(obj, data.ptr);
+        ext.readObjMapBytes(string_object, data.ptr);
 
         return data;
     }
 };
 
 pub fn exit(msg: []const u8) noreturn {
-    const obj = ext.makeString(msg.ptr, msg.len);
-    return ext.exit(obj);
+    const exit_message = wasm.make.string(.temp, msg);
+    return ext.exit(exit_message);
 }
 
 const CommandBuffer = liu.RingBuffer(root.WasmCommand, 64);
@@ -189,7 +231,7 @@ pub fn log(
         .err => .err,
     };
 
-    out.post(level_obj, fmt ++ "\n", args);
+    post(level_obj, fmt ++ "\n", args);
 }
 
 pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) noreturn {

@@ -47,13 +47,13 @@ const FlammableC = struct {
 };
 
 export fn setDims(posX: f32, posY: f32) void {
-    _ = posX;
-    _ = posY;
+    dims[0] = posX;
+    dims[1] = posY;
 }
 
 export fn onRightClick(posX: f32, posY: f32) void {
-    dims[0] = posX;
-    dims[1] = posY;
+    _ = posX;
+    _ = posY;
 }
 
 export fn onKey(down: bool, code: u32) void {
@@ -88,15 +88,20 @@ export fn init(timestamp: f64) void {
 
     initErr(timestamp) catch @panic("meh");
 
-    wasm.out.post(.info, "WASM initialized!", .{});
+    wasm.post(.info, "WASM initialized!", .{});
 }
 
 fn initErr(timestamp: f64) !void {
     previous_time = timestamp;
+    large_font = wasm.make.fmt(.manual, "bold 48px sans-serif", .{});
+    small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
 }
 
 var previous_time: f64 = undefined;
 var dims: Vec2 = [_]f32{ 0, 0 };
+
+var large_font: wasm.Obj = undefined;
+var small_font: wasm.Obj = undefined;
 
 export fn run(timestamp: f64) void {
     const diff = timestamp - previous_time;
@@ -108,12 +113,7 @@ export fn run(timestamp: f64) void {
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
-    _ = diff;
-
     ext.fillStyle(0.5, 0.5, 0.5);
-
-    const large_font = wasm.out.fmt("48px sans-serif", .{});
-    const small_font = wasm.out.fmt("10px sans-serif", .{});
 
     ext.setFont(large_font);
 
