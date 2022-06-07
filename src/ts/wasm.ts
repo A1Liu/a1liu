@@ -138,7 +138,6 @@ export const fetchWasm = async (
 
       return encodedString.length;
     },
-    objLen: (idx: number): number => readObj(idx).length,
     readObjMapBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
       objectMap.delete(idx);
@@ -159,6 +158,7 @@ export const fetchWasm = async (
       objectBuffer.length = idx;
     },
 
+    objLen: (idx: number): number => readObj(idx).length,
     arrayPush: (arrayIdx: number, valueIdx: number) => {
       const arr = readObj(arrayIdx);
       const value = readObj(valueIdx);
