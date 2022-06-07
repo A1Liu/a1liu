@@ -10,17 +10,8 @@ const Allocator = std.mem.Allocator;
 
 pub const kilordle = struct {
     pub const Spec = struct {
-        word0: []const u8,
-        word1: []const u8,
-        word2: []const u8,
-        word3: []const u8,
-        word4: []const u8,
-
-        wordle0: []const u8,
-        wordle1: []const u8,
-        wordle2: []const u8,
-        wordle3: []const u8,
-        wordle4: []const u8,
+        words: [5][]const u8,
+        wordles: [5][]const u8,
     };
 
     fn soa_translation(alloc: Allocator, data: []const u8) ![5][]const u8 {
@@ -84,17 +75,8 @@ pub const kilordle = struct {
         const wordles_out = try soa_translation(liu.Temp, wordles);
 
         const out_data = Spec{
-            .word0 = words_out[0],
-            .word1 = words_out[1],
-            .word2 = words_out[2],
-            .word3 = words_out[3],
-            .word4 = words_out[4],
-
-            .wordle0 = wordles_out[0],
-            .wordle1 = wordles_out[1],
-            .wordle2 = wordles_out[2],
-            .wordle3 = wordles_out[3],
-            .wordle4 = wordles_out[4],
+            .words = words_out,
+            .wordles = wordles_out,
         };
 
         const encoded = try liu.packed_asset.tempEncode(out_data, null);

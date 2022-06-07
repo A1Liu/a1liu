@@ -370,17 +370,17 @@ pub fn init(l_asset: wasm.Obj) !void {
     const asset_data = try wasm.in.alignedBytes(l_asset, liu.Pages, 8);
     const parsed = try liu.packed_asset.parse(Spec, asset_data);
 
-    wordles[0] = parsed.wordle0.slice();
-    wordles[1] = parsed.wordle1.slice();
-    wordles[2] = parsed.wordle2.slice();
-    wordles[3] = parsed.wordle3.slice();
-    wordles[4] = parsed.wordle4.slice();
+    wordles[0] = parsed.wordles[0].slice();
+    wordles[1] = parsed.wordles[1].slice();
+    wordles[2] = parsed.wordles[2].slice();
+    wordles[3] = parsed.wordles[3].slice();
+    wordles[4] = parsed.wordles[4].slice();
 
-    wordle_words[0] = parsed.word0.slice();
-    wordle_words[1] = parsed.word1.slice();
-    wordle_words[2] = parsed.word2.slice();
-    wordle_words[3] = parsed.word3.slice();
-    wordle_words[4] = parsed.word4.slice();
+    wordle_words[0] = parsed.words[0].slice();
+    wordle_words[1] = parsed.words[1].slice();
+    wordle_words[2] = parsed.words[2].slice();
+    wordle_words[3] = parsed.words[3].slice();
+    wordle_words[4] = parsed.words[4].slice();
 
     keys = makeKeys();
 

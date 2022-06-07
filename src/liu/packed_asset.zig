@@ -200,11 +200,10 @@ pub const Spec = struct {
                     // Empirically, this reduces the number of branches needed at
                     // compile time.
                     if (encode_info.len == 1) { // This means its a primitive
-                        // @compileLog(T, Elem);
                         while (i < end) : (i += 1) {
                             const new_info = EncoderInfo{
                                 .type_info = encode_info[0].type_info,
-                                .offset = i * @sizeOf(info.child),
+                                .offset = i * @sizeOf(Elem),
                             };
 
                             spec = spec ++ &[_]EncoderInfo{new_info};
@@ -216,15 +215,16 @@ pub const Spec = struct {
                     while (i < end) : (i += 1) {
                         var iter = EncoderInfoIter{ .info = encode_info };
                         while (iter.peek()) |sa| : (iter.index = sa.next_index) {
-                            const offset = sa.offset + i * @sizeOf(T);
+                            const offset = sa.offset + i * @sizeOf(Elem);
                             const new_info = EncoderInfo{
                                 .type_info = sa.type_info,
                                 .offset = offset,
                             };
 
                             spec = spec ++ &[_]EncoderInfo{new_info};
-                            if (sa.slice_info) |slice_info|
+                            if (sa.slice_info) |slice_info| {
                                 spec = spec ++ slice_info.spec;
+                            }
                         }
                     }
 
@@ -295,8 +295,9 @@ pub const Spec = struct {
                     };
 
                     spec = spec ++ &[_]EncoderInfo{new_info};
-                    if (sa.slice_info) |slice_info|
+                    if (sa.slice_info) |slice_info| {
                         spec = spec ++ slice_info.spec;
+                    }
                 }
             }
 
@@ -547,6 +548,7 @@ const Encoder = struct {
         const spec = Spec.fromType(T);
 
         const obj_info = objectInfo(spec.encoder_info);
+        assert(obj_info.size == @sizeOf(spec.Type));
 
         return .{
             .header = spec.header,

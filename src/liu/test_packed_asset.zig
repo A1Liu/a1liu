@@ -409,3 +409,52 @@ test "Packed Asset: arrays" {
 
     try std.testing.expectEqualSlices(u64, &t.data, &value.data);
 }
+
+test "Packed Asset: wordle" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const Test = struct {
+        words: [5][]const u8,
+        wordles: [5][]const u8,
+    };
+
+    const spec = Spec.fromType(Test);
+    const type_info = spec.typeInfo();
+
+    try std.testing.expectEqualSlices(TypeInfo, type_info, &[_]TypeInfo{
+        .ustruct_open_4,  .ustruct_open_4,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .ustruct_close_4, .ustruct_open_4,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .uslice_of_next,  .pu8,
+        .ustruct_close_4, .ustruct_close_4,
+    });
+
+    const t: Test = .{
+        .words = .{ "asdf", "asdf;lk", "wertn", "sdoi", "wernt" },
+        .wordles = .{ "bsdf", "bsdf;lk", "wedtn", "swoi", "wgrnt" },
+    };
+
+    const encoded = try tempEncode(t, 1024);
+
+    try std.testing.expect(encoded.chunks.len == 0);
+
+    const bytes = try encoded.copyContiguous(liu.Temp);
+
+    const value = try parse(Test, bytes);
+
+    for (t.words) |w, i| {
+        try std.testing.expectEqualSlices(u8, w, value.words[i].slice());
+    }
+    for (t.wordles) |w, i| {
+        try std.testing.expectEqualSlices(u8, w, value.wordles[i].slice());
+    }
+}
