@@ -109,7 +109,7 @@ export const fetchWasm = async (
     addObj,
   };
 
-  debugLoop(postMessage, objectBuffer, objectMap);
+  // debugLoop(postMessage, objectBuffer, objectMap);
 
   const wasmImports = {} as any;
   Object.entries({ postMessage, ...importData.imports }).forEach(
