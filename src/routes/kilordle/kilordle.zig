@@ -321,7 +321,6 @@ fn compareWordles(context: void, left: Wordle, right: Wordle) bool {
 
 fn initData() !void {
     const wordle_count = wordles[0].len;
-    std.log.info("{}", .{wordles[0].len});
 
     try wordles_left.ensureUnusedCapacity(wordle_count);
 

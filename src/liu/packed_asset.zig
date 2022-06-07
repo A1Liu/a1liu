@@ -23,11 +23,9 @@
 // TODO
 // 1. Validation of input data in parser: slice ranges and object sizes/alignments
 // 2. Refactorings to simplify a bit where possible
-// 4. Array types? Technically this just requires more zig type translation stuff,
-//      No additional requirements at runtime, because arrays are stored the
-//      same as fields in memory
 // 5. Optimization pass in encoder to speed up instances of reasonably packed
 //      data? (slices, packed structs, etc)
+// 6. Make arrays less silly
 
 const std = @import("std");
 const builtin = @import("builtin");
