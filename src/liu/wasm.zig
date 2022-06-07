@@ -42,10 +42,11 @@ const ext = struct {
 
     extern fn watermark() Watermark;
     extern fn setWatermark(watermark: Watermark) void;
+    extern fn deleteObj(obj: Obj) void;
 
-    extern fn objInplaceStringEncode(idx: Obj) usize;
+    extern fn encodeString(idx: Obj) usize;
     extern fn objLen(idx: Obj) usize;
-    extern fn readObjMapBytes(idx: Obj, begin: [*]u8) void;
+    extern fn readBytes(idx: Obj, begin: [*]u8) void;
 
     extern fn postMessage(tagIdx: Obj, id: Obj) void;
     extern fn exit(objIndex: Obj) noreturn;
@@ -129,6 +130,13 @@ pub fn post(level: Obj, comptime format: []const u8, args: anytype) void {
     ext.postMessage(level, object);
 }
 
+pub const delete = ext.deleteObj;
+pub fn deleteMany(obj_slice: []const Obj) void {
+    for (obj_slice) |o| {
+        delete(o);
+    }
+}
+
 pub const out = struct {
     pub inline fn array() Obj {
         return wasm.make.array(.temp);
@@ -158,10 +166,13 @@ pub const in = struct {
 
     pub fn alignedBytes(byte_object: Obj, alloc: Allocator, comptime alignment: ?u29) ![]align(alignment orelse 1) u8 {
         if (builtin.target.cpu.arch != .wasm32) return &.{};
+
+        defer ext.deleteObj(byte_object);
+
         const len = ext.objLen(byte_object);
         const data = try alloc.alignedAlloc(u8, alignment, len);
 
-        ext.readObjMapBytes(byte_object, data.ptr);
+        ext.readBytes(byte_object, data.ptr);
 
         return data;
     }
@@ -169,10 +180,12 @@ pub const in = struct {
     pub fn string(string_object: Obj, alloc: Allocator) ![]u8 {
         if (builtin.target.cpu.arch != .wasm32) return &.{};
 
-        const len = ext.objInplaceStringEncode(string_object);
+        defer ext.deleteObj(string_object);
+
+        const len = ext.encodeString(string_object);
         const data = try alloc.alloc(u8, len);
 
-        ext.readObjMapBytes(string_object, data.ptr);
+        ext.readBytes(string_object, data.ptr);
 
         return data;
     }

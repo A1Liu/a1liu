@@ -54,7 +54,8 @@ function debugLoop(
       objectBuffer,
       objectMap: [...objectMap.entries()],
     };
-    postMessage("info", JSON.stringify(data));
+    // postMessage("info", JSON.stringify(data));
+    postMessage("info", data);
 
     setTimeout(loop, 2000);
   }
@@ -108,6 +109,8 @@ export const fetchWasm = async (
     addObj,
   };
 
+  debugLoop(postMessage, objectBuffer, objectMap);
+
   const wasmImports = {} as any;
   Object.entries({ postMessage, ...importData.imports }).forEach(
     ([key, value]: [string, any]) => {
@@ -130,7 +133,7 @@ export const fetchWasm = async (
       return addObj(array, isTemp);
     },
 
-    objInplaceStringEncode: (idx: number): number => {
+    encodeString: (idx: number): number => {
       const value = readObj(idx);
 
       const encodedString = encoder.encode(value);
@@ -138,16 +141,10 @@ export const fetchWasm = async (
 
       return encodedString.length;
     },
-    readObjMapBytes: (idx: number, begin: number): void => {
+    readBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
-      objectMap.delete(idx);
-
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
       writeTo.set(array);
-
-      if (objectMap.size === 0) {
-        nextObjectId = 0;
-      }
     },
 
     // TODO some kind of pop stack operation that makes full objects or arrays
@@ -157,6 +154,7 @@ export const fetchWasm = async (
     setWatermark: (idx: number) => {
       objectBuffer.length = idx;
     },
+    deleteObj: (idx: number) => objectMap.delete(idx),
 
     objLen: (idx: number): number => readObj(idx).length,
     arrayPush: (arrayIdx: number, valueIdx: number) => {
