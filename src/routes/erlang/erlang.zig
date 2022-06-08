@@ -147,11 +147,6 @@ var small_font: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
 
 pub var camera: Camera = .{};
-var ground_bbox: BBox = BBox{
-    .pos = Vec2{ 0, 0 },
-    .width = 1,
-    .height = 1,
-};
 
 export fn run(timestamp: f64) void {
     defer input.frameCleanup();
