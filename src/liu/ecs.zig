@@ -26,7 +26,6 @@ fn UnwrappedField(comptime FieldT: type) FieldInfo {
     const child = switch (@typeInfo(FieldT)) {
         .Optional => |info| info.child,
         else => FieldT,
-        // @compileError("Expected field to be optional, found '" ++ @typeName(FieldT) ++ "'"),
     };
 
     const is_pointer = @typeInfo(child) == .Pointer;
@@ -72,13 +71,8 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
 
         registry: *Reg,
         index: u32 = 0,
-        // sparse: [Reg.SparseComponents.len]u32 = .{0} ** Reg.SparseComponents.len,
 
-        pub fn read(
-            registry: *Reg,
-            index: u32,
-            // sparse: *[Reg.SparseComponents.len]u32,
-        ) ?ViewType {
+        pub fn read(registry: *Reg, index: u32) ?ViewType {
             const meta = &registry.raw(Reg.Meta)[index];
 
             var value: ViewType = undefined;
@@ -108,14 +102,6 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                         }
                     }
 
-                    // if (comptime Reg.sparseTypeIndex(T)) |SparseIdx| {
-                    //     const sparse_index = sparse[SparseIdx];
-                    //     sparse[SparseIdx] += 1;
-
-                    //     const ptr = &registry.rawSparse(T).items[sparse_index].t;
-                    //     break :value if (isPointer) ptr else ptr.*;
-                    // }
-
                     const ptr = &registry.raw(unwrapped.T)[index];
                     break :value if (unwrapped.is_pointer) ptr else ptr.*;
                 };
@@ -127,24 +113,11 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
         pub fn get(self: *Iter, id: EntityId) ?ViewType {
             const index = self.registry.indexOf(id) orelse return null;
 
-            // var sparse: [Reg.SparseComponents.len]u32 = undefined;
-            // inline for (std.meta.fields(ViewType)) |field| {
-            //     if (comptime std.mem.eql(u8, field.name, "id")) continue;
-            //     if (comptime std.mem.eql(u8, field.name, "meta")) continue;
-
-            //     const T = UnwrappedField(field.field_type).T;
-            //     const SparseIdx = comptime Reg.sparseTypeIndex(T) orelse continue;
-            //     const mapping = self.registry.sparse_mapping[SparseIdx];
-
-            //     sparse[SparseIdx] = mapping.map.get(index) orelse 0;
-            // }
-
             return read(self.registry, index); //, &sparse);
         }
 
         pub fn reset(self: *Iter) void {
             self.index = 0;
-            // std.mem.set(u32, &self.sparse, 0);
         }
 
         pub fn next(self: *Iter) ?ViewType {
@@ -156,7 +129,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 const meta = &self.registry.raw(Reg.Meta)[self.index];
                 if (meta.generation == NULL) continue;
 
-                const value = read(self.registry, self.index); // , &self.sparse);
+                const value = read(self.registry, self.index);
                 if (value) |v| return v;
             }
 
@@ -214,10 +187,10 @@ pub fn Registry(
         };
 
         const List = std.ArrayListUnmanaged;
-        const Mapping = struct {
-            // index is entity ID, value is component index
-            map: std.ArrayListUnmanaged(u32) = .{},
-        };
+        // const Mapping = struct {
+        //     // index is entity ID, value is component index
+        //     map: std.ArrayListUnmanaged(u32) = .{},
+        // };
 
         const DensePointers = [DenseComponents.len][*]u8;
         // const SparsePointers = [SparseComponents.len]List(u8);
@@ -230,9 +203,6 @@ pub fn Registry(
         capacity: u32,
         free_head: u32,
 
-        // sparse_mapping: [SparseComponents.len]Mapping,
-        // sparse: SparsePointers,
-
         pub fn init(capacity: u32, alloc: std.mem.Allocator) !Self {
             var dense: DensePointers = undefined;
             inline for (DenseComponents) |T, Idx| {
@@ -242,13 +212,8 @@ pub fn Registry(
                 dense[Idx] = @ptrCast([*]u8, slice.ptr);
             }
 
-            // const sparse_mapping = .{Mapping{}} ** SparseComponents.len;
-            // const sparse: SparsePointers = .{.{}} ** SparseComponents.len;
-
             return Self{
                 .dense = dense,
-                // .sparse_mapping = sparse_mapping,
-                // .sparse = sparse,
                 .len = 0,
                 .generation = 1,
                 .capacity = capacity,
@@ -267,14 +232,6 @@ pub fn Registry(
 
                 self.alloc.free(slice);
             }
-
-            // inline for (SparseComponents) |T, SparseIdx| {
-            //     const list = self.rawSparse(T);
-            //     const mapping = &self.sparse_mapping[SparseIdx];
-
-            //     list.deinit(self.alloc);
-            //     mapping.map.deinit(self.alloc);
-            // }
         }
 
         pub fn create(self: *Self, name: []const u8) !EntityId {
@@ -321,19 +278,6 @@ pub fn Registry(
             const index = self.indexOf(id) orelse return false;
             const meta = &self.raw(Meta)[index];
 
-            // inline for (SparseComponents) |T, SparseIdx| {
-            //     const Idx = comptime typeIndex(T).?;
-
-            //     const list = self.rawSparse(T);
-            //     const mapping = &self.sparse_mapping[SparseIdx];
-
-            //     if (meta.bitset.isSet(Idx)) {
-            //         const sparse_index = mapping.map.fetchRemove(index).?.value;
-            //         list.items[sparse_index] = .{ .next = mapping.free_head };
-            //         mapping.free_head = sparse_index;
-            //     }
-            // }
-
             meta.generation = NULL;
             meta.name = "";
             meta.name.len = self.free_head;
@@ -357,52 +301,11 @@ pub fn Registry(
             // returning
             defer self.raw(Meta)[index].bitset.set(Idx);
 
-            // const SparseIdx = if (comptime sparseTypeIndex(T)) |I| I else {
             const elements = self.raw(T);
             elements[index] = component;
 
             return true;
-            // };
-
-            // const meta = &self.raw(Meta)[index];
-            // const list = self.rawSparse(T);
-            // const mapping = &self.sparse_mapping[SparseIdx];
-
-            // if (meta.bitset.isSet(Idx)) {
-            //     const sparse_index = mapping.map.get(index) orelse unreachable;
-            //     list.items[sparse_index] = .{ .t = component };
-
-            //     return true;
-            // }
-
-            // if (mapping.free_head != NULL) {
-            //     const sparse_index = mapping.free_head;
-            //     mapping.free_head = list.items[sparse_index].next;
-
-            //     try mapping.map.put(self.alloc, index, sparse_index);
-            //     list.items[sparse_index] = .{ .t = component };
-            //     return true;
-            // }
-
-            // const sparse_index: u32 = @truncate(u32, list.items.len);
-            // try mapping.map.put(self.alloc, index, sparse_index);
-            // try list.append(self.alloc, .{ .t = component });
-
-            // return true;
         }
-
-        // fn rawSparse(self: *Self, comptime T: type) *List(FreeEnt(T)) {
-        //     if (comptime sparseTypeIndex(T)) |SparseIdx| {
-        //         const list = @ptrCast(*List(FreeEnt(T)), &self.sparse[SparseIdx]);
-        //         return list;
-        //     }
-
-        //     if (comptime denseTypeIndex(T)) |_| {
-        //         @compileError("Type not sparse: " ++ @typeName(T));
-        //     }
-
-        //     @compileError("Type not registered: " ++ @typeName(T));
-        // }
 
         fn raw(self: *Self, comptime T: type) []T {
             if (comptime denseTypeIndex(T)) |Idx| {
@@ -415,10 +318,6 @@ pub fn Registry(
 
                 return slice;
             }
-
-            // if (comptime sparseTypeIndex(T)) |_| {
-            //     @compileError("Type not dense: " ++ @typeName(T));
-            // }
 
             @compileError("Type not registered: " ++ @typeName(T));
         }
@@ -444,14 +343,6 @@ pub fn Registry(
 
             return null;
         }
-
-        // fn sparseTypeIndex(comptime T: type) ?usize {
-        //     for (SparseComponents) |Component, idx| {
-        //         if (T == Component) return idx;
-        //     }
-
-        //     return null;
-        // }
 
         fn denseTypeIndex(comptime T: type) ?usize {
             for (DenseComponents) |Component, idx| {
@@ -500,82 +391,6 @@ test "Registry: iterate" {
         try std.testing.expect(elem.move == null);
     }
 }
-
-// test "Registry: sparse" {
-//     const TransformComponent = struct { i: u32 };
-//     const Empty = struct {};
-//     const MoveComponent = struct { i: u32 };
-//
-//     const RegistryType = Registry(&.{ TransformComponent, Empty }, &.{MoveComponent});
-//
-//     var registry = try RegistryType.init(256, liu.Pages);
-//     defer registry.deinit();
-//
-//     const View = struct {
-//         transform: ?*TransformComponent,
-//         move: ?*MoveComponent,
-//     };
-//
-//     var i: u32 = 0;
-//     var success = false;
-//
-//     while (i < 100) : (i += 1) {
-//         const meh = try registry.create("meh");
-//         if (i % 2 == 0) {
-//             success = try registry.addComponent(meh, TransformComponent{ .i = i });
-//             try std.testing.expect(success);
-//         }
-//
-//         if (i % 4 == 0) {
-//             success = try registry.addComponent(meh, Empty{});
-//             try std.testing.expect(success);
-//         }
-//
-//         if (i % 8 == 0) {
-//             success = try registry.addComponent(meh, MoveComponent{ .i = i });
-//             try std.testing.expect(success);
-//         }
-//     }
-//
-//     const deh = try registry.create("dehh");
-//
-//     success = try registry.addComponent(deh, MoveComponent{ .i = 1 });
-//     try std.testing.expect(success);
-//
-//     try std.testing.expect(registry.delete(deh));
-//
-//     var view = registry.view(View);
-//     var count: u32 = 0;
-//     var sparse_count: u32 = 0;
-//     while (view.next()) |elem| {
-//         try std.testing.expect(elem.meta.name.len == 3);
-//
-//         if (elem.transform) |transform| {
-//             try std.testing.expect(transform.i == count);
-//         }
-//
-//         if (elem.move) |move| {
-//             try std.testing.expect(move.i == count);
-//             sparse_count += 1;
-//         }
-//
-//         const elem2 = view.get(elem.id) orelse
-//             return error.TestUnexpectedResult;
-//
-//         try std.testing.expect(elem.id.index == elem2.id.index);
-//         try std.testing.expect(elem.id.generation == elem2.id.generation);
-//         try std.testing.expect(elem.meta == elem2.meta);
-//         try std.testing.expect(elem.transform == elem2.transform);
-//         try std.testing.expect(elem.move == elem2.move);
-//
-//         count += 1;
-//     }
-//
-//     try std.testing.expect(count == 100);
-//     try std.testing.expect(sparse_count == (100 / 8) + 1);
-//
-//     view.reset();
-// }
 
 test "Registry: delete" {
     const TransformComponent = struct {};
