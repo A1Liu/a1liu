@@ -36,6 +36,12 @@
       worker.postMessage({ kind: "resize", data: [width, height] });
     };
 
+    {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      worker.postMessage({ kind: "resize", data: [width, height] });
+    }
+
     window.addEventListener("resize", listener);
 
     const offscreen = canvas.transferControlToOffscreen();

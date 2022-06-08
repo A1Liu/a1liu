@@ -86,7 +86,6 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
     case "resize": {
       const [width, height] = msg.data;
       resize(wasmRef, width, height);
-
       break;
     }
 
@@ -147,8 +146,6 @@ const init = async () => {
     imports: {},
   });
 
-  wasmRef.abi.init(performance.now());
-
   while (true) {
     const captured = await ctx.msgWait();
     let offscreen = null;
@@ -180,6 +177,8 @@ const init = async () => {
 
     break;
   }
+
+  wasmRef.abi.init(performance.now());
 
   main(wasmRef);
 };

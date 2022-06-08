@@ -164,7 +164,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
     };
 }
 
-// TODO get rid of sparse for now
+// TODO add back sparse (commented out code is wrong so rewrite it lol)
 
 pub fn Registry(
     comptime InDense: []const type,
