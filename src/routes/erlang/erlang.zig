@@ -12,15 +12,11 @@ pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 const Vec2 = liu.Vec2;
-const Vec3 = liu.Vec3;
-
 pub const BBox = struct {
     pos: Vec2,
     width: f32,
     height: f32,
 };
-
-const Point = struct { pos: Vec2, color: Vec3 };
 
 const ext = struct {
     extern fn fillStyle(r: f32, g: f32, b: f32) void;
