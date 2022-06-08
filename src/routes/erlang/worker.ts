@@ -98,7 +98,7 @@ const main = async (wasmRef: wasm.Ref) => {
   const ctx2d = gglRef.current.ctx;
   const canvas = ctx2d.canvas;
 
-  function render(timestamp: number) {
+  function run(timestamp: number) {
     ctx2d.clearRect(0, 0, canvas.width, canvas.height);
 
     wasmRef.abi.run(timestamp);
@@ -107,10 +107,10 @@ const main = async (wasmRef: wasm.Ref) => {
     // However, the media recorder seems to skip frames when we don't forcibly
     // re-render at every opportunity. Oh well.
     //                                - Albert Liu, May 15, 2022 Sun 02:25 EDT
-    requestAnimationFrame(render);
+    requestAnimationFrame(run);
   }
 
-  requestAnimationFrame(render);
+  requestAnimationFrame(run);
 
   while (true) {
     const captured = await ctx.msgWait();

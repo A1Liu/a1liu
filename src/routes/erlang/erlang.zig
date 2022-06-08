@@ -1,6 +1,10 @@
 const std = @import("std");
 const liu = @import("liu");
 
+const input = @import("./input.zig");
+const rows = input.rows;
+const keys = input.keys;
+
 // https://youtu.be/SFKR5rZBu-8?t=2202
 
 const wasm = liu.wasm;
@@ -10,7 +14,7 @@ pub usingnamespace wasm;
 const Vec2 = liu.Vec2;
 const Vec3 = liu.Vec3;
 
-const BBox = struct {
+pub const BBox = struct {
     pos: Vec2,
     width: f32,
     height: f32,
@@ -86,39 +90,6 @@ export fn setDims(posX: u32, posY: u32) void {
     camera.setDims(posX, posY);
 }
 
-export fn onRightClick(posX: f32, posY: f32) void {
-    _ = posX;
-    _ = posY;
-}
-
-export fn onKey(down: bool, code: u32) void {
-    var begin: u32 = 0;
-
-    for (rows) |row| {
-        const end = row.end;
-
-        for (keys[begin..row.end]) |*key| {
-            if (code == key.code) {
-                key.pressed = down;
-                key.down = down;
-                return;
-            }
-        }
-
-        begin = end;
-    }
-}
-
-export fn onMove(posX: f32, posY: f32) void {
-    _ = posX;
-    _ = posY;
-}
-
-export fn onClick(posX: f32, posY: f32) void {
-    _ = posX;
-    _ = posY;
-}
-
 export fn init(timestamp: f64) void {
     wasm.initIfNecessary();
 
@@ -138,12 +109,11 @@ fn initErr(timestamp: f64) !void {
 }
 
 var previous_time: f64 = undefined;
-
 var large_font: wasm.Obj = undefined;
 var small_font: wasm.Obj = undefined;
-var registry: Registry = undefined;
+pub var registry: Registry = undefined;
 
-var camera: Camera = .{};
+pub var camera: Camera = .{};
 var ground_bbox: BBox = BBox{
     .pos = Vec2{ 0, 0 },
     .width = 1,
@@ -166,6 +136,8 @@ export fn run(timestamp: f64) void {
 
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
+
+    defer input.frameCleanup();
 
     // Input
     if (keys[10].pressed) {
@@ -286,56 +258,4 @@ export fn run(timestamp: f64) void {
 
         begin = end;
     }
-
-    for (keys) |*k| {
-        k.pressed = false;
-    }
 }
-
-const KeyBox = struct {
-    code: u32,
-    pressed: bool = false,
-    down: bool = false,
-};
-
-const KeyRow = struct {
-    end: u32,
-    leftX: i32,
-};
-
-const rows: [3]KeyRow = .{
-    .{ .end = 10, .leftX = 5 },
-    .{ .end = 19, .leftX = 10 },
-    .{ .end = 26, .leftX = 13 },
-};
-
-var keys: [26]KeyBox = [_]KeyBox{
-    .{ .code = 'Q' },
-    .{ .code = 'W' },
-    .{ .code = 'E' },
-    .{ .code = 'R' },
-    .{ .code = 'T' },
-    .{ .code = 'Y' },
-    .{ .code = 'U' },
-    .{ .code = 'I' },
-    .{ .code = 'O' },
-    .{ .code = 'P' },
-
-    .{ .code = 'A' },
-    .{ .code = 'S' },
-    .{ .code = 'D' },
-    .{ .code = 'F' },
-    .{ .code = 'G' },
-    .{ .code = 'H' },
-    .{ .code = 'J' },
-    .{ .code = 'K' },
-    .{ .code = 'L' },
-
-    .{ .code = 'Z' },
-    .{ .code = 'X' },
-    .{ .code = 'C' },
-    .{ .code = 'V' },
-    .{ .code = 'B' },
-    .{ .code = 'N' },
-    .{ .code = 'M' },
-};
