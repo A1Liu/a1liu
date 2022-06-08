@@ -8,6 +8,8 @@
   let canvas: any = undefined;
 
   onMount(() => {
+    canvas.focus();
+
     worker = new MyWorker();
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {

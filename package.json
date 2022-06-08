@@ -10,7 +10,7 @@
     "typecheck": "svelte-check --tsconfig .svelte-kit/tsconfig.json",
     "check:watch": "svelte-check --tsconfig .svelte-kit/tsconfig.json --watch",
     "lint": "prettier --check --plugin-search-dir=. .",
-    "format": "prettier --write --plugin-search-dir=. src/routes src/svelte",
+    "format": "prettier --no-color --write --plugin-search-dir=. src/routes src/svelte src/ts",
     "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
   },
   "dependencies": {},
