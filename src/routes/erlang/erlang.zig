@@ -70,12 +70,17 @@ const Camera = struct {
 
 const RenderC = struct {
     color: Vec3,
-    width: f32,
-    height: f32,
+    sprite_width: f32,
+    sprite_height: f32,
 };
 
 const PositionC = struct {
     pos: Vec2,
+};
+
+const CollisionC = struct {
+    width: f32,
+    height: f32,
 };
 
 const MoveC = struct {
@@ -104,6 +109,7 @@ const Registry = liu.ecs.Registry(&.{
     MoveC,
     RenderC,
     DecisionC,
+    CollisionC,
 });
 
 fn initErr(timestamp: f64) !void {
@@ -121,6 +127,10 @@ fn initErr(timestamp: f64) !void {
         });
         _ = try registry.addComponent(box, RenderC{
             .color = Vec3{ 0.6, 0.5, 0.4 },
+            .sprite_width = 0.5,
+            .sprite_height = 0.5,
+        });
+        _ = try registry.addComponent(box, CollisionC{
             .width = 0.5,
             .height = 0.5,
         });
@@ -136,8 +146,8 @@ fn initErr(timestamp: f64) !void {
     });
     _ = try registry.addComponent(ground, RenderC{
         .color = Vec3{ 0.2, 0.5, 0.3 },
-        .width = 100,
-        .height = 1,
+        .sprite_width = 100,
+        .sprite_height = 1,
     });
 }
 
@@ -163,13 +173,13 @@ export fn run(timestamp: f64) void {
     // Input
     {
         var view = registry.view(struct {
-            move_c: ?*MoveC,
-            decide_c: ?DecisionC,
+            move_c: *MoveC,
+            decide_c: DecisionC,
         });
 
         while (view.next()) |elem| {
-            const move_c = elem.move_c orelse continue;
-            const decide_c = elem.decide_c orelse continue;
+            const move_c = elem.move_c;
+            const decide_c = elem.decide_c;
 
             if (decide_c != .player) continue;
 
@@ -196,16 +206,16 @@ export fn run(timestamp: f64) void {
 
     {
         var view = registry.view(struct {
-            pos_c: ?*PositionC,
-            move_c: ?*MoveC,
-            render_c: ?RenderC,
+            pos_c: *PositionC,
+            move_c: *MoveC,
+            collision_c: CollisionC,
         });
 
         const groundY: f32 = 1;
         while (view.next()) |elem| {
-            const pos_c = elem.pos_c orelse continue;
-            const move_c = elem.move_c orelse continue;
-            const render_c = elem.render_c orelse continue;
+            const pos_c = elem.pos_c;
+            const move_c = elem.move_c;
+            const collision_c = elem.collision_c;
 
             pos_c.pos += move_c.velocity * @splat(2, delta / 1000); // move the thing
             if (pos_c.pos[1] < groundY) {
@@ -225,8 +235,8 @@ export fn run(timestamp: f64) void {
                 move_c.velocity[0] = 0;
             }
 
-            if (pos_c.pos[0] + render_c.width > cam_pos1[0]) {
-                pos_c.pos[0] = cam_pos1[0] - render_c.width;
+            if (pos_c.pos[0] + collision_c.width > cam_pos1[0]) {
+                pos_c.pos[0] = cam_pos1[0] - collision_c.width;
                 move_c.velocity[0] = 0;
             }
 
@@ -235,8 +245,8 @@ export fn run(timestamp: f64) void {
                 move_c.velocity[1] = 0;
             }
 
-            if (pos_c.pos[1] + render_c.height > cam_pos1[1]) {
-                pos_c.pos[1] = cam_pos1[1] - render_c.width;
+            if (pos_c.pos[1] + collision_c.height > cam_pos1[1]) {
+                pos_c.pos[1] = cam_pos1[1] - collision_c.width;
                 move_c.velocity[1] = 0;
             }
         }
@@ -244,12 +254,13 @@ export fn run(timestamp: f64) void {
 
     {
         var view = registry.view(struct {
-            move_c: ?*MoveC,
+            move_c: *MoveC,
         });
 
         while (view.next()) |elem| {
-            const move = elem.move_c orelse continue;
+            const move = elem.move_c;
 
+            // apply gravity
             move.velocity[1] -= 0.014 * delta;
 
             // applies a friction force when mario hits the ground.
@@ -277,20 +288,20 @@ export fn run(timestamp: f64) void {
     // Rendering
     {
         var view = registry.view(struct {
-            pos_c: ?*PositionC,
-            render: ?*const RenderC,
+            pos_c: *PositionC,
+            render: *const RenderC,
         });
 
         while (view.next()) |elem| {
-            const pos_c = elem.pos_c orelse continue;
-            const render = elem.render orelse continue;
+            const pos_c = elem.pos_c;
+            const render = elem.render;
 
             const color = render.color;
             ext.fillStyle(color[0], color[1], color[2]);
             const bbox = camera.getScreenBoundingBox(BBox{
                 .pos = pos_c.pos,
-                .width = render.width,
-                .height = render.height,
+                .width = render.sprite_width,
+                .height = render.sprite_height,
             });
 
             ext.fillRect(

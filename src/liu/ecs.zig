@@ -15,20 +15,31 @@ fn FreeEnt(comptime T: type) type {
     return union { t: T, next: u32 };
 }
 
-fn UnwrappedField(comptime FieldT: type) struct { isPointer: bool, T: type } {
+const FieldInfo = struct {
+    is_optional: bool,
+    is_pointer: bool,
+    T: type,
+};
+
+fn UnwrappedField(comptime FieldT: type) FieldInfo {
+    const is_optional = @typeInfo(FieldT) == .Optional;
     const child = switch (@typeInfo(FieldT)) {
         .Optional => |info| info.child,
-        else => @compileError("Expected field to be optional, found '" ++
-            @typeName(FieldT) ++ "'"),
+        else => FieldT,
+        // @compileError("Expected field to be optional, found '" ++ @typeName(FieldT) ++ "'"),
     };
 
-    const isPointer = @typeInfo(child) == .Pointer;
+    const is_pointer = @typeInfo(child) == .Pointer;
     const T = switch (@typeInfo(child)) {
         .Pointer => |info| info.child,
         else => child,
     };
 
-    return .{ .isPointer = isPointer, .T = T };
+    return .{
+        .is_optional = is_optional,
+        .is_pointer = is_pointer,
+        .T = T,
+    };
 }
 
 fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
@@ -63,48 +74,11 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
         index: u32 = 0,
         // sparse: [Reg.SparseComponents.len]u32 = .{0} ** Reg.SparseComponents.len,
 
-        // This is a separate function because there was some kind of confusing
-        // compiler behavior otherwise.
-        fn readForField(
-            registry: *Reg,
-            meta: *const Reg.Meta,
-            out: *ViewType,
-            comptime name: []const u8,
-            comptime FieldT: type,
-            index: u32,
-            // sparse: *[Reg.SparseComponents.len]u32,
-        ) void {
-            @field(out, name) = value: {
-                const unwrapped = UnwrappedField(FieldT);
-                const isPointer = unwrapped.isPointer;
-                const T = unwrapped.T;
-
-                const Idx = comptime Reg.typeIndex(T) orelse
-                    @compileError("field type not registered: " ++
-                    "name=" ++ name ++ ", type=" ++ @typeName(T));
-
-                if (!meta.bitset.isSet(Idx)) {
-                    break :value null;
-                }
-
-                // if (comptime Reg.sparseTypeIndex(T)) |SparseIdx| {
-                //     const sparse_index = sparse[SparseIdx];
-                //     sparse[SparseIdx] += 1;
-
-                //     const ptr = &registry.rawSparse(T).items[sparse_index].t;
-                //     break :value if (isPointer) ptr else ptr.*;
-                // }
-
-                const ptr = &registry.raw(T)[index];
-                break :value if (isPointer) ptr else ptr.*;
-            };
-        }
-
         pub fn read(
             registry: *Reg,
             index: u32,
             // sparse: *[Reg.SparseComponents.len]u32,
-        ) ViewType {
+        ) ?ViewType {
             const meta = &registry.raw(Reg.Meta)[index];
 
             var value: ViewType = undefined;
@@ -115,9 +89,36 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
                 if (comptime std.mem.eql(u8, field.name, "meta")) continue;
 
-                readForField(registry, meta, &value, field.name, field.field_type, index
-                // sparse,
-                );
+                const unwrapped = UnwrappedField(field.field_type);
+
+                const Idx = comptime Reg.typeIndex(unwrapped.T) orelse
+                    @compileError("field type not registered: " ++
+                    "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
+
+                const is_set = meta.bitset.isSet(Idx);
+
+                @field(value, field.name) = value: {
+                    if (!unwrapped.is_optional) {
+                        if (!is_set) {
+                            return null;
+                        }
+                    } else {
+                        if (!is_set) {
+                            break :value null;
+                        }
+                    }
+
+                    // if (comptime Reg.sparseTypeIndex(T)) |SparseIdx| {
+                    //     const sparse_index = sparse[SparseIdx];
+                    //     sparse[SparseIdx] += 1;
+
+                    //     const ptr = &registry.rawSparse(T).items[sparse_index].t;
+                    //     break :value if (isPointer) ptr else ptr.*;
+                    // }
+
+                    const ptr = &registry.raw(unwrapped.T)[index];
+                    break :value if (unwrapped.is_pointer) ptr else ptr.*;
+                };
             }
 
             return value;
@@ -156,7 +157,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 if (meta.generation == NULL) continue;
 
                 const value = read(self.registry, self.index); // , &self.sparse);
-                return value;
+                if (value) |v| return v;
             }
 
             return null;
