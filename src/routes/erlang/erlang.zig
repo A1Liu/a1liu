@@ -12,6 +12,7 @@ pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 const Vec2 = liu.Vec2;
+const Vec3 = liu.Vec3;
 pub const BBox = struct {
     pos: Vec2,
     width: f32,
@@ -67,15 +68,19 @@ const Camera = struct {
     }
 };
 
-const RenderC = struct {};
+const RenderC = struct {
+    color: Vec3,
+    width: f32,
+    height: f32,
+};
 
 const PositionC = struct {
     pos: Vec2,
 };
 
 const MoveC = struct {
-    direction: Vec2, // normalized
-    speed: f32,
+    velocity: Vec2,
+    is_airborne: bool = false,
 };
 
 const DecisionC = union(enum) {
@@ -94,7 +99,12 @@ export fn init(timestamp: f64) void {
     wasm.post(.info, "WASM initialized!", .{});
 }
 
-const Registry = liu.ecs.Registry(&.{MoveC});
+const Registry = liu.ecs.Registry(&.{
+    PositionC,
+    MoveC,
+    RenderC,
+    DecisionC,
+});
 
 fn initErr(timestamp: f64) !void {
     previous_time = timestamp;
@@ -102,6 +112,33 @@ fn initErr(timestamp: f64) !void {
     small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
 
     registry = try Registry.init(16, liu.Pages);
+
+    var i: u32 = 0;
+    while (i < 3) : (i += 1) {
+        const box = try registry.create("box");
+        _ = try registry.addComponent(box, PositionC{
+            .pos = Vec2{ @intToFloat(f32, i) + 5, 1 },
+        });
+        _ = try registry.addComponent(box, RenderC{
+            .color = Vec3{ 0.6, 0.5, 0.4 },
+            .width = 0.5,
+            .height = 0.5,
+        });
+        _ = try registry.addComponent(box, MoveC{
+            .velocity = Vec2{ 0, 0 },
+        });
+        _ = try registry.addComponent(box, DecisionC{ .player = {} });
+    }
+
+    const ground = try registry.create("ground");
+    _ = try registry.addComponent(ground, PositionC{
+        .pos = Vec2{ 0, 0 },
+    });
+    _ = try registry.addComponent(ground, RenderC{
+        .color = Vec3{ 0.2, 0.5, 0.3 },
+        .width = 100,
+        .height = 1,
+    });
 }
 
 var previous_time: f64 = undefined;
@@ -115,15 +152,10 @@ var ground_bbox: BBox = BBox{
     .width = 1,
     .height = 1,
 };
-var block_bbox: BBox = BBox{
-    .pos = Vec2{ 5, 1 },
-    .width = 1,
-    .height = 1,
-};
-var is_airborne: bool = false;
-var velocity: Vec2 = Vec2{ 0, 0 };
 
 export fn run(timestamp: f64) void {
+    defer input.frameCleanup();
+
     const delta = @floatCast(f32, timestamp - previous_time);
     defer previous_time = timestamp;
 
@@ -133,91 +165,147 @@ export fn run(timestamp: f64) void {
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
-    defer input.frameCleanup();
-
     // Input
-    if (keys[10].pressed) {
-        velocity[0] -= 8;
-        // wasm.post(.info, "Hello!\n", .{});
-    }
+    {
+        var view = registry.view(struct {
+            move_c: ?*MoveC,
+            decide_c: ?DecisionC,
+        });
 
-    if (keys[11].pressed) {
-        velocity[1] -= 8;
-        // wasm.post(.info, "Hello!\n", .{});
-    }
+        while (view.next()) |elem| {
+            const move_c = elem.move_c orelse continue;
+            const decide_c = elem.decide_c orelse continue;
 
-    if (keys[12].pressed) {
-        velocity[0] += 8;
-        // wasm.post(.info, "Hello!\n", .{});
-    }
+            if (decide_c != .player) continue;
 
-    if (keys[1].pressed) {
-        // block_bbox.pos[1] += 0.25;
-        velocity[1] += 8;
-        is_airborne = true;
-        // wasm.post(.info, "Hello {d:.2},{d:.2} {d:.1}x{d:.1}!\n", .{
-        //     block_screen_bbox.pos[0],
-        //     block_screen_bbox.pos[1],
-        //     block_screen_bbox.width,
-        //     block_screen_bbox.height,
-        // });
+            if (keys[10].pressed) {
+                move_c.velocity[0] -= 8;
+            }
+
+            if (keys[11].pressed) {
+                move_c.velocity[1] -= 8;
+            }
+
+            if (keys[12].pressed) {
+                move_c.velocity[0] += 8;
+            }
+
+            if (keys[1].pressed) {
+                move_c.velocity[1] += 8;
+                move_c.is_airborne = true;
+            }
+        }
     }
 
     // Gameplay
-    // applies a friction force when mario hits the ground.
-    block_bbox.pos += velocity * @splat(2, delta / 1000);
 
-    // const y = velocity[1];
-    // if ((y * y) > 1) {
-    //     wasm.post(.info, "{d:.2} {}", .{ y, delta });
-    // }
+    {
+        var view = registry.view(struct {
+            pos_c: ?*PositionC,
+            move_c: ?*MoveC,
+            render_c: ?RenderC,
+        });
 
-    // gravity
-    velocity[1] -= 0.014 * delta;
+        const groundY: f32 = 1;
+        while (view.next()) |elem| {
+            const pos_c = elem.pos_c orelse continue;
+            const move_c = elem.move_c orelse continue;
+            const render_c = elem.render_c orelse continue;
 
-    if (!is_airborne and velocity[0] != 0) {
-        // Friction is applied in the opposite direction of velocity
-        // You cannot gain speed in the opposite direction from friction
-        const friction: f32 = 0.05 * delta;
-        if (velocity[0] > 0) {
-            velocity[0] = std.math.clamp(velocity[0] - friction, 0, std.math.inf(f32));
-        } else {
-            velocity[0] = std.math.clamp(velocity[0] + friction, -std.math.inf(f32), 0);
+            pos_c.pos += move_c.velocity * @splat(2, delta / 1000); // move the thing
+            if (pos_c.pos[1] < groundY) {
+                if (move_c.is_airborne) {
+                    move_c.is_airborne = false;
+                }
+
+                pos_c.pos[1] = groundY;
+                move_c.velocity[1] = 0;
+            }
+
+            const cam_pos0 = camera.bbox.pos;
+            const cam_dims = Vec2{ camera.bbox.width, camera.bbox.height };
+            const cam_pos1 = cam_pos0 + cam_dims;
+            if (pos_c.pos[0] < cam_pos0[0]) {
+                pos_c.pos[0] = cam_pos0[0];
+                move_c.velocity[0] = 0;
+            }
+
+            if (pos_c.pos[0] + render_c.width > cam_pos1[0]) {
+                pos_c.pos[0] = cam_pos1[0] - render_c.width;
+                move_c.velocity[0] = 0;
+            }
+
+            if (pos_c.pos[1] < cam_pos0[1]) {
+                pos_c.pos[1] = cam_pos0[1];
+                move_c.velocity[1] = 0;
+            }
+
+            if (pos_c.pos[1] + render_c.height > cam_pos1[1]) {
+                pos_c.pos[1] = cam_pos1[1] - render_c.width;
+                move_c.velocity[1] = 0;
+            }
         }
     }
 
-    const groundY: f32 = ground_bbox.pos[1] + ground_bbox.height;
+    {
+        var view = registry.view(struct {
+            move_c: ?*MoveC,
+        });
 
-    if (block_bbox.pos[1] < groundY) {
-        if (is_airborne) {
-            is_airborne = false;
+        while (view.next()) |elem| {
+            const move = elem.move_c orelse continue;
+
+            move.velocity[1] -= 0.014 * delta;
+
+            // applies a friction force when mario hits the ground.
+            if (!move.is_airborne and move.velocity[0] != 0) {
+                // Friction is applied in the opposite direction of velocity
+                // You cannot gain speed in the opposite direction from friction
+                const friction: f32 = 0.05 * delta;
+                if (move.velocity[0] > 0) {
+                    move.velocity[0] = std.math.clamp(
+                        move.velocity[0] - friction,
+                        0,
+                        std.math.inf(f32),
+                    );
+                } else {
+                    move.velocity[0] = std.math.clamp(
+                        move.velocity[0] + friction,
+                        -std.math.inf(f32),
+                        0,
+                    );
+                }
+            }
         }
-
-        block_bbox.pos[1] = groundY;
-        velocity[1] = 0;
     }
 
     // Rendering
-    ext.fillStyle(0.2, 0.5, 0.3);
-    ground_bbox.width = camera.bbox.width;
+    {
+        var view = registry.view(struct {
+            pos_c: ?*PositionC,
+            render: ?*const RenderC,
+        });
 
-    const ground_screen_bbox = camera.getScreenBoundingBox(ground_bbox);
-    ext.fillRect(
-        @floatToInt(i32, ground_screen_bbox.pos[0]),
-        @floatToInt(i32, ground_screen_bbox.pos[1]),
-        @floatToInt(i32, ground_screen_bbox.width),
-        @floatToInt(i32, ground_screen_bbox.height),
-    );
+        while (view.next()) |elem| {
+            const pos_c = elem.pos_c orelse continue;
+            const render = elem.render orelse continue;
 
-    ext.fillStyle(0.6, 0.5, 0.4);
+            const color = render.color;
+            ext.fillStyle(color[0], color[1], color[2]);
+            const bbox = camera.getScreenBoundingBox(BBox{
+                .pos = pos_c.pos,
+                .width = render.width,
+                .height = render.height,
+            });
 
-    const block_screen_bbox = camera.getScreenBoundingBox(block_bbox);
-    ext.fillRect(
-        @floatToInt(i32, block_screen_bbox.pos[0]),
-        @floatToInt(i32, block_screen_bbox.pos[1]),
-        @floatToInt(i32, block_screen_bbox.width),
-        @floatToInt(i32, block_screen_bbox.height),
-    );
+            ext.fillRect(
+                @floatToInt(i32, bbox.pos[0]),
+                @floatToInt(i32, bbox.pos[1]),
+                @floatToInt(i32, bbox.width),
+                @floatToInt(i32, bbox.height),
+            );
+        }
+    }
 
     // USER INTERFACE
     ext.fillStyle(0.5, 0.5, 0.5);

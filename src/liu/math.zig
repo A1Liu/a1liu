@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const Vec2 = @Vector(2, f32);
 pub const Vec3 = @Vector(3, f32);
 
@@ -8,6 +10,12 @@ pub fn vec2Append(v: Vec2, third: f32) Vec3 {
     vec[2] = third;
 
     return vec;
+}
+
+pub fn norm2(v: Vec2) Vec2 {
+    const out = @reduce(.Sum, v * v);
+
+    return v / @sqrt(out);
 }
 
 pub fn cross(a: Vec3, b: Vec3) Vec3 {
