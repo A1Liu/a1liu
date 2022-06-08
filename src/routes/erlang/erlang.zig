@@ -6,6 +6,7 @@ const rows = input.rows;
 const keys = input.keys;
 
 // https://youtu.be/SFKR5rZBu-8?t=2202
+// https://stackoverflow.com/questions/22511158/how-to-profile-web-workers-in-chrome
 
 const wasm = liu.wasm;
 pub const WasmCommand = void;
@@ -27,11 +28,9 @@ const ext = struct {
 };
 
 const Camera = struct {
-    bbox: BBox = .{
-        .pos = Vec2{ 0, 0 },
-        .height = 10,
-        .width = 10,
-    },
+    pos: Vec2 = Vec2{ 0, 0 },
+    height: f32 = 10,
+    width: f32 = 10,
     world_to_pixel: f32 = 1,
 
     const Self = @This();
@@ -41,16 +40,16 @@ const Camera = struct {
     }
 
     pub fn setDims(self: *Self, pix_width: u32, pix_height: u32) void {
-        self.world_to_pixel = @intToFloat(f32, pix_height) / self.bbox.height;
-        self.bbox.width = @intToFloat(f32, pix_width) / self.world_to_pixel;
+        self.world_to_pixel = @intToFloat(f32, pix_height) / self.height;
+        self.width = @intToFloat(f32, pix_width) / self.world_to_pixel;
     }
 
     pub fn screenSpaceCoordinates(self: *const Self, pos: Vec2) Vec2 {
-        const pos_camera = pos - self.bbox.pos;
+        const pos_camera = pos - self.pos;
 
         const pos_canvas = Vec2{
             pos_camera[0] * self.world_to_pixel,
-            (self.bbox.height - pos_camera[1]) * self.world_to_pixel,
+            (self.height - pos_camera[1]) * self.world_to_pixel,
         };
 
         return pos_canvas;
@@ -85,6 +84,11 @@ const CollisionC = struct {
 
 const MoveC = struct {
     velocity: Vec2,
+};
+
+const ForceC = struct {
+    accel: Vec2,
+    friction: f32,
     is_airborne: bool = false,
 };
 
@@ -110,6 +114,7 @@ const Registry = liu.ecs.Registry(&.{
     RenderC,
     DecisionC,
     CollisionC,
+    ForceC,
 });
 
 fn initErr(timestamp: f64) !void {
@@ -138,6 +143,11 @@ fn initErr(timestamp: f64) !void {
             .velocity = Vec2{ 0, 0 },
         });
         _ = try registry.addComponent(box, DecisionC{ .player = {} });
+
+        _ = try registry.addComponent(box, ForceC{
+            .accel = Vec2{ 0, -0.014 },
+            .friction = 0.05,
+        });
     }
 
     const ground = try registry.create("ground");
@@ -197,17 +207,16 @@ export fn run(timestamp: f64) void {
 
             if (keys[1].pressed) {
                 move_c.velocity[1] += 8;
-                move_c.is_airborne = true;
             }
         }
     }
 
     // Gameplay
-
     {
         var view = registry.view(struct {
             pos_c: *PositionC,
             move_c: *MoveC,
+            force_c: *ForceC,
             collision_c: CollisionC,
         });
 
@@ -218,17 +227,16 @@ export fn run(timestamp: f64) void {
             const collision_c = elem.collision_c;
 
             pos_c.pos += move_c.velocity * @splat(2, delta / 1000); // move the thing
-            if (pos_c.pos[1] < groundY) {
-                if (move_c.is_airborne) {
-                    move_c.is_airborne = false;
-                }
 
+            const is_airborne = pos_c.pos[1] > groundY;
+            elem.force_c.is_airborne = is_airborne;
+            if (!is_airborne) {
                 pos_c.pos[1] = groundY;
                 move_c.velocity[1] = 0;
             }
 
-            const cam_pos0 = camera.bbox.pos;
-            const cam_dims = Vec2{ camera.bbox.width, camera.bbox.height };
+            const cam_pos0 = camera.pos;
+            const cam_dims = Vec2{ camera.width, camera.height };
             const cam_pos1 = cam_pos0 + cam_dims;
             if (pos_c.pos[0] < cam_pos0[0]) {
                 pos_c.pos[0] = cam_pos0[0];
@@ -255,19 +263,21 @@ export fn run(timestamp: f64) void {
     {
         var view = registry.view(struct {
             move_c: *MoveC,
+            force_c: ForceC,
         });
 
         while (view.next()) |elem| {
             const move = elem.move_c;
+            const force = elem.force_c;
 
             // apply gravity
-            move.velocity[1] -= 0.014 * delta;
+            move.velocity += force.accel * @splat(2, delta);
 
             // applies a friction force when mario hits the ground.
-            if (!move.is_airborne and move.velocity[0] != 0) {
+            if (!force.is_airborne and move.velocity[0] != 0) {
                 // Friction is applied in the opposite direction of velocity
                 // You cannot gain speed in the opposite direction from friction
-                const friction: f32 = 0.05 * delta;
+                const friction: f32 = force.friction * delta;
                 if (move.velocity[0] > 0) {
                     move.velocity[0] = std.math.clamp(
                         move.velocity[0] - friction,
@@ -289,7 +299,7 @@ export fn run(timestamp: f64) void {
     {
         var view = registry.view(struct {
             pos_c: *PositionC,
-            render: *const RenderC,
+            render: RenderC,
         });
 
         while (view.next()) |elem| {
