@@ -288,11 +288,11 @@ pub fn Registry(
             return true;
         }
 
-        pub fn addComponent(self: *Self, id: EntityId, component: anytype) !bool {
+        pub fn addComponent(self: *Self, id: EntityId, component: anytype) !void {
             const T = @TypeOf(component);
             if (T == Meta) @compileError("Tried to add a Meta component");
 
-            const index = self.indexOf(id) orelse return false;
+            const index = self.indexOf(id) orelse return;
 
             const Idx = comptime typeIndex(T) orelse
                 @compileError("Type not registered: " ++ @typeName(T));
@@ -304,7 +304,7 @@ pub fn Registry(
             const elements = self.raw(T);
             elements[index] = component;
 
-            return true;
+            return;
         }
 
         fn raw(self: *Self, comptime T: type) []T {

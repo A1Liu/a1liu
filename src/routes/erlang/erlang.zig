@@ -67,6 +67,8 @@ const Camera = struct {
     }
 };
 
+const norm_color: Vec3 = Vec3{ 0.6, 0.5, 0.4 };
+
 const RenderC = struct {
     color: Vec3,
     sprite_width: f32,
@@ -127,34 +129,34 @@ fn initErr(timestamp: f64) !void {
     var i: u32 = 0;
     while (i < 3) : (i += 1) {
         const box = try registry.create("box");
-        _ = try registry.addComponent(box, PositionC{
+        try registry.addComponent(box, PositionC{
             .pos = Vec2{ @intToFloat(f32, i) + 5, 1 },
         });
-        _ = try registry.addComponent(box, RenderC{
-            .color = Vec3{ 0.6, 0.5, 0.4 },
+        try registry.addComponent(box, RenderC{
+            .color = norm_color,
             .sprite_width = 0.5,
-            .sprite_height = 0.5,
+            .sprite_height = 0.75,
         });
-        _ = try registry.addComponent(box, CollisionC{
+        try registry.addComponent(box, CollisionC{
             .width = 0.5,
-            .height = 0.5,
+            .height = 0.75,
         });
-        _ = try registry.addComponent(box, MoveC{
+        try registry.addComponent(box, MoveC{
             .velocity = Vec2{ 0, 0 },
         });
-        _ = try registry.addComponent(box, DecisionC{ .player = {} });
+        try registry.addComponent(box, DecisionC{ .player = {} });
 
-        _ = try registry.addComponent(box, ForceC{
-            .accel = Vec2{ 0, -0.014 },
+        try registry.addComponent(box, ForceC{
+            .accel = Vec2{ 0, -14 },
             .friction = 0.05,
         });
     }
 
     const ground = try registry.create("ground");
-    _ = try registry.addComponent(ground, PositionC{
+    try registry.addComponent(ground, PositionC{
         .pos = Vec2{ 0, 0 },
     });
-    _ = try registry.addComponent(ground, RenderC{
+    try registry.addComponent(ground, RenderC{
         .color = Vec3{ 0.2, 0.5, 0.3 },
         .sprite_width = 100,
         .sprite_height = 1,
@@ -238,25 +240,16 @@ export fn run(timestamp: f64) void {
             const cam_pos0 = camera.pos;
             const cam_dims = Vec2{ camera.width, camera.height };
             const cam_pos1 = cam_pos0 + cam_dims;
-            if (pos_c.pos[0] < cam_pos0[0]) {
-                pos_c.pos[0] = cam_pos0[0];
+
+            const new_x = std.math.clamp(pos_c.pos[0], cam_pos0[0], cam_pos1[0] - collision_c.width);
+            if (new_x != pos_c.pos[0])
                 move_c.velocity[0] = 0;
-            }
+            pos_c.pos[0] = new_x;
 
-            if (pos_c.pos[0] + collision_c.width > cam_pos1[0]) {
-                pos_c.pos[0] = cam_pos1[0] - collision_c.width;
-                move_c.velocity[0] = 0;
-            }
-
-            if (pos_c.pos[1] < cam_pos0[1]) {
-                pos_c.pos[1] = cam_pos0[1];
+            const new_y = std.math.clamp(pos_c.pos[1], cam_pos0[1], cam_pos1[1] - collision_c.height);
+            if (new_y != pos_c.pos[1])
                 move_c.velocity[1] = 0;
-            }
-
-            if (pos_c.pos[1] + collision_c.height > cam_pos1[1]) {
-                pos_c.pos[1] = cam_pos1[1] - collision_c.width;
-                move_c.velocity[1] = 0;
-            }
+            pos_c.pos[1] = new_y;
         }
     }
 
@@ -271,7 +264,7 @@ export fn run(timestamp: f64) void {
             const force = elem.force_c;
 
             // apply gravity
-            move.velocity += force.accel * @splat(2, delta);
+            move.velocity += force.accel * @splat(2, delta / 1000);
 
             // applies a friction force when mario hits the ground.
             if (!force.is_airborne and move.velocity[0] != 0) {
