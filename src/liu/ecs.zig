@@ -69,10 +69,10 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
 
         const Iter = @This();
 
-        registry: *Reg,
+        registry: *const Reg,
         index: u32 = 0,
 
-        pub fn read(registry: *Reg, index: u32) ?ViewType {
+        pub fn read(registry: *const Reg, index: u32) ?ViewType {
             const meta = &registry.raw(Reg.Meta)[index];
 
             var value: ViewType = undefined;
@@ -84,22 +84,34 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 if (comptime std.mem.eql(u8, field.name, "meta")) continue;
 
                 const unwrapped = UnwrappedField(field.field_type);
+                if (unwrapped.is_optional) continue;
 
                 const Idx = comptime Reg.typeIndex(unwrapped.T) orelse
                     @compileError("field type not registered: " ++
                     "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
 
                 const is_set = meta.bitset.isSet(Idx);
+                if (!is_set) return null;
 
+                const ptr = &registry.raw(unwrapped.T)[index];
+                @field(value, field.name) = if (unwrapped.is_pointer) ptr else ptr.*;
+            }
+
+            inline for (std.meta.fields(ViewType)) |field| {
+                if (comptime std.mem.eql(u8, field.name, "id")) continue;
+                if (comptime std.mem.eql(u8, field.name, "meta")) continue;
+
+                const unwrapped = UnwrappedField(field.field_type);
+                if (!unwrapped.is_optional) continue;
+
+                const Idx = comptime Reg.typeIndex(unwrapped.T) orelse
+                    @compileError("field type not registered: " ++
+                    "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
+
+                const is_set = meta.bitset.isSet(Idx);
                 @field(value, field.name) = value: {
-                    if (!unwrapped.is_optional) {
-                        if (!is_set) {
-                            return null;
-                        }
-                    } else {
-                        if (!is_set) {
-                            break :value null;
-                        }
+                    if (!is_set) {
+                        break :value null;
                     }
 
                     const ptr = &registry.raw(unwrapped.T)[index];
@@ -307,7 +319,7 @@ pub fn Registry(
             return;
         }
 
-        fn raw(self: *Self, comptime T: type) []T {
+        fn raw(self: *const Self, comptime T: type) []T {
             if (comptime denseTypeIndex(T)) |Idx| {
                 var slice: []T = &.{};
                 slice.len = self.len;

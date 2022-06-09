@@ -110,7 +110,12 @@ const main = async (wasmRef: wasm.Ref) => {
     requestAnimationFrame(run);
   }
 
-  requestAnimationFrame(run);
+  function run1(timestamp: number) {
+    wasmRef.abi.setInitialTime(timestamp);
+    requestAnimationFrame(run);
+  }
+
+  requestAnimationFrame(run1);
 
   while (true) {
     const captured = await ctx.msgWait();
@@ -178,7 +183,7 @@ const init = async () => {
     break;
   }
 
-  wasmRef.abi.init(performance.now());
+  wasmRef.abi.init();
 
   main(wasmRef);
 };
