@@ -346,13 +346,6 @@ export fn run(timestamp: f64) void {
 
             pos_c.pos = new_pos;
 
-            // const is_airborne = pos_c.pos[1] > groundY;
-            // elem.force_c.is_airborne = is_airborne;
-            // if (!is_airborne) {
-            //     pos_c.pos[1] = groundY;
-            //     move_c.velocity[1] = 0;
-            // }
-
             const cam_pos0 = camera.pos;
             const cam_dims = Vec2{ camera.width, camera.height };
             const cam_pos1 = cam_pos0 + cam_dims;

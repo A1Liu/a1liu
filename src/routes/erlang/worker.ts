@@ -103,10 +103,6 @@ const main = async (wasmRef: wasm.Ref) => {
 
     wasmRef.abi.run(timestamp);
 
-    // Technically maybe we don't have to do this every frame if nothing updates.
-    // However, the media recorder seems to skip frames when we don't forcibly
-    // re-render at every opportunity. Oh well.
-    //                                - Albert Liu, May 15, 2022 Sun 02:25 EDT
     requestAnimationFrame(run);
   }
 
