@@ -1,9 +1,10 @@
 const std = @import("std");
 const liu = @import("liu");
 
-const input = @import("./input.zig");
-const rows = input.rows;
-const keys = input.keys;
+const util = @import("./util.zig");
+const rows = util.rows;
+const keys = util.keys;
+const camera: *util.Camera = &util.camera;
 
 // https://youtu.be/SFKR5rZBu-8?t=2202
 // https://stackoverflow.com/questions/22511158/how-to-profile-web-workers-in-chrome
@@ -39,51 +40,11 @@ pub const BBox = struct {
     }
 };
 
-const ext = struct {
-    extern fn fillStyle(r: f32, g: f32, b: f32) void;
-    extern fn fillRect(x: i32, y: i32, width: i32, height: i32) void;
-    extern fn setFont(font: wasm.Obj) void;
-    extern fn fillText(text: wasm.Obj, x: i32, y: i32) void;
-};
-
-const Camera = struct {
-    pos: Vec2 = Vec2{ 0, 0 },
-    height: f32 = 30,
-    width: f32 = 10,
-    world_to_pixel: f32 = 1,
-
-    const Self = @This();
-
-    pub fn init() Self {
-        return .{};
-    }
-
-    pub fn setDims(self: *Self, pix_width: u32, pix_height: u32) void {
-        self.world_to_pixel = @intToFloat(f32, pix_height) / self.height;
-        self.width = @intToFloat(f32, pix_width) / self.world_to_pixel;
-    }
-
-    pub fn screenSpaceCoordinates(self: *const Self, pos: Vec2) Vec2 {
-        const pos_camera = pos - self.pos;
-
-        const pos_canvas = Vec2{
-            pos_camera[0] * self.world_to_pixel,
-            (self.height - pos_camera[1]) * self.world_to_pixel,
-        };
-
-        return pos_canvas;
-    }
-
-    pub fn getScreenBoundingBox(self: *const Self, bbox: BBox) BBox {
-        const coords = self.screenSpaceCoordinates(bbox.pos);
-        const screen_height = bbox.height * self.world_to_pixel;
-
-        return BBox{
-            .pos = Vec2{ coords[0], coords[1] - screen_height },
-            .width = bbox.width * self.world_to_pixel,
-            .height = screen_height,
-        };
-    }
+pub const ext = struct {
+    pub extern fn fillStyle(r: f32, g: f32, b: f32) void;
+    pub extern fn fillRect(x: i32, y: i32, width: i32, height: i32) void;
+    pub extern fn setFont(font: wasm.Obj) void;
+    pub extern fn fillText(text: wasm.Obj, x: i32, y: i32) void;
 };
 
 const norm_color: Vec3 = Vec3{ 0.6, 0.5, 0.4 };
@@ -202,11 +163,9 @@ fn initErr() !void {
 var frame_id: u64 = 0;
 var start_time: f64 = undefined;
 var previous_time: f64 = undefined;
-var large_font: wasm.Obj = undefined;
-var small_font: wasm.Obj = undefined;
+pub var large_font: wasm.Obj = undefined;
+pub var small_font: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
-
-pub var camera: Camera = .{};
 
 export fn setInitialTime(timestamp: f64) void {
     start_time = timestamp;
@@ -214,10 +173,12 @@ export fn setInitialTime(timestamp: f64) void {
 }
 
 export fn run(timestamp: f64) void {
-    defer input.frameCleanup();
+    defer util.frameCleanup();
     defer frame_id += 1;
     defer previous_time = timestamp;
 
+    // Wait for a bit, because otherwise the world will start running before its
+    // visible
     if (timestamp - start_time < 300) {
         return;
     }
@@ -438,38 +399,5 @@ export fn run(timestamp: f64) void {
     }
 
     // USER INTERFACE
-    ext.fillStyle(0.5, 0.5, 0.5);
-
-    ext.setFont(large_font);
-
-    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / delta});
-    ext.fillText(fps_message, 5, 160);
-
-    ext.setFont(small_font);
-
-    var begin: u32 = 0;
-    var topY: i32 = 5;
-
-    for (rows) |row| {
-        var leftX = row.leftX;
-        const end = row.end;
-
-        for (keys[begin..row.end]) |key| {
-            const color: f32 = if (key.down) 0.3 else 0.5;
-            ext.fillStyle(color, color, color);
-
-            ext.fillRect(leftX, topY, 30, 30);
-
-            ext.fillStyle(1, 1, 1);
-            const s = &[_]u8{@truncate(u8, key.code)};
-            const letter = wasm.out.fmt("{s}", .{s});
-            ext.fillText(letter, leftX + 15, topY + 10);
-
-            leftX += 35;
-        }
-
-        topY += 35;
-
-        begin = end;
-    }
+    util.renderDebugInfo(delta);
 }
