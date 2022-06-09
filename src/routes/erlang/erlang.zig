@@ -48,7 +48,7 @@ const ext = struct {
 
 const Camera = struct {
     pos: Vec2 = Vec2{ 0, 0 },
-    height: f32 = 10,
+    height: f32 = 30,
     width: f32 = 10,
     world_to_pixel: f32 = 1,
 
@@ -172,7 +172,7 @@ fn initErr() !void {
 
     const bump = try registry.create("bump");
     try registry.addComponent(bump, PositionC{
-        .pos = Vec2{ 10, 1 },
+        .pos = Vec2{ 10, 4 },
     });
     try registry.addComponent(bump, CollisionC{
         .width = 1,
@@ -235,28 +235,40 @@ export fn run(timestamp: f64) void {
         var view = registry.view(struct {
             move_c: *MoveC,
             decide_c: DecisionC,
+            force_c: ForceC,
         });
 
         while (view.next()) |elem| {
             const move_c = elem.move_c;
-            const decide_c = elem.decide_c;
 
-            if (decide_c != .player) continue;
-
-            if (keys[10].pressed) {
-                move_c.velocity[0] -= 8;
-            }
+            if (elem.decide_c != .player) continue;
 
             if (keys[11].pressed) {
                 move_c.velocity[1] -= 8;
             }
 
-            if (keys[12].pressed) {
-                move_c.velocity[0] += 8;
-            }
-
             if (keys[1].pressed) {
                 move_c.velocity[1] += 8;
+            }
+
+            if (elem.force_c.is_airborne) {
+                if (keys[10].pressed) {
+                    move_c.velocity[0] -= 8;
+                }
+
+                if (keys[12].pressed) {
+                    move_c.velocity[0] += 8;
+                }
+            } else {
+                if (keys[10].down) {
+                    move_c.velocity[0] -= 8;
+                    move_c.velocity[0] = std.math.clamp(move_c.velocity[0], -8, 0);
+                }
+
+                if (keys[12].down) {
+                    move_c.velocity[0] += 8;
+                    move_c.velocity[0] = std.math.clamp(move_c.velocity[0], 0, 8);
+                }
             }
         }
     }

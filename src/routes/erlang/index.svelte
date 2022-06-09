@@ -22,10 +22,10 @@
           break;
 
         default:
-          // if (typeof message.data === "string") {
-          //   const color = ToastColors[message.kind] ?? "info";
-          //   addToast(color, null, message.data);
-          // }
+          if (typeof message.data === "string") {
+            const color = ToastColors[message.kind] ?? "info";
+            addToast(color, null, message.data);
+          }
 
           console.log(message.data);
           break;
@@ -53,7 +53,7 @@
   });
 </script>
 
-<Toast />
+<Toast location={'top-right'} />
 
 <div
   class="wrapper"
@@ -82,8 +82,7 @@
   }}
   on:keydown={(evt) => {
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
-    if (evt.ctrlKey) return;
-    if (evt.metaKey) return;
+    if (evt.ctrlKey || evt.metaKey) return;
 
     if (!canvas) return;
     if (evt.target !== canvas) return;
@@ -92,8 +91,7 @@
   }}
   on:keyup={(evt) => {
     if (evt.isComposing || evt.keyCode === 229) return;
-    if (evt.ctrlKey) return;
-    if (evt.metaKey) return;
+    if (evt.ctrlKey || evt.metaKey) return;
 
     if (!canvas) return;
     if (evt.target !== canvas) return;

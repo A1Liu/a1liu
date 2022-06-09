@@ -1,6 +1,8 @@
 <script lang="ts" context="module">
   import { writable } from "svelte/store";
 
+  export type ToastLocation = "bottom-left" | "top-right";
+
   interface ToastData {
     color: string;
     text: string;
@@ -76,10 +78,18 @@
 </script>
 
 <script lang="ts">
+  export let location: ToastLocation = "bottom-left";
+
   $: ({ toasts, toastId } = $store);
 </script>
 
-<div class="toastCorner">
+<div
+  class="toastCorner"
+  class:toastTop={location.includes(  "top")}
+  class:toastBottom={location.includes("bottom")}
+  class:toastLeft={location.includes("left")}
+  class:toastRight={location.includes("right")}
+>
   <div class="toastContent">
     {#each toasts as { color, text }, idx (idx + toastId)}
       <div class="toast" style={`background-color: ${color}`}>
@@ -90,10 +100,24 @@
 </div>
 
 <style lang="postcss">
+  .toastTop {
+    top: 8px;
+  }
+
+  .toastBottom {
+    bottom: 8px;
+  }
+
+  .toastLeft {
+    left: 8px;
+  }
+
+  .toastRight {
+    right: 8px;
+  }
+
   .toastCorner {
     position: fixed;
-    left: 8px;
-    bottom: 8px;
     z-index: 10000;
     width: 300px;
 
