@@ -1,4 +1,4 @@
-name: Build and Deploy to Github Pages
+name: Build Static Pages
 
 on:
   workflow_dispatch:
