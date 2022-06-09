@@ -134,10 +134,11 @@ const init = async () => {
         gglRef.current.ctx.fillText(text, x, y);
       },
 
-      fillStyle: (r: number, g: number, b: number) => {
-        gglRef.current.ctx.fillStyle = `rgb(${Math.floor(
-          255 * r
-        )}, ${Math.floor(255 * g)}, ${Math.floor(255 * b)})`;
+      fillStyle: (rF: number, gF: number, bF: number, a: number) => {
+        gglRef.current.ctx.globalAlpha = a;
+        const [r, g, b] = [rF, gF, bF].map(Math.floor);
+
+        gglRef.current.ctx.fillStyle = `rgba(${r},${g},${b})`;
       },
 
       fillRect: (x: number, y: number, width: number, height: number) => {

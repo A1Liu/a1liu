@@ -4,7 +4,7 @@ const liu = @import("liu");
 const util = @import("./util.zig");
 const rows = util.rows;
 const keys = util.keys;
-const camera: *util.Camera = &util.camera;
+const camera = util.camera;
 
 // https://youtu.be/SFKR5rZBu-8?t=2202
 // https://stackoverflow.com/questions/22511158/how-to-profile-web-workers-in-chrome
@@ -15,6 +15,7 @@ pub usingnamespace wasm;
 
 const Vec2 = liu.Vec2;
 const Vec3 = liu.Vec3;
+const Vec4 = liu.Vec4;
 pub const BBox = struct {
     pos: Vec2,
     width: f32,
@@ -41,16 +42,14 @@ pub const BBox = struct {
 };
 
 pub const ext = struct {
-    pub extern fn fillStyle(r: f32, g: f32, b: f32) void;
+    pub extern fn fillStyle(r: f32, g: f32, b: f32, a: f32) void;
     pub extern fn fillRect(x: i32, y: i32, width: i32, height: i32) void;
     pub extern fn setFont(font: wasm.Obj) void;
     pub extern fn fillText(text: wasm.Obj, x: i32, y: i32) void;
 };
 
-const norm_color: Vec3 = Vec3{ 0.6, 0.5, 0.4 };
-
 const RenderC = struct {
-    color: Vec3,
+    color: Vec4,
     sprite_width: f32,
     sprite_height: f32,
 };
@@ -78,10 +77,6 @@ const DecisionC = union(enum) {
     player: void,
 };
 
-export fn setDims(posX: u32, posY: u32) void {
-    camera.setDims(posX, posY);
-}
-
 export fn init() void {
     wasm.initIfNecessary();
 
@@ -99,6 +94,7 @@ const Registry = liu.ecs.Registry(&.{
     ForceC,
 });
 
+const norm_color: Vec4 = Vec4{ 0.5, 0.5, 0.5, 0.6 };
 fn initErr() !void {
     large_font = wasm.make.fmt(.manual, "bold 48px sans-serif", .{});
     small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
@@ -107,12 +103,15 @@ fn initErr() !void {
 
     var i: u32 = 0;
     while (i < 3) : (i += 1) {
+        var color = norm_color;
+        color[i] = 1;
+
         const box = try registry.create("box");
         try registry.addComponent(box, PositionC{
             .pos = Vec2{ @intToFloat(f32, i) + 5, 3 },
         });
         try registry.addComponent(box, RenderC{
-            .color = norm_color,
+            .color = color,
             .sprite_width = 0.5,
             .sprite_height = 3,
         });
@@ -140,7 +139,7 @@ fn initErr() !void {
         .height = 1,
     });
     try registry.addComponent(bump, RenderC{
-        .color = Vec3{ 0.1, 0.5, 0.3 },
+        .color = Vec4{ 0.1, 0.5, 0.3, 1 },
         .sprite_width = 1,
         .sprite_height = 1,
     });
@@ -154,7 +153,7 @@ fn initErr() !void {
         .height = 1,
     });
     try registry.addComponent(ground, RenderC{
-        .color = Vec3{ 0.2, 0.5, 0.3 },
+        .color = Vec4{ 0.2, 0.5, 0.3, 1 },
         .sprite_width = 100,
         .sprite_height = 1,
     });
@@ -177,11 +176,9 @@ export fn run(timestamp: f64) void {
     defer frame_id += 1;
     defer previous_time = timestamp;
 
-    // Wait for a bit, because otherwise the world will start running before its
-    // visible
-    if (timestamp - start_time < 300) {
-        return;
-    }
+    // Wait for a bit, because otherwise the world will start running
+    // before its visible
+    if (timestamp - start_time < 300) return;
 
     const delta = @floatCast(f32, timestamp - previous_time);
 
@@ -250,8 +247,8 @@ export fn run(timestamp: f64) void {
             pos_c: PositionC,
             collision_c: CollisionC,
 
+            move_c: ?*const MoveC,
             force_c: ?*ForceC,
-            move_c: ?*MoveC,
         };
 
         var stable = registry.view(StableObject);
@@ -282,7 +279,6 @@ export fn run(timestamp: f64) void {
                 // No move/force component means it can't even be made to move, so we'll
                 // think of it as a stable piece of the environment
                 if (solid.force_c != null) continue;
-                if (solid.move_c != null) continue;
 
                 const found = BBox{
                     .pos = solid.pos_c.pos,
@@ -382,7 +378,7 @@ export fn run(timestamp: f64) void {
             const render = elem.render;
 
             const color = render.color;
-            ext.fillStyle(color[0], color[1], color[2]);
+            ext.fillStyle(color[0], color[1], color[2], color[3]);
             const bbox = camera.getScreenBoundingBox(BBox{
                 .pos = pos_c.pos,
                 .width = render.sprite_width,

@@ -6,7 +6,8 @@ const BBox = erlang.BBox;
 const wasm = liu.wasm;
 const Vec2 = liu.Vec2;
 
-pub var camera: Camera = .{};
+pub const camera: *const Camera = &camera_data;
+var camera_data: Camera = .{};
 
 pub fn frameCleanup() void {
     for (key_data) |*k| {
@@ -17,7 +18,7 @@ pub fn frameCleanup() void {
 }
 
 pub fn renderDebugInfo(delta: f64) void {
-    ext.fillStyle(0.5, 0.5, 0.5);
+    ext.fillStyle(0.5, 0.5, 0.5, 1);
 
     ext.setFont(erlang.large_font);
 
@@ -35,11 +36,11 @@ pub fn renderDebugInfo(delta: f64) void {
 
         for (keys[begin..row.end]) |key| {
             const color: f32 = if (key.down) 0.3 else 0.5;
-            ext.fillStyle(color, color, color);
+            ext.fillStyle(color, color, color, 1);
 
             ext.fillRect(leftX, topY, 30, 30);
 
-            ext.fillStyle(1, 1, 1);
+            ext.fillStyle(1, 1, 1, 1);
             const s = &[_]u8{@truncate(u8, key.code)};
             const letter = wasm.out.fmt("{s}", .{s});
             ext.fillText(letter, leftX + 15, topY + 10);
@@ -157,9 +158,13 @@ pub const Camera = struct {
     }
 };
 
+export fn setDims(posX: u32, posY: u32) void {
+    camera_data.setDims(posX, posY);
+}
+
 export fn onMove(posX: f32, posY: f32) void {
     const pos = Vec2{ posX, posY };
-    const world_pos = camera.screenToWorldCoordinates(pos);
+    const world_pos = camera_data.screenToWorldCoordinates(pos);
 
     mouse_data.pos = world_pos;
 }
@@ -170,8 +175,7 @@ export fn onClick(posX: f32, posY: f32) void {
 }
 
 export fn onRightClick(posX: f32, posY: f32) void {
-    _ = posX;
-    _ = posY;
+    onMove(posX, posY);
 }
 
 export fn onKey(down: bool, code: u32) void {

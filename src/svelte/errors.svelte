@@ -85,7 +85,7 @@
 
 <div
   class="toastCorner"
-  class:toastTop={location.includes(  "top")}
+  class:toastTop={location.includes("top")}
   class:toastBottom={location.includes("bottom")}
   class:toastLeft={location.includes("left")}
   class:toastRight={location.includes("right")}

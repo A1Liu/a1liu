@@ -53,7 +53,7 @@
   });
 </script>
 
-<Toast location={'top-right'} />
+<Toast location={"top-right"} />
 
 <div
   class="wrapper"
