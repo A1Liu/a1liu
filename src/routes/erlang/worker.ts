@@ -136,7 +136,7 @@ const init = async () => {
 
       fillStyle: (rF: number, gF: number, bF: number, a: number) => {
         gglRef.current.ctx.globalAlpha = a;
-        const [r, g, b] = [rF, gF, bF].map(Math.floor);
+        const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
 
         gglRef.current.ctx.fillStyle = `rgba(${r},${g},${b})`;
       },
