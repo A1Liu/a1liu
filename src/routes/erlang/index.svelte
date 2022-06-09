@@ -82,6 +82,8 @@
   }}
   on:keydown={(evt) => {
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
+    if (evt.ctrlKey) return;
+    if (evt.metaKey) return;
 
     if (!canvas) return;
     if (evt.target !== canvas) return;
@@ -90,6 +92,8 @@
   }}
   on:keyup={(evt) => {
     if (evt.isComposing || evt.keyCode === 229) return;
+    if (evt.ctrlKey) return;
+    if (evt.metaKey) return;
 
     if (!canvas) return;
     if (evt.target !== canvas) return;
