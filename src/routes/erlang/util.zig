@@ -111,6 +111,12 @@ const MouseData = struct {
     clicked: bool = false,
 };
 
+pub fn moveCamera(pos: Vec2) void {
+    camera_data.pos = pos - Vec2{ camera_data.width / 2, camera_data.height / 2 };
+}
+
+// multiple cameras at once?
+
 pub const Camera = struct {
     pos: Vec2 = Vec2{ 0, 0 },
     height: f32 = 30,

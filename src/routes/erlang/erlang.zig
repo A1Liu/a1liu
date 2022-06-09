@@ -94,7 +94,7 @@ const Registry = liu.ecs.Registry(&.{
     ForceC,
 });
 
-const norm_color: Vec4 = Vec4{ 0.5, 0.5, 0.5, 0.6 };
+const norm_color: Vec4 = Vec4{ 0.3, 0.3, 0.3, 0.6 };
 fn initErr() !void {
     large_font = wasm.make.fmt(.manual, "bold 48px sans-serif", .{});
     small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
@@ -363,6 +363,21 @@ export fn run(timestamp: f64) void {
                     );
                 }
             }
+        }
+    }
+
+    // Camera Lock
+    {
+        var view = registry.view(struct {
+            pos_c: PositionC,
+            decision_c: DecisionC,
+        });
+
+        while (view.next()) |elem| {
+            if (elem.decision_c != .player) continue;
+
+            util.moveCamera(elem.pos_c.pos);
+            break;
         }
     }
 
