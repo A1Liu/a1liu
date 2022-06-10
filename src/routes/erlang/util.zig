@@ -16,7 +16,8 @@ pub fn frameCleanup() void {
     }
     mouse_data.scroll_dist = Vec2{ 0, 0 };
     mouse_data.scroll_tick = @Vector(2, i32){ 0, 0 };
-    mouse_data.clicked = false;
+    mouse_data.left_clicked = false;
+    mouse_data.right_clicked = false;
 }
 
 pub const mouse: *const MouseData = &mouse_data;
@@ -75,7 +76,8 @@ const MouseData = struct {
     pos: Vec2 = Vec2{ 0, 0 },
     scroll_dist: Vec2 = Vec2{ 0, 0 },
     scroll_tick: @Vector(2, i32) = @Vector(2, i32){ 0, 0 },
-    clicked: bool = false,
+    left_clicked: bool = false,
+    right_clicked: bool = false,
 };
 
 pub fn moveCamera(pos: Vec2) void {
@@ -163,11 +165,12 @@ export fn onMove(posX: f32, posY: f32) void {
 
 export fn onClick(posX: f32, posY: f32) void {
     onMove(posX, posY);
-    mouse_data.clicked = true;
+    mouse_data.left_clicked = true;
 }
 
 export fn onRightClick(posX: f32, posY: f32) void {
     onMove(posX, posY);
+    mouse_data.right_clicked = true;
 }
 
 export fn onKey(down: bool, code: u32) void {

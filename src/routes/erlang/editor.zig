@@ -93,7 +93,7 @@ pub const ClickTool = struct {
     }
 
     pub fn frame(self: *@This()) void {
-        if (!mouse.clicked) return;
+        if (!mouse.left_clicked) return;
         _ = self;
 
         const pos = @floor(mouse.pos);
@@ -118,7 +118,17 @@ pub const LineTool = struct {
     pub fn frame(self: *@This()) void {
         const pos = @floor(mouse.pos);
 
-        if (mouse.clicked) {
+        if (mouse.right_clicked) {
+            if (self.data) |data| {
+                _ = erlang.registry.delete(data.entity);
+            }
+
+            self.data = null;
+
+            return;
+        }
+
+        if (mouse.left_clicked) {
             if (self.data != null) {
                 self.data = null;
             } else {
@@ -160,7 +170,6 @@ pub const LineTool = struct {
         };
 
         {
-            // TODO check collisions
             var view = erlang.registry.view(struct {
                 pos_c: erlang.PositionC,
                 collision_c: erlang.CollisionC,
@@ -203,7 +212,7 @@ pub const DrawTool = struct {
     }
 
     pub fn frame(self: *@This()) void {
-        if (mouse.clicked) {
+        if (mouse.left_clicked) {
             self.drawing = !self.drawing;
         }
 
