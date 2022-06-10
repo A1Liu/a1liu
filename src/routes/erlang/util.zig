@@ -7,53 +7,128 @@ const BBox = erlang.BBox;
 const wasm = liu.wasm;
 const Vec2 = liu.Vec2;
 
+pub const KeyCode = enum(u8) {
+    space = 32,
+
+    comma = 44,
+    period = 46,
+    slash = 47,
+
+    digit0,
+    digit1,
+    digit2,
+    digit3,
+    digit4,
+    digit5,
+    digit6,
+    digit7,
+    digit8,
+    digit9,
+
+    semicolon = 59,
+
+    key_a = 65,
+    key_b,
+    key_c,
+    key_d,
+    key_e,
+    key_f,
+    key_g,
+    key_h,
+    key_i,
+    key_j,
+    key_k,
+    key_l,
+    key_m,
+    key_n,
+    key_o,
+    key_p,
+    key_q,
+    key_r,
+    key_s,
+    key_t,
+    key_u,
+    key_v,
+    key_w,
+    key_x,
+    key_y,
+    key_z,
+
+    pub fn code(self: @This()) u8 {
+        return @enumToInt(self);
+    }
+};
+
 pub const camera: *const Camera = &camera_data;
 pub const rows: [3]KeyRow = .{
-    .{ .end = 10, .leftX = 5 },
-    .{ .end = 19, .leftX = 11 },
-    .{ .end = 26, .leftX = 27 },
+    .{
+        .leftX = 5,
+        .keys = &[_]KeyCode{
+            .key_q,
+            .key_w,
+            .key_e,
+            .key_r,
+            .key_t,
+            .key_y,
+            .key_u,
+            .key_i,
+            .key_o,
+            .key_p,
+        },
+    },
+    .{
+        .leftX = 11,
+        .keys = &[_]KeyCode{
+            .key_a,
+            .key_s,
+            .key_d,
+            .key_f,
+            .key_g,
+            .key_h,
+            .key_j,
+            .key_k,
+            .key_l,
+            .semicolon,
+        },
+    },
+    .{
+        .leftX = 27,
+        .keys = &[_]KeyCode{
+            .key_z,
+            .key_x,
+            .key_c,
+            .key_v,
+            .key_b,
+            .key_n,
+            .key_m,
+            .comma,
+            .period,
+            .slash,
+        },
+    },
 };
 
 var frame_id: u64 = 0;
 var camera_data: Camera = .{};
 var time: f64 = undefined;
+var key_data: [256]KeyInfo = [_]KeyInfo{.{}} ** 256;
 var mouse_data: MouseData = .{};
-var key_data: [26]KeyBox = [_]KeyBox{
-    .{ .code = 'Q' },
-    .{ .code = 'W' },
-    .{ .code = 'E' },
-    .{ .code = 'R' },
-    .{ .code = 'T' },
-    .{ .code = 'Y' },
-    .{ .code = 'U' },
-    .{ .code = 'I' },
-    .{ .code = 'O' },
-    .{ .code = 'P' },
 
-    .{ .code = 'A' },
-    .{ .code = 'S' },
-    .{ .code = 'D' },
-    .{ .code = 'F' },
-    .{ .code = 'G' },
-    .{ .code = 'H' },
-    .{ .code = 'J' },
-    .{ .code = 'K' },
-    .{ .code = 'L' },
-
-    .{ .code = 'Z' },
-    .{ .code = 'X' },
-    .{ .code = 'C' },
-    .{ .code = 'V' },
-    .{ .code = 'B' },
-    .{ .code = 'N' },
-    .{ .code = 'M' },
+const KeyInfo = struct {
+    pressed: bool = false,
+    down: bool = false,
 };
 
 pub const FrameInput = struct {
     frame_id: u64,
     delta: f32,
-    keys: []const KeyBox,
     mouse: *const MouseData,
+
+    pub fn key(self: *const @This(), code: KeyCode) KeyInfo {
+        _ = self;
+
+        return key_data[code.code()];
+    }
 };
 
 pub fn init(timestamp: f64) void {
@@ -64,7 +139,6 @@ pub fn frameStart(timestamp: f64) FrameInput {
     const value = FrameInput{
         .frame_id = frame_id,
         .delta = @floatCast(f32, timestamp - time),
-        .keys = &key_data,
         .mouse = &mouse_data,
     };
 
@@ -85,14 +159,8 @@ pub fn frameCleanup() void {
     mouse_data.right_clicked = false;
 }
 
-const KeyBox = struct {
-    code: u32,
-    pressed: bool = false,
-    down: bool = false,
-};
-
 const KeyRow = struct {
-    end: u32,
+    keys: []const KeyCode,
     leftX: i32,
 };
 
@@ -217,20 +285,8 @@ export fn onRightClick(posX: f32, posY: f32) void {
     mouse_data.right_clicked = true;
 }
 
-export fn onKey(down: bool, code: u32) void {
-    var begin: u32 = 0;
-
-    for (rows) |row| {
-        const end = row.end;
-
-        for (key_data[begin..row.end]) |*key| {
-            if (code == key.code) {
-                key.pressed = down;
-                key.down = down;
-                return;
-            }
-        }
-
-        begin = end;
-    }
+export fn onKey(down: bool, code: u8) void {
+    const key = &key_data[code];
+    key.pressed = down;
+    key.down = down;
 }

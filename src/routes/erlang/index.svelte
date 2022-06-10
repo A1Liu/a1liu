@@ -3,6 +3,7 @@
   import MyWorker from "./worker?worker";
   import Toast, { ToastColors, addToast } from "@lib/svelte/errors.svelte";
   import * as wasm from "@lib/ts/wasm";
+  import { KeyId } from "@lib/ts/input";
 
   let worker = undefined;
   let canvas: any = undefined;
@@ -96,7 +97,8 @@
     if (!canvas) return;
     if (evt.target !== canvas) return;
 
-    worker.postMessage({ kind: "keydown", data: evt.keyCode });
+    const data = KeyId[evt.code] ?? 0;
+    worker.postMessage({ kind: "keydown", data });
   }}
   on:keyup={(evt) => {
     if (evt.isComposing || evt.keyCode === 229) return;
@@ -105,7 +107,8 @@
     if (!canvas) return;
     if (evt.target !== canvas) return;
 
-    worker.postMessage({ kind: "keyup", data: evt.keyCode });
+    const data = KeyId[evt.code] ?? 0;
+    worker.postMessage({ kind: "keyup", data });
   }}
 >
   <canvas

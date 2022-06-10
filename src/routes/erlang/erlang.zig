@@ -249,29 +249,29 @@ export fn run(timestamp: f64) void {
 
             if (elem.decide_c != .player) continue;
 
-            if (input.keys[11].pressed) {
+            if (input.key(.key_s).pressed) {
                 move_c.velocity[1] -= 8;
             }
 
-            if (input.keys[1].pressed) {
+            if (input.key(.key_w).pressed) {
                 move_c.velocity[1] += 8;
             }
 
             if (elem.force_c.is_airborne) {
-                if (input.keys[10].pressed) {
+                if (input.key(.key_a).pressed) {
                     move_c.velocity[0] -= 8;
                 }
 
-                if (input.keys[12].pressed) {
+                if (input.key(.key_d).pressed) {
                     move_c.velocity[0] += 8;
                 }
             } else {
-                if (input.keys[10].down) {
+                if (input.key(.key_a).down) {
                     move_c.velocity[0] -= 8;
                     move_c.velocity[0] = std.math.clamp(move_c.velocity[0], -8, 0);
                 }
 
-                if (input.keys[12].down) {
+                if (input.key(.key_d).down) {
                     move_c.velocity[0] += 8;
                     move_c.velocity[0] = std.math.clamp(move_c.velocity[0], 0, 8);
                 }
@@ -504,24 +504,19 @@ pub fn renderDebugInfo(input: util.FrameInput) void {
 
     ext.setFont(small_font);
 
-    // Show other tools in line
-    // ext.fillStyle(0.7, 0.7, 0.7, 1);
-
-    var begin: u32 = 0;
     var topY: i32 = 5;
 
     for (rows) |row| {
         var leftX = row.leftX;
-        const end = row.end;
 
-        for (input.keys[begin..row.end]) |key| {
-            const color: f32 = if (key.down) 0.3 else 0.5;
+        for (row.keys) |key| {
+            const color: f32 = if (input.key(key).down) 0.3 else 0.5;
             ext.fillStyle(color, color, color, 1);
 
             ext.fillRect(leftX, topY, 30, 30);
 
             ext.fillStyle(1, 1, 1, 1);
-            const s = &[_]u8{@truncate(u8, key.code)};
+            const s = &[_]u8{key.code()};
             const letter = wasm.out.fmt("{s}", .{s});
             ext.fillText(letter, leftX + 15, topY + 10);
 
@@ -529,7 +524,5 @@ pub fn renderDebugInfo(input: util.FrameInput) void {
         }
 
         topY += 35;
-
-        begin = end;
     }
 }
