@@ -2,10 +2,6 @@ const std = @import("std");
 const liu = @import("liu");
 
 const util = @import("./util.zig");
-const mouse = util.mouse;
-const rows = util.rows;
-const keys = util.keys;
-const camera = util.camera;
 
 const erlang = @import("./erlang.zig");
 const ext = erlang.ext;
@@ -19,7 +15,7 @@ pub const Tool = struct {
     const Self = @This();
 
     const VTable = struct {
-        frame: fn (self: *anyopaque) void,
+        frame: fn (self: *anyopaque, input: util.FrameInput) void,
         reset: fn (self: *anyopaque) void,
     };
 
@@ -60,8 +56,8 @@ pub const Tool = struct {
         return self.vtable.reset(self.ptr);
     }
 
-    pub fn frame(self: *Self) void {
-        return self.vtable.frame(self.ptr);
+    pub fn frame(self: *Self, input: util.FrameInput) void {
+        return self.vtable.frame(self.ptr, input);
     }
 };
 
@@ -92,11 +88,11 @@ pub const ClickTool = struct {
         _ = self;
     }
 
-    pub fn frame(self: *@This()) void {
-        if (!mouse.left_clicked) return;
+    pub fn frame(self: *@This(), input: util.FrameInput) void {
+        if (!input.mouse.left_clicked) return;
         _ = self;
 
-        const pos = @floor(mouse.pos);
+        const pos = @floor(input.mouse.pos);
         _ = makeBox(pos) catch return;
     }
 };
@@ -115,10 +111,10 @@ pub const LineTool = struct {
         _ = erlang.registry.delete(data.entity);
     }
 
-    pub fn frame(self: *@This()) void {
-        const pos = @floor(mouse.pos);
+    pub fn frame(self: *@This(), input: util.FrameInput) void {
+        const pos = @floor(input.mouse.pos);
 
-        if (mouse.right_clicked) {
+        if (input.mouse.right_clicked) {
             if (self.data) |data| {
                 _ = erlang.registry.delete(data.entity);
             }
@@ -128,7 +124,7 @@ pub const LineTool = struct {
             return;
         }
 
-        if (mouse.left_clicked) {
+        if (input.mouse.left_clicked) {
             if (self.data != null) {
                 self.data = null;
             } else {
@@ -211,15 +207,15 @@ pub const DrawTool = struct {
         self.drawing = false;
     }
 
-    pub fn frame(self: *@This()) void {
-        if (mouse.left_clicked) {
+    pub fn frame(self: *@This(), input: util.FrameInput) void {
+        if (input.mouse.left_clicked) {
             self.drawing = !self.drawing;
         }
 
         if (!self.drawing) return;
 
-        const pos = @floor(mouse.pos);
-        const pos1 = @ceil(mouse.pos);
+        const pos = @floor(input.mouse.pos);
+        const pos1 = @ceil(input.mouse.pos);
         const bbox = BBox{
             .pos = pos,
             .width = pos1[0] - pos[0],

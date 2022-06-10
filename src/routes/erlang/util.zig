@@ -8,28 +8,16 @@ const wasm = liu.wasm;
 const Vec2 = liu.Vec2;
 
 pub const camera: *const Camera = &camera_data;
-var camera_data: Camera = .{};
-
-pub fn frameCleanup() void {
-    for (key_data) |*k| {
-        k.pressed = false;
-    }
-    mouse_data.scroll_dist = Vec2{ 0, 0 };
-    mouse_data.scroll_tick = @Vector(2, i32){ 0, 0 };
-    mouse_data.left_clicked = false;
-    mouse_data.right_clicked = false;
-}
-
-pub const mouse: *const MouseData = &mouse_data;
-pub const keys: []const KeyBox = &key_data;
 pub const rows: [3]KeyRow = .{
     .{ .end = 10, .leftX = 5 },
     .{ .end = 19, .leftX = 11 },
     .{ .end = 26, .leftX = 27 },
 };
 
+var frame_id: u64 = 0;
+var camera_data: Camera = .{};
+var time: f64 = undefined;
 var mouse_data: MouseData = .{};
-
 var key_data: [26]KeyBox = [_]KeyBox{
     .{ .code = 'Q' },
     .{ .code = 'W' },
@@ -61,6 +49,42 @@ var key_data: [26]KeyBox = [_]KeyBox{
     .{ .code = 'M' },
 };
 
+pub const FrameInput = struct {
+    frame_id: u64,
+    delta: f32,
+    keys: []const KeyBox,
+    mouse: *const MouseData,
+};
+
+pub fn init(timestamp: f64) void {
+    time = timestamp;
+}
+
+pub fn frameStart(timestamp: f64) FrameInput {
+    const value = FrameInput{
+        .frame_id = frame_id,
+        .delta = @floatCast(f32, timestamp - time),
+        .keys = &key_data,
+        .mouse = &mouse_data,
+    };
+
+    time = timestamp;
+    frame_id += 1;
+
+    return value;
+}
+
+pub fn frameCleanup() void {
+    for (key_data) |*k| {
+        k.pressed = false;
+    }
+
+    mouse_data.scroll_dist = Vec2{ 0, 0 };
+    mouse_data.scroll_tick = @Vector(2, i32){ 0, 0 };
+    mouse_data.left_clicked = false;
+    mouse_data.right_clicked = false;
+}
+
 const KeyBox = struct {
     code: u32,
     pressed: bool = false,
@@ -83,6 +107,25 @@ const MouseData = struct {
 pub fn moveCamera(pos: Vec2) void {
     camera_data.pos = pos - Vec2{ camera_data.width / 2, camera_data.height / 2 };
 }
+
+pub const Timer = struct {
+    previous: f64,
+
+    pub fn init() @This() {
+        return .{ .previous = time };
+    }
+
+    pub fn elapsed(self: @This()) f32 {
+        return @floatCast(f32, time - self.previous);
+    }
+
+    pub fn lap(self: @This()) f32 {
+        const delta = self.elapsed();
+        self.previous = time;
+
+        return delta;
+    }
+};
 
 // multiple cameras at once? LOL you can addd a CameraC to ECS registry:
 //

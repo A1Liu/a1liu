@@ -4,9 +4,7 @@ const liu = @import("liu");
 const editor = @import("./editor.zig");
 
 const util = @import("./util.zig");
-const mouse = util.mouse;
 const rows = util.rows;
-const keys = util.keys;
 const camera = util.camera;
 
 // https://youtu.be/SFKR5rZBu-8?t=2202
@@ -190,9 +188,7 @@ fn initErr() !void {
     });
 }
 
-var frame_id: u64 = 0;
-var start_time: f64 = undefined;
-var previous_time: f64 = undefined;
+var start_timer: util.Timer = undefined;
 var static_storage: liu.Bump = liu.Bump.init(1024, liu.Pages);
 const Static: std.mem.Allocator = static_storage.allocator();
 
@@ -205,20 +201,20 @@ pub var small_font: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
 
 export fn setInitialTime(timestamp: f64) void {
-    start_time = timestamp;
-    previous_time = timestamp;
+    util.init(timestamp);
+
+    start_timer = util.Timer.init();
 }
 
 export fn run(timestamp: f64) void {
+    const input = util.frameStart(timestamp);
     defer util.frameCleanup();
-    defer frame_id += 1;
-    defer previous_time = timestamp;
 
     // Wait for a bit, because otherwise the world will start running
     // before its visible
-    if (timestamp - start_time < 300) return;
+    if (start_timer.elapsed() < 300) return;
 
-    const delta = @floatCast(f32, timestamp - previous_time);
+    const delta = input.delta;
     if (delta > 66) return;
 
     const mark = liu.TempMark;
@@ -230,14 +226,14 @@ export fn run(timestamp: f64) void {
     // Input
 
     {
-        const new_index = newToolIndex(mouse.scroll_tick[1]);
+        const new_index = newToolIndex(input.mouse.scroll_tick[1]);
 
         if (tool_index != new_index) {
             tools.items[tool_index].reset();
             tool_index = new_index;
         } else {
             // Run the tool on the next frame, let's not get ahead of ourselves
-            tools.items[tool_index].frame();
+            tools.items[tool_index].frame(input);
         }
     }
 
@@ -253,29 +249,29 @@ export fn run(timestamp: f64) void {
 
             if (elem.decide_c != .player) continue;
 
-            if (keys[11].pressed) {
+            if (input.keys[11].pressed) {
                 move_c.velocity[1] -= 8;
             }
 
-            if (keys[1].pressed) {
+            if (input.keys[1].pressed) {
                 move_c.velocity[1] += 8;
             }
 
             if (elem.force_c.is_airborne) {
-                if (keys[10].pressed) {
+                if (input.keys[10].pressed) {
                     move_c.velocity[0] -= 8;
                 }
 
-                if (keys[12].pressed) {
+                if (input.keys[12].pressed) {
                     move_c.velocity[0] += 8;
                 }
             } else {
-                if (keys[10].down) {
+                if (input.keys[10].down) {
                     move_c.velocity[0] -= 8;
                     move_c.velocity[0] = std.math.clamp(move_c.velocity[0], -8, 0);
                 }
 
-                if (keys[12].down) {
+                if (input.keys[12].down) {
                     move_c.velocity[0] += 8;
                     move_c.velocity[0] = std.math.clamp(move_c.velocity[0], 0, 8);
                 }
@@ -458,7 +454,7 @@ export fn run(timestamp: f64) void {
     }
 
     // USER INTERFACE
-    renderDebugInfo(delta);
+    renderDebugInfo(input);
 }
 
 fn newToolIndex(diff: i32) u32 {
@@ -470,12 +466,12 @@ fn newToolIndex(diff: i32) u32 {
     return new_index;
 }
 
-pub fn renderDebugInfo(delta: f64) void {
+pub fn renderDebugInfo(input: util.FrameInput) void {
     {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
 
-        const pos = @floor(mouse.pos);
-        const pos1 = @ceil(mouse.pos);
+        const pos = @floor(input.mouse.pos);
+        const pos1 = @ceil(input.mouse.pos);
         const bbox = BBox{
             .pos = pos,
             .width = pos1[0] - pos[0],
@@ -490,7 +486,7 @@ pub fn renderDebugInfo(delta: f64) void {
 
     ext.setFont(large_font);
 
-    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / delta});
+    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / input.delta});
     ext.fillText(fps_message, 5, 160);
 
     {
@@ -518,7 +514,7 @@ pub fn renderDebugInfo(delta: f64) void {
         var leftX = row.leftX;
         const end = row.end;
 
-        for (keys[begin..row.end]) |key| {
+        for (input.keys[begin..row.end]) |key| {
             const color: f32 = if (key.down) 0.3 else 0.5;
             ext.fillStyle(color, color, color, 1);
 
