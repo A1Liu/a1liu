@@ -1,6 +1,8 @@
 const std = @import("std");
 const liu = @import("liu");
 
+const editor = @import("./editor.zig");
+
 const util = @import("./util.zig");
 const mouse = util.mouse;
 const rows = util.rows;
@@ -108,6 +110,9 @@ fn initErr() !void {
     large_font = wasm.make.fmt(.manual, "bold 48px sans-serif", .{});
     small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
 
+    const draw_tool = try Static.create(editor.DrawTool);
+    try tools.append(Static, editor.Tool.init(draw_tool));
+
     registry = try Registry.init(16, liu.Pages);
 
     var i: u32 = 0;
@@ -171,6 +176,12 @@ fn initErr() !void {
 var frame_id: u64 = 0;
 var start_time: f64 = undefined;
 var previous_time: f64 = undefined;
+var static_storage: liu.Bump = liu.Bump.init(1024, liu.Pages);
+const Static: std.mem.Allocator = static_storage.allocator();
+
+var tools: std.ArrayListUnmanaged(editor.Tool) = .{};
+var tool_index: u32 = 0;
+
 pub var large_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
@@ -190,6 +201,7 @@ export fn run(timestamp: f64) void {
     if (timestamp - start_time < 300) return;
 
     const delta = @floatCast(f32, timestamp - previous_time);
+    if (delta > 66) return;
 
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
@@ -198,6 +210,8 @@ export fn run(timestamp: f64) void {
     defer wasm.setWatermark(wasm_mark);
 
     // Input
+
+    {}
 
     skip_this: {
         if (!mouse.clicked) break :skip_this;
@@ -461,5 +475,48 @@ export fn run(timestamp: f64) void {
     }
 
     // USER INTERFACE
-    util.renderDebugInfo(delta);
+    renderDebugInfo(delta);
+}
+
+pub fn renderDebugInfo(delta: f64) void {
+    ext.fillStyle(0.5, 0.5, 0.5, 1);
+
+    ext.setFont(large_font);
+
+    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / delta});
+    ext.fillText(fps_message, 5, 160);
+
+    const tool_name = wasm.out.string(tools.items[tool_index].name);
+    ext.fillText(tool_name, 500, 75);
+
+    ext.setFont(small_font);
+
+    // Show other tools in line
+    // ext.fillStyle(0.7, 0.7, 0.7, 1);
+
+    var begin: u32 = 0;
+    var topY: i32 = 5;
+
+    for (rows) |row| {
+        var leftX = row.leftX;
+        const end = row.end;
+
+        for (keys[begin..row.end]) |key| {
+            const color: f32 = if (key.down) 0.3 else 0.5;
+            ext.fillStyle(color, color, color, 1);
+
+            ext.fillRect(leftX, topY, 30, 30);
+
+            ext.fillStyle(1, 1, 1, 1);
+            const s = &[_]u8{@truncate(u8, key.code)};
+            const letter = wasm.out.fmt("{s}", .{s});
+            ext.fillText(letter, leftX + 15, topY + 10);
+
+            leftX += 35;
+        }
+
+        topY += 35;
+
+        begin = end;
+    }
 }

@@ -57,6 +57,17 @@
 
 <div
   class="wrapper"
+  on:wheel={(evt) => {
+    if (!canvas) return;
+    if (evt.target !== canvas) return;
+
+    evt.preventDefault();
+
+    const data = [evt.deltaX, evt.deltaY];
+  worker.postMessage({ kind: 'scroll', data });
+    console.log(evt);
+    console.log(evt.deltaX, evt.deltaY, evt.wheelDeltaX,evt.wheelDeltaY);
+  }}
   on:mousemove={(evt) => {
     if (!canvas) return;
     if (evt.target !== canvas) return;

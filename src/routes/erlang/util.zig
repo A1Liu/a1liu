@@ -14,44 +14,8 @@ pub fn frameCleanup() void {
         k.pressed = false;
     }
 
+    mouse_data.scroll = Vec2{ 0, 0 };
     mouse_data.clicked = false;
-}
-
-pub fn renderDebugInfo(delta: f64) void {
-    ext.fillStyle(0.5, 0.5, 0.5, 1);
-
-    ext.setFont(erlang.large_font);
-
-    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / delta});
-    ext.fillText(fps_message, 5, 160);
-
-    ext.setFont(erlang.small_font);
-
-    var begin: u32 = 0;
-    var topY: i32 = 5;
-
-    for (rows) |row| {
-        var leftX = row.leftX;
-        const end = row.end;
-
-        for (keys[begin..row.end]) |key| {
-            const color: f32 = if (key.down) 0.3 else 0.5;
-            ext.fillStyle(color, color, color, 1);
-
-            ext.fillRect(leftX, topY, 30, 30);
-
-            ext.fillStyle(1, 1, 1, 1);
-            const s = &[_]u8{@truncate(u8, key.code)};
-            const letter = wasm.out.fmt("{s}", .{s});
-            ext.fillText(letter, leftX + 15, topY + 10);
-
-            leftX += 35;
-        }
-
-        topY += 35;
-
-        begin = end;
-    }
 }
 
 pub const mouse: *const MouseData = &mouse_data;
@@ -108,6 +72,7 @@ const KeyRow = struct {
 
 const MouseData = struct {
     pos: Vec2 = Vec2{ 0, 0 },
+    scroll: Vec2 = Vec2{ 0, 0 },
     clicked: bool = false,
 };
 
@@ -173,6 +138,10 @@ pub const Camera = struct {
 
 export fn setDims(posX: u32, posY: u32) void {
     camera_data.setDims(posX, posY);
+}
+
+export fn onScroll(deltaX: f32, deltaY: f32) void {
+    mouse_data.scroll = Vec2{ deltaX, -deltaY / 2 };
 }
 
 export fn onMove(posX: f32, posY: f32) void {

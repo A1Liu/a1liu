@@ -7,6 +7,7 @@ export type Number4 = [number, number, number, number];
 
 export type Message =
   | { kind: "resize"; data: Number2 }
+  | { kind: "scroll"; data: Number2 }
   | { kind: "mousemove"; data: Number2 }
   | { kind: "leftclick"; data: Number2 }
   | { kind: "rightclick"; data: Number2 }
@@ -55,6 +56,12 @@ const initGl = async (canvas: any): Promise<ErlangGl | null> => {
 
 const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
   switch (msg.kind) {
+    case "scroll": {
+      const [x, y] = msg.data;
+      wasmRef.abi.onScroll(x, y);
+      break;
+    }
+
     case "mousemove": {
       const [x, y] = msg.data;
       wasmRef.abi.onMove(x, y);
