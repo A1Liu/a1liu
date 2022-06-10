@@ -102,25 +102,96 @@ pub const ClickTool = struct {
 };
 
 pub const LineTool = struct {
-    existing: ?EntityId = null,
+    data: ?Data = null,
+
+    const Data = struct {
+        entity: EntityId,
+        pos: Vec2,
+    };
 
     pub fn reset(self: *@This()) void {
-        const existing = self.existing orelse return;
-        self.existing = null;
-        _ = erlang.registry.delete(existing);
+        const data = self.data orelse return;
+        self.data = null;
+        _ = erlang.registry.delete(data.entity);
     }
 
     pub fn frame(self: *@This()) void {
+        const pos = @floor(mouse.pos);
+
         if (mouse.clicked) {
-            if (self.existing != null) {
-                self.existing = null;
+            if (self.data != null) {
+                self.data = null;
             } else {
-                const pos = @floor(mouse.pos);
-                self.existing = makeBox(pos) catch return;
+                const entity = makeBox(pos) catch return;
+                self.data = .{ .entity = entity, .pos = pos };
             }
 
             return;
         }
+
+        const data = self.data orelse return;
+
+        const bbox = bbox: {
+            // Project the floored mouse position onto the X and Y axes, so that
+            // the line will always be straight horizontal or straight vertical
+            const xProj = Vec2{ pos[0], data.pos[1] };
+            const yProj = Vec2{ data.pos[0], pos[1] };
+
+            // Get squared distance between each projection and line origin
+            const xDiff = pos - xProj;
+            const yDiff = pos - yProj;
+            const xSqr = @reduce(.Add, xDiff * xDiff);
+            const ySqr = @reduce(.Add, yDiff * yDiff);
+
+            // Pick the projection with least distance
+            const proj = if (xSqr < ySqr) xProj else yProj;
+
+            // Translate position and projection into top-left pos0 and bottom-right
+            // pos1
+            const mask = proj < data.pos;
+            const pos0 = @select(f32, mask, proj, data.pos);
+            const pos1 = @select(f32, mask, data.pos, proj) + Vec2{ 1, 1 };
+
+            break :bbox erlang.BBox{
+                .pos = pos0,
+                .width = pos1[0] - pos0[0],
+                .height = pos1[1] - pos0[1],
+            };
+        };
+
+        {
+            // TODO check collisions
+            var view = erlang.registry.view(struct {
+                pos_c: erlang.PositionC,
+                collision_c: erlang.CollisionC,
+                decide_c: erlang.DecisionC,
+            });
+
+            while (view.next()) |elem| {
+                if (elem.decide_c != .player) continue;
+
+                const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
+                if (elem_bbox.overlap(bbox).result) return;
+            }
+        }
+
+        var view = erlang.registry.view(struct {
+            pos_c: *erlang.PositionC,
+            collision_c: *erlang.CollisionC,
+            render: *erlang.RenderC,
+        });
+
+        const val = view.get(data.entity) orelse {
+            self.data = null;
+            return;
+        };
+
+        val.pos_c.pos = bbox.pos;
+        val.collision_c.width = bbox.width;
+        val.collision_c.height = bbox.height;
+
+        val.render.sprite_width = bbox.width;
+        val.render.sprite_height = bbox.height;
     }
 };
 

@@ -125,8 +125,8 @@ fn initErr() !void {
     small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
 
     try tools.appendSlice(Static, &.{
-        try editor.Tool.create(Static, editor.DrawTool{}),
         try editor.Tool.create(Static, editor.LineTool{}),
+        try editor.Tool.create(Static, editor.DrawTool{}),
         try editor.Tool.create(Static, editor.ClickTool{}),
     });
 

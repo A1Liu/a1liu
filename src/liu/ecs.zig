@@ -338,7 +338,7 @@ pub fn Registry(
             return .{ .registry = self };
         }
 
-        fn indexOf(self: *Self, id: EntityId) ?u32 {
+        fn indexOf(self: *const Self, id: EntityId) ?u32 {
             const meta_slice = self.raw(Meta);
             if (id.index >= meta_slice.len) return null;
 

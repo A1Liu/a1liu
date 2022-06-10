@@ -22,7 +22,7 @@
           break;
 
         default:
-          if (typeof message.data === "string") {
+          if (typeof message.data === "string" && message.kind !== "log") {
             const color = ToastColors[message.kind] ?? "info";
             addToast(color, null, message.data);
           }
