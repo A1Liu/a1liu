@@ -190,12 +190,13 @@ export fn setDims(posX: u32, posY: u32) void {
 export fn onScroll(deltaX: f32, deltaY: f32) void {
     mouse_data.scroll_dist += Vec2{ deltaX, -deltaY };
 
+    const one: f32 = 1;
     if (deltaX != 0) {
-        mouse_data.scroll_tick[0] += @floatToInt(i32, std.math.copysign(f32, 1, deltaX));
+        mouse_data.scroll_tick[0] += @floatToInt(i32, std.math.copysign(one, deltaX));
     }
 
     if (deltaY != 0) {
-        mouse_data.scroll_tick[1] += @floatToInt(i32, std.math.copysign(f32, 1, deltaY));
+        mouse_data.scroll_tick[1] += @floatToInt(i32, std.math.copysign(one, deltaY));
     }
 }
 
