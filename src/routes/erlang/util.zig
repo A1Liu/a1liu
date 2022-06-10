@@ -115,7 +115,14 @@ pub fn moveCamera(pos: Vec2) void {
     camera_data.pos = pos - Vec2{ camera_data.width / 2, camera_data.height / 2 };
 }
 
-// multiple cameras at once?
+// multiple cameras at once? LOL you can addd a CameraC to ECS registry:
+//
+// const CameraC = struct {
+//     world_to_pixel: f32 = 1,
+// };
+//
+// Unclear how it would interact with setDims, especially if there's multiple
+// cameras active
 
 pub const Camera = struct {
     pos: Vec2 = Vec2{ 0, 0 },

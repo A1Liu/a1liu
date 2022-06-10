@@ -2,6 +2,7 @@ const std = @import("std");
 const liu = @import("liu");
 
 const util = @import("./util.zig");
+const mouse = util.mouse;
 const rows = util.rows;
 const keys = util.keys;
 const camera = util.camera;
@@ -26,6 +27,14 @@ pub const BBox = struct {
         x: bool,
         y: bool,
     };
+
+    pub fn init(pos: Vec2, collision_c: CollisionC) @This() {
+        return BBox{
+            .pos = pos,
+            .width = collision_c.width,
+            .height = collision_c.height,
+        };
+    }
 
     pub fn overlap(self: @This(), other: @This()) Overlap {
         const pos1 = self.pos + Vec2{ self.width, self.height };
@@ -106,7 +115,7 @@ fn initErr() !void {
         var color = norm_color;
         color[i] = 1;
 
-        const box = try registry.create("box");
+        const box = try registry.create("bar");
         try registry.addComponent(box, PositionC{
             .pos = Vec2{ @intToFloat(f32, i) + 5, 3 },
         });
@@ -189,6 +198,48 @@ export fn run(timestamp: f64) void {
     defer wasm.setWatermark(wasm_mark);
 
     // Input
+
+    skip_this: {
+        if (!mouse.clicked) break :skip_this;
+
+        const pos = @floor(mouse.pos);
+        const pos1 = @ceil(mouse.pos);
+        const bbox = BBox{
+            .pos = pos,
+            .width = pos1[0] - pos[0],
+            .height = pos1[1] - pos[1],
+        };
+
+        var view = registry.view(struct {
+            pos_c: PositionC,
+            collision_c: CollisionC,
+            decide_c: DecisionC,
+        });
+
+        while (view.next()) |elem| {
+            if (elem.decide_c != .player) continue;
+
+            const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
+            if (elem_bbox.overlap(bbox).result) break :skip_this;
+        }
+
+        const new_solid = registry.create("box") catch break :skip_this;
+        registry.addComponent(new_solid, PositionC{
+            .pos = pos,
+        }) catch registry.delete(new_solid);
+        registry.addComponent(new_solid, CollisionC{
+            .width = 1,
+            .height = 1,
+        }) catch registry.delete(new_solid);
+        registry.addComponent(new_solid, RenderC{
+            .color = Vec4{ 0.2, 0.5, 0.3, 1 },
+            .sprite_width = 1,
+            .sprite_height = 1,
+        }) catch registry.delete(new_solid);
+
+        _ = new_solid;
+    }
+
     {
         var view = registry.view(struct {
             move_c: *MoveC,
@@ -315,19 +366,19 @@ export fn run(timestamp: f64) void {
 
             pos_c.pos = new_pos;
 
-            const cam_pos0 = camera.pos;
-            const cam_dims = Vec2{ camera.width, camera.height };
-            const cam_pos1 = cam_pos0 + cam_dims;
+            // const cam_pos0 = camera.pos;
+            // const cam_dims = Vec2{ camera.width, camera.height };
+            // const cam_pos1 = cam_pos0 + cam_dims;
 
-            const new_x = std.math.clamp(pos_c.pos[0], cam_pos0[0], cam_pos1[0] - collision_c.width);
-            if (new_x != pos_c.pos[0])
-                move_c.velocity[0] = 0;
-            pos_c.pos[0] = new_x;
+            // const new_x = std.math.clamp(pos_c.pos[0], cam_pos0[0], cam_pos1[0] - collision_c.width);
+            // if (new_x != pos_c.pos[0])
+            //     move_c.velocity[0] = 0;
+            // pos_c.pos[0] = new_x;
 
-            const new_y = std.math.clamp(pos_c.pos[1], cam_pos0[1], cam_pos1[1] - collision_c.height);
-            if (new_y != pos_c.pos[1])
-                move_c.velocity[1] = 0;
-            pos_c.pos[1] = new_y;
+            // const new_y = std.math.clamp(pos_c.pos[1], cam_pos0[1], cam_pos1[1] - collision_c.height);
+            // if (new_y != pos_c.pos[1])
+            //     move_c.velocity[1] = 0;
+            // pos_c.pos[1] = new_y;
         }
     }
 
