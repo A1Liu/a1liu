@@ -121,10 +121,14 @@ const Registry = liu.ecs.Registry(&.{
 const norm_color: Vec4 = Vec4{ 0.3, 0.3, 0.3, 0.6 };
 fn initErr() !void {
     large_font = wasm.make.fmt(.manual, "bold 48px sans-serif", .{});
+    med_font = wasm.make.fmt(.manual, "24px sans-serif", .{});
     small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
 
-    const draw_tool = try Static.create(editor.DrawTool);
-    try tools.append(Static, editor.Tool.init(draw_tool));
+    try tools.appendSlice(Static, &.{
+        try editor.Tool.create(Static, editor.DrawTool{}),
+        try editor.Tool.create(Static, editor.LineTool{}),
+        try editor.Tool.create(Static, editor.ClickTool{}),
+    });
 
     registry = try Registry.init(16, liu.Pages);
 
@@ -196,6 +200,7 @@ var tools: std.ArrayListUnmanaged(editor.Tool) = .{};
 var tool_index: u32 = 0;
 
 pub var large_font: wasm.Obj = undefined;
+pub var med_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
 
@@ -225,12 +230,15 @@ export fn run(timestamp: f64) void {
     // Input
 
     {
-        const new_tool_index = @intCast(i32, tool_index) + mouse.scroll_tick[1];
-        const len = @intCast(i32, tools.items.len);
-        const index = @mod(new_tool_index, len);
-        tool_index = @intCast(u32, index);
+        const new_index = newToolIndex(mouse.scroll_tick[1]);
 
-        tools.items[0].frame();
+        if (tool_index != new_index) {
+            tools.items[tool_index].reset();
+            tool_index = new_index;
+        } else {
+            // Run the tool on the next frame, let's not get ahead of ourselves
+            tools.items[tool_index].frame();
+        }
     }
 
     {
@@ -453,6 +461,15 @@ export fn run(timestamp: f64) void {
     renderDebugInfo(delta);
 }
 
+fn newToolIndex(diff: i32) u32 {
+    const new_tool_index = @intCast(i32, tool_index) + diff;
+    const len = @intCast(i32, tools.items.len);
+    const index = @mod(new_tool_index, len);
+    const new_index = @intCast(u32, index);
+
+    return new_index;
+}
+
 pub fn renderDebugInfo(delta: f64) void {
     {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
@@ -476,13 +493,20 @@ pub fn renderDebugInfo(delta: f64) void {
     const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / delta});
     ext.fillText(fps_message, 5, 160);
 
-    const tool_name = wasm.out.string(tools.items[tool_index].name);
-    ext.fillText(tool_name, 500, 75);
+    {
+        const tool_name = wasm.out.string(tools.items[tool_index].name);
+        ext.fillText(tool_name, 500, 75);
+    }
+
+    ext.setFont(med_font);
+    {
+        const prev_tool = wasm.out.string(tools.items[newToolIndex(-1)].name);
+        const next_tool = wasm.out.string(tools.items[newToolIndex(1)].name);
+        ext.fillText(prev_tool, 530, 25);
+        ext.fillText(next_tool, 530, 110);
+    }
 
     ext.setFont(small_font);
-
-    const prev_tool = wasm.out.fmt("{}", .{tool_index});
-    ext.fillText(prev_tool, 530, 10);
 
     // Show other tools in line
     // ext.fillStyle(0.7, 0.7, 0.7, 1);

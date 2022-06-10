@@ -12,6 +12,7 @@ const ext = erlang.ext;
 const BBox = erlang.BBox;
 
 const wasm = liu.wasm;
+const EntityId = liu.ecs.EntityId;
 const Vec2 = liu.Vec2;
 
 pub const Tool = struct {
@@ -25,6 +26,13 @@ pub const Tool = struct {
     name: []const u8,
     ptr: *anyopaque,
     vtable: *const VTable,
+
+    pub fn create(alloc: std.mem.Allocator, obj: anytype) !Self {
+        const val = try alloc.create(@TypeOf(obj));
+        val.* = obj;
+
+        return init(val);
+    }
 
     pub fn init(obj: anytype) Self {
         const PtrT = @TypeOf(obj);
@@ -48,8 +56,71 @@ pub const Tool = struct {
         };
     }
 
+    pub fn reset(self: *Self) void {
+        return self.vtable.reset(self.ptr);
+    }
+
     pub fn frame(self: *Self) void {
         return self.vtable.frame(self.ptr);
+    }
+};
+
+fn makeBox(pos: Vec2) !EntityId {
+    const id = try erlang.registry.create("box");
+    errdefer erlang.registry.delete(id);
+
+    try erlang.registry.addComponent(id, erlang.PositionC{
+        .pos = pos,
+    });
+    try erlang.registry.addComponent(id, erlang.CollisionC{
+        .width = 1,
+        .height = 1,
+    });
+    try erlang.registry.addComponent(id, erlang.RenderC{
+        .color = erlang.Vec4{ 0.2, 0.5, 0.3, 1 },
+        .sprite_width = 1,
+        .sprite_height = 1,
+    });
+
+    return id;
+}
+
+pub const ClickTool = struct {
+    dummy: bool = false,
+
+    pub fn reset(self: *@This()) void {
+        _ = self;
+    }
+
+    pub fn frame(self: *@This()) void {
+        if (!mouse.clicked) return;
+        _ = self;
+
+        const pos = @floor(mouse.pos);
+        _ = makeBox(pos) catch return;
+    }
+};
+
+pub const LineTool = struct {
+    existing: ?EntityId = null,
+
+    pub fn reset(self: *@This()) void {
+        const existing = self.existing orelse return;
+        self.existing = null;
+        _ = erlang.registry.delete(existing);
+    }
+
+    pub fn frame(self: *@This()) void {
+        if (mouse.clicked) {
+            if (self.existing != null) {
+                self.existing = null;
+            } else {
+                const pos = @floor(mouse.pos);
+                self.existing = makeBox(pos) catch return;
+            }
+
+            return;
+        }
     }
 };
 
@@ -88,18 +159,7 @@ pub const DrawTool = struct {
             if (elem_bbox.overlap(bbox).result) return;
         }
 
-        const new_solid = erlang.registry.create("box") catch return;
-        erlang.registry.addComponent(new_solid, erlang.PositionC{
-            .pos = pos,
-        }) catch erlang.registry.delete(new_solid);
-        erlang.registry.addComponent(new_solid, erlang.CollisionC{
-            .width = 1,
-            .height = 1,
-        }) catch erlang.registry.delete(new_solid);
-        erlang.registry.addComponent(new_solid, erlang.RenderC{
-            .color = erlang.Vec4{ 0.2, 0.5, 0.3, 1 },
-            .sprite_width = 1,
-            .sprite_height = 1,
-        }) catch erlang.registry.delete(new_solid);
+        const new_solid = makeBox(pos) catch return;
+        _ = new_solid;
     }
 };
