@@ -1,3 +1,4 @@
+const std = @import("std");
 const liu = @import("liu");
 const erlang = @import("./erlang.zig");
 const ext = erlang.ext;
@@ -13,8 +14,8 @@ pub fn frameCleanup() void {
     for (key_data) |*k| {
         k.pressed = false;
     }
-
-    mouse_data.scroll = Vec2{ 0, 0 };
+    mouse_data.scroll_dist = Vec2{ 0, 0 };
+    mouse_data.scroll_tick = @Vector(2, i32){ 0, 0 };
     mouse_data.clicked = false;
 }
 
@@ -72,7 +73,8 @@ const KeyRow = struct {
 
 const MouseData = struct {
     pos: Vec2 = Vec2{ 0, 0 },
-    scroll: Vec2 = Vec2{ 0, 0 },
+    scroll_dist: Vec2 = Vec2{ 0, 0 },
+    scroll_tick: @Vector(2, i32) = @Vector(2, i32){ 0, 0 },
     clicked: bool = false,
 };
 
@@ -141,7 +143,15 @@ export fn setDims(posX: u32, posY: u32) void {
 }
 
 export fn onScroll(deltaX: f32, deltaY: f32) void {
-    mouse_data.scroll = Vec2{ deltaX, -deltaY / 2 };
+    mouse_data.scroll_dist += Vec2{ deltaX, -deltaY };
+
+    if (deltaX != 0) {
+        mouse_data.scroll_tick[0] += @floatToInt(i32, std.math.copysign(f32, 1, deltaX));
+    }
+
+    if (deltaY != 0) {
+        mouse_data.scroll_tick[1] += @floatToInt(i32, std.math.copysign(f32, 1, deltaY));
+    }
 }
 
 export fn onMove(posX: f32, posY: f32) void {

@@ -141,6 +141,12 @@ const init = async () => {
         gglRef.current.ctx.fillText(text, x, y);
       },
 
+      strokeStyle: (rF: number, gF: number, bF: number, a: number) => {
+        gglRef.current.ctx.globalAlpha = a;
+        const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
+
+        gglRef.current.ctx.strokeStyle = `rgba(${r},${g},${b})`;
+      },
       fillStyle: (rF: number, gF: number, bF: number, a: number) => {
         gglRef.current.ctx.globalAlpha = a;
         const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
@@ -148,6 +154,9 @@ const init = async () => {
         gglRef.current.ctx.fillStyle = `rgba(${r},${g},${b})`;
       },
 
+      strokeRect: (x: number, y: number, width: number, height: number) => {
+        gglRef.current.ctx.strokeRect(x, y, width, height);
+      },
       fillRect: (x: number, y: number, width: number, height: number) => {
         gglRef.current.ctx.fillRect(x, y, width, height);
       },

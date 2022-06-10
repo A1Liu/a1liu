@@ -11,6 +11,7 @@ zig-out
 *.wasm
 
 # testing C code
+/test.c
 a.out
 
 # dependencies

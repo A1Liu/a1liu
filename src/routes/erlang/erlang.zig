@@ -16,9 +16,9 @@ const wasm = liu.wasm;
 pub const WasmCommand = void;
 pub usingnamespace wasm;
 
-const Vec2 = liu.Vec2;
-const Vec3 = liu.Vec3;
-const Vec4 = liu.Vec4;
+pub const Vec2 = liu.Vec2;
+pub const Vec3 = liu.Vec3;
+pub const Vec4 = liu.Vec4;
 pub const BBox = struct {
     pos: Vec2,
     width: f32,
@@ -50,41 +50,54 @@ pub const BBox = struct {
             .x = x,
         };
     }
+
+    pub fn renderRectVector(self: @This()) @Vector(4, i32) {
+        return @Vector(4, i32){
+            @floatToInt(i32, @floor(self.pos[0])),
+            @floatToInt(i32, @floor(self.pos[1])),
+            @floatToInt(i32, @ceil(self.width)),
+            @floatToInt(i32, @ceil(self.height)),
+        };
+    }
 };
 
 pub const ext = struct {
     pub extern fn fillStyle(r: f32, g: f32, b: f32, a: f32) void;
+    pub extern fn strokeStyle(r: f32, g: f32, b: f32, a: f32) void;
+
     pub extern fn fillRect(x: i32, y: i32, width: i32, height: i32) void;
+    pub extern fn strokeRect(x: i32, y: i32, width: i32, height: i32) void;
+
     pub extern fn setFont(font: wasm.Obj) void;
     pub extern fn fillText(text: wasm.Obj, x: i32, y: i32) void;
 };
 
-const RenderC = struct {
+pub const RenderC = struct {
     color: Vec4,
     sprite_width: f32,
     sprite_height: f32,
 };
 
-const PositionC = struct {
+pub const PositionC = struct {
     pos: Vec2,
 };
 
-const CollisionC = struct {
+pub const CollisionC = struct {
     width: f32,
     height: f32,
 };
 
-const MoveC = struct {
+pub const MoveC = struct {
     velocity: Vec2,
 };
 
-const ForceC = struct {
+pub const ForceC = struct {
     accel: Vec2,
     friction: f32,
     is_airborne: bool = false,
 };
 
-const DecisionC = union(enum) {
+pub const DecisionC = union(enum) {
     player: void,
 };
 
@@ -211,47 +224,13 @@ export fn run(timestamp: f64) void {
 
     // Input
 
-    {}
+    {
+        const new_tool_index = @intCast(i32, tool_index) + mouse.scroll_tick[1];
+        const len = @intCast(i32, tools.items.len);
+        const index = @mod(new_tool_index, len);
+        tool_index = @intCast(u32, index);
 
-    skip_this: {
-        if (!mouse.clicked) break :skip_this;
-
-        const pos = @floor(mouse.pos);
-        const pos1 = @ceil(mouse.pos);
-        const bbox = BBox{
-            .pos = pos,
-            .width = pos1[0] - pos[0],
-            .height = pos1[1] - pos[1],
-        };
-
-        var view = registry.view(struct {
-            pos_c: PositionC,
-            collision_c: CollisionC,
-            decide_c: DecisionC,
-        });
-
-        while (view.next()) |elem| {
-            if (elem.decide_c != .player) continue;
-
-            const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
-            if (elem_bbox.overlap(bbox).result) break :skip_this;
-        }
-
-        const new_solid = registry.create("box") catch break :skip_this;
-        registry.addComponent(new_solid, PositionC{
-            .pos = pos,
-        }) catch registry.delete(new_solid);
-        registry.addComponent(new_solid, CollisionC{
-            .width = 1,
-            .height = 1,
-        }) catch registry.delete(new_solid);
-        registry.addComponent(new_solid, RenderC{
-            .color = Vec4{ 0.2, 0.5, 0.3, 1 },
-            .sprite_width = 1,
-            .sprite_height = 1,
-        }) catch registry.delete(new_solid);
-
-        _ = new_solid;
+        tools.items[0].frame();
     }
 
     {
@@ -464,13 +443,9 @@ export fn run(timestamp: f64) void {
                 .width = render.sprite_width,
                 .height = render.sprite_height,
             });
+            const rect = bbox.renderRectVector();
 
-            ext.fillRect(
-                @floatToInt(i32, bbox.pos[0]),
-                @floatToInt(i32, bbox.pos[1]),
-                @floatToInt(i32, bbox.width),
-                @floatToInt(i32, bbox.height),
-            );
+            ext.fillRect(rect[0], rect[1], rect[2], rect[3]);
         }
     }
 
@@ -479,6 +454,21 @@ export fn run(timestamp: f64) void {
 }
 
 pub fn renderDebugInfo(delta: f64) void {
+    {
+        ext.strokeStyle(0.1, 0.1, 0.1, 1);
+
+        const pos = @floor(mouse.pos);
+        const pos1 = @ceil(mouse.pos);
+        const bbox = BBox{
+            .pos = pos,
+            .width = pos1[0] - pos[0],
+            .height = pos1[1] - pos[1],
+        };
+
+        const screen_rect = camera.getScreenBoundingBox(bbox).renderRectVector();
+        ext.strokeRect(screen_rect[0], screen_rect[1], screen_rect[2], screen_rect[3]);
+    }
+
     ext.fillStyle(0.5, 0.5, 0.5, 1);
 
     ext.setFont(large_font);
@@ -490,6 +480,9 @@ pub fn renderDebugInfo(delta: f64) void {
     ext.fillText(tool_name, 500, 75);
 
     ext.setFont(small_font);
+
+    const prev_tool = wasm.out.fmt("{}", .{tool_index});
+    ext.fillText(prev_tool, 530, 10);
 
     // Show other tools in line
     // ext.fillStyle(0.7, 0.7, 0.7, 1);
