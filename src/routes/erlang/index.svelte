@@ -64,9 +64,7 @@
     evt.preventDefault();
 
     const data = [evt.deltaX, evt.deltaY];
-  worker.postMessage({ kind: 'scroll', data });
-    console.log(evt);
-    console.log(evt.deltaX, evt.deltaY, evt.wheelDeltaX,evt.wheelDeltaY);
+    worker.postMessage({ kind: "scroll", data });
   }}
   on:mousemove={(evt) => {
     if (!canvas) return;
