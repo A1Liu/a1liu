@@ -11,6 +11,34 @@ const wasm = liu.wasm;
 const EntityId = liu.ecs.EntityId;
 const Vec2 = liu.Vec2;
 
+pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
+    const pos0 = @floor(pos);
+    const pos1 = @ceil(pos);
+
+    return BBox{
+        .pos = pos0,
+        .width = pos1[0] - pos0[0],
+        .height = pos1[1] - pos0[1],
+    };
+}
+
+pub fn boxWillCollide(bbox: BBox) bool {
+    var view = erlang.registry.view(struct {
+        pos_c: erlang.PositionC,
+        collision_c: erlang.CollisionC,
+        decide_c: erlang.DecisionC,
+    });
+
+    while (view.next()) |elem| {
+        if (elem.decide_c != .player) continue;
+
+        const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
+        if (elem_bbox.overlap(bbox).result) return true;
+    }
+
+    return false;
+}
+
 pub const Tool = struct {
     const Self = @This();
 
@@ -92,30 +120,10 @@ pub const ClickTool = struct {
         if (!input.mouse.left_clicked) return;
         _ = self;
 
-        const pos = @floor(input.mouse.pos);
-        const pos1 = @ceil(input.mouse.pos);
-        const bbox = BBox{
-            .pos = pos,
-            .width = pos1[0] - pos[0],
-            .height = pos1[1] - pos[1],
-        };
+        const bbox = unitSquareBBoxForPos(input.mouse.pos);
+        if (boxWillCollide(bbox)) return;
 
-        {
-            var view = erlang.registry.view(struct {
-                pos_c: erlang.PositionC,
-                collision_c: erlang.CollisionC,
-                decide_c: erlang.DecisionC,
-            });
-
-            while (view.next()) |elem| {
-                if (elem.decide_c != .player) continue;
-
-                const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
-                if (elem_bbox.overlap(bbox).result) return;
-            }
-        }
-
-        _ = makeBox(pos) catch return;
+        _ = makeBox(bbox.pos) catch return;
     }
 };
 
@@ -187,20 +195,7 @@ pub const LineTool = struct {
             };
         };
 
-        {
-            var view = erlang.registry.view(struct {
-                pos_c: erlang.PositionC,
-                collision_c: erlang.CollisionC,
-                decide_c: erlang.DecisionC,
-            });
-
-            while (view.next()) |elem| {
-                if (elem.decide_c != .player) continue;
-
-                const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
-                if (elem_bbox.overlap(bbox).result) return;
-            }
-        }
+        if (boxWillCollide(bbox)) return;
 
         var view = erlang.registry.view(struct {
             pos_c: *erlang.PositionC,
@@ -236,28 +231,10 @@ pub const DrawTool = struct {
 
         if (!self.drawing) return;
 
-        const pos = @floor(input.mouse.pos);
-        const pos1 = @ceil(input.mouse.pos);
-        const bbox = BBox{
-            .pos = pos,
-            .width = pos1[0] - pos[0],
-            .height = pos1[1] - pos[1],
-        };
+        const bbox = unitSquareBBoxForPos(input.mouse.pos);
+        if (boxWillCollide(bbox)) return;
 
-        var view = erlang.registry.view(struct {
-            pos_c: erlang.PositionC,
-            collision_c: erlang.CollisionC,
-            // decide_c: erlang.DecisionC,
-        });
-
-        while (view.next()) |elem| {
-            // if (elem.decide_c != .player) continue;
-
-            const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
-            if (elem_bbox.overlap(bbox).result) return;
-        }
-
-        const new_solid = makeBox(pos) catch return;
+        const new_solid = makeBox(bbox.pos) catch return;
         _ = new_solid;
     }
 };

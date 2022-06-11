@@ -309,16 +309,8 @@ export fn run(timestamp: f64) void {
             // move the thing
             var new_pos = pos_c.pos + move_c.velocity * @splat(2, delta / 1000);
 
-            const bbox = BBox{
-                .pos = pos_c.pos,
-                .width = collision_c.width,
-                .height = collision_c.height,
-            };
-            const new_bbox = BBox{
-                .pos = new_pos,
-                .width = collision_c.width,
-                .height = collision_c.height,
-            };
+            const bbox = BBox.init(pos_c.pos, collision_c);
+            const new_bbox = BBox.init(new_pos, collision_c);
 
             elem.force_c.is_airborne = true;
 
@@ -328,11 +320,7 @@ export fn run(timestamp: f64) void {
                 // think of it as a stable piece of the environment
                 if (solid.force_c != null) continue;
 
-                const found = BBox{
-                    .pos = solid.pos_c.pos,
-                    .width = solid.collision_c.width,
-                    .height = solid.collision_c.height,
-                };
+                const found = BBox.init(solid.pos_c.pos, solid.collision_c);
 
                 const overlap = new_bbox.overlap(found);
                 if (!overlap.result) continue;
@@ -470,13 +458,7 @@ pub fn renderDebugInfo(input: util.FrameInput) void {
     {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
 
-        const pos = @floor(input.mouse.pos);
-        const pos1 = @ceil(input.mouse.pos);
-        const bbox = BBox{
-            .pos = pos,
-            .width = pos1[0] - pos[0],
-            .height = pos1[1] - pos[1],
-        };
+        const bbox = editor.unitSquareBBoxForPos(input.mouse.pos);
 
         const screen_rect = camera.getScreenBoundingBox(bbox).renderRectVector();
         ext.strokeRect(screen_rect[0], screen_rect[1], screen_rect[2], screen_rect[3]);
