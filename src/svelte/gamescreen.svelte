@@ -74,9 +74,7 @@
 
   $: {
     if (worker && canvas) {
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
-      worker.postMessage({ kind: "resize", data: [width, height] });
+      listener(null);
 
       const offscreen = canvas.transferControlToOffscreen();
       worker.postMessage({ kind: "canvas", offscreen }, [offscreen]);
