@@ -12,13 +12,10 @@ const EntityId = liu.ecs.EntityId;
 const Vec2 = liu.Vec2;
 
 pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
-    const pos0 = @floor(pos);
-    const pos1 = @ceil(pos);
-
     return BBox{
-        .pos = pos0,
-        .width = pos1[0] - pos0[0],
-        .height = pos1[1] - pos0[1],
+        .pos = @floor(pos),
+        .width = 1,
+        .height = 1,
     };
 }
 
@@ -29,9 +26,10 @@ pub fn boxWillCollide(bbox: BBox) bool {
     });
 
     while (view.next()) |elem| {
-        if (elem.force_c != null) continue;
+        if (elem.force_c == null) continue;
 
-        if (elem.pos_c.bbox.overlap(bbox).result) return true;
+        const overlap = elem.pos_c.bbox.overlap(bbox);
+        if (overlap.result) return true;
     }
 
     return false;
