@@ -14,7 +14,7 @@ pub const KeyCode = enum(u8) {
     period = 46,
     slash = 47,
 
-    digit0,
+    digit0 = 48,
     digit1,
     digit2,
     digit3,
@@ -53,6 +53,11 @@ pub const KeyCode = enum(u8) {
     key_x,
     key_y,
     key_z,
+
+    arrow_up = 128,
+    arrow_down,
+    arrow_left,
+    arrow_right,
 
     pub fn code(self: @This()) u8 {
         return @enumToInt(self);
@@ -255,8 +260,11 @@ export fn setDims(posX: u32, posY: u32) void {
     camera_data.setDims(posX, posY);
 }
 
-export fn onScroll(deltaX: f32, deltaY: f32) void {
-    mouse_data.scroll_dist += Vec2{ deltaX, -deltaY };
+export fn onScroll(deltaX: f32, deltaY_: f32) void {
+    // Y axis grows downwards on the web
+    const deltaY = -deltaY_;
+
+    mouse_data.scroll_dist += Vec2{ deltaX, deltaY };
 
     const one: f32 = 1;
     if (deltaX != 0) {

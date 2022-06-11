@@ -226,7 +226,11 @@ export fn run(timestamp: f64) void {
     // Input
 
     {
-        const new_index = newToolIndex(input.mouse.scroll_tick[1]);
+        var diff = -input.mouse.scroll_tick[1];
+        if (input.key(.arrow_up).pressed) diff -= 1;
+        if (input.key(.arrow_down).pressed) diff += 1;
+
+        const new_index = newToolIndex(diff);
 
         if (tool_index != new_index) {
             tools.items[tool_index].reset();
