@@ -66,19 +66,19 @@ pub fn build(b: *Builder) !void {
     _ = wasmProgram(b, .{
         .name = "kilordle",
         .root = "./src/routes/kilordle/kilordle.zig",
-        .output = "./static/kilordle/",
+        .output = "./.zig/zig-out/",
     });
 
     _ = wasmProgram(b, .{
         .name = "painter",
         .root = "./src/routes/painter/painter.zig",
-        .output = "./static/painter/",
+        .output = "./.zig/zig-out/",
     });
 
     _ = wasmProgram(b, .{
         .name = "erlang",
         .root = "./src/routes/erlang/erlang.zig",
-        .output = "./static/erlang/",
+        .output = "./.zig/zig-out/",
     });
 }
 

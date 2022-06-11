@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import * as wasm from "@lib/ts/wasm";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
+  import wasmUrl from "@zig/kilordle.wasm?url";
   import { defer } from "@lib/ts/util";
 
   interface PuzzleData {
@@ -110,7 +111,7 @@
     // NOTE: we use RTF file extension here, even though this file is technically
     // binary, because RTF is gzip'd by Github Pages. For non-gzip files, use `.bin`
     const data = wasm.fetchAsset("/kilordle/data.rtf");
-    const wasmPromise = wasm.fetchWasm("/kilordle/kilordle.wasm", {
+    const wasmPromise = wasm.fetchWasm(wasmUrl, {
       postMessage: postToast,
       imports: { setPuzzles: (p: PuzzleData[]) => (puzzles = p) },
       raw: () => ({

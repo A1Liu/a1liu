@@ -34,11 +34,11 @@ jobs:
       - name: Build Zig
         run: zig build -Drelease-small
 
-      - name: Clean garbage
-        run: |
-          find static/ -name "*.o" -delete
-          find static/ -name "*.so" -delete
-          find static/ -name "*.so.0" -delete
+          # - name: Clean garbage
+          #   run: |
+          #     find static/ -name "*.o" -delete
+          #     find static/ -name "*.so" -delete
+          #     find static/ -name "*.so.0" -delete
 
       - name: Build Site
         run: yarn build

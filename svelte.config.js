@@ -24,9 +24,15 @@ const config = {
     },
 
     vite: {
+      server: {
+        fs: {
+          allow: ["./.zig/zig-out"]
+        },
+      },
       resolve: {
         alias: {
           "@lib": path.resolve("./src"),
+          "@zig": path.resolve("./.zig/zig-out"),
         },
       },
     },

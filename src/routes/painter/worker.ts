@@ -2,6 +2,7 @@ import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
 import * as wasm from "@lib/ts/wasm";
+import wasmUrl from "@zig/painter.wasm?url";
 
 export type Number2 = [number, number];
 export type Number3 = [number, number, number];
@@ -271,7 +272,7 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm("/painter/painter.wasm", {
+  const wasmRef = await wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
       readPixel: (x: number, y: number): number => {

@@ -1,4 +1,5 @@
 import * as wasm from "@lib/ts/wasm";
+import wasmUrl from "@zig/erlang.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
 
 export type Number2 = [number, number];
@@ -129,7 +130,7 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm("/erlang/erlang.wasm", {
+  const wasmRef = await wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
       setFont: (fontId: number) => {
