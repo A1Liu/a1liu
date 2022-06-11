@@ -200,6 +200,7 @@ const init = async () => {
 
     break;
   }
+
   unhandled.forEach((msg) => {
     handleMessage(wasmRef, msg);
   });

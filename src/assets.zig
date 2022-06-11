@@ -42,22 +42,16 @@ pub const kilordle = struct {
     pub fn generate() !void {
         const cwd = std.fs.cwd();
 
-        const words = try cwd.readFileAllocOptions(
+        const words = try cwd.readFileAlloc(
             liu.Temp,
             "src/routes/kilordle/wordle-words.txt",
             4096 * 4096,
-            null,
-            8,
-            null,
         );
 
-        const wordles = try cwd.readFileAllocOptions(
+        const wordles = try cwd.readFileAlloc(
             liu.Temp,
             "src/routes/kilordle/wordles.txt",
             4096 * 4096,
-            null,
-            8,
-            null,
         );
 
         {

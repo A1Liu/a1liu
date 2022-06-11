@@ -434,8 +434,12 @@ pub fn renderDebugInfo(input: util.FrameInput) void {
 
     ext.setFont(large_font);
 
-    const fps_message = wasm.out.fmt("FPS: {d:.2}", .{1000 / input.delta});
-    ext.fillText(fps_message, 5, 160);
+    {
+        const fps_text = wasm.out.string("FPS:");
+        const fps_val = wasm.out.floatPrint(1000 / input.delta);
+        ext.fillText(fps_text, 5, 160);
+        ext.fillText(fps_val, 120, 160);
+    }
 
     {
         const tool_name = wasm.out.string(tools.items[tool_index].name);
@@ -465,7 +469,7 @@ pub fn renderDebugInfo(input: util.FrameInput) void {
 
             ext.fillStyle(1, 1, 1, 1);
             const s = &[_]u8{key.code()};
-            const letter = wasm.out.fmt("{s}", .{s});
+            const letter = wasm.out.string(s);
             ext.fillText(letter, leftX + 15, topY + 10);
 
             leftX += 35;

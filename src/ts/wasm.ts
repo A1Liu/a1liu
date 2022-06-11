@@ -54,8 +54,8 @@ function debugLoop(
       objectBuffer,
       objectMap: [...objectMap.entries()],
     };
-    // postMessage("info", JSON.stringify(data));
-    postMessage("info", data);
+    postMessage("log", JSON.stringify(data));
+    // postMessage("log", data);
 
     setTimeout(loop, 2000);
   }
@@ -140,6 +140,9 @@ export const fetchWasm = async (
       updateObj(idx, encodedString);
 
       return encodedString.length;
+    },
+    decimalFormatFloat: (value: number, isTemp: boolean) => {
+      return addObj(value.toFixed(2), isTemp);
     },
     readBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);

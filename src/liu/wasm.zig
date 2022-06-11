@@ -45,6 +45,8 @@ const ext = struct {
     extern fn deleteObj(obj: Obj) void;
 
     extern fn encodeString(idx: Obj) usize;
+    extern fn decimalFormatFloat(value: f64, is_temp: bool) Obj;
+
     extern fn objLen(idx: Obj) usize;
     extern fn readBytes(idx: Obj, begin: [*]u8) void;
 
@@ -115,6 +117,10 @@ pub const make = struct {
     pub fn obj(life: Lifetime) Obj {
         return ext.makeObj(life.isTemp());
     }
+
+    pub fn floatPrint(life: Lifetime, value: f64) Obj {
+        return ext.decimalFormatFloat(value, life.isTemp());
+    }
 };
 
 pub fn post(level: Obj, comptime format: []const u8, args: anytype) void {
@@ -157,6 +163,10 @@ pub const out = struct {
     pub inline fn fmt(comptime format: []const u8, args: anytype) Obj {
         return wasm.make.fmt(.temp, format, args);
     }
+
+    pub fn floatPrint(value: f64) Obj {
+        return wasm.make.floatPrint(.temp, value);
+    }
 };
 
 pub const in = struct {
@@ -196,13 +206,7 @@ pub fn exit(msg: []const u8) noreturn {
     return ext.exit(exit_message);
 }
 
-const CommandBuffer = liu.RingBuffer(root.WasmCommand, 64);
 var initialized: bool = false;
-
-var cmd_bump: liu.Bump = undefined;
-var commands: CommandBuffer = undefined;
-
-const CmdAlloc = cmd_bump.allocator();
 
 pub fn initIfNecessary() void {
     if (builtin.target.cpu.arch != .wasm32) {
@@ -210,9 +214,6 @@ pub fn initIfNecessary() void {
     }
 
     if (!initialized) {
-        cmd_bump = liu.Bump.init(4096, liu.Pages);
-        commands = CommandBuffer.init();
-
         initialized = true;
     }
 }
