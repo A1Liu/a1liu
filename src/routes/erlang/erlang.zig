@@ -123,7 +123,7 @@ fn initErr() !void {
         try registry.addComponent(box, PositionC{ .bbox = .{
             .pos = Vec2{ @intToFloat(f32, i) + 5, 3 },
             .width = 0.5,
-            .height = 3,
+            .height = 2.75,
         } });
         try registry.addComponent(box, RenderC{
             .color = color,
