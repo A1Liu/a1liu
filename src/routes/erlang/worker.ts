@@ -42,8 +42,9 @@ const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
     ctx.canvas.width = width;
     ctx.canvas.height = height;
 
-    // ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
     wasmRef.abi.setDims(width, height);
+
+    // ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 };
 
@@ -164,6 +165,9 @@ const init = async () => {
     imports: {},
   });
 
+  wasmRef.abi.init();
+
+  let unhandled: any[] = [];
   while (true) {
     const captured = await ctx.msgWait();
     let offscreen = null;
@@ -175,7 +179,7 @@ const init = async () => {
           break;
 
         default:
-          handleMessage(wasmRef, msg);
+          unhandled.push(msg);
           break;
       }
     });
@@ -195,8 +199,9 @@ const init = async () => {
 
     break;
   }
-
-  wasmRef.abi.init();
+  unhandled.forEach((msg) => {
+    handleMessage(wasmRef, msg);
+  });
 
   main(wasmRef);
 };

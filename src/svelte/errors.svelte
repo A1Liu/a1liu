@@ -71,7 +71,7 @@
   export const postToast = (tag: string, data: any): void => {
     console.log(tag, data);
 
-    if (typeof data === "string") {
+    if (typeof data === "string" && tag !== "log") {
       addToast(ToastColors[tag] ?? "green", null, data);
     }
   };
