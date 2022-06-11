@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
-  import Toast, { ToastColors, addToast } from "@lib/svelte/errors.svelte";
-  import * as wasm from "@lib/ts/wasm";
+  import Screen from "@lib/svelte/gamescreen.svelte";
+  import Toast, { addToast, postToast } from "@lib/svelte/errors.svelte";
+  import { githubIssueLink } from "@lib/ts/util";
   import * as GL from "@lib/ts/webgl";
 
   type String3 = [string, string, string];
@@ -19,21 +20,13 @@
   let mediaRecorder = null;
   let recordingUrl: string | null = null;
 
-  const urlString = (() => {
-    let urlString = "https://github.com/A1Liu/a1liu/issues/new";
-    const query = { title: "Painter: Bug Report", body: "" };
-    const queryString = new URLSearchParams(query).toString();
-    if (queryString) {
-      urlString += "?" + queryString;
-    }
-    return urlString;
-  })();
+  const urlString = githubIssueLink({ title: "Painter: Bug Report" });
 
   const recordButtonHandler = (evt) => {
     if (navigator.userAgent.indexOf("Firefox") != -1) {
       addToast(
         "warn",
-        5 * 1000,
+        10 * 1000,
         "Recording on Firefox isn't supported right now"
       );
 
@@ -104,76 +97,16 @@
           break;
 
         default:
-          if (typeof message.data === "string") {
-            const color = ToastColors[message.kind] ?? "info";
-            addToast(color, null, message.data);
-          }
-
-          console.log(message.data);
+          postToast(message.kind, message.data);
           break;
       }
-    };
-
-    const listener = (evt: any) => {
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
-      worker.postMessage({ kind: "resize", data: [width, height] });
-    };
-
-    window.addEventListener("resize", listener);
-
-    const offscreen = canvas.transferControlToOffscreen();
-    worker.postMessage({ kind: "canvas", offscreen }, [offscreen]);
-
-    return () => {
-      window.removeEventListener("resize", listener);
     };
   });
 </script>
 
 <Toast />
 
-<div
-  class="wrapper"
-  on:mousemove={(evt) => {
-    if (!canvas) return;
-    if (evt.target !== canvas) return;
-
-    const data = [evt.clientX, evt.clientY];
-    worker.postMessage({ kind: "mousemove", data });
-  }}
-  on:click={(evt) => {
-    if (!canvas) return;
-    if (evt.target !== canvas) return;
-
-    const data = [evt.clientX, evt.clientY];
-    worker.postMessage({ kind: "leftclick", data });
-  }}
-  on:contextmenu={(evt) => {
-    if (!canvas) return;
-    if (evt.target !== canvas) return;
-
-    evt.preventDefault();
-
-    const data = [evt.clientX, evt.clientY];
-    worker.postMessage({ kind: "rightclick", data });
-  }}
-  on:keydown={(evt) => {
-    if (evt.isComposing || evt.keyCode === 229) return;
-
-    if (!canvas) return;
-    if (evt.target !== canvas) return;
-
-    worker.postMessage({ kind: "keydown", data: evt.keyCode });
-  }}
->
-  <canvas
-    bind:this={canvas}
-    class="canvas"
-    contentEditable
-    on:mousedown={(evt) => evt.preventDefault()}
-  />
-
+<Screen {worker} bind:canvas>
   <div class="configBox">
     <div class="config">
       <h3>Painter</h3>
@@ -247,32 +180,10 @@
       Report a bug
     </a>
   </div>
-</div>
+</Screen>
 
 <style lang="postcss">
   @import "@lib/svelte/util.module.css";
-
-  .wrapper {
-    height: 100vh;
-    width: 100vw;
-    max-height: 100vh;
-    max-width: 100vw;
-
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-  }
-
-  .canvas {
-    height: 100%;
-    min-width: 0px;
-    width: inherit;
-    max-width: inherit;
-    flex-grow: 1;
-
-    cursor: default;
-    outline: 0px solid transparent;
-  }
 
   .configBox {
     height: 100%;
