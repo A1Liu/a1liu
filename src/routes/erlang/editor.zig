@@ -25,11 +25,11 @@ pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
 pub fn boxWillCollide(bbox: BBox) bool {
     var view = erlang.registry.view(struct {
         pos_c: erlang.PositionC,
-        decide_c: erlang.DecisionC,
+        force_c: ?*const erlang.ForceC,
     });
 
     while (view.next()) |elem| {
-        if (elem.decide_c != .player) continue;
+        if (elem.force_c != null) continue;
 
         if (elem.pos_c.bbox.overlap(bbox).result) return true;
     }

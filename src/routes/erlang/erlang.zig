@@ -261,16 +261,13 @@ export fn run(timestamp: f64) void {
     {
         var view = registry.view(struct {
             pos_c: *PositionC,
-
             move_c: *MoveC,
             force_c: *ForceC,
         });
 
         const StableObject = struct {
             pos_c: PositionC,
-
-            move_c: ?*const MoveC,
-            force_c: ?*ForceC,
+            force_c: ?*const ForceC,
         };
 
         var stable = registry.view(StableObject);
@@ -289,8 +286,8 @@ export fn run(timestamp: f64) void {
 
             stable.reset();
             while (stable.next()) |solid| {
-                // No move/force component means it can't even be made to move, so we'll
-                // think of it as a stable piece of the environment
+                // No force component means it doesn't interact with gravity,
+                // so we'll think of it as a stable piece of the environment
                 if (solid.force_c != null) continue;
 
                 const found = solid.pos_c.bbox;
