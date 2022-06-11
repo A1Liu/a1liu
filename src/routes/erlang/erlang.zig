@@ -28,14 +28,6 @@ pub const BBox = struct {
         y: bool,
     };
 
-    pub fn init(pos: Vec2, collision_c: CollisionC) @This() {
-        return BBox{
-            .pos = pos,
-            .width = collision_c.width,
-            .height = collision_c.height,
-        };
-    }
-
     pub fn overlap(self: @This(), other: @This()) Overlap {
         const pos1 = self.pos + Vec2{ self.width, self.height };
         const other_pos1 = other.pos + Vec2{ other.width, other.height };
@@ -72,17 +64,10 @@ pub const ext = struct {
 
 pub const RenderC = struct {
     color: Vec4,
-    sprite_width: f32,
-    sprite_height: f32,
 };
 
 pub const PositionC = struct {
-    pos: Vec2,
-};
-
-pub const CollisionC = struct {
-    width: f32,
-    height: f32,
+    bbox: BBox,
 };
 
 pub const MoveC = struct {
@@ -112,7 +97,6 @@ const Registry = liu.ecs.Registry(&.{
     MoveC,
     RenderC,
     DecisionC,
-    CollisionC,
     ForceC,
 });
 
@@ -136,17 +120,13 @@ fn initErr() !void {
         color[i] = 1;
 
         const box = try registry.create("bar");
-        try registry.addComponent(box, PositionC{
+        try registry.addComponent(box, PositionC{ .bbox = .{
             .pos = Vec2{ @intToFloat(f32, i) + 5, 3 },
-        });
-        try registry.addComponent(box, RenderC{
-            .color = color,
-            .sprite_width = 0.5,
-            .sprite_height = 3,
-        });
-        try registry.addComponent(box, CollisionC{
             .width = 0.5,
             .height = 3,
+        } });
+        try registry.addComponent(box, RenderC{
+            .color = color,
         });
         try registry.addComponent(box, MoveC{
             .velocity = Vec2{ 0, 0 },
@@ -160,31 +140,23 @@ fn initErr() !void {
     }
 
     const bump = try registry.create("bump");
-    try registry.addComponent(bump, PositionC{
+    try registry.addComponent(bump, PositionC{ .bbox = .{
         .pos = Vec2{ 10, 4 },
-    });
-    try registry.addComponent(bump, CollisionC{
         .width = 1,
         .height = 1,
-    });
+    } });
     try registry.addComponent(bump, RenderC{
         .color = Vec4{ 0.1, 0.5, 0.3, 1 },
-        .sprite_width = 1,
-        .sprite_height = 1,
     });
 
     const ground = try registry.create("ground");
-    try registry.addComponent(ground, PositionC{
+    try registry.addComponent(ground, PositionC{ .bbox = .{
         .pos = Vec2{ 0, 0 },
-    });
-    try registry.addComponent(ground, CollisionC{
         .width = 100,
         .height = 1,
-    });
+    } });
     try registry.addComponent(ground, RenderC{
         .color = Vec4{ 0.2, 0.5, 0.3, 1 },
-        .sprite_width = 100,
-        .sprite_height = 1,
     });
 }
 
@@ -289,7 +261,6 @@ export fn run(timestamp: f64) void {
     {
         var view = registry.view(struct {
             pos_c: *PositionC,
-            collision_c: CollisionC,
 
             move_c: *MoveC,
             force_c: *ForceC,
@@ -297,7 +268,6 @@ export fn run(timestamp: f64) void {
 
         const StableObject = struct {
             pos_c: PositionC,
-            collision_c: CollisionC,
 
             move_c: ?*const MoveC,
             force_c: ?*ForceC,
@@ -308,13 +278,12 @@ export fn run(timestamp: f64) void {
         while (view.next()) |elem| {
             const pos_c = elem.pos_c;
             const move_c = elem.move_c;
-            const collision_c = elem.collision_c;
 
             // move the thing
-            var new_pos = pos_c.pos + move_c.velocity * @splat(2, delta / 1000);
+            var new_bbox = pos_c.bbox;
+            new_bbox.pos = pos_c.bbox.pos + move_c.velocity * @splat(2, delta / 1000);
 
-            const bbox = BBox.init(pos_c.pos, collision_c);
-            const new_bbox = BBox.init(new_pos, collision_c);
+            const bbox = pos_c.bbox;
 
             elem.force_c.is_airborne = true;
 
@@ -324,7 +293,7 @@ export fn run(timestamp: f64) void {
                 // think of it as a stable piece of the environment
                 if (solid.force_c != null) continue;
 
-                const found = BBox.init(solid.pos_c.pos, solid.collision_c);
+                const found = solid.pos_c.bbox;
 
                 const overlap = new_bbox.overlap(found);
                 if (!overlap.result) continue;
@@ -332,10 +301,10 @@ export fn run(timestamp: f64) void {
                 const prev_overlap = bbox.overlap(found);
 
                 if (prev_overlap.x) {
-                    if (pos_c.pos[1] < found.pos[1]) {
-                        new_pos[1] = found.pos[1] - collision_c.height;
+                    if (bbox.pos[1] < found.pos[1]) {
+                        new_bbox.pos[1] = found.pos[1] - bbox.height;
                     } else {
-                        new_pos[1] = found.pos[1] + found.height;
+                        new_bbox.pos[1] = found.pos[1] + found.height;
                         elem.force_c.is_airborne = false;
                     }
 
@@ -343,17 +312,17 @@ export fn run(timestamp: f64) void {
                 }
 
                 if (prev_overlap.y) {
-                    if (pos_c.pos[0] < found.pos[0]) {
-                        new_pos[0] = found.pos[0] - collision_c.width;
+                    if (bbox.pos[0] < found.pos[0]) {
+                        new_bbox.pos[0] = found.pos[0] - bbox.width;
                     } else {
-                        new_pos[0] = found.pos[0] + found.width;
+                        new_bbox.pos[0] = found.pos[0] + found.width;
                     }
 
                     move_c.velocity[0] = 0;
                 }
             }
 
-            pos_c.pos = new_pos;
+            pos_c.bbox.pos = new_bbox.pos;
 
             // const cam_pos0 = camera.pos;
             // const cam_dims = Vec2{ camera.width, camera.height };
@@ -416,7 +385,7 @@ export fn run(timestamp: f64) void {
         while (view.next()) |elem| {
             if (elem.decision_c != .player) continue;
 
-            util.moveCamera(elem.pos_c.pos);
+            util.moveCamera(elem.pos_c.bbox.pos);
             break;
         }
     }
@@ -434,11 +403,7 @@ export fn run(timestamp: f64) void {
 
             const color = render.color;
             ext.fillStyle(color[0], color[1], color[2], color[3]);
-            const bbox = camera.getScreenBoundingBox(BBox{
-                .pos = pos_c.pos,
-                .width = render.sprite_width,
-                .height = render.sprite_height,
-            });
+            const bbox = camera.getScreenBoundingBox(pos_c.bbox);
             const rect = bbox.renderRectVector();
 
             ext.fillRect(rect[0], rect[1], rect[2], rect[3]);

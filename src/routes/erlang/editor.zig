@@ -25,15 +25,13 @@ pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
 pub fn boxWillCollide(bbox: BBox) bool {
     var view = erlang.registry.view(struct {
         pos_c: erlang.PositionC,
-        collision_c: erlang.CollisionC,
         decide_c: erlang.DecisionC,
     });
 
     while (view.next()) |elem| {
         if (elem.decide_c != .player) continue;
 
-        const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
-        if (elem_bbox.overlap(bbox).result) return true;
+        if (elem.pos_c.bbox.overlap(bbox).result) return true;
     }
 
     return false;
@@ -93,17 +91,13 @@ fn makeBox(pos: Vec2) !EntityId {
     const id = try erlang.registry.create("box");
     errdefer erlang.registry.delete(id);
 
-    try erlang.registry.addComponent(id, erlang.PositionC{
+    try erlang.registry.addComponent(id, erlang.PositionC{ .bbox = .{
         .pos = pos,
-    });
-    try erlang.registry.addComponent(id, erlang.CollisionC{
         .width = 1,
         .height = 1,
-    });
+    } });
     try erlang.registry.addComponent(id, erlang.RenderC{
         .color = erlang.Vec4{ 0.2, 0.5, 0.3, 1 },
-        .sprite_width = 1,
-        .sprite_height = 1,
     });
 
     return id;
@@ -199,7 +193,6 @@ pub const LineTool = struct {
 
         var view = erlang.registry.view(struct {
             pos_c: *erlang.PositionC,
-            collision_c: *erlang.CollisionC,
             render: *erlang.RenderC,
         });
 
@@ -208,12 +201,7 @@ pub const LineTool = struct {
             return;
         };
 
-        val.pos_c.pos = bbox.pos;
-        val.collision_c.width = bbox.width;
-        val.collision_c.height = bbox.height;
-
-        val.render.sprite_width = bbox.width;
-        val.render.sprite_height = bbox.height;
+        val.pos_c.bbox = bbox;
     }
 };
 
