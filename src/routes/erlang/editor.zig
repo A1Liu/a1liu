@@ -93,6 +93,28 @@ pub const ClickTool = struct {
         _ = self;
 
         const pos = @floor(input.mouse.pos);
+        const pos1 = @ceil(input.mouse.pos);
+        const bbox = BBox{
+            .pos = pos,
+            .width = pos1[0] - pos[0],
+            .height = pos1[1] - pos[1],
+        };
+
+        {
+            var view = erlang.registry.view(struct {
+                pos_c: erlang.PositionC,
+                collision_c: erlang.CollisionC,
+                decide_c: erlang.DecisionC,
+            });
+
+            while (view.next()) |elem| {
+                if (elem.decide_c != .player) continue;
+
+                const elem_bbox = BBox.init(elem.pos_c.pos, elem.collision_c);
+                if (elem_bbox.overlap(bbox).result) return;
+            }
+        }
+
         _ = makeBox(pos) catch return;
     }
 };
