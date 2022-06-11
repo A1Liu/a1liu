@@ -56,10 +56,10 @@
     KeyY: 89,
     KeyZ: 90,
 
- ArrowUp: 128,
- ArrowDown: 129,
- ArrowLeft: 130,
- ArrowRight: 131,
+    ArrowUp: 128,
+    ArrowDown: 129,
+    ArrowLeft: 130,
+    ArrowRight: 131,
   };
 </script>
 

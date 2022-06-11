@@ -102,9 +102,9 @@ const Registry = liu.ecs.Registry(&.{
 
 const norm_color: Vec4 = Vec4{ 0.3, 0.3, 0.3, 0.6 };
 fn initErr() !void {
-    large_font = wasm.make.fmt(.manual, "bold 48px sans-serif", .{});
-    med_font = wasm.make.fmt(.manual, "24px sans-serif", .{});
-    small_font = wasm.make.fmt(.manual, "10px sans-serif", .{});
+    large_font = wasm.make.string(.manual, "bold 48px sans-serif");
+    med_font = wasm.make.string(.manual, "24px sans-serif");
+    small_font = wasm.make.string(.manual, "10px sans-serif");
 
     try tools.appendSlice(Static, &.{
         try editor.Tool.create(Static, editor.LineTool{}),

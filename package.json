@@ -3,6 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "svelte-kit dev -p 1337",
+    "zig:build": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE",
+    "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",
@@ -28,7 +30,8 @@
     "svelte": "3.44.0",
     "svelte-check": "2.7.2",
     "svelte-preprocess": "4.10.1",
-    "typescript": "4.6.2"
+    "typescript": "4.6.2",
+    "watch": "1.0.2"
   },
   "eslintConfig": {
     "extends": "next/core-web-vitals",
