@@ -8,13 +8,13 @@ const wasm = liu.wasm;
 const Vec2 = liu.Vec2;
 
 pub const KeyCode = enum(u8) {
-    space = 32,
+    space = ' ',
 
-    comma = 44,
-    period = 46,
-    slash = 47,
+    comma = ',',
+    period = '.',
+    slash = '/',
 
-    digit0 = 48,
+    digit0 = '0',
     digit1,
     digit2,
     digit3,
@@ -25,9 +25,9 @@ pub const KeyCode = enum(u8) {
     digit8,
     digit9,
 
-    semicolon = 59,
+    semicolon = ';',
 
-    key_a = 65,
+    key_a = 'A',
     key_b,
     key_c,
     key_d,
@@ -267,6 +267,7 @@ export fn onScroll(deltaX: f32, deltaY_: f32) void {
     mouse_data.scroll_dist += Vec2{ deltaX, deltaY };
 
     const one: f32 = 1;
+
     if (deltaX != 0) {
         mouse_data.scroll_tick[0] += @floatToInt(i32, std.math.copysign(one, deltaX));
     }

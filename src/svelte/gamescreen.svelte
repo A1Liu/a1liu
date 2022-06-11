@@ -171,6 +171,9 @@
 
   canvas {
     height: 100%;
+
+    /* Painter uses this and the slot to put a sidebar on the right; unclear
+     * if that functionality would be useful elsewhere */
     min-width: 0px;
     width: inherit;
     max-width: inherit;
