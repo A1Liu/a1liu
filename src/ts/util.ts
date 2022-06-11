@@ -6,6 +6,27 @@ export async function defer<T>(cb: () => T): Promise<T> {
   return cb();
 }
 
+interface IssueLinkOptions {
+  title: string;
+  body?: string;
+}
+
+const defaultIssueOptions = {
+  body: "",
+};
+
+export function githubIssueLink(options: IssueLinkOptions): string {
+  let urlString = "https://github.com/A1Liu/a1liu/issues/new";
+
+  const query = { ...defaultIssueOptions, ...options };
+  const queryString = new URLSearchParams(query).toString();
+  if (queryString) {
+    urlString += "?" + queryString;
+  }
+
+  return urlString;
+}
+
 export async function post(url: string, data: any): Promise<any> {
   const resp = await fetch(url, {
     method: "POST",

@@ -149,7 +149,7 @@
     on:mousedown={(evt) => evt.preventDefault()}
   />
 
-  <slot></slot>
+  <slot />
 </div>
 
 <style lang="postcss">
