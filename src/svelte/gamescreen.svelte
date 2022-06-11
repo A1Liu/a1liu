@@ -62,7 +62,7 @@
   import { onMount } from "svelte";
 
   export let worker;
-  let canvas: any = undefined;
+  export let canvas: any = undefined;
 
   const listener = (evt: any) => {
     if (!worker || !canvas) return;
@@ -146,11 +146,10 @@
   <canvas
     bind:this={canvas}
     contentEditable
-    on:doubleclick={(evt) => {
-      evt.stopPropagation();
-      evt.preventDefault();
-    }}
+    on:mousedown={(evt) => evt.preventDefault()}
   />
+
+  <slot></slot>
 </div>
 
 <style lang="postcss">
