@@ -1,22 +1,9 @@
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/erlang.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
+import { handleInput, InputMessage } from "@lib/ts/gamescreen";
 
-export type Number2 = [number, number];
-export type Number3 = [number, number, number];
-export type Number4 = [number, number, number, number];
-
-export type Message =
-  | { kind: "resize"; data: Number2 }
-  | { kind: "scroll"; data: Number2 }
-  | { kind: "mousemove"; data: Number2 }
-  | { kind: "leftclick"; data: Number2 }
-  | { kind: "rightclick"; data: Number2 }
-  | { kind: "keydown"; data: number }
-  | { kind: "keyup"; data: number }
-  | { kind: "canvas"; offscreen: any };
-
-const ctx = new WorkerCtx<Message>();
+const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
 
 export type OutMessage =
@@ -29,78 +16,11 @@ interface ErlangGl {
 
 const gglRef: { current: ErlangGl | null } = { current: null };
 
-const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
-  const ggl = gglRef.current;
-  if (!ggl) return;
-
-  const ctx = ggl.ctx;
-
-  // Check if the canvas is not the same size.
-  const needResize = ctx.canvas.width !== width || ctx.canvas.height !== height;
-
-  if (needResize) {
-    // Make the canvas the same size
-    ctx.canvas.width = width;
-    ctx.canvas.height = height;
-
-    wasmRef.abi.setDims(width, height);
-
-    // ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
-  }
-};
-
 const initGl = async (canvas: any): Promise<ErlangGl | null> => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
   return { ctx };
-};
-
-const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
-  switch (msg.kind) {
-    case "scroll": {
-      const [x, y] = msg.data;
-      wasmRef.abi.onScroll(x, y);
-      break;
-    }
-
-    case "mousemove": {
-      const [x, y] = msg.data;
-      wasmRef.abi.onMove(x, y);
-      break;
-    }
-
-    case "leftclick": {
-      const [x, y] = msg.data;
-      wasmRef.abi.onClick(x, y);
-      break;
-    }
-
-    case "rightclick": {
-      const [x, y] = msg.data;
-      wasmRef.abi.onRightClick(x, y);
-      break;
-    }
-
-    case "keydown":
-    case "keyup": {
-      const down = msg.kind === "keydown";
-      wasmRef.abi.onKey(down, msg.data);
-
-      const data = `${msg.kind}: ${msg.data}`;
-      // postMessage({ kind: "info", data });
-      break;
-    }
-
-    case "resize": {
-      const [width, height] = msg.data;
-      resize(wasmRef, width, height);
-      break;
-    }
-
-    default:
-      return;
-  }
 };
 
 const main = async (wasmRef: wasm.Ref) => {
@@ -125,7 +45,7 @@ const main = async (wasmRef: wasm.Ref) => {
   while (true) {
     const captured = await ctx.msgWait();
 
-    captured.forEach((msg) => handleMessage(wasmRef, msg));
+    captured.forEach((msg) => handleInput(wasmRef, gglRef.current.ctx, msg));
   }
 };
 
@@ -176,7 +96,7 @@ const init = async () => {
     captured.forEach((msg) => {
       switch (msg.kind) {
         case "canvas":
-          offscreen = msg.offscreen;
+          offscreen = msg.data;
           break;
 
         default:
@@ -202,7 +122,7 @@ const init = async () => {
   }
 
   unhandled.forEach((msg) => {
-    handleMessage(wasmRef, msg);
+    handleInput(wasmRef, gglRef.current.ctx, msg);
   });
 
   main(wasmRef);

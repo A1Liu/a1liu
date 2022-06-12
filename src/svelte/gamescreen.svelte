@@ -1,70 +1,6 @@
-<script lang="ts" context="module">
-  export type InputMessage =
-    | { kind: "resize"; data: Number2 }
-    | { kind: "scroll"; data: Number2 }
-    | { kind: "mousemove"; data: Number2 }
-    | { kind: "leftclick"; data: Number2 }
-    | { kind: "rightclick"; data: Number2 }
-    | { kind: "keydown"; data: number }
-    | { kind: "keyup"; data: number }
-    | { kind: "canvas"; offscreen: any };
-
-  export const KeyId: Record<string, number> = {
-    Space: 32,
-
-    Comma: 44,
-    Period: 46,
-    Slash: 47,
-
-    Digit0: 48,
-    Digit1: 49,
-    Digit2: 50,
-    Digit3: 51,
-    Digit4: 52,
-    Digit5: 53,
-    Digit6: 54,
-    Digit7: 55,
-    Digit8: 56,
-    Digit9: 57,
-
-    Semicolon: 59,
-
-    KeyA: 65,
-    KeyB: 66,
-    KeyC: 67,
-    KeyD: 68,
-    KeyE: 69,
-    KeyF: 70,
-    KeyG: 71,
-    KeyH: 72,
-    KeyI: 73,
-    KeyJ: 74,
-    KeyK: 75,
-    KeyL: 76,
-    KeyM: 77,
-    KeyN: 78,
-    KeyO: 79,
-    KeyP: 80,
-    KeyQ: 81,
-    KeyR: 82,
-    KeyS: 83,
-    KeyT: 84,
-    KeyU: 85,
-    KeyV: 86,
-    KeyW: 87,
-    KeyX: 88,
-    KeyY: 89,
-    KeyZ: 90,
-
-    ArrowUp: 128,
-    ArrowDown: 129,
-    ArrowLeft: 130,
-    ArrowRight: 131,
-  };
-</script>
-
 <script lang="ts">
   import { onMount } from "svelte";
+  import { KeyId } from "@lib/ts/gamescreen";
 
   export let worker;
   export let canvas: any = undefined;
@@ -82,7 +18,7 @@
       listener(null);
 
       const offscreen = canvas.transferControlToOffscreen();
-      worker.postMessage({ kind: "canvas", offscreen }, [offscreen]);
+      worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
     }
   }
 

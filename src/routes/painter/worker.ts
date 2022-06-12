@@ -1,6 +1,7 @@
 import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
+import { handleInput, InputMessage } from "@lib/ts/gamescreen";
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/painter.wasm?url";
 
@@ -12,11 +13,7 @@ export type Message =
   | { kind: "toggleTool" }
   | { kind: "resize"; data: Number2 }
   | { kind: "setColor"; data: Number3 }
-  | { kind: "mousemove"; data: Number2 }
-  | { kind: "leftclick"; data: Number2 }
-  | { kind: "rightclick"; data: Number2 }
-  | { kind: "keydown"; data: number }
-  | { kind: "canvas"; offscreen: any };
+  | InputMessage;
 
 const ctx = new WorkerCtx<Message>();
 onmessage = ctx.onmessageCallback();
@@ -28,7 +25,6 @@ export type OutMessage =
   | { kind: string; data: any };
 
 interface PainterGlState {
-  renderId: number;
   rawTrianglesLength: number;
   colorsLength: number;
 }
@@ -45,7 +41,6 @@ const gglRef: { current: PainterGl | null } = { current: null };
 const glState: PainterGlState = {
   rawTrianglesLength: 0,
   colorsLength: 0,
-  renderId: 1,
 };
 
 const initGl = async (canvas: any): Promise<PainterGl | null> => {
@@ -155,8 +150,6 @@ const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
 
     ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
     wasmRef.abi.setDims(width, height);
-
-    glState.renderId = glState.renderId + 1;
   }
 };
 
@@ -201,7 +194,6 @@ const updateState = (
     ctx.bufferData(ctx.ARRAY_BUFFER, triangles, ctx.DYNAMIC_DRAW);
 
     glState.rawTrianglesLength = Math.floor(triangles.length / 2);
-    glState.renderId = glState.renderId + 1;
   }
 
   if (colors !== null) {
@@ -209,40 +201,13 @@ const updateState = (
     ctx.bufferData(ctx.ARRAY_BUFFER, colors, ctx.DYNAMIC_DRAW);
 
     glState.colorsLength = Math.floor(colors.length / 3);
-    glState.renderId = glState.renderId + 1;
   }
 };
 
 const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
+  if (handleInput(wasmRef, gglRef.current?.ctx, msg)) return;
+
   switch (msg.kind) {
-    case "mousemove": {
-      const [x, y] = msg.data;
-      wasmRef.abi.onMove(x, y);
-      break;
-    }
-
-    case "leftclick": {
-      const [x, y] = msg.data;
-      wasmRef.abi.onClick(x, y);
-      break;
-    }
-
-    case "rightclick":
-      const [x, y] = msg.data;
-      wasmRef.abi.onRightClick(x, y);
-      break;
-
-    case "keydown":
-      const data = `${msg.data}`;
-      wasmRef.abi.onKey(msg.data);
-      break;
-
-    case "resize": {
-      const [width, height] = msg.data;
-      resize(wasmRef, width, height);
-      break;
-    }
-
     case "setColor": {
       const [r, g, b] = msg.data;
       wasmRef.abi.setColor(r, g, b);
@@ -298,7 +263,7 @@ const init = async () => {
     captured.forEach((msg) => {
       switch (msg.kind) {
         case "canvas":
-          offscreen = msg.offscreen;
+          offscreen = msg.data;
           break;
 
         default:
