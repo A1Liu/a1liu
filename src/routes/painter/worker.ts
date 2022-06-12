@@ -266,7 +266,7 @@ const init = async () => {
 
   gglRef.current = ggl;
 
-  postMessage({ kind: "success", data: "WebGL2 context initialized!" });
+  postMessage({ kind: "log", data: "WebGL2 context initialized!" });
   postMessage({ kind: "initDone" });
 
   result.remainder.forEach((msg) => handleMessage(wasmRef, msg));

@@ -501,5 +501,5 @@ export fn init() void {
     obj_click = wasm.make.string(.manual, "click");
     obj_draw = wasm.make.string(.manual, "draw");
 
-    wasm.post(.info, "WASM initialized!", .{});
+    wasm.post(.log, "WASM initialized!", .{});
 }

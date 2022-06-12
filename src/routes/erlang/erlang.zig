@@ -89,7 +89,7 @@ export fn init() void {
 
     initErr() catch @panic("meh");
 
-    wasm.post(.info, "WASM initialized!", .{});
+    wasm.post(.log, "WASM initialized!", .{});
 }
 
 const Registry = liu.ecs.Registry(&.{
