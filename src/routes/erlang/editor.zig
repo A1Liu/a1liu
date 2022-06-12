@@ -109,13 +109,32 @@ pub const ClickTool = struct {
     }
 
     pub fn frame(self: *@This(), input: util.FrameInput) void {
-        if (!input.mouse.left_clicked) return;
+        if (!input.mouse.left_clicked and !input.mouse.right_clicked) return;
         _ = self;
 
         const bbox = unitSquareBBoxForPos(input.mouse.pos);
-        if (boxWillCollide(bbox)) return;
+        if (input.mouse.left_clicked) {
+            if (boxWillCollide(bbox)) return;
 
-        _ = makeBox(bbox.pos) catch return;
+            _ = makeBox(bbox.pos) catch return;
+            return;
+        }
+
+        if (input.mouse.right_clicked) {
+            var view = erlang.registry.view(struct {
+                pos_c: erlang.PositionC,
+                force_c: ?*const erlang.ForceC,
+            });
+
+            while (view.next()) |elem| {
+                if (elem.force_c != null) continue;
+
+                const overlap = elem.pos_c.bbox.overlap(bbox);
+                if (overlap.result) {
+                    _ = erlang.registry.delete(elem.id);
+                }
+            }
+        }
     }
 };
 
