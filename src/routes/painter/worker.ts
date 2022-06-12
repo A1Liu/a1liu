@@ -1,7 +1,7 @@
 import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
-import { handleInput, InputMessage } from "@lib/ts/gamescreen";
+import { handleInput, InputMessage, findCanvas } from "@lib/ts/gamescreen";
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/painter.wasm?url";
 
@@ -256,37 +256,20 @@ const init = async () => {
 
   wasmRef.abi.init();
 
-  while (true) {
-    const captured = await ctx.msgWait();
-    let offscreen = null;
+  const result = await findCanvas(ctx);
+  const ggl = await initGl(result.canvas);
 
-    captured.forEach((msg) => {
-      switch (msg.kind) {
-        case "canvas":
-          offscreen = msg.data;
-          break;
-
-        default:
-          handleMessage(wasmRef, msg);
-          break;
-      }
-    });
-
-    if (offscreen === null) continue;
-
-    const ggl = await initGl(offscreen);
-
-    if (!ggl) {
-      postMessage({ kind: "error", data: "WebGL2 not supported!" });
-      return;
-    }
-
-    gglRef.current = ggl;
-
-    postMessage({ kind: "success", data: "WebGL2 context initialized!" });
-    postMessage({ kind: "initDone" });
-    break;
+  if (!ggl) {
+    postMessage({ kind: "error", data: "WebGL2 not supported!" });
+    return;
   }
+
+  gglRef.current = ggl;
+
+  postMessage({ kind: "success", data: "WebGL2 context initialized!" });
+  postMessage({ kind: "initDone" });
+
+  result.remainder.forEach((msg) => handleMessage(wasmRef, msg));
 
   main(wasmRef);
 };

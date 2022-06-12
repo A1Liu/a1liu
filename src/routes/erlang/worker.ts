@@ -1,7 +1,7 @@
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/erlang.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
-import { handleInput, InputMessage } from "@lib/ts/gamescreen";
+import { handleInput, findCanvas, InputMessage } from "@lib/ts/gamescreen";
 
 const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
@@ -88,40 +88,19 @@ const init = async () => {
 
   wasmRef.abi.init();
 
-  let unhandled: any[] = [];
-  while (true) {
-    const captured = await ctx.msgWait();
-    let offscreen = null;
+  const result = await findCanvas(ctx);
+  const ggl = await initGl(result.canvas);
 
-    captured.forEach((msg) => {
-      switch (msg.kind) {
-        case "canvas":
-          offscreen = msg.data;
-          break;
-
-        default:
-          unhandled.push(msg);
-          break;
-      }
-    });
-
-    if (offscreen === null) continue;
-
-    const ggl = await initGl(offscreen);
-
-    if (!ggl) {
-      postMessage({ kind: "error", data: "WebGL2 not supported!" });
-      return;
-    }
-
-    gglRef.current = ggl;
-    postMessage({ kind: "success", data: "WebGL2 context initialized!" });
-    postMessage({ kind: "initDone" });
-
-    break;
+  if (!ggl) {
+    postMessage({ kind: "error", data: "WebGL2 not supported!" });
+    return;
   }
 
-  unhandled.forEach((msg) => {
+  gglRef.current = ggl;
+  postMessage({ kind: "success", data: "WebGL2 context initialized!" });
+  postMessage({ kind: "initDone" });
+
+  result.remainder.forEach((msg) => {
     handleInput(wasmRef, gglRef.current.ctx, msg);
   });
 

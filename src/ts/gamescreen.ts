@@ -126,7 +126,7 @@ export const handleInput = (
       const down = msg.kind === "keydown";
       wasmRef.abi.onKey(down, msg.data);
 
-      const data = `${msg.kind}: ${msg.data}`;
+      // const data = `${msg.kind}: ${msg.data}`;
       // postMessage({ kind: "info", data });
       break;
     }
@@ -142,4 +142,31 @@ export const handleInput = (
   }
 
   return true;
+};
+
+interface FindCanvasResult {
+  canvas: any;
+  remainder: Message[];
+}
+
+export const findCanvas = async (ctx: WorkerCtx): Promise<FindCanvasResult> => {
+  const result: FindCanvasResult = { canvas: null, remainder: [] };
+  while (true) {
+    const messages = await ctx.msgWait();
+    messages.forEach((msg) => {
+      switch (msg.kind) {
+        case "canvas":
+          result.canvas = msg.data;
+          break;
+
+        default:
+          result.remainder.push(msg);
+          break;
+      }
+    });
+
+    if (result.canvas) {
+      return result;
+    }
+  }
 };
