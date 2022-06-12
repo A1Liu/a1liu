@@ -150,6 +150,8 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
     };
 }
 
+// TODO: creating entity during iteration
+
 // TODO add back sparse (commented out code is wrong so rewrite it lol)
 
 pub fn Registry(
