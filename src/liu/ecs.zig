@@ -154,10 +154,8 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
 
 // TODO add back sparse (commented out code is wrong so rewrite it lol)
 
-pub fn Registry(
-    comptime InDense: []const type,
-    // comptime InSparse: []const type,
-) type {
+// comptime InSparse: []const type,
+pub fn Registry(comptime InDense: []const type) type {
     comptime {
         // for (InSparse) |T| {
         //     if (@sizeOf(T) > 0) continue;
