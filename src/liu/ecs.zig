@@ -197,6 +197,8 @@ pub fn Registry(comptime InDense: []const type) type {
             bitset: std.StaticBitSet(Components.len - 1),
         };
 
+        pub const Asset = struct {};
+
         const List = std.ArrayListUnmanaged;
         // const Mapping = struct {
         //     // index is entity ID, value is component index
@@ -316,6 +318,16 @@ pub fn Registry(comptime InDense: []const type) type {
             elements[index] = component;
 
             return;
+        }
+
+        pub fn writeToAsset(self: *const Self, alloc: std.mem.Allocator) void {
+            _ = self;
+            _ = alloc;
+        }
+
+        pub fn readFromAsset(self: *const Self, bytes: []const u8) void {
+            _ = self;
+            _ = bytes;
         }
 
         fn raw(self: *const Self, comptime T: type) []T {
