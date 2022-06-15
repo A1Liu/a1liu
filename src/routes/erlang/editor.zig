@@ -243,3 +243,11 @@ pub const DrawTool = struct {
         _ = new_solid;
     }
 };
+
+pub fn writeToAsset(alloc: std.mem.Allocator) void {
+    _ = alloc;
+}
+
+pub fn readFromAsset(bytes: []const u8) void {
+    _ = bytes;
+}
