@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Somehow path modification on MacOS fucks up the shell. No idea how to fix
-# right now. This is possible culprit for Vim termguicolors not ever working
-# in Tmux.
-# https://superuser.com/questions/544989/does-tmux-sort-the-path-variable
 
 # Takes as arguments:
 # 1. path to source
@@ -34,6 +30,15 @@ if [[ $CFG_SHELL_ENV != 1 ]]; then
   source_if_necessary $HOME/.sdkman/bin/sdkman-init.sh sdk
 fi
 
+export EDITOR='vim'
+export VISUAL='vim'
+
+export BASH_SILENCE_DEPRECATION_WARNING=1
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# Adding stuff to python path
+export PYTHONPATH="${CFG_DIR}/programs"
+
 # Guard prevents this from being sourced in environments that already have it.
 # Block focuses on environment variables.
 
@@ -48,20 +53,25 @@ fi
 
 # TODO This also breaks when TMUX runs things. I think I'm going to rewrite this stuff
 # to just not append ever, but on install it copies the existing environment.
-if [[ $CFG_ENV != 1 ]]; then
+
+# ^ Continuation: Somehow path modification on MacOS fucks up the shell. No idea
+# how to fix right now. This is possible culprit for Vim termguicolors not ever
+# working in Tmux.
+# https://superuser.com/questions/544989/does-tmux-sort-the-path-variable
+
+# ^ Continuation: I think I've fixed it by using a zig helper program to edit
+# my path. Old code is kept for now. Unsure how to work around zig dependency
+# stuffs
+
+
+if [ -e "${CFG_DIR}/local/path/aliu_path_helper" ]; then
+  export PATH=`${CFG_DIR}/local/path/aliu_path_helper`
+  export CFG_ENV=1
+elif [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
 
-  export EDITOR='vim'
-  export VISUAL='vim'
-
-  export BASH_SILENCE_DEPRECATION_WARNING=1
-  export HOMEBREW_NO_AUTO_UPDATE=1
-
-  # Adding stuff to python path
-  export PYTHONPATH="${CFG_DIR}/programs"
-
   # export GOROOT="/usr/local/go"
-  export GOPATH="$HOME/go"
+  export GOPATH="~/go"
   export LINUX_GOPATH="/usr/local/go/bin"
   export PATH="${LINUX_GOPATH}:${GOPATH}:${GOPATH}/bin:${PATH}"
 
@@ -71,3 +81,4 @@ if [[ $CFG_ENV != 1 ]]; then
 
   export PATH="${CFG_DIR}/local/path:${PATH}"
 fi
+

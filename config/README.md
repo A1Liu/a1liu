@@ -62,3 +62,4 @@ My Vim config uses these environment variables at startup:
 - `install/?` -> needs to copy files instead of just moving them.
 - `install/setup` -> reorganize, maybe just turn it into docs instead of scripts
 - SSH key stuff
+- Figure out how to handle new Zig dependency for path management stuffs
