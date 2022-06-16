@@ -11,9 +11,23 @@ var mode: Mode = undefined;
 
 const ProgData = struct {
     name: []const u8,
-    output: []const u8,
     root: []const u8,
 };
+
+fn pathTool(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
+    const program = b.addExecutable(prog.name, prog.root);
+
+    program.addPackagePath("liu", "src/liu/lib.zig");
+
+    program.setBuildMode(mode);
+
+    program.setOutputDir("config/local/path");
+
+    program.install();
+    b.default_step.dependOn(&program.step);
+
+    return program;
+}
 
 fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
     const vers = b.version(0, 0, 0);
@@ -27,7 +41,7 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
     // Output straight to static folder by default to make things easier
-    program.setOutputDir(prog.output);
+    program.setOutputDir("./.zig/zig-out/");
 
     if (mode != .Debug) {
         program.strip = true;
@@ -44,41 +58,24 @@ pub fn build(b: *Builder) !void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     mode = b.standardReleaseOptions();
 
-    // const cache_dir = "./.zig/zig-cache";
-    // const out_dir = "./.zig/zig-out";
-    // const cwd = std.fs.cwd();
-
-    // try cwd.makePath(cache_dir);
-    // try cwd.makePath(out_dir ++ "/lib");
-    // try cwd.makePath(out_dir ++ "/bin");
-    // try cwd.makePath(out_dir ++ "/include");
-
-    // b.install_prefix = try cwd.realpathAlloc(liu.Temp, "./.zig/zig-out");
-    // b.install_path = try cwd.realpathAlloc(liu.Temp, "./.zig/zig-out");
-    // b.lib_dir = try cwd.realpathAlloc(liu.Temp, out_dir ++ "/lib");
-    // b.exe_dir = try cwd.realpathAlloc(liu.Temp, out_dir ++ "/bin");
-    // b.h_dir = try cwd.realpathAlloc(liu.Temp, out_dir ++ "/include");
-    // b.dest_dir = try cwd.realpathAlloc(liu.Temp, "./.zig");
-    // b.cache_root = try cwd.realpathAlloc(liu.Temp, "./.zig/zig-cache");
-
-    // b.override_dest_dir = "./.zig";
-
     _ = wasmProgram(b, .{
         .name = "kilordle",
         .root = "./src/routes/kilordle/kilordle.zig",
-        .output = "./.zig/zig-out/",
     });
 
     _ = wasmProgram(b, .{
         .name = "painter",
         .root = "./src/routes/painter/painter.zig",
-        .output = "./.zig/zig-out/",
     });
 
     _ = wasmProgram(b, .{
         .name = "erlang",
         .root = "./src/routes/erlang/erlang.zig",
-        .output = "./.zig/zig-out/",
+    });
+
+    _ = pathTool(b, .{
+        .name = "aliu_path_helper",
+        .root = "./src/tools/path_helper.zig",
     });
 }
 
@@ -86,14 +83,3 @@ pub fn build(b: *Builder) !void {
 pub fn main() !void {
     try assets.kilordle.generate();
 }
-
-// Experimenting with comptime branch quota
-// fn erro() !void {}
-// test {
-//     comptime {
-//         var i: u32 = 0;
-//         while (i < 333) : (i += 1) {
-//             try erro();
-//         }
-//     }
-// }
