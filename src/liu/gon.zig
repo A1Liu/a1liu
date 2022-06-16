@@ -2,10 +2,56 @@ const std = @import("std");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
+const SchemaParseError = std.fmt.ParseIntError || error{
+    MissingField,
+    ExpectedStruct,
+    ExpectedPrimitive,
+    ExpectedString,
+    ExpectedArray,
+
+    OnlyStringSlicesSupported,
+};
+
 pub const Value = union(enum) {
     map: std.StringArrayHashMapUnmanaged(@This()),
     array: std.ArrayListUnmanaged(@This()),
     value: []const u8,
+
+    pub fn expect(self: *const @This(), comptime T: type) SchemaParseError!T {
+        if (T == @This()) {
+            return self.*;
+        }
+
+        switch (@typeInfo(T)) {
+            .Struct => |info| {
+                if (self.* != .map) return error.ExpectedStruct;
+
+                var t: T = undefined;
+                const map = &self.map;
+
+                inline for (info.fields) |field| {
+                    // if (field.field_type == .Optional)
+                    const value = map.get(field.name) orelse return error.MissingField;
+
+                    @field(t, field.name) = try value.expect(field.field_type);
+                }
+
+                return t;
+            },
+
+            .Pointer => |info| {
+                if (info.size != .Slice) @compileError("We only support strings ([]const u8)");
+                if (info.child != u8) @compileError("We only support strings ([]const u8)");
+                if (!info.is_const) @compileError("We only support strings ([]const u8)");
+
+                if (self.* != .value) return error.ExpectedString;
+
+                return self.value;
+            },
+
+            else => @compileError("wtf"),
+        }
+    }
 
     pub fn write(self: *const @This(), writer: anytype, is_root: bool) !void {
         const indent: u32 = if (is_root) 0 else 2;
@@ -191,15 +237,23 @@ test "GON: parse" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ]");
+    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ] merp farg");
 
     var writer_out = std.ArrayList(u8).init(liu.Pages);
     defer writer_out.deinit();
 
     try output.write(writer_out.writer(), true);
 
-    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\n";
+    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\nmerp farg\n";
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
+
+    const parsed = try output.expect(struct {
+        Hello: Value,
+        Kerrz: Value,
+        merp: []const u8,
+    });
+
+    try std.testing.expectEqualSlices(u8, "farg", parsed.merp);
 }
 
 test "GON: tokenize" {
