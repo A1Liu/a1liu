@@ -30,10 +30,20 @@ pub const Value = union(enum) {
                 const map = &self.map;
 
                 inline for (info.fields) |field| {
-                    // if (field.field_type == .Optional)
-                    const value = map.get(field.name) orelse return error.MissingField;
+                    const map_value = map.get(field.name);
+                    const field_info = @typeInfo(field.field_type);
+                    if (field_info == .Optional) {
+                        if (map_value) |value| {
+                            const field_type = field_info.Optional.child;
+                            @field(t, field.name) = try value.expect(field_type);
+                        } else {
+                            @field(t, field.name) = null;
+                        }
+                    } else {
+                        const value = map_value orelse return error.MissingField;
 
-                    @field(t, field.name) = try value.expect(field.field_type);
+                        @field(t, field.name) = try value.expect(field.field_type);
+                    }
                 }
 
                 return t;
@@ -251,9 +261,11 @@ test "GON: parse" {
         Hello: Value,
         Kerrz: Value,
         merp: []const u8,
+        zarg: ?[]const u8,
     });
 
     try std.testing.expectEqualSlices(u8, "farg", parsed.merp);
+    try std.testing.expect(parsed.zarg == null);
 }
 
 test "GON: tokenize" {
