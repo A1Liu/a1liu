@@ -79,18 +79,16 @@ fn tokenize(bytes: []const u8) !std.ArrayList(Token) {
         const tok_opt: ?Token = switch (b) {
             ' ', '\t', '\n' => null,
 
-            'a'...'z', 'A'...'Z', '.', '_', '0'...'9' => {
-                if (word_begin == null)
-                    word_begin = i;
-                continue;
-            },
-
             '{' => .lbrace,
             '}' => .rbrace,
             '[' => .lbracket,
             ']' => .rbracket,
 
-            else => null,
+            else => {
+                if (word_begin == null)
+                    word_begin = i;
+                continue;
+            },
         };
 
         if (word_begin) |begin| {
@@ -193,14 +191,14 @@ test "GON: parse" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const output = try parseGon("Hello { blarg werp }\n");
+    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ]");
 
     var writer_out = std.ArrayList(u8).init(liu.Pages);
     defer writer_out.deinit();
 
     try output.write(writer_out.writer(), true);
 
-    const expected = "Hello {\n  blarg werp\n}\n";
+    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\n";
     // std.debug.print("\n\n{s}\n\n{s}\n", .{ expected, writer_out.items });
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 }
