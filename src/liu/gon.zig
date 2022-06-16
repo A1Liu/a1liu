@@ -199,7 +199,6 @@ test "GON: parse" {
     try output.write(writer_out.writer(), true);
 
     const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\n";
-    // std.debug.print("\n\n{s}\n\n{s}\n", .{ expected, writer_out.items });
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 }
 
