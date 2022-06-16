@@ -374,13 +374,14 @@ test "Registry: iterate" {
     var registry = try RegistryType.init(256, liu.Pages);
     defer registry.deinit();
 
-    var success = false;
+    // var success = false;
 
     var i: u32 = 0;
     while (i < 257) : (i += 1) {
         const meh = try registry.create("meh");
-        success = try registry.addComponent(meh, TransformComponent{ .i = meh.index });
-        try std.testing.expect(success);
+        // success =
+        try registry.addComponent(meh, TransformComponent{ .i = meh.index });
+        // try std.testing.expect(success);
     }
 
     try std.testing.expect(registry.len == 257);

@@ -2,6 +2,7 @@ const alloc = @import("./allocators.zig");
 const buffers = @import("./buffers.zig");
 const math = @import("./math.zig");
 const interface = @import("./interface.zig");
+const gon = @import("./gon.zig");
 
 pub const packed_asset = @import("./packed_asset.zig");
 pub const ecs = @import("./ecs.zig");
@@ -13,6 +14,7 @@ pub const img = @import("./img.zig");
 pub const wasm = @import("wasm.zig");
 
 pub usingnamespace alloc;
+pub usingnamespace gon;
 pub usingnamespace buffers;
 pub usingnamespace math;
 pub usingnamespace interface;
