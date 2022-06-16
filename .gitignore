@@ -20,9 +20,7 @@ a.out
 # Svelte output
 /.svelte-kit
 /.out
-
-# editor
-.idea
+/.zig
 
 # debug
 npm-debug.log*

@@ -3,8 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "svelte-kit dev -p 1337",
-    "zig:build": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE",
     "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
+    "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",
