@@ -68,4 +68,6 @@ if [[ $CFG_ENV != 1 ]]; then
   export PATH="/opt/homebrew/bin:$PATH"
 
   export PATH="~/.rbenv/bin:${PATH}"
+
+  export PATH="${CFG_DIR}/local/path:${PATH}"
 fi

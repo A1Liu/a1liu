@@ -46,6 +46,7 @@ const ext = struct {
 
     extern fn encodeString(idx: Obj) usize;
     extern fn decimalFormatFloat(value: f64, is_temp: bool) Obj;
+    extern fn parseFloat(obj: Obj) f64;
 
     extern fn objLen(idx: Obj) usize;
     extern fn readBytes(idx: Obj, begin: [*]u8) void;
@@ -65,6 +66,14 @@ pub const Lifetime = enum {
         return self == .temp;
     }
 };
+
+pub fn parseFloat(bytes: []const u8) f64 {
+    const mark = watermark();
+    defer setWatermark(mark);
+
+    const obj = make.string(.temp, bytes);
+    return ext.parseFloat(obj);
+}
 
 pub const make = struct {
     pub fn slice(life: Lifetime, data: anytype) Obj {

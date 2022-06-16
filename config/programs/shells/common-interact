@@ -10,9 +10,6 @@ alias zigb='zig build -p .zig/zig-out --cache-dir .zig/zig-cache'
 
 alias rmbranch='git branch | grep -v "main" | grep -v "master" | xargs git branch -D'
 
-# Eclim
-export ECLIM_SERVER_SCRIPT="${CFG_DIR}/programs/vim/eclimd"
-
 # SSH
 alias ssh='TERM=xterm-256color ssh'
 

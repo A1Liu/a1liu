@@ -244,6 +244,7 @@ pub const DrawTool = struct {
     }
 };
 
+// Use stable declaration on type
 pub fn writeToAsset(alloc: std.mem.Allocator) void {
     _ = alloc;
 }

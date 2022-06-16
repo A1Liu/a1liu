@@ -144,6 +144,10 @@ export const fetchWasm = async (
     decimalFormatFloat: (value: number, isTemp: boolean) => {
       return addObj(value.toFixed(2), isTemp);
     },
+    parseFloat: (idx: number) => {
+      const value = readObj(idx);
+      return parseFloat(value);
+    },
     readBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);

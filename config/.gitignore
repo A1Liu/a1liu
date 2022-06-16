@@ -9,3 +9,5 @@ __pycache__
 !/local/flags
 /local/flags/*
 !/local/flags/.gitkeep
+/local/path/*
+!/local/path/.gitkeep
