@@ -13,12 +13,50 @@ const SchemaParseError = std.fmt.ParseIntError || error{
 };
 
 pub const Value = union(enum) {
-    map: std.StringArrayHashMapUnmanaged(@This()),
-    array: std.ArrayListUnmanaged(@This()),
+    map: Map,
+    array: Array,
     value: []const u8,
 
-    pub fn expect(self: *const @This(), comptime T: type) SchemaParseError!T {
-        if (T == @This()) {
+    const Map = std.StringArrayHashMapUnmanaged(Self);
+    const Array = std.ArrayListUnmanaged(Self);
+
+    const Self = @This();
+
+    pub fn init(val: anytype) Self {
+        const T = @TypeOf(val);
+
+        if (T == Self) {
+            return val;
+        }
+
+        switch (@typeInfo(T)) {
+            .Struct => |info| {
+                var map: Map = .{};
+                map.ensureTotalCapacity(liu.Temp, info.fields.len);
+
+                inline for (info.fields) |field| {
+                    const field_val = @field(val, field.name);
+
+                    map.putAssumeCapacity(field.name, field_val);
+                }
+
+                return Self{ .map = map };
+            },
+
+            .Pointer => |info| {
+                if (info.size != .Slice) @compileError("We only support strings ([]const u8)");
+                if (info.child != u8) @compileError("We only support strings ([]const u8)");
+                if (!info.is_const) @compileError("We only support strings ([]const u8)");
+
+                return Self{ .value = val };
+            },
+
+            else => @compileError("unsupported type for GON"),
+        }
+    }
+
+    pub fn expect(self: *const Self, comptime T: type) SchemaParseError!T {
+        if (T == Self) {
             return self.*;
         }
 
@@ -63,13 +101,13 @@ pub const Value = union(enum) {
         }
     }
 
-    pub fn write(self: *const @This(), writer: anytype, is_root: bool) !void {
+    pub fn write(self: *const Self, writer: anytype, is_root: bool) !void {
         const indent: u32 = if (is_root) 0 else 2;
         try self.writeRecursive(writer, indent, is_root);
     }
 
     fn writeRecursive(
-        self: *const @This(),
+        self: *const Self,
         writer: anytype,
         indent: u32,
         is_root: bool,
@@ -201,7 +239,7 @@ const Parser = struct {
             };
 
             if (parse_as_object) {
-                var values: std.StringArrayHashMapUnmanaged(Value) = .{};
+                var values: Value.Map = .{};
 
                 while (self.index < self.tokens.len) {
                     const tok = self.tokens[self.index];
