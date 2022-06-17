@@ -1,4 +1,5 @@
 const std = @import("std");
+const root = @import("root");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
@@ -11,6 +12,8 @@ const SchemaParseError = std.fmt.ParseIntError || error{
 
     OnlyStringSlicesSupported,
 };
+
+const printFloat = if (@hasDecl(root, "printFloat")) root.printFloat else std.fmt.printFloat;
 
 pub const Value = union(enum) {
     map: Map,
@@ -42,6 +45,10 @@ pub const Value = union(enum) {
                 }
 
                 return Self{ .map = map };
+            },
+
+            .Float => |info| {
+                _ = info;
             },
 
             .Pointer => |info| {

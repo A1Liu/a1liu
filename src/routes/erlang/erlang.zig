@@ -436,7 +436,7 @@ pub fn renderDebugInfo(input: util.FrameInput) void {
 
     {
         const fps_text = wasm.out.string("FPS:");
-        const fps_val = wasm.out.floatPrint(1000 / input.delta);
+        const fps_val = wasm.out.fixedFloatPrint(1000 / input.delta, 2);
         ext.fillText(fps_text, 5, 160);
         ext.fillText(fps_val, 120, 160);
     }

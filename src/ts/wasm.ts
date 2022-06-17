@@ -141,12 +141,15 @@ export const fetchWasm = async (
 
       return encodedString.length;
     },
-    decimalFormatFloat: (value: number, isTemp: boolean) => {
-      return addObj(value.toFixed(2), isTemp);
+    exactExpFloatFormat: (value: number, isTemp: boolean) => {
+      return addObj(value.toExponential(), isTemp);
+    },
+    fixedFormatFloat: (value: number, decimalPlaces: number, isTemp: boolean) => {
+      return addObj(value.toFixed(decimalPlaces), isTemp);
     },
     parseFloat: (idx: number) => {
       const value = readObj(idx);
-      return parseFloat(value);
+      return Number(value);
     },
     readBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
