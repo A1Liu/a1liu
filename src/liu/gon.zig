@@ -22,7 +22,7 @@ pub const Value = union(enum) {
 
     const Self = @This();
 
-    pub fn init(val: anytype) Self {
+    pub fn init(val: anytype) error{OutOfMemory}!Self {
         const T = @TypeOf(val);
 
         if (T == Self) {
@@ -32,12 +32,13 @@ pub const Value = union(enum) {
         switch (@typeInfo(T)) {
             .Struct => |info| {
                 var map: Map = .{};
-                map.ensureTotalCapacity(liu.Temp, info.fields.len);
+                try map.ensureTotalCapacity(liu.Temp, info.fields.len);
 
                 inline for (info.fields) |field| {
                     const field_val = @field(val, field.name);
 
-                    map.putAssumeCapacity(field.name, field_val);
+                    const field_gon = try Value.init(field_val);
+                    map.putAssumeCapacity(field.name, field_gon);
                 }
 
                 return Self{ .map = map };
@@ -304,6 +305,28 @@ test "GON: parse" {
 
     try std.testing.expectEqualSlices(u8, "farg", parsed.merp);
     try std.testing.expect(parsed.zarg == null);
+}
+
+test "GON: serialize" {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const Test = struct {
+        merp: []const u8 = "hello",
+        zarg: []const u8 = "world",
+    };
+
+    const a = Test{};
+
+    const value = try Value.init(a);
+
+    var writer_out = std.ArrayList(u8).init(liu.Pages);
+    defer writer_out.deinit();
+
+    try value.write(writer_out.writer(), true);
+
+    const expected = "merp hello\nzarg world\n";
+    try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 }
 
 test "GON: tokenize" {
