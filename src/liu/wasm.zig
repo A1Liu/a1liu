@@ -45,6 +45,7 @@ const ext = struct {
     extern fn deleteObj(obj: Obj) void;
 
     extern fn encodeString(idx: Obj) usize;
+    extern fn exactExpFloatFormat(value: f64, is_temp: bool) Obj;
     extern fn fixedFormatFloat(value: f64, decimal_places: u32, is_temp: bool) Obj;
     extern fn parseFloat(obj: Obj) f64;
 
@@ -127,6 +128,10 @@ pub const make = struct {
         return ext.makeObj(life.isTemp());
     }
 
+    pub fn exactExpFloatPrint(life: Lifetime, value: f64) Obj {
+        return ext.exactExpFloatPrint(value, life.isTemp());
+    }
+
     pub fn fixedFloatPrint(life: Lifetime, value: f64, places: u32) Obj {
         return ext.fixedFormatFloat(value, places, life.isTemp());
     }
@@ -171,6 +176,10 @@ pub const out = struct {
 
     pub inline fn fmt(comptime format: []const u8, args: anytype) Obj {
         return wasm.make.fmt(.temp, format, args);
+    }
+
+    pub fn exactExpFloatPrint(value: f64) Obj {
+        return wasm.make.exactExpFloatPrint(.temp, value);
     }
 
     pub fn fixedFloatPrint(value: f64, places: u32) Obj {
