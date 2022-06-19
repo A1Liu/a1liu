@@ -56,6 +56,16 @@ const ext = struct {
     extern fn exit(objIndex: Obj) noreturn;
 };
 
+var error_code: ?u32 = null;
+
+comptime {
+    @export(liuWasmErrorCode, .{ .name = "liuWasmErrorCode", .linkage = .Strong });
+}
+
+fn liuWasmErrorCode(code: u32) callconv(.C) void {
+    error_code = code;
+}
+
 pub const watermark = ext.watermark;
 pub const setWatermark = ext.setWatermark;
 
@@ -68,12 +78,21 @@ pub const Lifetime = enum {
     }
 };
 
-pub fn parseFloat(bytes: []const u8) f64 {
+pub fn parseFloat(bytes: []const u8) std.fmt.ParseFloatError!f64 {
     const mark = watermark();
     defer setWatermark(mark);
 
     const obj = make.string(.temp, bytes);
-    return ext.parseFloat(obj);
+    const val = ext.parseFloat(obj);
+    if (val == std.math.nan(f64)) {
+        if (error_code) |_| {
+            return error.InvalidCharacter;
+        }
+
+        error_code = null;
+    }
+
+    return val;
 }
 
 pub const make = struct {

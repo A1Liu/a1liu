@@ -149,7 +149,14 @@ export const fetchWasm = async (
     },
     parseFloat: (idx: number) => {
       const value = readObj(idx);
-      return Number(value);
+
+      const out = Number(value);
+
+      if (Number.isNaN(out) && value.toLowerCase() === 'nan') {
+          ref.abi.liuWasmErrorCode(1);
+      }
+
+      return out;
     },
     readBytes: (idx: number, begin: number): void => {
       const array = objectMap.get(idx);
