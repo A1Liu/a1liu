@@ -78,18 +78,50 @@ pub const Lifetime = enum {
     }
 };
 
+// Copied from std
+fn parseInfOrNan(comptime T: type, s: []const u8, negative: bool) ?T {
+    // inf/infinity; infxxx should only consume inf.
+    if (std.ascii.startsWithIgnoreCase(s, "inf")) {
+        const n: usize = if (std.ascii.startsWithIgnoreCase(s[3..], "inity")) 8 else 3;
+        if (n != s.len) return null;
+
+        return if (!negative) std.math.inf(T) else -std.math.inf(T);
+    }
+
+    if (std.ascii.startsWithIgnoreCase(s, "nan")) {
+        if (s.len != 3) return null;
+        return std.math.nan(T);
+    }
+
+    return null;
+}
+
 pub fn parseFloat(bytes: []const u8) std.fmt.ParseFloatError!f64 {
+    if (bytes.len == 0) {
+        return error.InvalidCharacter;
+    }
+
+    var i: usize = 0;
+    const negative = bytes[i] == '-';
+    if (bytes[i] == '-' or bytes[i] == '+') {
+        i += 1;
+    }
+
+    if (bytes.len == i) {
+        return error.InvalidCharacter;
+    }
+
+    if (parseInfOrNan(f64, bytes[i..], negative)) |val| {
+        return val;
+    }
+
     const mark = watermark();
     defer setWatermark(mark);
 
     const obj = make.string(.temp, bytes);
     const val = ext.parseFloat(obj);
-    if (val == std.math.nan(f64)) {
-        if (error_code) |_| {
-            return error.InvalidCharacter;
-        }
-
-        error_code = null;
+    if (std.math.isNan(val)) {
+        return error.InvalidCharacter;
     }
 
     return val;
