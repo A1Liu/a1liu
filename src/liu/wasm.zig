@@ -103,7 +103,7 @@ pub fn parseFloat(bytes: []const u8) std.fmt.ParseFloatError!f64 {
 
     var i: usize = 0;
     const negative = bytes[i] == '-';
-    if (bytes[i] == '-' or bytes[i] == '+') {
+    if (negative or bytes[i] == '+') {
         i += 1;
     }
 
