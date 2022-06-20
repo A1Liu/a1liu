@@ -13,7 +13,6 @@ export type Number4 = [number, number, number, number];
 
 export type Message =
   | { kind: "toggleTool" }
-  | { kind: "resize"; data: Number2 }
   | { kind: "setColor"; data: Number3 }
   | InputMessage;
 
@@ -134,25 +133,6 @@ const readPixel = (x: number, y: number): Uint8Array | null => {
   );
 
   return pixel;
-};
-
-const resize = (wasmRef: wasm.Ref, width: number, height: number) => {
-  const ggl = gglRef.current;
-  if (!ggl) return;
-
-  const ctx = ggl.ctx;
-
-  // Check if the canvas is not the same size.
-  const needResize = ctx.canvas.width !== width || ctx.canvas.height !== height;
-
-  if (needResize) {
-    // Make the canvas the same size
-    ctx.canvas.width = width;
-    ctx.canvas.height = height;
-
-    ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
-    wasmRef.abi.setDims(width, height);
-  }
 };
 
 function render() {
