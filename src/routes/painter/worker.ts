@@ -2,6 +2,8 @@ import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
 import { handleInput, InputMessage, findCanvas } from "@lib/ts/gamescreen";
+import fragShaderUrl from "./painter.frag?url";
+import vertShaderUrl from "./painter.vert?url";
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/painter.wasm?url";
 
@@ -50,8 +52,8 @@ const initGl = async (canvas: any): Promise<PainterGl | null> => {
   if (!ctx) return null;
 
   const [vertSrc, fragSrc] = await Promise.all([
-    fetch("/painter/painter.vert").then((r) => r.text()),
-    fetch("/painter/painter.frag").then((r) => r.text()),
+    fetch(vertShaderUrl).then((r) => r.text()),
+    fetch(fragShaderUrl).then((r) => r.text()),
   ]);
 
   const vertexShader = GL.createShader(ctx, ctx.VERTEX_SHADER, vertSrc);
