@@ -6,7 +6,6 @@ const assets = @import("assets").kilordle;
 const Spec = assets.Spec;
 
 const wasm = liu.wasm;
-pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 const ArrayList = std.ArrayList;

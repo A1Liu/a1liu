@@ -13,7 +13,6 @@ const liu = @import("liu");
 // -> select objects
 
 const wasm = liu.wasm;
-pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 const Vec2 = liu.Vec2;

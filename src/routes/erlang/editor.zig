@@ -7,9 +7,9 @@ const erlang = @import("./erlang.zig");
 const ext = erlang.ext;
 const BBox = erlang.BBox;
 
-const wasm = liu.wasm;
 const EntityId = liu.ecs.EntityId;
 const Vec2 = liu.Vec2;
+const FrameInput = liu.gamescreen.FrameInput;
 
 pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
     return BBox{
@@ -39,7 +39,7 @@ pub const Tool = struct {
     const Self = @This();
 
     const VTable = struct {
-        frame: fn (self: *anyopaque, input: util.FrameInput) void,
+        frame: fn (self: *anyopaque, input: FrameInput) void,
         reset: fn (self: *anyopaque) void,
     };
 
@@ -80,7 +80,7 @@ pub const Tool = struct {
         return self.vtable.reset(self.ptr);
     }
 
-    pub fn frame(self: *Self, input: util.FrameInput) void {
+    pub fn frame(self: *Self, input: FrameInput) void {
         return self.vtable.frame(self.ptr, input);
     }
 };
@@ -108,7 +108,7 @@ pub const ClickTool = struct {
         _ = self;
     }
 
-    pub fn frame(self: *@This(), input: util.FrameInput) void {
+    pub fn frame(self: *@This(), input: FrameInput) void {
         if (!input.mouse.left_clicked and !input.mouse.right_clicked) return;
         _ = self;
 
@@ -152,7 +152,7 @@ pub const LineTool = struct {
         _ = erlang.registry.delete(data.entity);
     }
 
-    pub fn frame(self: *@This(), input: util.FrameInput) void {
+    pub fn frame(self: *@This(), input: FrameInput) void {
         const pos = @floor(input.mouse.pos);
 
         if (input.mouse.right_clicked) {
@@ -229,7 +229,7 @@ pub const DrawTool = struct {
         self.drawing = false;
     }
 
-    pub fn frame(self: *@This(), input: util.FrameInput) void {
+    pub fn frame(self: *@This(), input: FrameInput) void {
         if (input.mouse.left_clicked) {
             self.drawing = !self.drawing;
         }

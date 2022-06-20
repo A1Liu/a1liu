@@ -2,8 +2,8 @@ import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
 import { handleInput, InputMessage, findCanvas } from "@lib/ts/gamescreen";
-import fragShaderUrl from "./painter.frag?url";
-import vertShaderUrl from "./painter.vert?url";
+import fragShaderUrl from "./shader.frag?url";
+import vertShaderUrl from "./shader.vert?url";
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/painter.wasm?url";
 

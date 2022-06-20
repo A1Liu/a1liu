@@ -6,12 +6,14 @@ const editor = @import("./editor.zig");
 const util = @import("./util.zig");
 const rows = util.rows;
 const camera = util.camera;
+const KeyCode = liu.gamescreen.KeyCode;
+const Timer = liu.gamescreen.Timer;
+const FrameInput = liu.gamescreen.FrameInput;
 
 // https://youtu.be/SFKR5rZBu-8?t=2202
 // https://stackoverflow.com/questions/22511158/how-to-profile-web-workers-in-chrome
 
 const wasm = liu.wasm;
-pub const WasmCommand = void;
 pub usingnamespace wasm;
 
 pub const Vec2 = liu.Vec2;
@@ -160,7 +162,7 @@ fn initErr() !void {
     });
 }
 
-var start_timer: util.Timer = undefined;
+var start_timer: Timer = undefined;
 var static_storage: liu.Bump = liu.Bump.init(1024, liu.Pages);
 const Static: std.mem.Allocator = static_storage.allocator();
 
@@ -173,14 +175,22 @@ pub var small_font: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
 
 export fn setInitialTime(timestamp: f64) void {
-    util.init(timestamp);
+    liu.gamescreen.init(timestamp);
 
-    start_timer = util.Timer.init();
+    start_timer = Timer.init();
 }
 
 export fn run(timestamp: f64) void {
-    const input = util.frameStart(timestamp);
-    defer util.frameCleanup();
+    var input = liu.gamescreen.frameStart(timestamp);
+    defer liu.gamescreen.frameCleanup();
+
+    {
+        const pos = input.mouse.pos;
+        const world_pos = camera.screenToWorldCoordinates(pos);
+        input.mouse.pos = world_pos;
+
+        camera.setDims(input.screen_dims[0], input.screen_dims[1]);
+    }
 
     // Wait for a bit, because otherwise the world will start running
     // before its visible
@@ -420,7 +430,7 @@ fn newToolIndex(diff: i32) u32 {
     return new_index;
 }
 
-pub fn renderDebugInfo(input: util.FrameInput) void {
+pub fn renderDebugInfo(input: FrameInput) void {
     {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
 

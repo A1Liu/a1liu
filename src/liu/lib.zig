@@ -6,6 +6,7 @@ const gon = @import("./gon.zig");
 
 pub const packed_asset = @import("./packed_asset.zig");
 pub const ecs = @import("./ecs.zig");
+pub const gamescreen = @import("./gamescreen.zig");
 
 pub const fonts = @import("./fonts.zig");
 pub const sdf = @import("./sdf.zig");
@@ -27,4 +28,5 @@ test {
     _ = img;
     _ = packed_asset;
     _ = ecs;
+    _ = gamescreen;
 }
