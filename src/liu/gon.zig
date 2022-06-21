@@ -59,6 +59,12 @@ pub const Value = union(enum) {
                 return Self{ .map = map };
             },
 
+            .Int => |_| {
+                var bytes = std.ArrayList(u8).init(liu.Temp);
+                try std.fmt.format(bytes.writer(), "{}", .{val});
+                return Self{ .value = bytes.items };
+            },
+
             .Float => |info| {
                 if (info.bits > 64) @compileError("Only support floats up to f64");
 
@@ -111,6 +117,13 @@ pub const Value = union(enum) {
                 }
 
                 return t;
+            },
+
+            .Int => |_| {
+                if (self.* != .value) return error.ExpectedString;
+
+                const out = try std.fmt.parseInt(T, self.value, 10);
+                return out;
             },
 
             .Float => |info| {
@@ -320,19 +333,20 @@ test "GON: parse" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ] merp farg\nwatta 1.0");
+    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ]fasd 13\n merp farg\nwatta 1.0");
 
     var writer_out = std.ArrayList(u8).init(liu.Pages);
     defer writer_out.deinit();
 
     try output.write(writer_out.writer(), true);
 
-    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\nmerp farg\nwatta 1.0\n";
+    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\nfasd 13\nmerp farg\nwatta 1.0\n";
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 
     const parsed = try output.expect(struct {
         Hello: Value,
         Kerrz: Value,
+        fasd: u32,
         merp: []const u8,
         zarg: ?[]const u8,
         watta: f32,
@@ -350,6 +364,7 @@ test "GON: serialize" {
     const Test = struct {
         merp: []const u8 = "hello",
         zarg: []const u8 = "world",
+        forts: u64 = 1231243,
         lerk: f64 = 13.0,
     };
 
@@ -362,7 +377,7 @@ test "GON: serialize" {
 
     try value.write(writer_out.writer(), true);
 
-    const expected = "merp hello\nzarg world\nlerk 1.3e+01\n";
+    const expected = "merp hello\nzarg world\nforts 1231243\nlerk 1.3e+01\n";
     // std.debug.print("{s}\n{s}\n", .{ expected, writer_out.items });
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 }
