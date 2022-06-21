@@ -82,8 +82,8 @@ pub const ForceC = struct {
     is_airborne: bool = false,
 };
 
-pub const DecisionC = union(enum) {
-    player: void,
+pub const DecisionC = struct {
+    player: bool,
 };
 
 export fn init() void {
@@ -133,7 +133,7 @@ fn initErr() !void {
         try registry.addComponent(box, MoveC{
             .velocity = Vec2{ 0, 0 },
         });
-        try registry.addComponent(box, DecisionC{ .player = {} });
+        try registry.addComponent(box, DecisionC{ .player = true });
 
         try registry.addComponent(box, ForceC{
             .accel = Vec2{ 0, -14 },
@@ -233,7 +233,7 @@ export fn run(timestamp: f64) void {
         while (view.next()) |elem| {
             const move_c = elem.move_c;
 
-            if (elem.decide_c != .player) continue;
+            if (!elem.decide_c.player) continue;
 
             if (input.key(.key_s).pressed) {
                 move_c.velocity[1] -= 8;
@@ -390,7 +390,7 @@ export fn run(timestamp: f64) void {
         });
 
         while (view.next()) |elem| {
-            if (elem.decision_c != .player) continue;
+            if (!elem.decision_c.player) continue;
 
             util.moveCamera(elem.pos_c.bbox.pos);
             break;

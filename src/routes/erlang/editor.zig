@@ -1,6 +1,9 @@
 const std = @import("std");
 const liu = @import("liu");
 
+const wasm = liu.wasm;
+const gon = liu.gon;
+
 const util = @import("./util.zig");
 
 const erlang = @import("./erlang.zig");
@@ -116,7 +119,10 @@ pub const ClickTool = struct {
         if (input.mouse.left_clicked) {
             if (boxWillCollide(bbox)) return;
 
+            writeToAsset() catch return;
+
             _ = makeBox(bbox.pos) catch return;
+
             return;
         }
 
@@ -244,9 +250,41 @@ pub const DrawTool = struct {
     }
 };
 
+const AssetEntity = struct {
+    move: ?erlang.MoveC,
+    render: ?erlang.RenderC,
+    pos: ?erlang.PositionC,
+    force: ?erlang.ForceC,
+    decide: ?erlang.DecisionC,
+};
+
 // Use stable declaration on type
-pub fn writeToAsset(alloc: std.mem.Allocator) void {
-    _ = alloc;
+pub fn writeToAsset() !void {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    var entities = std.ArrayList(AssetEntity).init(liu.Temp);
+
+    var view = erlang.registry.view(AssetEntity);
+    while (view.next()) |elem| {
+        try entities.append(.{
+            .move = elem.move,
+            .pos = elem.pos,
+            .render = elem.render,
+            .decide = elem.decide,
+            .force = elem.force,
+        });
+    }
+
+    const gon_data = try gon.Value.init(.{
+        .entities = entities.items,
+    });
+
+    var output = std.ArrayList(u8).init(liu.Temp);
+
+    try gon_data.write(output.writer(), true);
+
+    wasm.post(.log, "{s}", .{output.items});
 }
 
 pub fn readFromAsset(bytes: []const u8) void {

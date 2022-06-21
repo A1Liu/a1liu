@@ -52,8 +52,15 @@ pub const Value = union(enum) {
                 inline for (info.fields) |field| {
                     const field_val = @field(val, field.name);
 
-                    const field_gon = try Value.init(field_val);
-                    map.putAssumeCapacity(field.name, field_gon);
+                    if (@typeInfo(@TypeOf(field_val)) != .Optional) {
+                        const field_gon = try Value.init(field_val);
+                        map.putAssumeCapacity(field.name, field_gon);
+                    } else {
+                        if (field_val) |f| {
+                            const field_gon = try Value.init(f);
+                            map.putAssumeCapacity(field.name, field_gon);
+                        }
+                    }
                 }
 
                 return Self{ .map = map };
@@ -75,15 +82,54 @@ pub const Value = union(enum) {
                 return Self{ .value = bytes.items };
             },
 
-            .Pointer => |info| {
-                if (info.size != .Slice) @compileError("We only support strings ([]const u8)");
-                if (info.child != u8) @compileError("We only support strings ([]const u8)");
-                if (!info.is_const) @compileError("We only support strings ([]const u8)");
-
-                return Self{ .value = val };
+            .Bool => {
+                return if (val)
+                    Self{ .value = "true" }
+                else
+                    Self{ .value = "false" };
             },
 
-            else => @compileError("unsupported type for GON"),
+            .Pointer => |info| {
+                if (info.size != .Slice) @compileError("We only support slices right now");
+
+                if (info.child == u8) {
+                    return Self{ .value = val };
+                }
+
+                var array = Array{};
+                try array.ensureTotalCapacity(liu.Temp, val.len);
+
+                for (val) |v| {
+                    array.appendAssumeCapacity(try Value.init(v));
+                }
+
+                return Self{ .array = array };
+            },
+
+            .Array => |info| {
+                var array = Array{};
+                try array.ensureTotalCapacity(liu.Temp, info.len);
+
+                for (val) |v| {
+                    array.appendAssumeCapacity(try Value.init(v));
+                }
+
+                return Self{ .array = array };
+            },
+
+            .Vector => |info| {
+                var array = Array{};
+                try array.ensureTotalCapacity(liu.Temp, info.len);
+
+                const elements: [info.len]info.child = val;
+                for (elements) |v| {
+                    array.appendAssumeCapacity(try Value.init(v));
+                }
+
+                return Self{ .array = array };
+            },
+
+            else => @compileError("unsupported type '" ++ @typeName(T) ++ "' for GON"),
         }
     }
 
@@ -149,7 +195,7 @@ pub const Value = union(enum) {
         }
     }
 
-    pub fn write(self: *const Self, writer: anytype, is_root: bool) !void {
+    pub fn write(self: *const Self, writer: anytype, is_root: bool) @TypeOf(writer).Error!void {
         const indent: u32 = if (is_root) 0 else 2;
         try self.writeRecursive(writer, indent, is_root);
     }
