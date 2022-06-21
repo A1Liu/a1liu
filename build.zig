@@ -58,27 +58,21 @@ pub fn build(b: *Builder) !void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     mode = b.standardReleaseOptions();
 
-    const wasmPrograms = [_]ProgData{
-        .{
-            .name = "kilordle",
-            .root = "./src/routes/kilordle/kilordle.zig",
-        },
-        .{
-            .name = "painter",
-            .root = "./src/routes/painter/painter.zig",
-        },
-        .{
-            .name = "erlang",
-            .root = "./src/routes/erlang/erlang.zig",
-        },
-    };
+    const wasmPrograms = [_]ProgData{ .{
+        .name = "kilordle",
+        .root = "./src/routes/kilordle/kilordle.zig",
+    }, .{
+        .name = "painter",
+        .root = "./src/routes/painter/painter.zig",
+    }, .{
+        .name = "erlang",
+        .root = "./src/routes/erlang/erlang.zig",
+    } };
 
-    const pathTools = [_]ProgData{
-        .{
-            .name = "aliu_path_helper",
-            .root = "./src/tools/path_helper.zig",
-        },
-    };
+    const pathTools = [_]ProgData{.{
+        .name = "aliu_path_helper",
+        .root = "./src/tools/path_helper.zig",
+    }};
 
     for (wasmPrograms) |p| {
         _ = wasmProgram(b, p);

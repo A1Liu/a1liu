@@ -5,6 +5,7 @@
     "dev": "svelte-kit dev -p 1337",
     "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
     "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE",
+    "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small && echo DONE",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",
@@ -23,7 +24,6 @@
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-load-config": "3.1.4",
     "postcss-preset-env": "7.0.1",
-    "postcss-simple-vars": "6.0.3",
     "prettier": "2.5.1",
     "prettier-plugin-svelte": "2.5.0",
     "svelte": "3.44.0",
@@ -54,8 +54,7 @@
           "nesting-rules": true,
           "custom-properties": false
         }
-      },
-      "postcss-simple-vars": {}
+      }
     }
   },
   "prettier": {
