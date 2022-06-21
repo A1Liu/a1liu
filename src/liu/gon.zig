@@ -340,6 +340,7 @@ test "GON: parse" {
 
     try std.testing.expectEqualSlices(u8, "farg", parsed.merp);
     try std.testing.expect(parsed.zarg == null);
+    try std.testing.expect(parsed.watta == 1.0);
 }
 
 test "GON: serialize" {
