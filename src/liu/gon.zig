@@ -3,17 +3,29 @@ const root = @import("root");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
-const SchemaParseError = std.fmt.ParseIntError || error{
+const SchemaParseError = std.fmt.ParseIntError || std.fmt.ParseFloatError || error{
     MissingField,
     ExpectedStruct,
     ExpectedPrimitive,
     ExpectedString,
     ExpectedArray,
-
-    OnlyStringSlicesSupported,
 };
 
-const printFloat = if (@hasDecl(root, "printFloat")) root.printFloat else std.fmt.printFloat;
+const SchemaSerializeError = error{
+    OutOfMemory,
+};
+
+const formatFloatValue = if (@hasDecl(root, "gon_formatFloatValue")) root.formatFloatValue else struct {
+    fn formatFloatValue(value: f64, writer: anytype) !void {
+        return std.fmt.format(writer, "{e}", .{value});
+    }
+}.formatFloatValue;
+
+const parseFloat = if (@hasDecl(root, "gon_parseFloat")) root.parseFloat else struct {
+    fn parseFloat(bytes: []const u8) !f64 {
+        return std.fmt.parseFloat(f64, bytes);
+    }
+}.parseFloat;
 
 pub const Value = union(enum) {
     map: Map,
@@ -25,7 +37,7 @@ pub const Value = union(enum) {
 
     const Self = @This();
 
-    pub fn init(val: anytype) error{OutOfMemory}!Self {
+    pub fn init(val: anytype) SchemaSerializeError!Self {
         const T = @TypeOf(val);
 
         if (T == Self) {
@@ -48,7 +60,13 @@ pub const Value = union(enum) {
             },
 
             .Float => |info| {
-                _ = info;
+                if (info.bits > 64) @compileError("Only support floats up to f64");
+
+                var bytes = std.ArrayList(u8).init(liu.Temp);
+
+                try formatFloatValue(val, bytes.writer());
+
+                return Self{ .value = bytes.items };
             },
 
             .Pointer => |info| {
@@ -93,6 +111,15 @@ pub const Value = union(enum) {
                 }
 
                 return t;
+            },
+
+            .Float => |info| {
+                if (info.bits > 64) @compileError("Only support floats up to f64");
+
+                if (self.* != .value) return error.ExpectedString;
+
+                const out = try parseFloat(self.value);
+                return @floatCast(T, out);
             },
 
             .Pointer => |info| {
@@ -293,14 +320,14 @@ test "GON: parse" {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ] merp farg");
+    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ] merp farg\nwatta 1.0");
 
     var writer_out = std.ArrayList(u8).init(liu.Pages);
     defer writer_out.deinit();
 
     try output.write(writer_out.writer(), true);
 
-    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\nmerp farg\n";
+    const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\nmerp farg\nwatta 1.0\n";
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 
     const parsed = try output.expect(struct {
@@ -308,6 +335,7 @@ test "GON: parse" {
         Kerrz: Value,
         merp: []const u8,
         zarg: ?[]const u8,
+        watta: f32,
     });
 
     try std.testing.expectEqualSlices(u8, "farg", parsed.merp);
@@ -321,6 +349,7 @@ test "GON: serialize" {
     const Test = struct {
         merp: []const u8 = "hello",
         zarg: []const u8 = "world",
+        lerk: f64 = 13.0,
     };
 
     const a = Test{};
@@ -332,7 +361,8 @@ test "GON: serialize" {
 
     try value.write(writer_out.writer(), true);
 
-    const expected = "merp hello\nzarg world\n";
+    const expected = "merp hello\nzarg world\nlerk 1.3e+01\n";
+    // std.debug.print("{s}\n{s}\n", .{ expected, writer_out.items });
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 }
 
