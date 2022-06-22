@@ -45,7 +45,16 @@ const main = async (wasmRef: wasm.Ref) => {
   while (true) {
     const captured = await ctx.msgWait();
 
-    captured.forEach((msg) => handleInput(wasmRef, gglRef.current.ctx, msg));
+    captured.forEach((msg) => {
+      switch (msg.kind) {
+        case "levelDownload":
+          const value = wasmRef.abi.download();
+          break;
+
+        default:
+          handleInput(wasmRef, gglRef.current.ctx, msg);
+      }
+    });
   }
 };
 

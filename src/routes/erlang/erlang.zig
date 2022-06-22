@@ -107,6 +107,7 @@ fn initErr() !void {
     large_font = wasm.make.string(.manual, "bold 48px sans-serif");
     med_font = wasm.make.string(.manual, "24px sans-serif");
     small_font = wasm.make.string(.manual, "10px sans-serif");
+    level_download = wasm.make.string(.manual, "levelDownload");
 
     try tools.appendSlice(Static, &.{
         try editor.Tool.create(Static, editor.LineTool{}),
@@ -172,7 +173,17 @@ var tool_index: u32 = 0;
 pub var large_font: wasm.Obj = undefined;
 pub var med_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
+pub var level_download: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
+
+export fn download() void {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const text = editor.serializeLevel() catch return;
+
+    return wasm.post(level_download, "{s}", .{text});
+}
 
 export fn setInitialTime(timestamp: f64) void {
     liu.gamescreen.init(timestamp);

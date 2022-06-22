@@ -91,6 +91,10 @@
   />
 
   <slot />
+
+  <div class="overlay">
+    <slot name="overlay" />
+  </div>
 </div>
 
 <style lang="postcss">
@@ -117,5 +121,18 @@
 
     cursor: default;
     outline: 0px solid transparent;
+  }
+
+  .overlay {
+    position: fixed;
+    z-index: 10;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 </style>
