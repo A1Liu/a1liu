@@ -119,17 +119,6 @@ pub const ClickTool = struct {
         if (input.mouse.left_clicked) {
             if (boxWillCollide(bbox)) return;
 
-            // const mark = liu.TempMark;
-            // defer liu.TempMark = mark;
-
-            // const text = serializeLevel() catch return;
-
-            // wasm.post(.log, "{s}", .{text});
-
-            // readFromAsset(text) catch return;
-
-            // wasm.post(.log, "{any}", .{mark});
-
             _ = makeBox(bbox.pos) catch return;
 
             return;

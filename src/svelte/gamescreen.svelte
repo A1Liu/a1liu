@@ -4,6 +4,7 @@
 
   export let worker;
   export let canvas: any = undefined;
+  let overlay: any = undefined;
 
   const listener = (evt: any) => {
     if (!worker || !canvas) return;
@@ -23,7 +24,7 @@
   }
 
   onMount(() => {
-    canvas.focus();
+    overlay.focus();
 
     window.addEventListener("resize", listener);
     return () => window.removeEventListener("resize", listener);
@@ -31,9 +32,10 @@
 </script>
 
 <div
+  class="wrapper"
   on:wheel={(evt) => {
     if (!canvas || !worker) return;
-    if (evt.target !== canvas) return;
+    if (evt.target !== overlay) return;
 
     evt.preventDefault();
 
@@ -42,21 +44,21 @@
   }}
   on:mousemove={(evt) => {
     if (!canvas || !worker) return;
-    if (evt.target !== canvas) return;
+    if (evt.target !== overlay) return;
 
     const data = [evt.clientX, evt.clientY];
     worker.postMessage({ kind: "mousemove", data });
   }}
   on:click={(evt) => {
     if (!canvas || !worker) return;
-    if (evt.target !== canvas) return;
+    if (evt.target !== overlay) return;
 
     const data = [evt.clientX, evt.clientY];
     worker.postMessage({ kind: "leftclick", data });
   }}
   on:contextmenu={(evt) => {
     if (!canvas || !worker) return;
-    if (evt.target !== canvas) return;
+    if (evt.target !== overlay) return;
 
     evt.preventDefault();
 
@@ -67,8 +69,10 @@
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
     if (evt.ctrlKey || evt.metaKey) return;
 
+  console.log(evt.target);
+
     if (!canvas || !worker) return;
-    if (evt.target !== canvas) return;
+    if (evt.target !== overlay) return;
 
     const data = KeyId[evt.code] ?? 0;
     worker.postMessage({ kind: "keydown", data });
@@ -78,27 +82,28 @@
     if (evt.ctrlKey || evt.metaKey) return;
 
     if (!canvas || !worker) return;
-    if (evt.target !== canvas) return;
+    if (evt.target !== overlay) return;
 
     const data = KeyId[evt.code] ?? 0;
     worker.postMessage({ kind: "keyup", data });
   }}
 >
-  <canvas
-    bind:this={canvas}
-    contentEditable
-    on:mousedown={(evt) => evt.preventDefault()}
-  />
+  <canvas bind:this={canvas} />
 
   <slot />
 
-  <div class="overlay">
+  <div
+    bind:this={overlay}
+    class="overlay"
+    tabindex="0"
+    on:mousedown={(evt) => evt.preventDefault()}
+  >
     <slot name="overlay" />
   </div>
 </div>
 
 <style lang="postcss">
-  div {
+  .wrapper {
     height: 100vh;
     width: 100vw;
     max-height: 100vh;
@@ -134,5 +139,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+
+    cursor: default;
+    outline: 0px solid transparent;
   }
 </style>

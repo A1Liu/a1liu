@@ -176,6 +176,20 @@ pub var small_font: wasm.Obj = undefined;
 pub var level_download: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
 
+export fn uploadLevel(data: wasm.Obj) void {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const asset_data = wasm.in.string(data, liu.Temp) catch {
+        wasm.delete(data);
+        return;
+    };
+
+    wasm.post(.log, "{s}", .{asset_data});
+
+    editor.readFromAsset(asset_data) catch return;
+}
+
 export fn download() void {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;

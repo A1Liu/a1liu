@@ -47,8 +47,14 @@ const main = async (wasmRef: wasm.Ref) => {
 
     captured.forEach((msg) => {
       switch (msg.kind) {
+        case "uploadLevel": {
+          const value = wasmRef.addObj(msg.data);
+          wasmRef.abi.uploadLevel(value);
+          break;
+        }
+
         case "levelDownload":
-          const value = wasmRef.abi.download();
+          wasmRef.abi.download();
           break;
 
         default:

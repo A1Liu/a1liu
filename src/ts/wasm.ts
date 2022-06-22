@@ -92,13 +92,13 @@ export const fetchWasm = async (
     return idx;
   };
 
-  const updateObj = (obj: number, data: any): void => {
-    if (id < 0) {
-      objectMap.set(obj, data);
+  const updateObj = (objId: number, data: any): void => {
+    if (objId < 0) {
+      objectMap.set(objId, data);
       return;
     }
 
-    objectBuffer[id] = data;
+    objectBuffer[objId] = data;
   };
 
   const ref: Ref = {

@@ -18,9 +18,7 @@
           break;
 
         case "levelDownload": {
-          console.log(message.data);
           const blob = new Blob([message.data], { type: "text" });
-          blob.text().then((t) => console.log(t));
 
           const url = URL.createObjectURL(blob);
 
@@ -47,15 +45,20 @@
 <Toast location={"top-right"} />
 
 <Screen {worker}>
-  <div class="columnWrapper" slot="overlay">
-    <div class="column" />
-
-    <div class="column">
+  <div slot="overlay">
+    <div class="rightColumn">
       <input
         bind:this={fileInput}
         class="fileInput"
         type="file"
-        on:change={(evt) => console.log(evt.target.value)}
+        on:change={(evt) => {
+          const file = evt.target.files[0];
+          if (!file) return;
+
+          file.text().then((data) => {
+            worker.postMessage({ kind: "uploadLevel", data });
+          });
+        }}
       />
 
       <button
@@ -72,7 +75,7 @@
           fileInput.click();
         }}
       >
-        Upload
+        Open
       </button>
     </div>
   </div>
@@ -85,16 +88,14 @@
     display: none;
   }
 
-  .column {
+  .rightColumn {
+    position: fixed;
+    right: 0px;
+    top: 0px;
+
     display: flex;
     flex-direction: column;
     padding: 8px;
     gap: 8px;
-  }
-
-  .columnWrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
   }
 </style>
