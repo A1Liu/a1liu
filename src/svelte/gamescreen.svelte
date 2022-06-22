@@ -69,8 +69,6 @@
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
     if (evt.ctrlKey || evt.metaKey) return;
 
-  console.log(evt.target);
-
     if (!canvas || !worker) return;
     if (evt.target !== overlay) return;
 

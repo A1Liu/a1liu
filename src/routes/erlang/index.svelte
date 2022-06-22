@@ -55,6 +55,10 @@
           const file = evt.target.files[0];
           if (!file) return;
 
+          // clear the current file so that the next submission will also
+          // trigger onchange
+          evt.target.value = null;
+
           file.text().then((data) => {
             worker.postMessage({ kind: "uploadLevel", data });
           });

@@ -182,12 +182,14 @@ export fn uploadLevel(data: wasm.Obj) void {
 
     const asset_data = wasm.in.string(data, liu.Temp) catch {
         wasm.delete(data);
+        wasm.post(.err, "Error reading string data", .{});
         return;
     };
 
-    wasm.post(.log, "{s}", .{asset_data});
-
-    editor.readFromAsset(asset_data) catch return;
+    editor.readFromAsset(asset_data) catch {
+        wasm.post(.err, "Error reading asset data", .{});
+        return;
+    };
 }
 
 export fn download() void {
