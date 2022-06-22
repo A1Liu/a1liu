@@ -3,12 +3,19 @@ const root = @import("root");
 const builtin = @import("builtin");
 const liu = @import("./lib.zig");
 
-const SchemaParseError = std.fmt.ParseIntError || std.fmt.ParseFloatError || error{
+const SchemaParseError =
+    std.fmt.ParseIntError ||
+    std.fmt.ParseFloatError ||
+    std.mem.Allocator.Error ||
+    error{
     MissingField,
     ExpectedStruct,
     ExpectedPrimitive,
     ExpectedString,
     ExpectedArray,
+
+    InvalidBoolValue,
+    InvalidArrayLength,
 };
 
 const SchemaSerializeError = error{
@@ -165,6 +172,17 @@ pub const Value = union(enum) {
                 return t;
             },
 
+            .Bool => {
+                if (self.* != .value) return error.ExpectedString;
+
+                const value = self.value;
+
+                if (std.mem.eql(u8, value, "true")) return true;
+                if (std.mem.eql(u8, value, "false")) return false;
+
+                return error.InvalidBoolValue;
+            },
+
             .Int => |_| {
                 if (self.* != .value) return error.ExpectedString;
 
@@ -181,17 +199,44 @@ pub const Value = union(enum) {
                 return @floatCast(T, out);
             },
 
-            .Pointer => |info| {
-                if (info.size != .Slice) @compileError("We only support strings ([]const u8)");
-                if (info.child != u8) @compileError("We only support strings ([]const u8)");
-                if (!info.is_const) @compileError("We only support strings ([]const u8)");
+            .Vector => |info| {
+                if (self.* != .array) return error.ExpectedArray;
 
-                if (self.* != .value) return error.ExpectedString;
+                const values = self.array;
+                if (values.items.len != info.len)
+                    return error.InvalidArrayLength;
 
-                return self.value;
+                var out: [info.len]info.child = undefined;
+
+                for (values.items) |v, i| {
+                    out[i] = try v.expect(info.child);
+                }
+
+                return out;
             },
 
-            else => @compileError("wtf"),
+            .Pointer => |info| {
+                if (info.size != .Slice) @compileError("We only support strings ([]const u8)");
+
+                if (info.child == u8) {
+                    if (self.* != .value) return error.ExpectedString;
+
+                    return self.value;
+                }
+
+                if (self.* != .array) return error.ExpectedArray;
+
+                const vals = self.array;
+                const out = try liu.Temp.alloc(info.child, vals.items.len);
+
+                for (vals.items) |v, i| {
+                    out[i] = try v.expect(info.child);
+                }
+
+                return out;
+            },
+
+            else => @compileError("unsupported type '" ++ @typeName(T) ++ "' for GON"),
         }
     }
 

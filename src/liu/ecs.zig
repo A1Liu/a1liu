@@ -210,6 +210,7 @@ pub fn Registry(comptime InDense: []const type) type {
         generation: u32,
 
         dense: DensePointers,
+        count: u32,
         len: u32,
         capacity: u32,
         free_head: u32,
@@ -225,6 +226,7 @@ pub fn Registry(comptime InDense: []const type) type {
 
             return Self{
                 .dense = dense,
+                .count = 0,
                 .len = 0,
                 .generation = 1,
                 .capacity = capacity,
@@ -246,6 +248,9 @@ pub fn Registry(comptime InDense: []const type) type {
         }
 
         pub fn create(self: *Self, name: []const u8) !EntityId {
+            self.count += 1;
+            errdefer self.count -= 1;
+
             const index = index: {
                 if (self.free_head != NULL) {
                     const index = self.free_head;
@@ -287,6 +292,18 @@ pub fn Registry(comptime InDense: []const type) type {
 
         pub fn delete(self: *Self, id: EntityId) bool {
             const index = self.indexOf(id) orelse return false;
+            self.count -= 1;
+
+            if (self.count == 0) {
+                self.len = 0;
+                self.free_head = NULL;
+
+                // Should generation be reset here? Technically someone could
+                // be holding an external entity ID which would then false-positive
+
+                return true;
+            }
+
             const meta = &self.raw(Meta)[index];
 
             meta.generation = NULL;

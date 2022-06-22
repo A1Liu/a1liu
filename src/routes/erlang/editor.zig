@@ -119,7 +119,16 @@ pub const ClickTool = struct {
         if (input.mouse.left_clicked) {
             if (boxWillCollide(bbox)) return;
 
-            writeToAsset() catch return;
+            // const mark = liu.TempMark;
+            // defer liu.TempMark = mark;
+
+            // const text = serializeLevel() catch return;
+
+            // wasm.post(.log, "{s}", .{text});
+
+            // readFromAsset(text) catch return;
+
+            // wasm.post(.log, "{any}", .{mark});
 
             _ = makeBox(bbox.pos) catch return;
 
@@ -259,10 +268,7 @@ const AssetEntity = struct {
 };
 
 // Use stable declaration on type
-pub fn writeToAsset() !void {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
+pub fn serializeLevel() ![]const u8 {
     var entities = std.ArrayList(AssetEntity).init(liu.Temp);
 
     var view = erlang.registry.view(AssetEntity);
@@ -284,9 +290,44 @@ pub fn writeToAsset() !void {
 
     try gon_data.write(output.writer(), true);
 
-    wasm.post(.log, "{s}", .{output.items});
+    return output.items;
 }
 
-pub fn readFromAsset(bytes: []const u8) void {
-    _ = bytes;
+pub fn readFromAsset(bytes: []const u8) !void {
+    const registry = &erlang.registry;
+
+    var view = registry.view(struct {});
+    while (view.next()) |elem| {
+        _ = registry.delete(elem.id);
+    }
+
+    const gon_data = try gon.parseGon(bytes);
+    const asset_data = try gon_data.expect(struct {
+        entities: []const AssetEntity,
+    });
+
+    for (asset_data.entities) |entity| {
+        const id = try registry.create("");
+        errdefer _ = registry.delete(id);
+
+        if (entity.move) |move| {
+            try registry.addComponent(id, move);
+        }
+
+        if (entity.pos) |pos| {
+            try registry.addComponent(id, pos);
+        }
+
+        if (entity.render) |render| {
+            try registry.addComponent(id, render);
+        }
+
+        if (entity.decide) |decide| {
+            try registry.addComponent(id, decide);
+        }
+
+        if (entity.force) |force| {
+            try registry.addComponent(id, force);
+        }
+    }
 }
