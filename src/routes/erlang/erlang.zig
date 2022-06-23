@@ -142,16 +142,6 @@ fn initErr() !void {
         });
     }
 
-    const bump = try registry.create("bump");
-    try registry.addComponent(bump, PositionC{ .bbox = .{
-        .pos = Vec2{ 10, 4 },
-        .width = 1,
-        .height = 1,
-    } });
-    try registry.addComponent(bump, RenderC{
-        .color = Vec4{ 0.1, 0.5, 0.3, 1 },
-    });
-
     const ground = try registry.create("ground");
     try registry.addComponent(ground, PositionC{ .bbox = .{
         .pos = Vec2{ 0, 0 },

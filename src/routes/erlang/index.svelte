@@ -3,10 +3,15 @@
   import Screen from "@lib/svelte/gamescreen.svelte";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
+  import levelUrl from "./level.txt?url";
   import * as wasm from "@lib/ts/wasm";
 
   let worker = undefined;
   let fileInput = undefined;
+
+  const levelText = fetch(levelUrl)
+    .then((r) => r.text())
+    .catch(() => {});
 
   onMount(() => {
     worker = new MyWorker();
@@ -14,8 +19,12 @@
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
-        case "initDone":
+        case "initDone": {
+          levelText.then((data) =>
+            worker.postMessage({ kind: "uploadLevel", data })
+          );
           break;
+        }
 
         case "levelDownload": {
           const blob = new Blob([message.data], { type: "text" });
