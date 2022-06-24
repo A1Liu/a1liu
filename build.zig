@@ -44,7 +44,7 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
     program.setOutputDir("./.zig/zig-out/");
 
     if (mode != .Debug) {
-        // program.strip = true;
+        program.strip = true;
     }
 
     program.install();
