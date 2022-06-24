@@ -22,6 +22,23 @@ const KeyCode = liu.gamescreen.KeyCode;
 const Timer = liu.gamescreen.Timer;
 const FrameInput = liu.gamescreen.FrameInput;
 
+pub fn gon_formatFloatValue(value: f64, writer: anytype) !void {
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
+
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const wasm_obj = wasm.out.exactExpFloatPrint(value);
+    const output = try wasm.in.string(wasm_obj, liu.Temp);
+
+    try writer.writeAll(output);
+}
+
+pub fn gon_parseFloat(bytes: []const u8) !f64 {
+    return wasm.parseFloat(bytes);
+}
+
 // https://youtu.be/SFKR5rZBu-8?t=2202
 // https://stackoverflow.com/questions/22511158/how-to-profile-web-workers-in-chrome
 

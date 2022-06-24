@@ -180,7 +180,7 @@ pub const make = struct {
     }
 
     pub fn exactExpFloatPrint(life: Lifetime, value: f64) Obj {
-        return ext.exactExpFloatPrint(value, life.isTemp());
+        return ext.exactExpFloatFormat(value, life.isTemp());
     }
 
     pub fn fixedFloatPrint(life: Lifetime, value: f64, places: u32) Obj {

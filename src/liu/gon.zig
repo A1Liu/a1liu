@@ -22,13 +22,13 @@ const SchemaSerializeError = error{
     OutOfMemory,
 };
 
-const formatFloatValue = if (@hasDecl(root, "gon_formatFloatValue")) root.formatFloatValue else struct {
+const formatFloatValue = if (@hasDecl(root, "gon_formatFloatValue")) root.gon_formatFloatValue else struct {
     fn formatFloatValue(value: f64, writer: anytype) !void {
         return std.fmt.format(writer, "{e}", .{value});
     }
 }.formatFloatValue;
 
-const parseFloat = if (@hasDecl(root, "gon_parseFloat")) root.parseFloat else struct {
+const parseFloat = if (@hasDecl(root, "gon_parseFloat")) root.gon_parseFloat else struct {
     fn parseFloat(bytes: []const u8) !f64 {
         return std.fmt.parseFloat(f64, bytes);
     }
@@ -191,7 +191,8 @@ pub const Value = union(enum) {
             },
 
             .Float => |info| {
-                if (info.bits > 64) @compileError("Only support floats up to f64");
+                if (info.bits > 64)
+                    @compileError("Only support floats up to f64");
 
                 if (self.* != .value) return error.ExpectedString;
 
@@ -262,7 +263,8 @@ pub const Value = union(enum) {
 
                 while (iter.next()) |i| {
                     try writer.writeByteNTimes(' ', indent);
-                    try std.fmt.format(writer, "{s} ", .{i.key_ptr.*});
+                    try writer.writeAll(i.key_ptr.*);
+                    try writer.writeByte(' ');
                     try i.value_ptr.writeRecursive(writer, indent + 2, false);
                     try writer.writeByte('\n');
                 }
@@ -286,7 +288,7 @@ pub const Value = union(enum) {
                 try writer.writeByte(']');
             },
             .value => |value| {
-                try std.fmt.format(writer, "{s}", .{value});
+                try writer.writeAll(value);
             },
         }
     }
