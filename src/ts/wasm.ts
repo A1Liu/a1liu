@@ -168,6 +168,7 @@ export const fetchWasm = async (
     setWatermark: (idx: number) => {
       objectBuffer.length = idx;
     },
+
     deleteObj: (idx: number) => objectMap.delete(idx),
 
     objLen: (idx: number): number => readObj(idx).length,
