@@ -102,7 +102,6 @@ const Registry = liu.ecs.Registry(&.{
     ForceC,
 });
 
-const norm_color: Vec4 = Vec4{ 0.3, 0.3, 0.3, 0.6 };
 fn initErr() !void {
     large_font = wasm.make.string(.manual, "bold 48px sans-serif");
     med_font = wasm.make.string(.manual, "24px sans-serif");
@@ -116,41 +115,6 @@ fn initErr() !void {
     });
 
     registry = try Registry.init(16, liu.Pages);
-
-    var i: u32 = 0;
-    while (i < 3) : (i += 1) {
-        var color = norm_color;
-        color[i] = 1;
-
-        const box = try registry.create("bar");
-        try registry.addComponent(box, PositionC{ .bbox = .{
-            .pos = Vec2{ @intToFloat(f32, i) + 5, 3 },
-            .width = 0.5,
-            .height = 2.75,
-        } });
-        try registry.addComponent(box, RenderC{
-            .color = color,
-        });
-        try registry.addComponent(box, MoveC{
-            .velocity = Vec2{ 0, 0 },
-        });
-        try registry.addComponent(box, DecisionC{ .player = true });
-
-        try registry.addComponent(box, ForceC{
-            .accel = Vec2{ 0, -14 },
-            .friction = 0.05,
-        });
-    }
-
-    const ground = try registry.create("ground");
-    try registry.addComponent(ground, PositionC{ .bbox = .{
-        .pos = Vec2{ 0, 0 },
-        .width = 100,
-        .height = 1,
-    } });
-    try registry.addComponent(ground, RenderC{
-        .color = Vec4{ 0.2, 0.5, 0.3, 1 },
-    });
 }
 
 var start_timer: Timer = undefined;
