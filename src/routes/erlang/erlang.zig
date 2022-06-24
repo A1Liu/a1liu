@@ -297,8 +297,6 @@ export fn run(timestamp: f64) void {
             force_c: ?*const ForceC,
         };
 
-        var stable = registry.view(StableObject);
-
         while (view.next()) |elem| {
             const pos_c = elem.pos_c;
             const move_c = elem.move_c;
@@ -311,7 +309,7 @@ export fn run(timestamp: f64) void {
 
             elem.force_c.is_airborne = true;
 
-            stable.reset();
+            var stable = registry.view(StableObject);
             while (stable.next()) |solid| {
                 // No force component means it doesn't interact with gravity,
                 // so we'll think of it as a stable piece of the environment

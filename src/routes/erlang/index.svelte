@@ -79,7 +79,7 @@
         on:click={() =>
           worker.postMessage({ kind: "levelDownload", data: undefined })}
       >
-        Download
+        Save
       </button>
 
       <button
