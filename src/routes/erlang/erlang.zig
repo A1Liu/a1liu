@@ -5,8 +5,12 @@ const editor = @import("./editor.zig");
 
 // TODO better level editor tooling
 // spawn point/spawn point mode
-// editor mode with free camera
-// save which level we're on so that refresh is more useful
+// editor mode with free camera, rendering spawn points
+//  Ability to select objects, move them, etc
+//  Ability to snap to grid
+// save which level we're on in localstorage so that refresh is more useful
+
+// world bounds?
 
 const util = @import("./util.zig");
 const rows = util.rows;
