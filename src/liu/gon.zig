@@ -39,8 +39,11 @@ pub const Value = union(enum) {
     array: Array,
     value: []const u8,
 
-    const Map = std.StringArrayHashMapUnmanaged(Self);
     const Array = std.ArrayListUnmanaged(Self);
+    const Map = std.ArrayListUnmanaged(struct {
+        key: []const u8,
+        value: Value,
+    });
 
     const Self = @This();
 
@@ -61,11 +64,17 @@ pub const Value = union(enum) {
 
                     if (@typeInfo(@TypeOf(field_val)) != .Optional) {
                         const field_gon = try Value.init(field_val);
-                        map.putAssumeCapacity(field.name, field_gon);
+                        map.appendAssumeCapacity(.{
+                            .key = field.name,
+                            .value = field_gon,
+                        });
                     } else {
                         if (field_val) |f| {
                             const field_gon = try Value.init(f);
-                            map.putAssumeCapacity(field.name, field_gon);
+                            map.appendAssumeCapacity(.{
+                                .key = field.name,
+                                .value = field_gon,
+                            });
                         }
                     }
                 }
@@ -153,7 +162,15 @@ pub const Value = union(enum) {
                 const map = &self.map;
 
                 inline for (info.fields) |field| {
-                    const map_value = map.get(field.name);
+                    var map_value: ?Value = null;
+
+                    found: for (map.items) |kv| {
+                        if (std.mem.eql(u8, kv.key, field.name)) {
+                            map_value = kv.value;
+                            break :found;
+                        }
+                    }
+
                     const field_info = @typeInfo(field.field_type);
                     if (field_info == .Optional) {
                         if (map_value) |value| {
@@ -259,13 +276,11 @@ pub const Value = union(enum) {
                     try writer.writeByte('\n');
                 }
 
-                var iter = map.iterator();
-
-                while (iter.next()) |i| {
+                for (map.items) |kv| {
                     try writer.writeByteNTimes(' ', indent);
-                    try writer.writeAll(i.key_ptr.*);
+                    try writer.writeAll(kv.key);
                     try writer.writeByte(' ');
-                    try i.value_ptr.writeRecursive(writer, indent + 2, false);
+                    try kv.value.writeRecursive(writer, indent + 2, false);
                     try writer.writeByte('\n');
                 }
 
@@ -389,7 +404,10 @@ const Parser = struct {
                     switch (tok) {
                         .string => |s| {
                             const value = try self.parseGonRecursive(false);
-                            try values.put(liu.Temp, s, value);
+                            try values.append(liu.Temp, .{
+                                .key = s,
+                                .value = value,
+                            });
                         },
 
                         .rbrace => break,
