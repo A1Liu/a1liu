@@ -9,6 +9,9 @@ const editor = @import("./editor.zig");
 //  Ability to select objects, move them, etc
 //  Ability to snap to grid
 // save which level we're on in localstorage so that refresh is more useful
+// Coordinate UI
+// line tool bbox check on click
+// normalize coords
 
 // world bounds?
 
