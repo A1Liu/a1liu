@@ -163,14 +163,14 @@ export fn uploadLevel(data: wasm.Obj) void {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const asset_data = wasm.in.string(data, liu.Temp) catch {
+    const asset_data = wasm.in.string(data, liu.Temp) catch |e| {
         wasm.delete(data);
-        wasm.post(.err, "Error reading string data", .{});
+        wasm.post(.err, "Error reading string data: {}", .{e});
         return;
     };
 
-    editor.readFromAsset(asset_data) catch {
-        wasm.post(.err, "Error reading asset data", .{});
+    editor.readFromAsset(asset_data) catch |e| {
+        wasm.post(.err, "Error reading asset data: {}", .{e});
         return;
     };
 }

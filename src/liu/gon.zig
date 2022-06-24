@@ -35,17 +35,16 @@ const parseFloat = if (@hasDecl(root, "gon_parseFloat")) root.gon_parseFloat els
 }.parseFloat;
 
 pub const Value = union(enum) {
-    map: Map,
-    array: Array,
+    map: []const KV,
+    array: []const Self,
     value: []const u8,
 
-    const Array = std.ArrayListUnmanaged(Self);
-    const Map = std.ArrayListUnmanaged(struct {
+    const Self = @This();
+
+    const KV = struct {
         key: []const u8,
         value: Value,
-    });
-
-    const Self = @This();
+    };
 
     pub fn init(val: anytype) SchemaSerializeError!Self {
         const T = @TypeOf(val);
@@ -56,8 +55,8 @@ pub const Value = union(enum) {
 
         switch (@typeInfo(T)) {
             .Struct => |info| {
-                var map: Map = .{};
-                try map.ensureTotalCapacity(liu.Temp, info.fields.len);
+                var map = std.ArrayList(KV).init(liu.Temp);
+                try map.ensureTotalCapacity(info.fields.len);
 
                 inline for (info.fields) |field| {
                     const field_val = @field(val, field.name);
@@ -79,7 +78,7 @@ pub const Value = union(enum) {
                     }
                 }
 
-                return Self{ .map = map };
+                return Self{ .map = map.items };
             },
 
             .Int => |_| {
@@ -112,37 +111,37 @@ pub const Value = union(enum) {
                     return Self{ .value = val };
                 }
 
-                var array = Array{};
-                try array.ensureTotalCapacity(liu.Temp, val.len);
+                var array = std.ArrayList(Self).init(liu.Temp);
+                try array.ensureTotalCapacity(val.len);
 
                 for (val) |v| {
                     array.appendAssumeCapacity(try Value.init(v));
                 }
 
-                return Self{ .array = array };
+                return Self{ .array = array.items };
             },
 
             .Array => |info| {
-                var array = Array{};
-                try array.ensureTotalCapacity(liu.Temp, info.len);
+                var array = std.ArrayList(Self).init(liu.Temp);
+                try array.ensureTotalCapacity(info.len);
 
                 for (val) |v| {
                     array.appendAssumeCapacity(try Value.init(v));
                 }
 
-                return Self{ .array = array };
+                return Self{ .array = array.items };
             },
 
             .Vector => |info| {
-                var array = Array{};
-                try array.ensureTotalCapacity(liu.Temp, info.len);
+                var array = std.ArrayList(Self).init(liu.Temp);
+                try array.ensureTotalCapacity(info.len);
 
                 const elements: [info.len]info.child = val;
                 for (elements) |v| {
                     array.appendAssumeCapacity(try Value.init(v));
                 }
 
-                return Self{ .array = array };
+                return Self{ .array = array.items };
             },
 
             else => @compileError("unsupported type '" ++ @typeName(T) ++ "' for GON"),
@@ -159,15 +158,14 @@ pub const Value = union(enum) {
                 if (self.* != .map) return error.ExpectedStruct;
 
                 var t: T = undefined;
-                const map = &self.map;
 
                 inline for (info.fields) |field| {
                     var map_value: ?Value = null;
 
-                    found: for (map.items) |kv| {
+                    for (self.map) |kv| {
                         if (std.mem.eql(u8, kv.key, field.name)) {
                             map_value = kv.value;
-                            break :found;
+                            break;
                         }
                     }
 
@@ -221,12 +219,12 @@ pub const Value = union(enum) {
                 if (self.* != .array) return error.ExpectedArray;
 
                 const values = self.array;
-                if (values.items.len != info.len)
+                if (values.len != info.len)
                     return error.InvalidArrayLength;
 
                 var out: [info.len]info.child = undefined;
 
-                for (values.items) |v, i| {
+                for (values) |v, i| {
                     out[i] = try v.expect(info.child);
                 }
 
@@ -245,9 +243,9 @@ pub const Value = union(enum) {
                 if (self.* != .array) return error.ExpectedArray;
 
                 const vals = self.array;
-                const out = try liu.Temp.alloc(info.child, vals.items.len);
+                const out = try liu.Temp.alloc(info.child, vals.len);
 
-                for (vals.items) |v, i| {
+                for (vals) |v, i| {
                     out[i] = try v.expect(info.child);
                 }
 
@@ -276,7 +274,7 @@ pub const Value = union(enum) {
                     try writer.writeByte('\n');
                 }
 
-                for (map.items) |kv| {
+                for (map) |kv| {
                     try writer.writeByteNTimes(' ', indent);
                     try writer.writeAll(kv.key);
                     try writer.writeByte(' ');
@@ -293,7 +291,7 @@ pub const Value = union(enum) {
                 try writer.writeByte('[');
                 try writer.writeByte('\n');
 
-                for (array.items) |i| {
+                for (array) |i| {
                     try writer.writeByteNTimes(' ', indent);
                     try i.writeRecursive(writer, indent + 2, false);
                     try writer.writeByte('\n');
@@ -386,7 +384,7 @@ const Parser = struct {
                     try values.append(liu.Temp, value);
                 }
 
-                return Value{ .array = values };
+                return Value{ .array = values.items };
             }
 
             const parse_as_object = if (self.tokens[self.index] != .lbrace) is_root else object: {
@@ -395,7 +393,7 @@ const Parser = struct {
             };
 
             if (parse_as_object) {
-                var values: Value.Map = .{};
+                var values = std.ArrayList(Value.KV).init(liu.Temp);
 
                 while (self.index < self.tokens.len) {
                     const tok = self.tokens[self.index];
@@ -404,7 +402,7 @@ const Parser = struct {
                     switch (tok) {
                         .string => |s| {
                             const value = try self.parseGonRecursive(false);
-                            try values.append(liu.Temp, .{
+                            try values.append(.{
                                 .key = s,
                                 .value = value,
                             });
@@ -416,7 +414,7 @@ const Parser = struct {
                     }
                 }
 
-                return Value{ .map = values };
+                return Value{ .map = values.items };
             }
 
             const tok = self.tokens[self.index];

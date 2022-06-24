@@ -156,7 +156,7 @@ export const fetchWasm = async (
       return Number(value);
     },
     readBytes: (idx: number, begin: number): void => {
-      const array = objectMap.get(idx);
+      const array = readObj(idx);
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
       writeTo.set(array);
     },
