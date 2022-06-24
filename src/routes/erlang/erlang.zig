@@ -3,6 +3,11 @@ const liu = @import("liu");
 
 const editor = @import("./editor.zig");
 
+// TODO better level editor tooling
+// spawn point/spawn point mode
+// editor mode with free camera
+// save which level we're on so that refresh is more useful
+
 const util = @import("./util.zig");
 const rows = util.rows;
 const camera = util.camera;
