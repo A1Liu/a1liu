@@ -15,7 +15,9 @@
     "format": "prettier --no-color --write --plugin-search-dir=. '{src/routes,src/svelte,srv/ts}/**/*.{ts,svelte,js}'",
     "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
   },
-  "dependencies": {},
+  "dependencies": {
+    "idb-keyval": "6.2.0"
+  },
   "devDependencies": {
     "@sveltejs/adapter-static": "1.0.0-next.34",
     "@sveltejs/kit": "1.0.0-next.348",

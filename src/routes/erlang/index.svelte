@@ -4,17 +4,22 @@
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import levelUrl from "./levels/simple.txt?url";
+  import { get } from "idb-keyval";
   import * as wasm from "@lib/ts/wasm";
 
   let worker = undefined;
   let fileInput = undefined;
-
-  const levelText = fetch(levelUrl)
-    .then((r) => r.text())
-    .catch(() => {});
+  let defaultLevel = "";
 
   onMount(() => {
     worker = new MyWorker();
+
+    const req = fetch(levelUrl).then((r) => r.text());
+    const levelText = get("level")
+      .then((text) => text ?? req)
+      .catch(() => {});
+
+    req.then((t) => (defaultLevel = t));
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
@@ -73,6 +78,14 @@
           });
         }}
       />
+
+      <button
+        class="muiButton"
+        on:click={() =>
+          worker.postMessage({ kind: "uploadLevel", data: defaultLevel })}
+      >
+        Hard Reset
+      </button>
 
       <button
         class="muiButton"

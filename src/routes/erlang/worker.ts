@@ -1,6 +1,7 @@
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/erlang.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
+import { set } from "idb-keyval";
 import { handleInput, findCanvas, InputMessage } from "@lib/ts/gamescreen";
 
 const ctx = new WorkerCtx<InputMessage>();
@@ -50,6 +51,7 @@ const main = async (wasmRef: wasm.Ref) => {
         case "uploadLevel": {
           const value = wasmRef.addObj(msg.data);
           wasmRef.abi.uploadLevel(value);
+          set("level", msg.data).catch(() => {});
           break;
         }
 
@@ -68,6 +70,11 @@ const init = async () => {
   const wasmRef = await wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
+      saveLevel: (levelTextId: number) => {
+        const levelText = wasmRef.readObj(levelTextId);
+        set("level", levelText).catch(() => {});
+      },
+
       setFont: (fontId: number) => {
         const font = wasmRef.readObj(fontId);
         gglRef.current.ctx.font = font;

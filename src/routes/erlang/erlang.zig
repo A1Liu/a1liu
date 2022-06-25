@@ -10,9 +10,9 @@ pub const ty = @import("./types.zig");
 //  Ability to select objects, move them, etc
 //  Ability to snap to grid
 // save which level we're on in localstorage so that refresh is more useful
-// Coordinate UI
 // line tool bbox check on click
 // normalize coords
+// form generator code
 
 // world bounds?
 
@@ -51,6 +51,8 @@ pub const Vec3 = ty.Vec3;
 pub const Vec4 = ty.Vec4;
 
 pub const ext = struct {
+    pub extern fn saveLevel(levelTextId: wasm.Obj) void;
+
     pub extern fn fillStyle(r: f32, g: f32, b: f32, a: f32) void;
     pub extern fn strokeStyle(r: f32, g: f32, b: f32, a: f32) void;
 
@@ -418,6 +420,18 @@ fn newToolIndex(diff: i32) u32 {
 }
 
 pub fn renderDebugInfo(input: FrameInput) void {
+    if (input.frame_id % 128 == 0) oops: {
+        const wasm_mark = wasm.watermark();
+        defer wasm.setWatermark(wasm_mark);
+
+        const mark = liu.TempMark;
+        defer liu.TempMark = mark;
+
+        const text = editor.serializeLevel() catch break :oops;
+        const wasm_text = wasm.out.string(text);
+        ext.saveLevel(wasm_text);
+    }
+
     if (is_editor_mode) {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
 
