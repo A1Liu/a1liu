@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "svelte-kit dev -p 1337",
     "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
+    "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small && echo DONE' src/",
     "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE",
     "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small && echo DONE",
     "build": "svelte-kit build",

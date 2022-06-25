@@ -77,6 +77,7 @@ fn initErr() !void {
     med_font = wasm.make.string(.manual, "24px sans-serif");
     small_font = wasm.make.string(.manual, "10px sans-serif");
     level_download = wasm.make.string(.manual, "levelDownload");
+    save_level = wasm.make.string(.manual, "saveLevel");
 
     try tools.appendSlice(Static, &.{
         try editor.Tool.create(Static, editor.LineTool{}),
@@ -99,6 +100,7 @@ pub var large_font: wasm.Obj = undefined;
 pub var med_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
 pub var level_download: wasm.Obj = undefined;
+pub var save_level: wasm.Obj = undefined;
 pub var is_editor_mode: bool = false;
 
 export fn uploadLevel(data: wasm.Obj) void {
@@ -149,7 +151,10 @@ export fn run(timestamp: f64) void {
     if (start_timer.elapsed() < 300) return;
 
     const delta = input.delta;
-    if (delta > 66) return;
+    if (delta > 66) {
+        wasm.post(.log, "skipped frame", .{});
+        return;
+    }
 
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
@@ -231,7 +236,7 @@ export fn run(timestamp: f64) void {
     // Gameplay
 
     // Collisions
-    {
+    if (!is_editor_mode) {
         var view = ty.registry.view(struct {
             pos_c: *ty.PositionC,
             move_c: *ty.MoveC,
@@ -310,7 +315,7 @@ export fn run(timestamp: f64) void {
         }
     }
 
-    {
+    if (!is_editor_mode) {
         var view = ty.registry.view(struct {
             move_c: *ty.MoveC,
             force_c: ty.ForceC,
@@ -421,16 +426,8 @@ fn newToolIndex(diff: i32) u32 {
 }
 
 pub fn renderDebugInfo(input: FrameInput) void {
-    if (input.frame_id % 128 == 0) oops: {
-        const wasm_mark = wasm.watermark();
-        defer wasm.setWatermark(wasm_mark);
-
-        const mark = liu.TempMark;
-        defer liu.TempMark = mark;
-
-        const text = editor.serializeLevel() catch break :oops;
-        const wasm_text = wasm.out.string(text);
-        ext.saveLevel(wasm_text);
+    if (input.frame_id % 2048 == 0) {
+        wasm.pushMessage(save_level, .jsundefined);
     }
 
     if (is_editor_mode) {
@@ -507,4 +504,16 @@ pub fn renderDebugInfo(input: FrameInput) void {
 
         topY += 35;
     }
+}
+
+export fn saveLevel() void {
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
+
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
+    const text = editor.serializeLevel() catch return;
+    const wasm_text = wasm.out.string(text);
+    ext.saveLevel(wasm_text);
 }

@@ -59,6 +59,10 @@ const main = async (wasmRef: wasm.Ref) => {
           wasmRef.abi.download();
           break;
 
+        case "saveLevel":
+          wasmRef.abi.saveLevel();
+          break;
+
         default:
           handleInput(wasmRef, gglRef.current.ctx, msg);
       }
@@ -70,6 +74,12 @@ const init = async () => {
   const wasmRef = await wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
+      pushMessage: (kindId: number, dataId: number) => {
+        const kind = wasmRef.readObj(kindId);
+        const data = wasmRef.readObj(dataId);
+        ctx.push({kind, data});
+      },
+
       saveLevel: (levelTextId: number) => {
         const levelText = wasmRef.readObj(levelTextId);
         set("level", levelText).catch(() => {});

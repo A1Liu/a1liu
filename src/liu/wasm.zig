@@ -53,6 +53,7 @@ const ext = struct {
     extern fn readBytes(idx: Obj, begin: [*]u8) void;
 
     extern fn postMessage(tagIdx: Obj, id: Obj) void;
+    extern fn pushMessage(tagIdx: Obj, id: Obj) void;
     extern fn exit(objIndex: Obj) noreturn;
 };
 
@@ -68,6 +69,8 @@ fn liuWasmErrorCode(code: u32) callconv(.C) void {
 
 pub const watermark = ext.watermark;
 pub const setWatermark = ext.setWatermark;
+
+pub const pushMessage = ext.pushMessage;
 
 pub const Lifetime = enum {
     manual,
