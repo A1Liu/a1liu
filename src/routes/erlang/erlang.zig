@@ -476,14 +476,14 @@ pub fn renderDebugInfo(input: FrameInput) void {
         ext.fillText(next_tool, 530, 110);
     }
 
-    if (is_editor_mode) {
-        const y: u32 = 250;
-        const range = wasm.out.fmt("range={}", .{liu.TempMark.range});
-        const index = wasm.out.fmt("index_in_range={}", .{liu.TempMark.index_in_range});
+    // if (is_editor_mode) {
+    //     const y: u32 = 250;
+    //     const range = wasm.out.fmt("range={}", .{liu.TempMark.range});
+    //     const index = wasm.out.fmt("index_in_range={}", .{liu.TempMark.index_in_range});
 
-        ext.fillText(range, 5, y);
-        ext.fillText(index, 5, y + 30);
-    }
+    //     ext.fillText(range, 5, y);
+    //     ext.fillText(index, 5, y + 30);
+    // }
 
     ext.setFont(small_font);
 
