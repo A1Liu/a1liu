@@ -249,6 +249,15 @@ pub const DrawTool = struct {
 };
 
 const AssetEntity = struct {
+    name: []const u8,
+    move: ?erlang.MoveC,
+    render: ?erlang.RenderC,
+    pos: ?erlang.PositionC,
+    force: ?erlang.ForceC,
+    decide: ?erlang.DecisionC,
+};
+
+const OutputEntity = struct {
     move: ?erlang.MoveC,
     render: ?erlang.RenderC,
     pos: ?erlang.PositionC,
@@ -258,11 +267,13 @@ const AssetEntity = struct {
 
 // Use stable declaration on type
 pub fn serializeLevel() ![]const u8 {
-    var entities = std.ArrayList(AssetEntity).init(liu.Temp);
+    var entities = std.ArrayList(AssetEntity).init(liu.Pages);
+    defer entities.deinit();
 
-    var view = erlang.registry.view(AssetEntity);
+    var view = erlang.registry.view(OutputEntity);
     while (view.next()) |elem| {
         try entities.append(.{
+            .name = elem.meta.name,
             .move = elem.move,
             .pos = elem.pos,
             .render = elem.render,
@@ -296,7 +307,7 @@ pub fn readFromAsset(bytes: []const u8) !void {
     });
 
     for (asset_data.entities) |entity| {
-        const id = try registry.create("");
+        const id = try registry.create(entity.name);
         errdefer _ = registry.delete(id);
 
         if (entity.move) |move| {

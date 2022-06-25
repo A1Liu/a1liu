@@ -95,6 +95,8 @@ pub const ext = struct {
 
 pub const RenderC = struct {
     color: Vec4,
+    game_visible: bool = true,
+    editor_visible: bool = true,
 };
 
 pub const PositionC = struct {
@@ -114,6 +116,8 @@ pub const ForceC = struct {
 pub const DecisionC = struct {
     player: bool,
 };
+
+pub const EditorOnlyC = struct {};
 
 export fn init() void {
     wasm.initIfNecessary();
@@ -158,6 +162,7 @@ pub var med_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
 pub var level_download: wasm.Obj = undefined;
 pub var registry: Registry = undefined;
+pub var is_editor_mode: bool = false;
 
 export fn uploadLevel(data: wasm.Obj) void {
     const mark = liu.TempMark;
@@ -230,6 +235,11 @@ export fn run(timestamp: f64) void {
         } else {
             // Run the tool on the next frame, let's not get ahead of ourselves
             tools.items[tool_index].frame(input);
+        }
+
+        if (input.key(.key_e).pressed) {
+            is_editor_mode = !is_editor_mode;
+            tools.items[tool_index].reset();
         }
     }
 
@@ -439,7 +449,7 @@ fn newToolIndex(diff: i32) u32 {
 }
 
 pub fn renderDebugInfo(input: FrameInput) void {
-    {
+    if (is_editor_mode) {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
 
         const bbox = editor.unitSquareBBoxForPos(input.mouse.pos);
@@ -459,13 +469,13 @@ pub fn renderDebugInfo(input: FrameInput) void {
         ext.fillText(fps_val, 120, 160);
     }
 
-    {
+    if (is_editor_mode) {
         const tool_name = wasm.out.string(tools.items[tool_index].name);
         ext.fillText(tool_name, 500, 75);
     }
 
-    ext.setFont(med_font);
-    {
+    if (is_editor_mode) {
+        ext.setFont(med_font);
         const prev_tool = wasm.out.string(tools.items[newToolIndex(-1)].name);
         const next_tool = wasm.out.string(tools.items[newToolIndex(1)].name);
         ext.fillText(prev_tool, 530, 25);

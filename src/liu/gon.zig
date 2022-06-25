@@ -55,7 +55,9 @@ pub const Value = union(enum) {
 
         switch (@typeInfo(T)) {
             .Struct => |info| {
-                var map = std.ArrayList(KV).init(liu.Temp);
+                var map = std.ArrayList(KV).init(liu.Pages);
+                defer map.deinit();
+
                 try map.ensureTotalCapacity(info.fields.len);
 
                 inline for (info.fields) |field| {
@@ -78,7 +80,7 @@ pub const Value = union(enum) {
                     }
                 }
 
-                return Self{ .map = map.items };
+                return Self{ .map = try liu.Temp.dupe(KV, map.items) };
             },
 
             .Int => |_| {
@@ -90,11 +92,12 @@ pub const Value = union(enum) {
             .Float => |info| {
                 if (info.bits > 64) @compileError("Only support floats up to f64");
 
-                var bytes = std.ArrayList(u8).init(liu.Temp);
+                var bytes = std.ArrayList(u8).init(liu.Pages);
+                defer bytes.deinit();
 
                 try formatFloatValue(val, bytes.writer());
 
-                return Self{ .value = bytes.items };
+                return Self{ .value = try liu.Temp.dupe(u8, bytes.items) };
             },
 
             .Bool => {
@@ -111,29 +114,35 @@ pub const Value = union(enum) {
                     return Self{ .value = val };
                 }
 
-                var array = std.ArrayList(Self).init(liu.Temp);
+                var array = std.ArrayList(Self).init(liu.Pages);
+                defer array.deinit();
+
                 try array.ensureTotalCapacity(val.len);
 
                 for (val) |v| {
                     array.appendAssumeCapacity(try Value.init(v));
                 }
 
-                return Self{ .array = array.items };
+                return Self{ .array = try liu.Temp.dupe(Self, array.items) };
             },
 
             .Array => |info| {
-                var array = std.ArrayList(Self).init(liu.Temp);
+                var array = std.ArrayList(Self).init(liu.Pages);
+                defer array.deinit();
+
                 try array.ensureTotalCapacity(info.len);
 
                 for (val) |v| {
                     array.appendAssumeCapacity(try Value.init(v));
                 }
 
-                return Self{ .array = array.items };
+                return Self{ .array = try liu.Temp.dupe(Self, array.items) };
             },
 
             .Vector => |info| {
-                var array = std.ArrayList(Self).init(liu.Temp);
+                var array = std.ArrayList(Self).init(liu.Pages);
+                defer array.deinit();
+
                 try array.ensureTotalCapacity(info.len);
 
                 const elements: [info.len]info.child = val;
@@ -141,7 +150,7 @@ pub const Value = union(enum) {
                     array.appendAssumeCapacity(try Value.init(v));
                 }
 
-                return Self{ .array = array.items };
+                return Self{ .array = try liu.Temp.dupe(Self, array.items) };
             },
 
             else => @compileError("unsupported type '" ++ @typeName(T) ++ "' for GON"),
@@ -176,6 +185,12 @@ pub const Value = union(enum) {
                             @field(t, field.name) = try value.expect(field_type);
                         } else {
                             @field(t, field.name) = null;
+                        }
+                    } else if (field.default_value) |default| {
+                        if (map_value) |value| {
+                            @field(t, field.name) = try value.expect(field.field_type);
+                        } else {
+                            @field(t, field.name) = @ptrCast(*const field.field_type, default).*;
                         }
                     } else {
                         const value = map_value orelse return error.MissingField;
@@ -320,12 +335,18 @@ fn tokenize(bytes: []const u8) !std.ArrayList(Token) {
     errdefer tokens.deinit();
 
     var i: u32 = 0;
+    var prev_separator: ?u8 = null;
     var word_begin: ?u32 = null;
 
     while (i < bytes.len) : (i += 1) {
-        const b = bytes[i];
+        var b = bytes[i];
+        if (b == '\t') {
+            b = ' ';
+        }
+
         const tok_opt: ?Token = switch (b) {
-            ' ', '\t', '\n' => null,
+            ' ' => null,
+            '\n' => null,
 
             '{' => .lbrace,
             '}' => .rbrace,
@@ -333,15 +354,23 @@ fn tokenize(bytes: []const u8) !std.ArrayList(Token) {
             ']' => .rbracket,
 
             else => {
+                prev_separator = null;
                 if (word_begin == null)
                     word_begin = i;
+
                 continue;
             },
         };
 
         if (word_begin) |begin| {
             try tokens.append(.{ .string = bytes[begin..i] });
+        } else if (prev_separator) |sep| {
+            if (b == '\n' and sep == ' ') {
+                try tokens.append(.{ .string = "" });
+            }
         }
+
+        prev_separator = b;
 
         word_begin = null;
         if (tok_opt) |tok| {
@@ -351,6 +380,10 @@ fn tokenize(bytes: []const u8) !std.ArrayList(Token) {
 
     if (word_begin) |begin| {
         try tokens.append(.{ .string = bytes[begin..i] });
+    } else if (prev_separator) |sep| {
+        if (sep == ' ') {
+            try tokens.append(.{ .string = "" });
+        }
     }
 
     return tokens;
