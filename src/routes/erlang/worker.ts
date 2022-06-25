@@ -88,10 +88,10 @@ const init = async () => {
       },
 
       clearScreen: () => {
- const  ctx2d = gglRef.current.ctx;
-  const canvas = ctx2d.canvas;
+        const ctx2d = gglRef.current.ctx;
+        const canvas = ctx2d.canvas;
 
-    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+        ctx2d.clearRect(0, 0, canvas.width, canvas.height);
       },
 
       saveLevelToIdb: (levelTextId: number) => {
