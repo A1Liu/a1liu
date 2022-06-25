@@ -6,9 +6,10 @@ const gon = liu.gon;
 
 const util = @import("./util.zig");
 
-const erlang = @import("./erlang.zig");
+const erlang = @import("root");
+const ty = erlang.ty;
 const ext = erlang.ext;
-const BBox = erlang.BBox;
+const BBox = ty.BBox;
 
 const EntityId = liu.ecs.EntityId;
 const Vec2 = liu.Vec2;
@@ -23,9 +24,9 @@ pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
 }
 
 pub fn boxWillCollide(bbox: BBox) bool {
-    var view = erlang.registry.view(struct {
-        pos_c: erlang.PositionC,
-        force_c: ?*const erlang.ForceC,
+    var view = ty.registry.view(struct {
+        pos_c: ty.PositionC,
+        force_c: ?*const ty.ForceC,
     });
 
     while (view.next()) |elem| {
@@ -89,16 +90,16 @@ pub const Tool = struct {
 };
 
 fn makeBox(pos: Vec2) !EntityId {
-    const id = try erlang.registry.create("box");
-    errdefer erlang.registry.delete(id);
+    const id = try ty.registry.create("box");
+    errdefer ty.registry.delete(id);
 
-    try erlang.registry.addComponent(id, erlang.PositionC{ .bbox = .{
+    try ty.registry.addComponent(id, ty.PositionC{ .bbox = .{
         .pos = pos,
         .width = 1,
         .height = 1,
     } });
-    try erlang.registry.addComponent(id, erlang.RenderC{
-        .color = erlang.Vec4{ 0.2, 0.5, 0.3, 1 },
+    try ty.registry.addComponent(id, ty.RenderC{
+        .color = ty.Vec4{ 0.2, 0.5, 0.3, 1 },
     });
 
     return id;
@@ -125,9 +126,9 @@ pub const ClickTool = struct {
         }
 
         if (input.mouse.right_clicked) {
-            var view = erlang.registry.view(struct {
-                pos_c: erlang.PositionC,
-                force_c: ?*const erlang.ForceC,
+            var view = ty.registry.view(struct {
+                pos_c: ty.PositionC,
+                force_c: ?*const ty.ForceC,
             });
 
             while (view.next()) |elem| {
@@ -135,7 +136,7 @@ pub const ClickTool = struct {
 
                 const overlap = elem.pos_c.bbox.overlap(bbox);
                 if (overlap.result) {
-                    _ = erlang.registry.delete(elem.id);
+                    _ = ty.registry.delete(elem.id);
                 }
             }
         }
@@ -153,7 +154,7 @@ pub const LineTool = struct {
     pub fn reset(self: *@This()) void {
         const data = self.data orelse return;
         self.data = null;
-        _ = erlang.registry.delete(data.entity);
+        _ = ty.registry.delete(data.entity);
     }
 
     pub fn frame(self: *@This(), input: FrameInput) void {
@@ -161,7 +162,7 @@ pub const LineTool = struct {
 
         if (input.mouse.right_clicked) {
             if (self.data) |data| {
-                _ = erlang.registry.delete(data.entity);
+                _ = ty.registry.delete(data.entity);
             }
 
             self.data = null;
@@ -203,7 +204,7 @@ pub const LineTool = struct {
             const pos0 = @select(f32, mask, proj, data.pos);
             const pos1 = @select(f32, mask, data.pos, proj) + Vec2{ 1, 1 };
 
-            break :bbox erlang.BBox{
+            break :bbox ty.BBox{
                 .pos = pos0,
                 .width = pos1[0] - pos0[0],
                 .height = pos1[1] - pos0[1],
@@ -212,9 +213,9 @@ pub const LineTool = struct {
 
         if (boxWillCollide(bbox)) return;
 
-        var view = erlang.registry.view(struct {
-            pos_c: *erlang.PositionC,
-            render: *erlang.RenderC,
+        var view = ty.registry.view(struct {
+            pos_c: *ty.PositionC,
+            render: *ty.RenderC,
         });
 
         const val = view.get(data.entity) orelse {
@@ -250,21 +251,21 @@ pub const DrawTool = struct {
 
 const AssetEntity = struct {
     name: []const u8,
-    move: ?erlang.MoveC,
-    render: ?erlang.RenderC,
-    pos: ?erlang.PositionC,
-    force: ?erlang.ForceC,
-    decide: ?erlang.DecisionC,
-    bar: ?erlang.BarC,
+    move: ?ty.MoveC,
+    render: ?ty.RenderC,
+    pos: ?ty.PositionC,
+    force: ?ty.ForceC,
+    decide: ?ty.DecisionC,
+    bar: ?ty.BarC,
 };
 
 const OutputEntity = struct {
-    move: ?erlang.MoveC,
-    render: ?erlang.RenderC,
-    pos: ?erlang.PositionC,
-    force: ?erlang.ForceC,
-    decide: ?erlang.DecisionC,
-    bar: ?erlang.BarC,
+    move: ?ty.MoveC,
+    render: ?ty.RenderC,
+    pos: ?ty.PositionC,
+    force: ?ty.ForceC,
+    decide: ?ty.DecisionC,
+    bar: ?ty.BarC,
 };
 
 // Use stable declaration on type
@@ -272,7 +273,7 @@ pub fn serializeLevel() ![]const u8 {
     var entities = std.ArrayList(AssetEntity).init(liu.Pages);
     defer entities.deinit();
 
-    var view = erlang.registry.view(OutputEntity);
+    var view = ty.registry.view(OutputEntity);
     while (view.next()) |elem| {
         try entities.append(.{
             .name = elem.name,
@@ -297,7 +298,7 @@ pub fn serializeLevel() ![]const u8 {
 }
 
 pub fn readFromAsset(bytes: []const u8) !void {
-    const registry = &erlang.registry;
+    const registry = &ty.registry;
 
     var view = registry.view(struct {});
     while (view.next()) |elem| {

@@ -1,8 +1,9 @@
 const std = @import("std");
 const liu = @import("liu");
 const erlang = @import("./erlang.zig");
+const ty = erlang.ty;
 const ext = erlang.ext;
-const BBox = erlang.BBox;
+const BBox = ty.BBox;
 
 const Vec2 = liu.Vec2;
 const KeyCode = liu.gamescreen.KeyCode;

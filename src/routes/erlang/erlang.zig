@@ -2,6 +2,7 @@ const std = @import("std");
 const liu = @import("liu");
 
 const editor = @import("./editor.zig");
+pub const ty = @import("./types.zig");
 
 // TODO better level editor tooling
 // spawn point/spawn point mode
@@ -45,42 +46,9 @@ pub fn gon_parseFloat(bytes: []const u8) !f64 {
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
-pub const Vec2 = liu.Vec2;
-pub const Vec3 = liu.Vec3;
-pub const Vec4 = liu.Vec4;
-pub const BBox = struct {
-    pos: Vec2,
-    width: f32,
-    height: f32,
-
-    const Overlap = struct {
-        result: bool,
-        x: bool,
-        y: bool,
-    };
-
-    pub fn overlap(self: @This(), other: @This()) Overlap {
-        const pos1 = self.pos + Vec2{ self.width, self.height };
-        const other_pos1 = other.pos + Vec2{ other.width, other.height };
-        const x = self.pos[0] < other_pos1[0] and other.pos[0] < pos1[0];
-        const y = self.pos[1] < other_pos1[1] and other.pos[1] < pos1[1];
-
-        return .{
-            .result = x and y,
-            .y = y,
-            .x = x,
-        };
-    }
-
-    pub fn renderRectVector(self: @This()) @Vector(4, i32) {
-        return @Vector(4, i32){
-            @floatToInt(i32, @floor(self.pos[0])),
-            @floatToInt(i32, @floor(self.pos[1])),
-            @floatToInt(i32, @ceil(self.width)),
-            @floatToInt(i32, @ceil(self.height)),
-        };
-    }
-};
+pub const Vec2 = ty.Vec2;
+pub const Vec3 = ty.Vec3;
+pub const Vec4 = ty.Vec4;
 
 pub const ext = struct {
     pub extern fn fillStyle(r: f32, g: f32, b: f32, a: f32) void;
@@ -93,41 +61,6 @@ pub const ext = struct {
     pub extern fn fillText(text: wasm.Obj, x: i32, y: i32) void;
 };
 
-pub const BarKind = enum { red, blue, green };
-
-pub const RenderC = struct {
-    color: Vec4,
-    game_visible: bool = true,
-    editor_visible: bool = true,
-};
-
-pub const SerializeC = struct {
-    save_to_file: bool = true,
-};
-
-pub const BarC = struct {
-    is_spawn: bool,
-    kind: BarKind,
-};
-
-pub const PositionC = struct {
-    bbox: BBox,
-};
-
-pub const MoveC = struct {
-    velocity: Vec2,
-};
-
-pub const ForceC = struct {
-    accel: Vec2,
-    friction: f32,
-    is_airborne: bool = false,
-};
-
-pub const DecisionC = struct {
-    player: bool,
-};
-
 export fn init() void {
     wasm.initIfNecessary();
 
@@ -135,15 +68,6 @@ export fn init() void {
 
     wasm.post(.log, "WASM initialized!", .{});
 }
-
-const Registry = liu.ecs.Registry(&.{
-    PositionC,
-    MoveC,
-    RenderC,
-    DecisionC,
-    ForceC,
-    BarC,
-});
 
 fn initErr() !void {
     large_font = wasm.make.string(.manual, "bold 48px sans-serif");
@@ -157,7 +81,7 @@ fn initErr() !void {
         try editor.Tool.create(Static, editor.ClickTool{}),
     });
 
-    registry = try Registry.init(16, liu.Pages);
+    ty.registry = try ty.Registry.init(16, liu.Pages);
 }
 
 var start_timer: Timer = undefined;
@@ -171,7 +95,6 @@ pub var large_font: wasm.Obj = undefined;
 pub var med_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
 pub var level_download: wasm.Obj = undefined;
-pub var registry: Registry = undefined;
 pub var is_editor_mode: bool = false;
 
 export fn uploadLevel(data: wasm.Obj) void {
@@ -260,10 +183,10 @@ export fn run(timestamp: f64) void {
     }
 
     {
-        var view = registry.view(struct {
-            move_c: *MoveC,
-            decide_c: DecisionC,
-            force_c: ForceC,
+        var view = ty.registry.view(struct {
+            move_c: *ty.MoveC,
+            decide_c: ty.DecisionC,
+            force_c: ty.ForceC,
         });
 
         while (view.next()) |elem| {
@@ -305,15 +228,15 @@ export fn run(timestamp: f64) void {
 
     // Collisions
     {
-        var view = registry.view(struct {
-            pos_c: *PositionC,
-            move_c: *MoveC,
-            force_c: *ForceC,
+        var view = ty.registry.view(struct {
+            pos_c: *ty.PositionC,
+            move_c: *ty.MoveC,
+            force_c: *ty.ForceC,
         });
 
         const StableObject = struct {
-            pos_c: PositionC,
-            force_c: ?*const ForceC,
+            pos_c: ty.PositionC,
+            force_c: ?*const ty.ForceC,
         };
 
         while (view.next()) |elem| {
@@ -328,7 +251,7 @@ export fn run(timestamp: f64) void {
 
             elem.force_c.is_airborne = true;
 
-            var stable = registry.view(StableObject);
+            var stable = ty.registry.view(StableObject);
             while (stable.next()) |solid| {
                 // No force component means it doesn't interact with gravity,
                 // so we'll think of it as a stable piece of the environment
@@ -382,9 +305,9 @@ export fn run(timestamp: f64) void {
     }
 
     {
-        var view = registry.view(struct {
-            move_c: *MoveC,
-            force_c: ForceC,
+        var view = ty.registry.view(struct {
+            move_c: *ty.MoveC,
+            force_c: ty.ForceC,
         });
 
         while (view.next()) |elem| {
@@ -418,9 +341,9 @@ export fn run(timestamp: f64) void {
 
     // Camera Lock
     {
-        var view = registry.view(struct {
-            pos_c: PositionC,
-            decision_c: DecisionC,
+        var view = ty.registry.view(struct {
+            pos_c: ty.PositionC,
+            decision_c: ty.DecisionC,
         });
 
         while (view.next()) |elem| {
@@ -433,9 +356,9 @@ export fn run(timestamp: f64) void {
 
     // Rendering
     {
-        var view = registry.view(struct {
-            pos_c: *PositionC,
-            render: RenderC,
+        var view = ty.registry.view(struct {
+            pos_c: *ty.PositionC,
+            render: ty.RenderC,
         });
 
         while (view.next()) |elem| {
