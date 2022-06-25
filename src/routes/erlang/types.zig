@@ -140,7 +140,7 @@ pub fn boxWillCollide(bbox: BBox) bool {
 }
 
 const dark_green = Vec4{ 0.2, 0.5, 0.3, 1 };
-const norm_color: Vec4 = Vec4{ 0.3, 0.3, 0.3, 0.6 };
+const norm_color = Vec4{ 0.3, 0.3, 0.3, 0.6 };
 pub fn makeBox(pos: Vec2) !EntityId {
     const bbox = BBox{ .pos = pos, .width = 1, .height = 1 };
     if (boxWillCollide(bbox)) return error.Collision;

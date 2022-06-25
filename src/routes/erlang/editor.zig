@@ -295,32 +295,14 @@ pub fn readFromAsset(bytes: []const u8) !void {
 
         try registry.addComponent(id, ty.SaveC{});
 
-        if (entity.move) |move| {
-            try registry.addComponent(id, move);
-        }
+        const fields: []const []const u8 = &[_][]const u8{
+            "move",  "pos", "render",  "decide",
+            "force", "bar", "collide",
+        };
 
-        if (entity.pos) |pos| {
-            try registry.addComponent(id, pos);
-        }
-
-        if (entity.render) |render| {
-            try registry.addComponent(id, render);
-        }
-
-        if (entity.decide) |decide| {
-            try registry.addComponent(id, decide);
-        }
-
-        if (entity.force) |force| {
-            try registry.addComponent(id, force);
-        }
-
-        if (entity.bar) |bar| {
-            try registry.addComponent(id, bar);
-        }
-
-        if (entity.collide) |collide| {
-            try registry.addComponent(id, collide);
+        inline for (fields) |name| {
+            if (@field(entity, name)) |value|
+                try registry.addComponent(id, value);
         }
     }
 

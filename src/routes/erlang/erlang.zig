@@ -438,7 +438,7 @@ pub fn renderDebugInfo(input: FrameInput) void {
         ext.fillText(fps_val, 120, 160);
     }
 
-    if (is_editor_mode) {
+    {
         const y: u32 = 220;
         const pos0 = wasm.out.fixedFloatPrint(camera.pos[0], 2);
         ext.fillText(pos0, 5, y);
