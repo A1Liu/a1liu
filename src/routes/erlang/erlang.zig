@@ -182,7 +182,7 @@ export fn run(timestamp: f64) void {
         }
     }
 
-    {
+    if (!is_editor_mode) {
         var view = ty.registry.view(struct {
             move_c: *ty.MoveC,
             decide_c: ty.DecisionC,
@@ -340,18 +340,39 @@ export fn run(timestamp: f64) void {
     }
 
     // Camera Lock
-    {
-        var view = ty.registry.view(struct {
-            pos_c: ty.PositionC,
-            decision_c: ty.DecisionC,
-        });
+    switch (is_editor_mode) {
+        false => {
+            var view = ty.registry.view(struct {
+                pos_c: ty.PositionC,
+                decision_c: ty.DecisionC,
+            });
 
-        while (view.next()) |elem| {
-            if (!elem.decision_c.player) continue;
+            while (view.next()) |elem| {
+                if (!elem.decision_c.player) continue;
 
-            util.moveCamera(elem.pos_c.bbox.pos);
-            break;
-        }
+                util.moveCamera(elem.pos_c.bbox.pos);
+                break;
+            }
+        },
+        true => {
+            const speed: f32 = @as(f32, 16) / 1024 * delta;
+
+            if (input.key(.key_w).down) {
+                camera.pos[1] += speed;
+            }
+
+            if (input.key(.key_s).down) {
+                camera.pos[1] -= speed;
+            }
+
+            if (input.key(.key_a).down) {
+                camera.pos[0] -= speed;
+            }
+
+            if (input.key(.key_d).down) {
+                camera.pos[0] += speed;
+            }
+        },
     }
 
     // Rendering
@@ -412,6 +433,15 @@ pub fn renderDebugInfo(input: FrameInput) void {
         const fps_val = wasm.out.fixedFloatPrint(1000 / input.delta, 2);
         ext.fillText(fps_text, 5, 160);
         ext.fillText(fps_val, 120, 160);
+    }
+
+    if (is_editor_mode) {
+        const y: u32 = 220;
+        const pos0 = wasm.out.fixedFloatPrint(camera.pos[0], 2);
+        ext.fillText(pos0, 5, y);
+
+        const pos1 = wasm.out.fixedFloatPrint(camera.pos[1], 2);
+        ext.fillText(pos1, 180, y);
     }
 
     if (is_editor_mode) {

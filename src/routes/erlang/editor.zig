@@ -65,6 +65,19 @@ pub const Tool = struct {
     }
 };
 
+pub const SelectTool = struct {
+    entity: ?ty.EntityId = null,
+
+    pub fn reset(self: *@This()) void {
+        _ = self;
+    }
+
+    pub fn frame(self: *@This(), input: FrameInput) void {
+        _ = self;
+        _ = input;
+    }
+};
+
 pub const ClickTool = struct {
     dummy: bool = false,
 
