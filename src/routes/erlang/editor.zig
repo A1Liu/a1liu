@@ -255,6 +255,7 @@ const AssetEntity = struct {
     pos: ?erlang.PositionC,
     force: ?erlang.ForceC,
     decide: ?erlang.DecisionC,
+    bar: ?erlang.BarC,
 };
 
 const OutputEntity = struct {
@@ -263,6 +264,7 @@ const OutputEntity = struct {
     pos: ?erlang.PositionC,
     force: ?erlang.ForceC,
     decide: ?erlang.DecisionC,
+    bar: ?erlang.BarC,
 };
 
 // Use stable declaration on type
@@ -279,6 +281,7 @@ pub fn serializeLevel() ![]const u8 {
             .render = elem.render,
             .decide = elem.decide,
             .force = elem.force,
+            .bar = elem.bar,
         });
     }
 
@@ -328,6 +331,10 @@ pub fn readFromAsset(bytes: []const u8) !void {
 
         if (entity.force) |force| {
             try registry.addComponent(id, force);
+        }
+
+        if (entity.bar) |bar| {
+            try registry.addComponent(id, bar);
         }
     }
 }

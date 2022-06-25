@@ -525,7 +525,7 @@ pub const StringTable = struct {
             } else {
                 const id = @truncate(u32, self.ranges.items.len);
 
-                try self.ranges.addOne(alloc);
+                _ = try self.ranges.addOne(alloc);
 
                 break :id id;
             }

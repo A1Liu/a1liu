@@ -93,10 +93,21 @@ pub const ext = struct {
     pub extern fn fillText(text: wasm.Obj, x: i32, y: i32) void;
 };
 
+pub const BarKind = enum { red, blue, green };
+
 pub const RenderC = struct {
     color: Vec4,
     game_visible: bool = true,
     editor_visible: bool = true,
+};
+
+pub const SerializeC = struct {
+    save_to_file: bool = true,
+};
+
+pub const BarC = struct {
+    is_spawn: bool,
+    kind: BarKind,
 };
 
 pub const PositionC = struct {
@@ -131,6 +142,7 @@ const Registry = liu.ecs.Registry(&.{
     RenderC,
     DecisionC,
     ForceC,
+    BarC,
 });
 
 fn initErr() !void {
@@ -429,6 +441,12 @@ export fn run(timestamp: f64) void {
         while (view.next()) |elem| {
             const pos_c = elem.pos_c;
             const render = elem.render;
+            const show = switch (is_editor_mode) {
+                true => render.editor_visible,
+                false => render.game_visible,
+            };
+
+            if (!show) continue;
 
             const color = render.color;
             ext.fillStyle(color[0], color[1], color[2], color[3]);

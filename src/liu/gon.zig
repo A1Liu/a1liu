@@ -16,6 +16,7 @@ const SchemaParseError =
 
     InvalidBoolValue,
     InvalidArrayLength,
+    InvalidEnumVariant,
 };
 
 const SchemaSerializeError = error{
@@ -105,6 +106,10 @@ pub const Value = union(enum) {
                     Self{ .value = "true" }
                 else
                     Self{ .value = "false" };
+            },
+
+            .Enum => {
+                return Self{ .value = @tagName(val) };
             },
 
             .Pointer => |info| {
@@ -228,6 +233,12 @@ pub const Value = union(enum) {
 
                 const out = try parseFloat(self.value);
                 return @floatCast(T, out);
+            },
+
+            .Enum => |_| {
+                if (self.* != .value) return error.ExpectedString;
+
+                return std.meta.stringToEnum(T, self.value) orelse error.InvalidEnumVariant;
             },
 
             .Vector => |info| {
