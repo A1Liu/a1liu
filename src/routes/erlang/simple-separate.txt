@@ -120,7 +120,7 @@ entities [
     }
   }
   {
-    name 
+    name box
     render {
       color [
         2.0000000298023224e-1
@@ -134,39 +134,16 @@ entities [
     pos {
       bbox {
         pos [
-          5e+0
+          9e+0
           0e+0
         ]
-        width 3e+0
-        height 1e+0
-      }
-    }
-  }
-  {
-    name 
-    render {
-      color [
-        2.0000000298023224e-1
-        5e-1
-        3.0000001192092896e-1
-        1e+0
-      ]
-      game_visible true
-      editor_visible true
-    }
-    pos {
-      bbox {
-        pos [
-          3e+0
-          -1e+0
-        ]
         width 1e+0
-        height 9e+0
+        height 7e+0
       }
     }
   }
   {
-    name 
+    name box
     render {
       color [
         2.0000000298023224e-1
@@ -180,7 +157,7 @@ entities [
     pos {
       bbox {
         pos [
-          3e+0
+          7e+0
           -1e+0
         ]
         width 3e+0
@@ -189,30 +166,7 @@ entities [
     }
   }
   {
-    name 
-    render {
-      color [
-        2.0000000298023224e-1
-        5e-1
-        3.0000001192092896e-1
-        1e+0
-      ]
-      game_visible true
-      editor_visible true
-    }
-    pos {
-      bbox {
-        pos [
-          5e+0
-          4e+0
-        ]
-        width 1e+0
-        height 4e+0
-      }
-    }
-  }
-  {
-    name 
+    name box
     render {
       color [
         2.0000000298023224e-1
@@ -230,12 +184,35 @@ entities [
           4e+0
         ]
         width 1e+0
-        height 4e+0
+        height 3e+0
       }
     }
   }
   {
-    name 
+    name box
+    render {
+      color [
+        2.0000000298023224e-1
+        5e-1
+        3.0000001192092896e-1
+        1e+0
+      ]
+      game_visible true
+      editor_visible true
+    }
+    pos {
+      bbox {
+        pos [
+          5e+0
+          4e+0
+        ]
+        width 1e+0
+        height 3e+0
+      }
+    }
+  }
+  {
+    name box
     render {
       color [
         2.0000000298023224e-1
@@ -258,7 +235,7 @@ entities [
     }
   }
   {
-    name 
+    name box
     render {
       color [
         2.0000000298023224e-1
@@ -272,16 +249,16 @@ entities [
     pos {
       bbox {
         pos [
-          9e+0
-          -1e+0
+          3e+0
+          0e+0
         ]
         width 1e+0
-        height 9e+0
+        height 7e+0
       }
     }
   }
   {
-    name 
+    name box
     render {
       color [
         2.0000000298023224e-1
@@ -295,8 +272,31 @@ entities [
     pos {
       bbox {
         pos [
-          7e+0
+          3e+0
           -1e+0
+        ]
+        width 3e+0
+        height 1e+0
+      }
+    }
+  }
+  {
+    name box
+    render {
+      color [
+        2.0000000298023224e-1
+        5e-1
+        3.0000001192092896e-1
+        1e+0
+      ]
+      game_visible true
+      editor_visible true
+    }
+    pos {
+      bbox {
+        pos [
+          5e+0
+          0e+0
         ]
         width 3e+0
         height 1e+0

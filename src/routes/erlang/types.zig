@@ -13,6 +13,7 @@ pub const Registry = liu.ecs.Registry(&.{
     DecisionC,
     ForceC,
     BarC,
+    SaveC,
 });
 
 pub const BBox = struct {
@@ -69,6 +70,14 @@ pub const BarKind = enum(u8) {
             .blue => return "spawn_blue",
         }
     }
+
+    pub fn barName(self: @This()) []const u8 {
+        switch (self) {
+            .red => return "bar_red",
+            .green => return "bar_green",
+            .blue => return "bar_blue",
+        }
+    }
 };
 
 pub const RenderC = struct {
@@ -77,9 +86,7 @@ pub const RenderC = struct {
     editor_visible: bool = true,
 };
 
-pub const SerializeC = struct {
-    save_to_file: bool = true,
-};
+pub const SaveC = struct {};
 
 pub const BarC = struct {
     is_spawn: bool,
@@ -145,6 +152,8 @@ pub fn makeBox(pos: Vec2) !EntityId {
         .color = dark_green,
     });
 
+    try registry.addComponent(id, SaveC{});
+
     return id;
 }
 
@@ -169,6 +178,8 @@ pub fn makeSpawn(bar: BarKind, pos: Vec2) !EntityId {
         .is_spawn = true,
         .kind = bar,
     });
+
+    try registry.addComponent(box, SaveC{});
 }
 
 pub fn makeBar(bar: BarKind, pos: Vec2) !EntityId {

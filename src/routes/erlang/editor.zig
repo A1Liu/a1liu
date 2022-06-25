@@ -217,6 +217,7 @@ const AssetEntity = struct {
 };
 
 const OutputEntity = struct {
+    save: ty.SaveC,
     move: ?ty.MoveC,
     render: ?ty.RenderC,
     pos: ?ty.PositionC,
@@ -270,6 +271,8 @@ pub fn readFromAsset(bytes: []const u8) !void {
     for (asset_data.entities) |entity| {
         const id = try registry.create(entity.name);
         errdefer _ = registry.delete(id);
+
+        try registry.addComponent(id, ty.SaveC{});
 
         if (entity.move) |move| {
             try registry.addComponent(id, move);
