@@ -273,7 +273,7 @@ pub fn serializeLevel() ![]const u8 {
     var view = erlang.registry.view(OutputEntity);
     while (view.next()) |elem| {
         try entities.append(.{
-            .name = elem.meta.name,
+            .name = elem.name,
             .move = elem.move,
             .pos = elem.pos,
             .render = elem.render,

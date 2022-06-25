@@ -471,6 +471,75 @@ pub fn LRU(comptime V: type) type {
     };
 }
 
+pub const StringTable = struct {
+    bytes: std.ArrayListUnmanaged(u8) = .{},
+    ranges: std.ArrayListUnmanaged(struct { start: i32, end: u32 }) = .{},
+
+    // use `start` field as next field in freelist
+    next_free: ?i32 = null,
+
+    // TODO: do garbage collection instead of only ever increasing
+    used_space: u32 = 0,
+
+    const Self = @This();
+
+    pub fn deinit(self: *const Self, alloc: std.mem.Allocator) void {
+        self.bytes.deinit(alloc);
+        self.ranges.deinit(alloc);
+    }
+
+    pub fn get(self: *const Self, id: u32) ?[]const u8 {
+        if (id >= self.ranges.items.len) return null;
+
+        const range = self.ranges.items[id];
+        if (range.start < 0) return null;
+
+        return self.bytes.items[@intCast(u32, range.start)..range.end];
+    }
+
+    pub fn delete(self: *Self, id: u32) void {
+        if (id >= self.ranges.items.len) return;
+
+        const id_neg = -@intCast(i32, id) - 1;
+        const range = &self.ranges.items[id];
+        if (range.start < 0) return;
+
+        self.used_space += range.end - @intCast(u32, range.start);
+
+        range.start = self.next_free orelse id_neg;
+        self.next_free = id_neg;
+    }
+
+    pub fn add(self: *Self, alloc: std.mem.Allocator, data: []const u8) !u32 {
+        const id = id: {
+            if (self.next_free) |id_neg| {
+                const id = @intCast(u32, -(id_neg + 1));
+
+                if (self.ranges.items[id].start == id_neg) {
+                    self.next_free = null;
+                } else {
+                    self.next_free = self.ranges.items[id].start;
+                }
+
+                break :id id;
+            } else {
+                break :id @truncate(u32, self.ranges.items.len);
+            }
+        };
+
+        const start = self.bytes.items.len;
+
+        try self.bytes.appendSlice(alloc, data);
+
+        try self.ranges.append(alloc, .{
+            .start = @intCast(i32, start),
+            .end = @truncate(u32, self.bytes.items.len),
+        });
+
+        return id;
+    }
+};
+
 test "LRU: ordering" {
     const liu = @import("./lib.zig");
 

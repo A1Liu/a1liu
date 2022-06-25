@@ -117,8 +117,6 @@ pub const DecisionC = struct {
     player: bool,
 };
 
-pub const EditorOnlyC = struct {};
-
 export fn init() void {
     wasm.initIfNecessary();
 

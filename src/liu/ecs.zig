@@ -57,11 +57,11 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                         .alignment = @alignOf(EntityId),
                     },
                     .{
-                        .name = "meta",
-                        .field_type = *const Reg.Meta,
+                        .name = "name",
+                        .field_type = []const u8,
                         .default_value = null,
                         .is_comptime = false,
-                        .alignment = @alignOf(*const Reg.Meta),
+                        .alignment = @alignOf([]const u8),
                     },
                 },
             },
@@ -77,11 +77,11 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
 
             var value: ViewType = undefined;
             value.id = .{ .index = index, .generation = meta.generation };
-            value.meta = meta;
+            value.name = registry.strings.get(meta.name).?;
 
             inline for (std.meta.fields(ViewType)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
-                if (comptime std.mem.eql(u8, field.name, "meta")) continue;
+                if (comptime std.mem.eql(u8, field.name, "name")) continue;
 
                 const unwrapped = UnwrappedField(field.field_type);
                 if (unwrapped.is_optional) continue;
@@ -192,7 +192,7 @@ pub fn Registry(comptime InDense: []const type) type {
         // const SparseComponents = InSparse;
 
         pub const Meta = struct {
-            name: []const u8, // use the len field to store the next freelist element
+            name: u32, // use this field to store the next freelist element
             generation: u32,
             bitset: std.StaticBitSet(Components.len - 1),
         };
@@ -207,6 +207,7 @@ pub fn Registry(comptime InDense: []const type) type {
         // const SparsePointers = [SparseComponents.len]List(u8);
 
         alloc: std.mem.Allocator,
+        strings: liu.StringTable,
         generation: u32,
 
         dense: DensePointers,
@@ -230,12 +231,15 @@ pub fn Registry(comptime InDense: []const type) type {
                 .len = 0,
                 .generation = 1,
                 .capacity = capacity,
+                .strings = .{},
                 .alloc = alloc,
                 .free_head = NULL,
             };
         }
 
         pub fn deinit(self: *Self) void {
+            self.strings.deinit(self.alloc);
+
             inline for (DenseComponents) |T, idx| {
                 if (@sizeOf(T) == 0) continue;
 
@@ -255,7 +259,7 @@ pub fn Registry(comptime InDense: []const type) type {
                 if (self.free_head != NULL) {
                     const index = self.free_head;
                     const meta = &self.raw(Meta)[self.free_head];
-                    self.free_head = @truncate(u32, meta.name.len);
+                    self.free_head = meta.name;
 
                     break :index index;
                 }
@@ -282,8 +286,11 @@ pub fn Registry(comptime InDense: []const type) type {
                 break :index index;
             };
 
+            const name_id = try self.strings.add(self.alloc, name);
+            errdefer self.strings.delete(name_id);
+
             const meta = &self.raw(Meta)[index];
-            meta.name = name;
+            meta.name = name_id;
             meta.generation = self.generation;
             meta.bitset = std.StaticBitSet(Components.len - 1).initEmpty();
 
@@ -293,6 +300,9 @@ pub fn Registry(comptime InDense: []const type) type {
         pub fn delete(self: *Self, id: EntityId) bool {
             const index = self.indexOf(id) orelse return false;
             self.count -= 1;
+
+            const meta = &self.raw(Meta)[index];
+            self.strings.delete(meta.name);
 
             if (self.count == 0) {
                 self.len = 0;
@@ -304,11 +314,8 @@ pub fn Registry(comptime InDense: []const type) type {
                 return true;
             }
 
-            const meta = &self.raw(Meta)[index];
-
             meta.generation = NULL;
-            meta.name = "";
-            meta.name.len = self.free_head;
+            meta.name = self.free_head;
 
             self.free_head = id.index;
             self.generation += 1;
@@ -411,7 +418,7 @@ test "Registry: iterate" {
 
     var view = registry.view(View);
     while (view.next()) |elem| {
-        try std.testing.expect(elem.meta.name.len == 3);
+        try std.testing.expect(elem.name.len == 3);
         if (elem.transform) |t|
             try std.testing.expect(t.i == elem.id.index)
         else
@@ -443,7 +450,7 @@ test "Registry: delete" {
     var view = registry.view(View);
     var count: u32 = 0;
     while (view.next()) |elem| {
-        try std.testing.expect(elem.meta.name.len == 3);
+        try std.testing.expect(elem.name.len == 3);
         count += 1;
     }
 
