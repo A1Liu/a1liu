@@ -3,7 +3,7 @@
   import Screen from "@lib/svelte/gamescreen.svelte";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
-  import levelUrl from "./level.txt?url";
+  import levelUrl from "./levels/level.txt?url";
   import * as wasm from "@lib/ts/wasm";
 
   let worker = undefined;

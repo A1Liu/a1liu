@@ -65,16 +65,18 @@ pub const Tool = struct {
     }
 };
 
-pub const SelectTool = struct {
+pub const TestTool = struct {
     entity: ?ty.EntityId = null,
 
     pub fn reset(self: *@This()) void {
-        _ = self;
+        self.entity = null;
     }
 
     pub fn frame(self: *@This(), input: FrameInput) void {
-        _ = self;
-        _ = input;
+        if (input.mouse.left_clicked) {
+            const bbox = BBox.unitSquareAt(input.mouse.pos);
+            self.entity = ty.makeSpawn(.blue, bbox.pos) catch return;
+        }
     }
 };
 
@@ -226,16 +228,19 @@ const AssetEntity = struct {
     pos: ?ty.PositionC,
     force: ?ty.ForceC,
     decide: ?ty.DecisionC,
+    collide: ?ty.CollisionC,
     bar: ?ty.BarC,
 };
 
 const OutputEntity = struct {
     save: ty.SaveC,
+
     move: ?ty.MoveC,
     render: ?ty.RenderC,
     pos: ?ty.PositionC,
     force: ?ty.ForceC,
     decide: ?ty.DecisionC,
+    collide: ?ty.CollisionC,
     bar: ?ty.BarC,
 };
 
@@ -254,6 +259,7 @@ pub fn serializeLevel() ![]const u8 {
             .decide = elem.decide,
             .force = elem.force,
             .bar = elem.bar,
+            .collide = elem.collide,
         });
     }
 
@@ -271,9 +277,11 @@ pub fn serializeLevel() ![]const u8 {
 pub fn readFromAsset(bytes: []const u8) !void {
     const registry = &ty.registry;
 
-    var view = registry.view(struct {});
-    while (view.next()) |elem| {
-        _ = registry.delete(elem.id);
+    {
+        var view = registry.view(struct {});
+        while (view.next()) |elem| {
+            _ = registry.delete(elem.id);
+        }
     }
 
     const gon_data = try gon.parseGon(bytes);
@@ -309,6 +317,27 @@ pub fn readFromAsset(bytes: []const u8) !void {
 
         if (entity.bar) |bar| {
             try registry.addComponent(id, bar);
+        }
+
+        if (entity.collide) |collide| {
+            try registry.addComponent(id, collide);
+        }
+    }
+
+    {
+        var view = registry.view(struct {
+            pos: ty.PositionC,
+            bar: ty.BarC,
+        });
+
+        while (view.next()) |elem| {
+            if (!elem.bar.is_spawn) continue;
+
+            var pos = elem.pos.bbox.pos;
+            pos[1] += 0.25;
+            pos[0] += 0.25;
+
+            _ = try ty.makeBar(elem.bar.kind, pos);
         }
     }
 }

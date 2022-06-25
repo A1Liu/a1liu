@@ -11,6 +11,7 @@ pub const Registry = liu.ecs.Registry(&.{
     MoveC,
     RenderC,
     DecisionC,
+    CollisionC,
     ForceC,
     BarC,
     SaveC,
@@ -57,6 +58,8 @@ pub const BBox = struct {
         };
     }
 };
+
+pub const CollisionC = struct {};
 
 pub const BarKind = enum(u8) {
     red,
@@ -122,6 +125,7 @@ pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
 pub fn boxWillCollide(bbox: BBox) bool {
     var view = registry.view(struct {
         pos_c: PositionC,
+        collide: CollisionC,
         force_c: ?*const ForceC,
     });
 
@@ -152,6 +156,7 @@ pub fn makeBox(pos: Vec2) !EntityId {
         .color = dark_green,
     });
 
+    try registry.addComponent(id, CollisionC{});
     try registry.addComponent(id, SaveC{});
 
     return id;
@@ -163,7 +168,7 @@ pub fn makeSpawn(bar: BarKind, pos: Vec2) !EntityId {
     var color = norm_color;
     color[i] = 0.8;
 
-    const box = try registry.create("spawn");
+    const box = try registry.create(bar.spawnName());
 
     try registry.addComponent(box, PositionC{ .bbox = .{
         .pos = pos,
@@ -172,6 +177,7 @@ pub fn makeSpawn(bar: BarKind, pos: Vec2) !EntityId {
     } });
     try registry.addComponent(box, RenderC{
         .color = color,
+        .game_visible = false,
     });
 
     try registry.addComponent(box, BarC{
@@ -180,6 +186,8 @@ pub fn makeSpawn(bar: BarKind, pos: Vec2) !EntityId {
     });
 
     try registry.addComponent(box, SaveC{});
+
+    return box;
 }
 
 pub fn makeBar(bar: BarKind, pos: Vec2) !EntityId {
@@ -188,7 +196,7 @@ pub fn makeBar(bar: BarKind, pos: Vec2) !EntityId {
     var color = norm_color;
     color[i] = 1;
 
-    const box = try registry.create("bar");
+    const box = try registry.create(bar.barName());
     try registry.addComponent(box, PositionC{ .bbox = .{
         .pos = pos,
         .width = 0.5,
@@ -207,8 +215,12 @@ pub fn makeBar(bar: BarKind, pos: Vec2) !EntityId {
         .friction = 0.05,
     });
 
+    try registry.addComponent(box, CollisionC{});
+
     try registry.addComponent(box, BarC{
         .is_spawn = false,
         .kind = bar,
     });
+
+    return box;
 }

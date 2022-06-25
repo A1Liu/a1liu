@@ -77,6 +77,7 @@ fn initErr() !void {
 
     try tools.appendSlice(Static, &.{
         try editor.Tool.create(Static, editor.LineTool{}),
+        try editor.Tool.create(Static, editor.TestTool{}),
         try editor.Tool.create(Static, editor.DrawTool{}),
         try editor.Tool.create(Static, editor.ClickTool{}),
     });
@@ -232,10 +233,12 @@ export fn run(timestamp: f64) void {
             pos_c: *ty.PositionC,
             move_c: *ty.MoveC,
             force_c: *ty.ForceC,
+            collision_c: *ty.CollisionC,
         });
 
         const StableObject = struct {
             pos_c: ty.PositionC,
+            collision_c: ty.CollisionC,
             force_c: ?*const ty.ForceC,
         };
 

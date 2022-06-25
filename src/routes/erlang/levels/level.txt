@@ -42,6 +42,7 @@ entities [
       is_spawn false
       kind red
     }
+    collide {}
   }
   {
     name bar_green
@@ -86,6 +87,7 @@ entities [
       is_spawn false
       kind green
     }
+    collide {}
   }
   {
     name bar_blue
@@ -130,6 +132,7 @@ entities [
       is_spawn false
       kind blue
     }
+    collide {}
   }
   {
     name box
@@ -153,5 +156,6 @@ entities [
         height 1e+0
       }
     }
+    collide {}
   }
 ]
