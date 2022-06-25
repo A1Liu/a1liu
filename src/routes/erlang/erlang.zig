@@ -397,7 +397,7 @@ pub fn renderDebugInfo(input: FrameInput) void {
     if (is_editor_mode) {
         ext.strokeStyle(0.1, 0.1, 0.1, 1);
 
-        const bbox = editor.unitSquareBBoxForPos(input.mouse.pos);
+        const bbox = ty.BBox.unitSquareAt(input.mouse.pos);
 
         const screen_rect = camera.getScreenBoundingBox(bbox).renderRectVector();
         ext.strokeRect(screen_rect[0], screen_rect[1], screen_rect[2], screen_rect[3]);

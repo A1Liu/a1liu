@@ -15,30 +15,6 @@ const EntityId = liu.ecs.EntityId;
 const Vec2 = liu.Vec2;
 const FrameInput = liu.gamescreen.FrameInput;
 
-pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
-    return BBox{
-        .pos = @floor(pos),
-        .width = 1,
-        .height = 1,
-    };
-}
-
-pub fn boxWillCollide(bbox: BBox) bool {
-    var view = ty.registry.view(struct {
-        pos_c: ty.PositionC,
-        force_c: ?*const ty.ForceC,
-    });
-
-    while (view.next()) |elem| {
-        if (elem.force_c == null) continue;
-
-        const overlap = elem.pos_c.bbox.overlap(bbox);
-        if (overlap.result) return true;
-    }
-
-    return false;
-}
-
 pub const Tool = struct {
     const Self = @This();
 
@@ -89,22 +65,6 @@ pub const Tool = struct {
     }
 };
 
-fn makeBox(pos: Vec2) !EntityId {
-    const id = try ty.registry.create("box");
-    errdefer ty.registry.delete(id);
-
-    try ty.registry.addComponent(id, ty.PositionC{ .bbox = .{
-        .pos = pos,
-        .width = 1,
-        .height = 1,
-    } });
-    try ty.registry.addComponent(id, ty.RenderC{
-        .color = ty.Vec4{ 0.2, 0.5, 0.3, 1 },
-    });
-
-    return id;
-}
-
 pub const ClickTool = struct {
     dummy: bool = false,
 
@@ -116,11 +76,9 @@ pub const ClickTool = struct {
         if (!input.mouse.left_clicked and !input.mouse.right_clicked) return;
         _ = self;
 
-        const bbox = unitSquareBBoxForPos(input.mouse.pos);
+        const bbox = BBox.unitSquareAt(input.mouse.pos);
         if (input.mouse.left_clicked) {
-            if (boxWillCollide(bbox)) return;
-
-            _ = makeBox(bbox.pos) catch return;
+            _ = ty.makeBox(bbox.pos) catch return;
 
             return;
         }
@@ -174,7 +132,7 @@ pub const LineTool = struct {
             if (self.data != null) {
                 self.data = null;
             } else {
-                const entity = makeBox(pos) catch return;
+                const entity = ty.makeBox(pos) catch return;
                 self.data = .{ .entity = entity, .pos = pos };
             }
 
@@ -211,7 +169,7 @@ pub const LineTool = struct {
             };
         };
 
-        if (boxWillCollide(bbox)) return;
+        if (ty.boxWillCollide(bbox)) return;
 
         var view = ty.registry.view(struct {
             pos_c: *ty.PositionC,
@@ -241,10 +199,9 @@ pub const DrawTool = struct {
 
         if (!self.drawing) return;
 
-        const bbox = unitSquareBBoxForPos(input.mouse.pos);
-        if (boxWillCollide(bbox)) return;
+        const bbox = BBox.unitSquareAt(input.mouse.pos);
 
-        const new_solid = makeBox(bbox.pos) catch return;
+        const new_solid = ty.makeBox(bbox.pos) catch return;
         _ = new_solid;
     }
 };
