@@ -55,16 +55,16 @@ export class WorkerCtx<T> {
   private resolve?: (t: T) => void;
 
   onmessageCallback(): (event: MessageEvent<T>) => void {
-    return (event) => this.push(event.data) ;
+    return (event) => this.push(event.data);
   }
 
   push(t: T): void {
-      this.messages.push(t);
+    this.messages.push(t);
 
-      if (this.resolve) {
-        this.resolve(this.messages.splice(0, this.messages.length));
-        this.resolve = undefined;
-      }
+    if (this.resolve) {
+      this.resolve(this.messages.splice(0, this.messages.length));
+      this.resolve = undefined;
+    }
   }
 
   async msgWait(): Promise<T[]> {

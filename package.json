@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "svelte-kit dev -p 1337",
     "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
-    "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small && echo DONE' src/",
+    "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-safe && echo DONE' src/",
     "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE",
     "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small && echo DONE",
     "build": "svelte-kit build",
@@ -13,7 +13,7 @@
     "prepare": "svelte-kit sync",
     "typecheck": "svelte-check --tsconfig .svelte-kit/tsconfig.json",
     "check:watch": "svelte-check --tsconfig .svelte-kit/tsconfig.json --watch",
-    "format": "prettier --no-color --write --plugin-search-dir=. '{src/routes,src/svelte,srv/ts}/**/*.{ts,svelte,js}'",
+    "format": "prettier --no-color --write --plugin-search-dir=. '{src/routes,src/svelte,src/ts}/**/*.{ts,svelte,js}'",
     "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
   },
   "dependencies": {

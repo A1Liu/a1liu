@@ -70,14 +70,12 @@ pub const Value = union(enum) {
                             .key = field.name,
                             .value = field_gon,
                         });
-                    } else {
-                        if (field_val) |f| {
-                            const field_gon = try Value.init(f);
-                            map.appendAssumeCapacity(.{
-                                .key = field.name,
-                                .value = field_gon,
-                            });
-                        }
+                    } else if (field_val) |f| {
+                        const field_gon = try Value.init(f);
+                        map.appendAssumeCapacity(.{
+                            .key = field.name,
+                            .value = field_gon,
+                        });
                     }
                 }
 
@@ -410,13 +408,10 @@ const Parser = struct {
     index: u32 = 0,
 
     fn parseGonRecursive(self: *@This(), is_root: bool) ParseError!Value {
-        const mark = liu.TempMark;
-        errdefer liu.TempMark = mark;
-
         while (self.index < self.tokens.len) {
             if (self.tokens[self.index] == .lbracket) {
                 self.index += 1;
-                var values: std.ArrayListUnmanaged(Value) = .{};
+                var values = std.ArrayList(Value).init(liu.Temp);
 
                 while (self.index < self.tokens.len) {
                     if (self.tokens[self.index] == .rbracket) {
@@ -425,7 +420,7 @@ const Parser = struct {
                     }
 
                     const value = try self.parseGonRecursive(false);
-                    try values.append(liu.Temp, value);
+                    try values.append(value);
                 }
 
                 return Value{ .array = values.items };
@@ -473,6 +468,8 @@ const Parser = struct {
         return Value{ .value = "" };
     }
 };
+
+// TODO Made a mistake with Temp allocator... rip
 
 pub fn parseGon(bytes: []const u8) ParseError!Value {
     const tokens = try tokenize(bytes);

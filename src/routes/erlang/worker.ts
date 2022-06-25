@@ -29,7 +29,7 @@ const main = async (wasmRef: wasm.Ref) => {
   const canvas = ctx2d.canvas;
 
   function run(timestamp: number) {
-    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx2d.clearRect(0, 0, canvas.width, canvas.height);
 
     wasmRef.abi.run(timestamp);
 
@@ -46,6 +46,7 @@ const main = async (wasmRef: wasm.Ref) => {
   while (true) {
     const captured = await ctx.msgWait();
 
+    const seen = {};
     captured.forEach((msg) => {
       switch (msg.kind) {
         case "uploadLevel": {
@@ -56,16 +57,22 @@ const main = async (wasmRef: wasm.Ref) => {
         }
 
         case "levelDownload":
-          wasmRef.abi.download();
+          if (!seen[msg.kind]) {
+            wasmRef.abi.download();
+          }
           break;
 
         case "saveLevel":
-          wasmRef.abi.saveLevel();
+          if (!seen[msg.kind]) {
+            wasmRef.abi.saveLevel();
+          }
           break;
 
         default:
           handleInput(wasmRef, gglRef.current.ctx, msg);
       }
+
+      seen[msg.kind] = true;
     });
   }
 };
@@ -77,10 +84,17 @@ const init = async () => {
       pushMessage: (kindId: number, dataId: number) => {
         const kind = wasmRef.readObj(kindId);
         const data = wasmRef.readObj(dataId);
-        ctx.push({kind, data});
+        ctx.push({ kind, data });
       },
 
-      saveLevel: (levelTextId: number) => {
+      clearScreen: () => {
+ const  ctx2d = gglRef.current.ctx;
+  const canvas = ctx2d.canvas;
+
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+      },
+
+      saveLevelToIdb: (levelTextId: number) => {
         const levelText = wasmRef.readObj(levelTextId);
         set("level", levelText).catch(() => {});
       },

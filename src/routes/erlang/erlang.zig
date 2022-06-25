@@ -52,7 +52,9 @@ pub const Vec3 = ty.Vec3;
 pub const Vec4 = ty.Vec4;
 
 pub const ext = struct {
-    pub extern fn saveLevel(levelTextId: wasm.Obj) void;
+    pub extern fn saveLevelToIdb(levelTextId: wasm.Obj) void;
+
+    pub extern fn clearScreen() void;
 
     pub extern fn fillStyle(r: f32, g: f32, b: f32, a: f32) void;
     pub extern fn strokeStyle(r: f32, g: f32, b: f32, a: f32) void;
@@ -388,6 +390,8 @@ export fn run(timestamp: f64) void {
 
     // Rendering
     {
+        ext.clearScreen();
+
         var view = ty.registry.view(struct {
             pos_c: *ty.PositionC,
             render: ty.RenderC,
@@ -426,7 +430,7 @@ fn newToolIndex(diff: i32) u32 {
 }
 
 pub fn renderDebugInfo(input: FrameInput) void {
-    if (input.frame_id % 2048 == 0) {
+    if (input.frame_id % 256 == 0) {
         wasm.pushMessage(save_level, .jsundefined);
     }
 
@@ -515,5 +519,5 @@ export fn saveLevel() void {
 
     const text = editor.serializeLevel() catch return;
     const wasm_text = wasm.out.string(text);
-    ext.saveLevel(wasm_text);
+    ext.saveLevelToIdb(wasm_text);
 }

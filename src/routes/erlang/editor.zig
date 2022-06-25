@@ -263,18 +263,26 @@ pub fn serializeLevel() ![]const u8 {
         });
     }
 
+    const mark = liu.TempMark;
+
     const gon_data = try gon.Value.init(.{
         .entities = entities.items,
     });
 
-    var output = std.ArrayList(u8).init(liu.Temp);
+    var output = std.ArrayList(u8).init(liu.Pages);
+    defer output.deinit();
 
     try gon_data.write(output.writer(), true);
 
-    return output.items;
+    liu.TempMark = mark;
+
+    return liu.Temp.dupe(u8, output.items);
 }
 
 pub fn readFromAsset(bytes: []const u8) !void {
+    const mark = liu.TempMark;
+    defer liu.TempMark = mark;
+
     const registry = &ty.registry;
 
     {
