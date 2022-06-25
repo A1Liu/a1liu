@@ -77,7 +77,10 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
 
             var value: ViewType = undefined;
             value.id = .{ .index = index, .generation = meta.generation };
-            value.name = registry.strings.get(meta.name).?;
+            value.name = registry.strings.get(meta.name) orelse {
+                liu.wasm.post(.log, "wtf: {}", .{meta.name});
+                unreachable;
+            };
 
             inline for (std.meta.fields(ViewType)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;

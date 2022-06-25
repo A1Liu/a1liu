@@ -227,17 +227,23 @@ export fn run(timestamp: f64) void {
 
         const new_index = newToolIndex(diff);
 
+        var modified = false;
+
         if (tool_index != new_index) {
             tools.items[tool_index].reset();
             tool_index = new_index;
-        } else {
-            // Run the tool on the next frame, let's not get ahead of ourselves
-            tools.items[tool_index].frame(input);
+            modified = true;
         }
 
         if (input.key(.key_e).pressed) {
             is_editor_mode = !is_editor_mode;
             tools.items[tool_index].reset();
+            modified = true;
+        }
+
+        if (!modified and is_editor_mode) {
+            // Run the tool on the next frame, let's not get ahead of ourselves
+            tools.items[tool_index].frame(input);
         }
     }
 

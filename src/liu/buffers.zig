@@ -504,7 +504,7 @@ pub const StringTable = struct {
         const range = &self.ranges.items[id];
         if (range.start < 0) return;
 
-        self.used_space += range.end - @intCast(u32, range.start);
+        self.used_space -= range.end - @intCast(u32, range.start);
 
         range.start = self.next_free orelse id_neg;
         self.next_free = id_neg;
@@ -523,18 +523,22 @@ pub const StringTable = struct {
 
                 break :id id;
             } else {
-                break :id @truncate(u32, self.ranges.items.len);
+                const id = @truncate(u32, self.ranges.items.len);
+
+                try self.ranges.addOne(alloc);
+
+                break :id id;
             }
         };
 
         const start = self.bytes.items.len;
 
         try self.bytes.appendSlice(alloc, data);
+        self.used_space += @truncate(u32, data.len);
 
-        try self.ranges.append(alloc, .{
-            .start = @intCast(i32, start),
-            .end = @truncate(u32, self.bytes.items.len),
-        });
+        const range = &self.ranges.items[id];
+        range.start = @intCast(i32, start);
+        range.end = @truncate(u32, self.bytes.items.len);
 
         return id;
     }
