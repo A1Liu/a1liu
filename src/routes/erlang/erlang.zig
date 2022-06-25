@@ -13,6 +13,7 @@ pub const ty = @import("./types.zig");
 // line tool bbox check on click
 // normalize coords
 // form generator code
+// record behavior and make bug reporting system
 
 // world bounds?
 
