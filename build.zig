@@ -65,6 +65,9 @@ pub fn build(b: *Builder) !void {
         .name = "painter",
         .root = "./src/routes/painter/painter.zig",
     }, .{
+        .name = "test",
+        .root = "./src/test.zig",
+    }, .{
         .name = "erlang",
         .root = "./src/routes/erlang/erlang.zig",
     } };
