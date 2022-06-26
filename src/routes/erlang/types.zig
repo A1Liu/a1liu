@@ -83,6 +83,16 @@ pub const BarKind = enum(u8) {
     }
 };
 
+pub const SpawnKind = enum {
+    bar_red,
+    bar_green,
+    bar_blue,
+};
+
+pub const SpawnC = struct {
+    kind: SpawnKind,
+};
+
 pub const RenderC = struct {
     color: Vec4,
     game_visible: bool = true,
@@ -125,13 +135,10 @@ pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
 pub fn boxWillCollide(bbox: BBox) bool {
     var view = registry.view(struct {
         pos_c: PositionC,
-        collide: CollisionC,
-        force_c: ?*const ForceC,
+        bar: BarC,
     });
 
     while (view.next()) |elem| {
-        if (elem.force_c == null) continue;
-
         const overlap = elem.pos_c.bbox.overlap(bbox);
         if (overlap.result) return true;
     }
