@@ -134,12 +134,12 @@ pub fn unitSquareBBoxForPos(pos: Vec2) BBox {
 
 pub fn boxWillCollide(bbox: BBox) bool {
     var view = registry.view(struct {
-        pos_c: PositionC,
+        pos: PositionC,
         bar: BarC,
     });
 
     while (view.next()) |elem| {
-        const overlap = elem.pos_c.bbox.overlap(bbox);
+        const overlap = elem.pos.bbox.overlap(bbox);
         if (overlap.result) return true;
     }
 
