@@ -6,9 +6,9 @@ const gon = liu.gon;
 
 const util = @import("./util.zig");
 
-const erlang = @import("root");
-const ty = erlang.ty;
-const ext = erlang.ext;
+const root = @import("root");
+const ty = root.ty;
+const ext = root.ext;
 const BBox = ty.BBox;
 
 const EntityId = liu.ecs.EntityId;

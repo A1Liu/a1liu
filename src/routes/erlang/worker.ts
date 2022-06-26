@@ -11,26 +11,19 @@ export type OutMessage =
   | { kind: "initDone"; data?: void }
   | { kind: string; data: any };
 
-interface ErlangGl {
-  ctx: WebGl;
-}
+interface GlContext {}
 
-const gglRef: { current: ErlangGl | null } = { current: null };
+let glCtx = null;
 
-const initGl = async (canvas: any): Promise<ErlangGl | null> => {
+const initGl = async (canvas: any): Promise<GlContext | null> => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  return { ctx };
+  return ctx;
 };
 
 const main = async (wasmRef: wasm.Ref) => {
-  const ctx2d = gglRef.current.ctx;
-  const canvas = ctx2d.canvas;
-
   function run(timestamp: number) {
-    // ctx2d.clearRect(0, 0, canvas.width, canvas.height);
-
     wasmRef.abi.run(timestamp);
 
     requestAnimationFrame(run);
@@ -69,7 +62,7 @@ const main = async (wasmRef: wasm.Ref) => {
           break;
 
         default:
-          handleInput(wasmRef, gglRef.current.ctx, msg);
+          handleInput(wasmRef, glCtx, msg);
       }
 
       seen[msg.kind] = true;
@@ -88,10 +81,7 @@ const init = async () => {
       },
 
       clearScreen: () => {
-        const ctx2d = gglRef.current.ctx;
-        const canvas = ctx2d.canvas;
-
-        ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+        glCtx.clearRect(0, 0, glCtx.canvas.width, glCtx.canvas.height);
       },
 
       saveLevelToIdb: (levelTextId: number) => {
@@ -101,32 +91,32 @@ const init = async () => {
 
       setFont: (fontId: number) => {
         const font = wasmRef.readObj(fontId);
-        gglRef.current.ctx.font = font;
+        glCtx.font = font;
       },
 
       fillText: (textId: number, x: number, y: number) => {
         const text = wasmRef.readObj(textId);
-        gglRef.current.ctx.fillText(text, x, y);
+        glCtx.fillText(text, x, y);
       },
 
       strokeStyle: (rF: number, gF: number, bF: number, a: number) => {
-        gglRef.current.ctx.globalAlpha = a;
+        glCtx.globalAlpha = a;
         const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
 
-        gglRef.current.ctx.strokeStyle = `rgba(${r},${g},${b})`;
+        glCtx.strokeStyle = `rgba(${r},${g},${b})`;
       },
       fillStyle: (rF: number, gF: number, bF: number, a: number) => {
-        gglRef.current.ctx.globalAlpha = a;
+        glCtx.globalAlpha = a;
         const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
 
-        gglRef.current.ctx.fillStyle = `rgba(${r},${g},${b})`;
+        glCtx.fillStyle = `rgba(${r},${g},${b})`;
       },
 
       strokeRect: (x: number, y: number, width: number, height: number) => {
-        gglRef.current.ctx.strokeRect(x, y, width, height);
+        glCtx.strokeRect(x, y, width, height);
       },
       fillRect: (x: number, y: number, width: number, height: number) => {
-        gglRef.current.ctx.fillRect(x, y, width, height);
+        glCtx.fillRect(x, y, width, height);
       },
     }),
     imports: {},
@@ -135,19 +125,18 @@ const init = async () => {
   wasmRef.abi.init();
 
   const result = await findCanvas(ctx);
-  const ggl = await initGl(result.canvas);
+  glCtx = await initGl(result.canvas);
 
-  if (!ggl) {
+  if (!glCtx) {
     postMessage({ kind: "error", data: "WebGL2 not supported!" });
     return;
   }
 
-  gglRef.current = ggl;
   postMessage({ kind: "log", data: "WebGL2 context initialized!" });
   postMessage({ kind: "initDone" });
 
   result.remainder.forEach((msg) => {
-    handleInput(wasmRef, gglRef.current.ctx, msg);
+    handleInput(wasmRef, glCtx, msg);
   });
 
   main(wasmRef);
