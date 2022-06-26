@@ -22,6 +22,8 @@ pub usingnamespace interface;
 // NOTE: this forces the compiler to run the tests in the listed folders when
 // running `zig test src/liu/lib.zig
 test {
+    _ = @import("./ecs_2.zig");
+
     _ = fonts;
     _ = sdf;
     _ = img;

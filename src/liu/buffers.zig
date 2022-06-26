@@ -483,7 +483,7 @@ pub const StringTable = struct {
 
     const Self = @This();
 
-    pub fn deinit(self: *const Self, alloc: std.mem.Allocator) void {
+    pub fn deinit(self: *Self, alloc: std.mem.Allocator) void {
         self.bytes.deinit(alloc);
         self.ranges.deinit(alloc);
     }
