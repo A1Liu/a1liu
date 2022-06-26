@@ -243,12 +243,12 @@ export fn run(timestamp: f64) void {
             pos: *ty.PositionC,
             move: *ty.MoveC,
             force: *ty.ForceC,
-            collision: *ty.CollisionC,
+            collide: *ty.CollisionC,
         });
 
         const StableObject = struct {
             pos: ty.PositionC,
-            collision: ty.CollisionC,
+            collide: ty.CollisionC,
             force: ?*const ty.ForceC,
         };
 
@@ -305,12 +305,12 @@ export fn run(timestamp: f64) void {
             // const cam_dims = Vec2{ camera.width, camera.height };
             // const cam_pos1 = cam_pos0 + cam_dims;
 
-            // const new_x = std.math.clamp(pos.pos[0], cam_pos0[0], cam_pos1[0] - collision.width);
+            // const new_x = std.math.clamp(pos.pos[0], cam_pos0[0], cam_pos1[0] - collide.width);
             // if (new_x != pos.pos[0])
             //     move.velocity[0] = 0;
             // pos.pos[0] = new_x;
 
-            // const new_y = std.math.clamp(pos.pos[1], cam_pos0[1], cam_pos1[1] - collision.height);
+            // const new_y = std.math.clamp(pos.pos[1], cam_pos0[1], cam_pos1[1] - collide.height);
             // if (new_y != pos.pos[1])
             //     move.velocity[1] = 0;
             // pos.pos[1] = new_y;
@@ -357,11 +357,11 @@ export fn run(timestamp: f64) void {
         false => {
             var view = ty.registry.view(struct {
                 pos: ty.PositionC,
-                decision: ty.DecisionC,
+                decide: ty.DecisionC,
             });
 
             while (view.next()) |elem| {
-                if (!elem.decision.player) continue;
+                if (!elem.decide.player) continue;
 
                 util.moveCamera(elem.pos.bbox.pos);
                 break;
