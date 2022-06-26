@@ -322,7 +322,7 @@ pub fn Registry(comptime InDense: []const type) type {
             return true;
         }
 
-        pub fn addComponent(self: *Self, id: EntityId, component: anytype) !void {
+        pub fn addComponent(self: *Self, id: EntityId, component: anytype) void {
             const T = @TypeOf(component);
             if (T == Meta) @compileError("Tried to add a Meta component");
 
@@ -403,7 +403,7 @@ test "Registry: iterate" {
     while (i < 257) : (i += 1) {
         const meh = try registry.create("meh");
         // success =
-        try registry.addComponent(meh, TransformComponent{ .i = meh.index });
+        registry.addComponent(meh, TransformComponent{ .i = meh.index });
         // try std.testing.expect(success);
     }
 

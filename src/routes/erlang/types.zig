@@ -167,16 +167,16 @@ pub fn makeBox(pos: Vec2) !EntityId {
     const id = try registry.create("box");
     errdefer registry.delete(id);
 
-    try registry.addComponent(id, PositionC{
+    registry.addComponent(id, PositionC{
         .bbox = bbox,
     });
 
-    try registry.addComponent(id, RenderC{
+    registry.addComponent(id, RenderC{
         .color = dark_green,
     });
 
-    try registry.addComponent(id, CollisionC{});
-    try registry.addComponent(id, SaveC{});
+    registry.addComponent(id, CollisionC{});
+    registry.addComponent(id, SaveC{});
 
     return id;
 }
@@ -189,22 +189,22 @@ pub fn makeSpawn(bar: BarKind, pos: Vec2) !EntityId {
 
     const box = try registry.create(bar.spawnName());
 
-    try registry.addComponent(box, PositionC{ .bbox = .{
+    registry.addComponent(box, PositionC{ .bbox = .{
         .pos = pos,
         .width = 1,
         .height = 3,
     } });
-    try registry.addComponent(box, RenderC{
+    registry.addComponent(box, RenderC{
         .color = color,
         .game_visible = false,
     });
 
-    try registry.addComponent(box, BarC{
+    registry.addComponent(box, BarC{
         .is_spawn = true,
         .kind = bar,
     });
 
-    try registry.addComponent(box, SaveC{});
+    registry.addComponent(box, SaveC{});
 
     return box;
 }
@@ -216,27 +216,27 @@ pub fn makeBar(bar: BarKind, pos: Vec2) !EntityId {
     color[i] = 1;
 
     const box = try registry.create(bar.barName());
-    try registry.addComponent(box, PositionC{ .bbox = .{
+    registry.addComponent(box, PositionC{ .bbox = .{
         .pos = pos,
         .width = 0.5,
         .height = 2.75,
     } });
-    try registry.addComponent(box, RenderC{
+    registry.addComponent(box, RenderC{
         .color = color,
     });
-    try registry.addComponent(box, MoveC{
+    registry.addComponent(box, MoveC{
         .velocity = Vec2{ 0, 0 },
     });
-    try registry.addComponent(box, DecisionC{ .player = true });
+    registry.addComponent(box, DecisionC{ .player = true });
 
-    try registry.addComponent(box, ForceC{
+    registry.addComponent(box, ForceC{
         .accel = Vec2{ 0, -14 },
         .friction = 0.05,
     });
 
-    try registry.addComponent(box, CollisionC{});
+    registry.addComponent(box, CollisionC{});
 
-    try registry.addComponent(box, BarC{
+    registry.addComponent(box, BarC{
         .is_spawn = false,
         .kind = bar,
     });

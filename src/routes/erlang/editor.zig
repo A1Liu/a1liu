@@ -301,7 +301,7 @@ pub fn readFromAsset(bytes: []const u8) !void {
         const id = try registry.create(entity.name);
         errdefer _ = registry.delete(id);
 
-        try registry.addComponent(id, ty.SaveC{});
+        registry.addComponent(id, ty.SaveC{});
 
         const fields: []const []const u8 = &[_][]const u8{
             "move",  "pos", "render",  "decide",
@@ -310,7 +310,7 @@ pub fn readFromAsset(bytes: []const u8) !void {
 
         inline for (fields) |name| {
             if (@field(entity, name)) |value|
-                try registry.addComponent(id, value);
+                registry.addComponent(id, value);
         }
     }
 
