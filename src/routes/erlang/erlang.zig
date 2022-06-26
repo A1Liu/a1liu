@@ -195,41 +195,41 @@ export fn run(timestamp: f64) void {
 
     if (!is_editor_mode) {
         var view = ty.registry.view(struct {
-            move_c: *ty.MoveC,
-            decide_c: ty.DecisionC,
-            force_c: ty.ForceC,
+            move: *ty.MoveC,
+            decide: ty.DecisionC,
+            force: ty.ForceC,
         });
 
         while (view.next()) |elem| {
-            const move_c = elem.move_c;
+            const move = elem.move;
 
-            if (!elem.decide_c.player) continue;
+            if (!elem.decide.player) continue;
 
             if (input.key(.key_s).pressed) {
-                move_c.velocity[1] -= 8;
+                move.velocity[1] -= 8;
             }
 
             if (input.key(.key_w).pressed) {
-                move_c.velocity[1] += 8;
+                move.velocity[1] += 8;
             }
 
-            if (elem.force_c.is_airborne) {
+            if (elem.force.is_airborne) {
                 if (input.key(.key_a).pressed) {
-                    move_c.velocity[0] -= 8;
+                    move.velocity[0] -= 8;
                 }
 
                 if (input.key(.key_d).pressed) {
-                    move_c.velocity[0] += 8;
+                    move.velocity[0] += 8;
                 }
             } else {
                 if (input.key(.key_a).down) {
-                    move_c.velocity[0] -= 8;
-                    move_c.velocity[0] = std.math.clamp(move_c.velocity[0], -8, 0);
+                    move.velocity[0] -= 8;
+                    move.velocity[0] = std.math.clamp(move.velocity[0], -8, 0);
                 }
 
                 if (input.key(.key_d).down) {
-                    move_c.velocity[0] += 8;
-                    move_c.velocity[0] = std.math.clamp(move_c.velocity[0], 0, 8);
+                    move.velocity[0] += 8;
+                    move.velocity[0] = std.math.clamp(move.velocity[0], 0, 8);
                 }
             }
         }
@@ -240,37 +240,37 @@ export fn run(timestamp: f64) void {
     // Collisions
     if (!is_editor_mode) {
         var view = ty.registry.view(struct {
-            pos_c: *ty.PositionC,
-            move_c: *ty.MoveC,
-            force_c: *ty.ForceC,
-            collision_c: *ty.CollisionC,
+            pos: *ty.PositionC,
+            move: *ty.MoveC,
+            force: *ty.ForceC,
+            collision: *ty.CollisionC,
         });
 
         const StableObject = struct {
-            pos_c: ty.PositionC,
-            collision_c: ty.CollisionC,
-            force_c: ?*const ty.ForceC,
+            pos: ty.PositionC,
+            collision: ty.CollisionC,
+            force: ?*const ty.ForceC,
         };
 
         while (view.next()) |elem| {
-            const pos_c = elem.pos_c;
-            const move_c = elem.move_c;
+            const pos = elem.pos;
+            const move = elem.move;
 
             // move the thing
-            var new_bbox = pos_c.bbox;
-            new_bbox.pos = pos_c.bbox.pos + move_c.velocity * @splat(2, delta / 1000);
+            var new_bbox = pos.bbox;
+            new_bbox.pos = pos.bbox.pos + move.velocity * @splat(2, delta / 1000);
 
-            const bbox = pos_c.bbox;
+            const bbox = pos.bbox;
 
-            elem.force_c.is_airborne = true;
+            elem.force.is_airborne = true;
 
             var stable = ty.registry.view(StableObject);
             while (stable.next()) |solid| {
                 // No force component means it doesn't interact with gravity,
                 // so we'll think of it as a stable piece of the environment
-                if (solid.force_c != null) continue;
+                if (solid.force != null) continue;
 
-                const found = solid.pos_c.bbox;
+                const found = solid.pos.bbox;
 
                 const overlap = new_bbox.overlap(found);
                 if (!overlap.result) continue;
@@ -282,10 +282,10 @@ export fn run(timestamp: f64) void {
                         new_bbox.pos[1] = found.pos[1] - bbox.height;
                     } else {
                         new_bbox.pos[1] = found.pos[1] + found.height;
-                        elem.force_c.is_airborne = false;
+                        elem.force.is_airborne = false;
                     }
 
-                    move_c.velocity[1] = 0;
+                    move.velocity[1] = 0;
                 }
 
                 if (prev_overlap.y) {
@@ -295,37 +295,37 @@ export fn run(timestamp: f64) void {
                         new_bbox.pos[0] = found.pos[0] + found.width;
                     }
 
-                    move_c.velocity[0] = 0;
+                    move.velocity[0] = 0;
                 }
             }
 
-            pos_c.bbox.pos = new_bbox.pos;
+            pos.bbox.pos = new_bbox.pos;
 
             // const cam_pos0 = camera.pos;
             // const cam_dims = Vec2{ camera.width, camera.height };
             // const cam_pos1 = cam_pos0 + cam_dims;
 
-            // const new_x = std.math.clamp(pos_c.pos[0], cam_pos0[0], cam_pos1[0] - collision_c.width);
-            // if (new_x != pos_c.pos[0])
-            //     move_c.velocity[0] = 0;
-            // pos_c.pos[0] = new_x;
+            // const new_x = std.math.clamp(pos.pos[0], cam_pos0[0], cam_pos1[0] - collision.width);
+            // if (new_x != pos.pos[0])
+            //     move.velocity[0] = 0;
+            // pos.pos[0] = new_x;
 
-            // const new_y = std.math.clamp(pos_c.pos[1], cam_pos0[1], cam_pos1[1] - collision_c.height);
-            // if (new_y != pos_c.pos[1])
-            //     move_c.velocity[1] = 0;
-            // pos_c.pos[1] = new_y;
+            // const new_y = std.math.clamp(pos.pos[1], cam_pos0[1], cam_pos1[1] - collision.height);
+            // if (new_y != pos.pos[1])
+            //     move.velocity[1] = 0;
+            // pos.pos[1] = new_y;
         }
     }
 
     if (!is_editor_mode) {
         var view = ty.registry.view(struct {
-            move_c: *ty.MoveC,
-            force_c: ty.ForceC,
+            move: *ty.MoveC,
+            force: ty.ForceC,
         });
 
         while (view.next()) |elem| {
-            const move = elem.move_c;
-            const force = elem.force_c;
+            const move = elem.move;
+            const force = elem.force;
 
             // apply gravity
             move.velocity += force.accel * @splat(2, delta / 1000);
@@ -356,14 +356,14 @@ export fn run(timestamp: f64) void {
     switch (is_editor_mode) {
         false => {
             var view = ty.registry.view(struct {
-                pos_c: ty.PositionC,
-                decision_c: ty.DecisionC,
+                pos: ty.PositionC,
+                decision: ty.DecisionC,
             });
 
             while (view.next()) |elem| {
-                if (!elem.decision_c.player) continue;
+                if (!elem.decision.player) continue;
 
-                util.moveCamera(elem.pos_c.bbox.pos);
+                util.moveCamera(elem.pos.bbox.pos);
                 break;
             }
         },
@@ -393,12 +393,12 @@ export fn run(timestamp: f64) void {
         ext.clearScreen();
 
         var view = ty.registry.view(struct {
-            pos_c: *ty.PositionC,
+            pos: *ty.PositionC,
             render: ty.RenderC,
         });
 
         while (view.next()) |elem| {
-            const pos_c = elem.pos_c;
+            const pos = elem.pos;
             const render = elem.render;
             const show = switch (is_editor_mode) {
                 true => render.editor_visible,
@@ -409,7 +409,7 @@ export fn run(timestamp: f64) void {
 
             const color = render.color;
             ext.fillStyle(color[0], color[1], color[2], color[3]);
-            const bbox = camera.getScreenBoundingBox(pos_c.bbox);
+            const bbox = camera.getScreenBoundingBox(pos.bbox);
             const rect = bbox.renderRectVector();
 
             ext.fillRect(rect[0], rect[1], rect[2], rect[3]);

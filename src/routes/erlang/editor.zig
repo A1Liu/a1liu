@@ -100,14 +100,14 @@ pub const ClickTool = struct {
 
         if (input.mouse.right_clicked) {
             var view = ty.registry.view(struct {
-                pos_c: ty.PositionC,
-                force_c: ?*const ty.ForceC,
+                pos: ty.PositionC,
+                force: ?*const ty.ForceC,
             });
 
             while (view.next()) |elem| {
-                if (elem.force_c != null) continue;
+                if (elem.force != null) continue;
 
-                const overlap = elem.pos_c.bbox.overlap(bbox);
+                const overlap = elem.pos.bbox.overlap(bbox);
                 if (overlap.result) {
                     _ = ty.registry.delete(elem.id);
                 }
@@ -187,7 +187,7 @@ pub const LineTool = struct {
         if (ty.boxWillCollide(bbox)) return;
 
         var view = ty.registry.view(struct {
-            pos_c: *ty.PositionC,
+            pos: *ty.PositionC,
             render: *ty.RenderC,
         });
 
@@ -196,7 +196,7 @@ pub const LineTool = struct {
             return;
         };
 
-        val.pos_c.bbox = bbox;
+        val.pos.bbox = bbox;
     }
 };
 
