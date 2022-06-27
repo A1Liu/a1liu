@@ -218,12 +218,9 @@ pub fn Registry(comptime InDense: type) type {
         count: u32,
         free_head: u32,
 
-        pub fn init(capacity: u32, alloc: std.mem.Allocator) !Self {
-            var dense = std.MultiArrayList(Dense){};
-            try dense.ensureUnusedCapacity(alloc, capacity);
-
+        pub fn init(alloc: std.mem.Allocator) Self {
             return Self{
-                .dense = dense,
+                .dense = std.MultiArrayList(Dense){},
                 .count = 0,
                 .generation = 1,
                 .strings = .{},

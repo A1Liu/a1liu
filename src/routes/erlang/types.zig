@@ -5,7 +5,8 @@ pub const Vec3 = liu.Vec3;
 pub const Vec4 = liu.Vec4;
 pub const EntityId = liu.ecs.EntityId;
 
-pub var registry: Registry = undefined;
+pub const registry: *Registry = &registry_data;
+var registry_data: Registry = Registry.init(liu.Pages);
 
 pub const Registry = liu.ecs.Registry(struct {
     pos: PositionC,

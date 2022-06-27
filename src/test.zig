@@ -13,11 +13,9 @@ const Registry = liu.ecs.Registry(struct {
     fdadd: T,
 });
 
-var registry: Registry = undefined;
+var registry: Registry = Registry.init(liu.Pages);
 
 export fn asdf() void {
-    registry = Registry.init(16, liu.Pages) catch unreachable;
-
     var b: T = .{};
     const a: *T = &b;
     a.* = .{};

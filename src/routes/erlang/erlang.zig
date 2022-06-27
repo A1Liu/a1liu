@@ -87,8 +87,6 @@ fn initErr() !void {
         try editor.Tool.create(Static, editor.DrawTool{}),
         try editor.Tool.create(Static, editor.ClickTool{}),
     });
-
-    ty.registry = try ty.Registry.init(16, liu.Pages);
 }
 
 var start_timer: Timer = undefined;

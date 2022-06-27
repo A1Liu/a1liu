@@ -283,7 +283,7 @@ pub fn readFromAsset(bytes: []const u8) !void {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const registry = &ty.registry;
+    const registry = ty.registry;
 
     {
         var view = registry.view(struct {});
