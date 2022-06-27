@@ -11,7 +11,7 @@ const ty = root.ty;
 const ext = root.ext;
 const BBox = ty.BBox;
 
-const EntityId = liu.ecs.EntityId;
+const EntityId = ty.EntityId;
 const Vec2 = liu.Vec2;
 const FrameInput = liu.gamescreen.FrameInput;
 

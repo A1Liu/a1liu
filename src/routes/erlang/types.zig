@@ -1,9 +1,11 @@
 const liu = @import("liu");
 
+const ecs = liu.ecs;
+
 pub const Vec2 = liu.Vec2;
 pub const Vec3 = liu.Vec3;
 pub const Vec4 = liu.Vec4;
-pub const EntityId = liu.ecs.EntityId;
+pub const EntityId = ecs.EntityId;
 
 pub var registry: Registry = undefined;
 
