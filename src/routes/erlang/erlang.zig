@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const liu = @import("liu");
 
 const editor = @import("./editor.zig");
@@ -428,8 +429,10 @@ fn newToolIndex(diff: i32) u32 {
 }
 
 pub fn renderDebugInfo(input: FrameInput) void {
-    if (input.frame_id % 256 == 0) {
-        wasm.pushMessage(save_level, .jsundefined);
+    if (builtin.mode != .Debug) {
+        if (input.frame_id % 256 == 0) {
+            wasm.pushMessage(save_level, .jsundefined);
+        }
     }
 
     if (is_editor_mode) {

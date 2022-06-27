@@ -531,6 +531,25 @@ pub const StringTable = struct {
             }
         };
 
+        if (self.bytes.items.len + data.len > self.bytes.capacity) {
+            const needed_capacity = self.used_space + data.len;
+            var new_data = std.ArrayListUnmanaged(u8){};
+            try new_data.ensureTotalCapacity(alloc, needed_capacity);
+
+            for (self.ranges.items) |*range| {
+                if (range.start < 0) continue;
+
+                const start = @intCast(u32, range.start);
+                const new_start = new_data.items.len;
+                new_data.appendSliceAssumeCapacity(self.bytes.items[start..range.end]);
+                range.start = @intCast(i32, new_start);
+                range.end = @truncate(u32, new_data.items.len);
+            }
+
+            self.bytes.deinit(alloc);
+            self.bytes = new_data;
+        }
+
         const start = self.bytes.items.len;
 
         try self.bytes.appendSlice(alloc, data);
