@@ -79,8 +79,6 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
             //     unreachable;
             // };
 
-            const FieldEnum = std.meta.FieldEnum(Reg.Dense);
-
             inline for (std.meta.fields(ViewType)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
                 if (comptime std.mem.eql(u8, field.name, "name")) continue;
@@ -89,7 +87,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 if (unwrapped.is_optional) continue;
 
                 // const Idx = comptime Reg.typeIndex(unwrapped.T) orelse
-                const field_enum = comptime std.meta.stringToEnum(FieldEnum, field.name) orelse
+                const field_enum = comptime std.meta.stringToEnum(Reg.FieldEnum, field.name) orelse
                     @compileError("field type not registered: " ++
                     "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
 
@@ -107,7 +105,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 const unwrapped = UnwrappedField(field.field_type);
                 if (!unwrapped.is_optional) continue;
 
-                const field_enum = comptime std.meta.stringToEnum(FieldEnum, field.name) orelse
+                const field_enum = comptime std.meta.stringToEnum(Reg.FieldEnum, field.name) orelse
                     @compileError("field type not registered: " ++
                     "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
 
@@ -128,7 +126,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
         pub fn get(self: *Iter, id: EntityId) ?ViewType {
             const index = self.registry.indexOf(id) orelse return null;
 
-            return read(self.registry, index); //, &sparse);
+            return read(self.registry, index);
         }
 
         pub fn reset(self: *Iter) void {
@@ -163,6 +161,7 @@ pub fn Registry(comptime InDense: type) type {
     return struct {
         const Self = @This();
 
+        pub const FieldEnum = std.meta.FieldEnum(Dense);
         pub const Meta = struct {
             name: u32, // use this field to store the next freelist element
             generation: u32,
@@ -277,7 +276,7 @@ pub fn Registry(comptime InDense: type) type {
             return true;
         }
 
-        pub fn addComponent(self: *Self, id: EntityId, comptime field: std.meta.FieldEnum(Dense)) ?*std.meta.fieldInfo(Dense, field).field_type {
+        pub fn addComponent(self: *Self, id: EntityId, comptime field: FieldEnum) ?*std.meta.fieldInfo(Dense, field).field_type {
             if (field == .meta) @compileError("Tried to add a Meta component");
 
             const index = self.indexOf(id) orelse return null;
