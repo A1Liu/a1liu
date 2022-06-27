@@ -74,10 +74,6 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
             var value: ViewType = undefined;
             value.id = .{ .index = index, .generation = meta.generation };
             value.name = registry.strings.get(meta.name).?;
-            // orelse {
-            //     liu.wasm.post(.log, "wtf: {}", .{meta.name});
-            //     unreachable;
-            // };
 
             inline for (std.meta.fields(ViewType)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
@@ -86,7 +82,6 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 const unwrapped = UnwrappedField(field.field_type);
                 if (unwrapped.is_optional) continue;
 
-                // const Idx = comptime Reg.typeIndex(unwrapped.T) orelse
                 const field_enum = comptime std.meta.stringToEnum(Reg.FieldEnum, field.name) orelse
                     @compileError("field type not registered: " ++
                     "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
