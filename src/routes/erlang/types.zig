@@ -1,15 +1,13 @@
 const liu = @import("liu");
 
-const ecs = liu.ecs_2;
-
 pub const Vec2 = liu.Vec2;
 pub const Vec3 = liu.Vec3;
 pub const Vec4 = liu.Vec4;
-pub const EntityId = ecs.EntityId;
+pub const EntityId = liu.ecs.EntityId;
 
 pub var registry: Registry = undefined;
 
-pub const Registry = liu.ecs_2.Registry(struct {
+pub const Registry = liu.ecs.Registry(struct {
     pos: PositionC,
     move: MoveC,
     render: RenderC,
@@ -19,17 +17,6 @@ pub const Registry = liu.ecs_2.Registry(struct {
     bar: BarC,
     save: SaveC,
 });
-
-// pub const Registry = liu.ecs.Registry(&.{
-//     PositionC,
-//     MoveC,
-//     RenderC,
-//     DecisionC,
-//     CollisionC,
-//     ForceC,
-//     BarC,
-//     SaveC,
-// });
 
 pub const BBox = struct {
     pos: Vec2,

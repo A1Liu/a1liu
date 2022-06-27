@@ -7,7 +7,7 @@ const PositionC = struct {
 
 const T = struct {};
 
-const Registry = liu.ecs_2.Registry(struct {
+const Registry = liu.ecs.Registry(struct {
     pos: PositionC,
     asdf: liu.Vec2,
     fdadd: T,
