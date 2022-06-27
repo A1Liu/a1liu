@@ -1,6 +1,6 @@
 const liu = @import("liu");
 
-const ecs = liu.ecs;
+const ecs = liu.ecs_2;
 
 pub const Vec2 = liu.Vec2;
 pub const Vec3 = liu.Vec3;
@@ -9,27 +9,27 @@ pub const EntityId = ecs.EntityId;
 
 pub var registry: Registry = undefined;
 
-// pub const Registry = liu.ecs_2.Registry(struct {
-//     pos: PositionC,
-//     move: MoveC,
-//     render: RenderC,
-//     decide: DecisionC,
-//     collide: CollisionC,
-//     force: ForceC,
-//     bar: BarC,
-//     save: SaveC,
-// });
-
-pub const Registry = liu.ecs.Registry(&.{
-    PositionC,
-    MoveC,
-    RenderC,
-    DecisionC,
-    CollisionC,
-    ForceC,
-    BarC,
-    SaveC,
+pub const Registry = liu.ecs_2.Registry(struct {
+    pos: PositionC,
+    move: MoveC,
+    render: RenderC,
+    decide: DecisionC,
+    collide: CollisionC,
+    force: ForceC,
+    bar: BarC,
+    save: SaveC,
 });
+
+// pub const Registry = liu.ecs.Registry(&.{
+//     PositionC,
+//     MoveC,
+//     RenderC,
+//     DecisionC,
+//     CollisionC,
+//     ForceC,
+//     BarC,
+//     SaveC,
+// });
 
 pub const BBox = struct {
     pos: Vec2,
@@ -169,16 +169,16 @@ pub fn makeBox(pos: Vec2) !EntityId {
     const id = try registry.create("box");
     errdefer registry.delete(id);
 
-    registry.addComponent(id, PositionC{
+    registry.addComponent(id, .pos).?.* = .{
         .bbox = bbox,
-    });
+    };
 
-    registry.addComponent(id, RenderC{
+    registry.addComponent(id, .render).?.* = .{
         .color = dark_green,
-    });
+    };
 
-    registry.addComponent(id, CollisionC{});
-    registry.addComponent(id, SaveC{});
+    registry.addComponent(id, .collide).?.* = .{};
+    registry.addComponent(id, .save).?.* = .{};
 
     return id;
 }
@@ -191,22 +191,22 @@ pub fn makeSpawn(bar: BarKind, pos: Vec2) !EntityId {
 
     const box = try registry.create(bar.spawnName());
 
-    registry.addComponent(box, PositionC{ .bbox = .{
+    registry.addComponent(box, .pos).?.* = .{ .bbox = .{
         .pos = pos,
         .width = 1,
         .height = 3,
-    } });
-    registry.addComponent(box, RenderC{
+    } };
+    registry.addComponent(box, .render).?.* = .{
         .color = color,
         .game_visible = false,
-    });
+    };
 
-    registry.addComponent(box, BarC{
+    registry.addComponent(box, .bar).?.* = .{
         .is_spawn = true,
         .kind = bar,
-    });
+    };
 
-    registry.addComponent(box, SaveC{});
+    registry.addComponent(box, .save).?.* = .{};
 
     return box;
 }
@@ -218,30 +218,30 @@ pub fn makeBar(bar: BarKind, pos: Vec2) !EntityId {
     color[i] = 1;
 
     const box = try registry.create(bar.barName());
-    registry.addComponent(box, PositionC{ .bbox = .{
+    registry.addComponent(box, .pos).?.* = .{ .bbox = .{
         .pos = pos,
         .width = 0.5,
         .height = 2.75,
-    } });
-    registry.addComponent(box, RenderC{
+    } };
+    registry.addComponent(box, .render).?.* = .{
         .color = color,
-    });
-    registry.addComponent(box, MoveC{
+    };
+    registry.addComponent(box, .move).?.* = .{
         .velocity = Vec2{ 0, 0 },
-    });
-    registry.addComponent(box, DecisionC{ .player = true });
+    };
+    registry.addComponent(box, .decide).?.* = .{ .player = true };
 
-    registry.addComponent(box, ForceC{
+    registry.addComponent(box, .force).?.* = .{
         .accel = Vec2{ 0, -14 },
         .friction = 0.05,
-    });
+    };
 
-    registry.addComponent(box, CollisionC{});
+    registry.addComponent(box, .collide).?.* = .{};
 
-    registry.addComponent(box, BarC{
+    registry.addComponent(box, .bar).?.* = .{
         .is_spawn = false,
         .kind = bar,
-    });
+    };
 
     return box;
 }

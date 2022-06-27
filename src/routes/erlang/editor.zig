@@ -301,16 +301,16 @@ pub fn readFromAsset(bytes: []const u8) !void {
         const id = try registry.create(entity.name);
         errdefer _ = registry.delete(id);
 
-        registry.addComponent(id, ty.SaveC{});
+        registry.addComponent(id, .save).?.* = .{};
 
-        const fields: []const []const u8 = &[_][]const u8{
-            "move",  "pos", "render",  "decide",
-            "force", "bar", "collide",
+        const fields: []const ty.Registry.FieldEnum = &.{
+            .move,  .pos, .render,  .decide,
+            .force, .bar, .collide,
         };
 
         inline for (fields) |name| {
-            if (@field(entity, name)) |value|
-                registry.addComponent(id, value);
+            if (@field(entity, @tagName(name))) |value|
+                registry.addComponent(id, name).?.* = value;
         }
     }
 
