@@ -89,8 +89,17 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 const is_set = meta.bitset.isSet(@enumToInt(field_enum));
                 if (!is_set) return null;
 
-                const ptr = &registry.dense.items(field_enum)[index];
-                @field(value, field.name) = if (unwrapped.is_pointer) ptr else ptr.*;
+                if (@sizeOf(unwrapped.T) == 0) {
+                    if (@sizeOf(*unwrapped.T) != 0) {
+                        @compileLog("The Zig compiler no longer uses zero-sized pointers for zero-sized types");
+                    }
+
+                    var a: unwrapped.T = .{};
+                    @field(value, field.name) = if (unwrapped.is_pointer) &a else a;
+                } else {
+                    const ptr = &registry.dense.items(field_enum)[index];
+                    @field(value, field.name) = if (unwrapped.is_pointer) ptr else ptr.*;
+                }
             }
 
             inline for (std.meta.fields(ViewType)) |field| {
@@ -105,14 +114,29 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                     "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
 
                 const is_set = meta.bitset.isSet(@enumToInt(field_enum));
-                @field(value, field.name) = value: {
-                    if (!is_set) {
-                        break :value null;
+                if (@sizeOf(unwrapped.T) == 0) {
+                    if (@sizeOf(*unwrapped.T) != 0) {
+                        @compileLog("The Zig compiler no longer uses zero-sized pointers for zero-sized types");
                     }
 
-                    const ptr = &registry.dense.items(field_enum)[index];
-                    break :value if (unwrapped.is_pointer) ptr else ptr.*;
-                };
+                    @field(value, field.name) = value: {
+                        if (!is_set) {
+                            break :value null;
+                        }
+
+                        var a: unwrapped.T = .{};
+                        break :value if (unwrapped.is_pointer) &a else a;
+                    };
+                } else {
+                    @field(value, field.name) = value: {
+                        if (!is_set) {
+                            break :value null;
+                        }
+
+                        const ptr = &registry.dense.items(field_enum)[index];
+                        break :value if (unwrapped.is_pointer) ptr else ptr.*;
+                    };
+                }
             }
 
             return value;
@@ -282,8 +306,18 @@ pub fn Registry(comptime InDense: type) type {
             const meta = &self.dense.items(.meta)[index];
             defer meta.bitset.set(@enumToInt(field));
 
-            const elements = self.dense.items(field);
-            return &elements[index];
+            const T = std.meta.fieldInfo(Dense, field).field_type;
+            if (@sizeOf(T) == 0) {
+                if (@sizeOf(*T) != 0) {
+                    @compileLog("The Zig compiler no longer uses zero-sized pointers for zero-sized types");
+                }
+
+                var a: T = .{};
+                return &a;
+            } else {
+                const elements = self.dense.items(field);
+                return &elements[index];
+            }
         }
 
         pub fn view(self: *Self, comptime ViewType: type) RegistryView(Self, ViewType) {
