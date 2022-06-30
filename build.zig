@@ -68,8 +68,8 @@ pub fn build(b: *Builder) !void {
         .name = "test",
         .root = "./src/test.zig",
     }, .{
-        .name = "erlang",
-        .root = "./src/routes/erlang/erlang.zig",
+        .name = "game-2d-simple",
+        .root = "./src/routes/game-2d-simple/simple.zig",
     } };
 
     const pathTools = [_]ProgData{.{

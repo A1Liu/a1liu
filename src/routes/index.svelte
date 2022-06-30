@@ -53,6 +53,11 @@
         <a href="/painter/">Painter</a>{" "}
         - Tiny WebGL2 drawing app
       </li>
+
+      <li>
+        <a href="/game-2d-simple/">Simple 2D Game</a>{" "}
+        - Really simple 2D game
+      </li>
     </ul>
   </div>
 </div>

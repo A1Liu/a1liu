@@ -99,8 +99,10 @@ var tool_index: u32 = 0;
 pub var large_font: wasm.Obj = undefined;
 pub var med_font: wasm.Obj = undefined;
 pub var small_font: wasm.Obj = undefined;
+
 pub var level_download: wasm.Obj = undefined;
 pub var save_level: wasm.Obj = undefined;
+
 pub var is_editor_mode: bool = false;
 
 export fn uploadLevel(data: wasm.Obj) void {

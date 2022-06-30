@@ -1,5 +1,5 @@
 import * as wasm from "@lib/ts/wasm";
-import wasmUrl from "@zig/erlang.wasm?url";
+import wasmUrl from "@zig/game-2d-simple.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
 import { set } from "idb-keyval";
 import { handleInput, findCanvas, InputMessage } from "@lib/ts/gamescreen";
