@@ -43,9 +43,8 @@
         <a href="/kilordle/">Kilordle Clone</a>{" "}
         - Clone of{" "}
         <a href="https://jonesnxt.github.io/kilordle/">
-          someone else&apos;s idea
-        </a>
-        , which was inspired by{" "}
+          someone else&apos;s idea</a
+        >, which was inspired by{" "}
         <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a>
       </li>
 
