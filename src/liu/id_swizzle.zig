@@ -61,7 +61,7 @@ pub fn SwizzledId(comptime T: type) type {
             return @enumToInt(self);
         }
 
-        pub inline fn fromSwizzle(val: T) Self {
+        pub fn fromSwizzle(val: T) Self {
             const s1 = val ^ MASK;
             const s2 = s1 *% MUL.to;
             const s3 = s2 -% ADD;
