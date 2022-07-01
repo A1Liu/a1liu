@@ -12,7 +12,7 @@ fn idMask(comptime T: type) T {
 fn idAdd(comptime T: type) T {
     return switch (T) {
         u32 => 2740160927,
-        u64 => 2740160927,
+        u64 => 10063238043947838519,
 
         else => @compileError("the type '" ++ @typeName(T) ++ "' doesn't work as an ID type"),
     };
@@ -25,10 +25,15 @@ fn IdMul(comptime T: type) type {
     };
 }
 
+// 16294208416658607535 817831822087661903
+// 10451216379200822465 10888168410540946241
+// 11317887983584761797 11674727387005193997
+
 // These two numbers are multiplicative inverses mod T
 fn idMul(comptime T: type) IdMul(T) {
     return switch (T) {
         u32 => .{ .to = 0x01000193, .from = 0x359c449b },
+        u64 => .{ .to = 16294208416658607535, .from = 817831822087661903 },
 
         else => @compileError("the type '" ++ @typeName(T) ++ "' doesn't work as an ID type"),
     };
@@ -74,15 +79,15 @@ pub fn SwizzledId(comptime T: type) type {
     };
 }
 
-test "Id swizzle: basic" {
-    const Id = SwizzledId(u32);
+pub fn testData(comptime T: type) !void {
+    const Id = SwizzledId(T);
 
     try std.testing.expectEqual(Id.MUL.to *% Id.MUL.from, 1);
 
-    const tests = [_]u32{ Id.MASK, Id.ADD, Id.MUL.to, Id.MUL.from };
+    const tests = [_]T{ Id.MASK, Id.ADD, Id.MUL.to, Id.MUL.from };
 
     {
-        var id: u32 = 0;
+        var id: T = 0;
         while (id < 100) : (id += 1) {
             const value = Id.fromSwizzle(id);
             const out_id = value.swizzle();
@@ -104,7 +109,7 @@ test "Id swizzle: basic" {
         try std.testing.expectEqual(id, out_id);
     }
 
-    var value: u32 = 0;
+    var value: T = 0;
     while (value < 100) : (value += 100) {
         const id = Id.fromSwizzle(value);
         const out_value = id.swizzle();
@@ -114,5 +119,10 @@ test "Id swizzle: basic" {
         try std.testing.expectEqual(value, out_value);
     }
 
-    try std.testing.expectEqual(Id.fromSwizzle(0).raw(), std.math.maxInt(u32));
+    try std.testing.expectEqual(Id.fromSwizzle(0).raw(), std.math.maxInt(T));
+}
+
+test "Id swizzle: basic" {
+    try testData(u32);
+    try testData(u64);
 }
