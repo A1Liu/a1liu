@@ -3,6 +3,7 @@ const std = @import("std");
 fn idMask(comptime T: type) T {
     return switch (T) {
         u32 => 0b10100110_01101010_01001010_10101010,
+        u64 => 0b10100110_01101010_01001010_10101010_10100110_01101010_01001010_10101010,
 
         else => @compileError("the type '" ++ @typeName(T) ++ "' doesn't work as an ID type"),
     };
@@ -11,6 +12,7 @@ fn idMask(comptime T: type) T {
 fn idAdd(comptime T: type) T {
     return switch (T) {
         u32 => 2740160927,
+        u64 => 2740160927,
 
         else => @compileError("the type '" ++ @typeName(T) ++ "' doesn't work as an ID type"),
     };
@@ -46,28 +48,28 @@ pub fn SwizzledId(comptime T: type) type {
 
         const Self = @This();
 
-        pub inline fn fromIndex(val: T) Self {
+        pub inline fn fromRaw(val: T) Self {
             return @intToEnum(Self, val);
         }
 
-        pub inline fn index(self: Self) T {
+        pub inline fn raw(self: Self) T {
             return @enumToInt(self);
         }
 
         pub inline fn fromSwizzle(val: T) Self {
-            const s3 = val +% ADD;
-            const s2 = s3 *% MUL.from;
-            const s1 = s2 ^ MASK;
-
-            return @intToEnum(Self, s1);
-        }
-
-        pub fn swizzle(self: Self) T {
-            const s1 = @enumToInt(self) ^ MASK;
+            const s1 = val ^ MASK;
             const s2 = s1 *% MUL.to;
             const s3 = s2 -% ADD;
 
-            return s3;
+            return @intToEnum(Self, s3);
+        }
+
+        pub fn swizzle(self: Self) T {
+            const s3 = @enumToInt(self) +% ADD;
+            const s2 = s3 *% MUL.from;
+            const s1 = s2 ^ MASK;
+
+            return s1;
         }
     };
 }
@@ -111,4 +113,6 @@ test "Id swizzle: basic" {
 
         try std.testing.expectEqual(value, out_value);
     }
+
+    try std.testing.expectEqual(Id.fromSwizzle(0).raw(), std.math.maxInt(u32));
 }

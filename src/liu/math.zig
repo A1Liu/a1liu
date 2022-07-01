@@ -77,3 +77,63 @@ pub fn intersect(EPSILON: f32, ray: Vec3, ray_origin: Vec3, triangle: [3]Vec3) b
         return false;
     }
 }
+
+// Function to find modulo inverse of a
+pub fn modInverse(comptime T: type, a: T, m: T) ?T {
+    const result = gcdExtended(T, a, m);
+    if (result.gcd != 1) return null;
+
+    // m is added to handle negative x
+    return (result.x % m +% m) % m;
+}
+
+fn GcdResult(comptime T: type) type {
+    return struct {
+        gcd: T,
+        x: T,
+        y: T,
+    };
+}
+
+// Function for extended Euclidean Algorithm
+pub fn gcdExtended(comptime T: type, a: T, b: T) GcdResult(T) {
+    if (a == 0) // Base Case
+        return .{ .gcd = b, .x = 0, .y = 1 };
+
+    // To store results of recursive call
+    const result = gcdExtended(T, b % a, a);
+
+    // Update x and y using results of recursive call
+    return .{
+        .gcd = result.gcd,
+        .x = result.y -% (b / a) *% result.x,
+        .y = result.x,
+    };
+}
+
+test "Math: GCD" {
+    try std.testing.expectEqual(modInverse(u32, 3, 11), 4);
+
+    try std.testing.expectEqual(modInverse(u64, 0x01000193, 1 << 32), 0x359c449b);
+    try std.testing.expectEqual(@as(u32, 0x01000193) *% 0x359c449b, 1);
+
+    const a_array = [_]u128{
+        16294208416658607535,
+        10451216379200822465,
+        11317887983584761797,
+    };
+
+    const b_array = [_]u128{
+        817831822087661903,
+        10888168410540946241,
+        11674727387005193997,
+    };
+
+    for (a_array) |a, i| {
+        const b = b_array[i];
+        try std.testing.expectEqual(modInverse(u128, a, 1 << 64), b);
+        try std.testing.expectEqual(@intCast(u64, a) *% @intCast(u64, b), 1);
+    }
+
+    // try std.testing.expectEqual(@as(u32, 0), 1);
+}

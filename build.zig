@@ -85,8 +85,3 @@ pub fn build(b: *Builder) !void {
         _ = pathTool(b, p);
     }
 }
-
-// For running scripts/etc.
-pub fn main() !void {
-    try assets.kilordle.generate();
-}
