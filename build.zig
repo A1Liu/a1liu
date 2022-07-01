@@ -65,8 +65,8 @@ pub fn build(b: *Builder) !void {
         .name = "painter",
         .root = "./src/routes/painter/painter.zig",
     }, .{
-        .name = "test",
-        .root = "./src/test.zig",
+        .name = "info-graph",
+        .root = "./src/routes/graph/graph.zig",
     }, .{
         .name = "game-2d-simple",
         .root = "./src/routes/game-2d-simple/simple.zig",
