@@ -347,7 +347,7 @@ test "Registry: iterate" {
         mep: Mep,
     });
 
-    var registry = try RegistryType.init(256, liu.Pages);
+    var registry = RegistryType.init(liu.Pages);
     defer registry.deinit();
 
     var i: u32 = 0;
@@ -396,7 +396,7 @@ test "Registry: delete" {
         move: MoveComponent,
     });
 
-    var registry = try RegistryType.init(256, liu.Pages);
+    var registry = RegistryType.init(liu.Pages);
     defer registry.deinit();
 
     const View = struct {
