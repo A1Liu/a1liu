@@ -119,6 +119,20 @@ export const fetchWasm = async (
   );
 
   const env = {
+    fetch: (...a: number[]) => {
+      const res = fetch(...a.map(readObj)).then((res) => res.blob());
+      const id = addObj(res, false);
+
+      return id;
+    },
+    awaitHook: (id: number, out: number, ptr: number) => {
+      const obj = readObj(id);
+      obj.then((result) => {
+        updateObj(out, result);
+        ref.abi.resumePromise(ptr);
+      });
+    },
+
     makeArray: (isTemp: boolean) => addObj([], isTemp),
     makeObj: (isTemp: boolean) => addObj({}, isTemp),
     makeString: (location: number, size: number, isTemp: boolean) => {

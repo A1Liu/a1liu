@@ -58,6 +58,8 @@ pub fn build(b: *Builder) !void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     mode = b.standardReleaseOptions();
 
+    b.prominent_compile_errors = true;
+
     const wasmPrograms = [_]ProgData{ .{
         .name = "kilordle",
         .root = "./src/routes/kilordle/kilordle.zig",
