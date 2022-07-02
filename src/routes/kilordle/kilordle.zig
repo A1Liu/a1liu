@@ -81,14 +81,14 @@ fn setPuzzles(puzzles: []Puzzle) void {
     const mark = wasm.watermark();
     defer wasm.setWatermark(mark);
 
-    const arr = wasm.out.array();
+    const arr = wasm.make.array(.temp);
 
     for (puzzles) |puzzle| {
-        const obj = wasm.out.obj();
+        const obj = wasm.make.obj(.temp);
 
-        const solution = wasm.out.string(&puzzle.solution);
-        const filled = wasm.out.string(&puzzle.filled);
-        const submits = wasm.out.string(puzzle.submits);
+        const solution = wasm.make.string(.temp, &puzzle.solution);
+        const filled = wasm.make.string(.temp, &puzzle.filled);
+        const submits = wasm.make.string(.temp, puzzle.submits);
 
         obj.objSet(keys.solution, solution);
         obj.objSet(keys.filled, filled);

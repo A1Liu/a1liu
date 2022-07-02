@@ -63,8 +63,8 @@ const Render = struct {
         const mark = wasm.watermark();
         defer wasm.setWatermark(mark);
 
-        const obj = wasm.out.slice(self.triangles.items);
-        const obj2 = wasm.out.slice(self.colors.items);
+        const obj = wasm.make.slice(.temp, self.triangles.items);
+        const obj2 = wasm.make.slice(.temp, self.colors.items);
         ext.renderExt(obj, obj2);
     }
 

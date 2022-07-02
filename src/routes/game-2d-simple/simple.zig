@@ -31,7 +31,7 @@ pub fn gon_formatFloatValue(value: f64, writer: anytype) !void {
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
-    const wasm_obj = wasm.out.exactExpFloatPrint(value);
+    const wasm_obj = wasm.make.exactExpFloatPrint(.temp, value);
     const output = try wasm.in.string(wasm_obj, liu.Temp);
 
     try writer.writeAll(output);
@@ -110,7 +110,7 @@ export fn uploadLevel(data: wasm.Obj) void {
     defer liu.TempMark = mark;
 
     const asset_data = wasm.in.string(data, liu.Temp) catch |e| {
-        wasm.delete(data);
+        data.delete();
         wasm.post(.err, "Error reading string data: {}", .{e});
         return;
     };
@@ -450,30 +450,30 @@ pub fn renderDebugInfo(input: FrameInput) void {
     ext.setFont(large_font);
 
     {
-        const fps_text = wasm.out.string("FPS:");
-        const fps_val = wasm.out.fixedFloatPrint(1000 / input.delta, 2);
+        const fps_text = wasm.make.string(.temp, "FPS:");
+        const fps_val = wasm.make.fixedFloatPrint(.temp, 1000 / input.delta, 2);
         ext.fillText(fps_text, 5, 160);
         ext.fillText(fps_val, 120, 160);
     }
 
     {
         const y: u32 = 220;
-        const pos0 = wasm.out.fixedFloatPrint(camera.pos[0], 2);
+        const pos0 = wasm.make.fixedFloatPrint(.temp, camera.pos[0], 2);
         ext.fillText(pos0, 5, y);
 
-        const pos1 = wasm.out.fixedFloatPrint(camera.pos[1], 2);
+        const pos1 = wasm.make.fixedFloatPrint(.temp, camera.pos[1], 2);
         ext.fillText(pos1, 180, y);
     }
 
     if (is_editor_mode) {
-        const tool_name = wasm.out.string(tools.items[tool_index].name);
+        const tool_name = wasm.make.string(.temp, tools.items[tool_index].name);
         ext.fillText(tool_name, 500, 75);
     }
 
     if (is_editor_mode) {
         ext.setFont(med_font);
-        const prev_tool = wasm.out.string(tools.items[newToolIndex(-1)].name);
-        const next_tool = wasm.out.string(tools.items[newToolIndex(1)].name);
+        const prev_tool = wasm.make.string(.temp, tools.items[newToolIndex(-1)].name);
+        const next_tool = wasm.make.string(.temp, tools.items[newToolIndex(1)].name);
         ext.fillText(prev_tool, 530, 25);
         ext.fillText(next_tool, 530, 110);
     }
@@ -493,7 +493,7 @@ pub fn renderDebugInfo(input: FrameInput) void {
 
             ext.fillStyle(1, 1, 1, 1);
             const s = &[_]u8{key.code()};
-            const letter = wasm.out.string(s);
+            const letter = wasm.make.string(.temp, s);
             ext.fillText(letter, leftX + 15, topY + 10);
 
             leftX += 35;
@@ -511,6 +511,6 @@ export fn saveLevel() void {
     defer liu.TempMark = mark;
 
     const text = editor.serializeLevel() catch return;
-    const wasm_text = wasm.out.string(text);
+    const wasm_text = wasm.make.string(.temp, text);
     ext.saveLevelToIdb(wasm_text);
 }

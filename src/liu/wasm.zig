@@ -26,6 +26,7 @@ pub const Obj = enum(u32) {
 
     pub const objSet = ext.objSet;
     pub const arrayPush = ext.arrayPush;
+    pub const delete = ext.deleteObj;
 };
 
 const Watermark = enum(i32) { _ };
@@ -203,43 +204,6 @@ pub fn post(level: Obj, comptime format: []const u8, args: anytype) void {
     const object = make.fmt(.temp, format, args);
     ext.postMessage(level, object);
 }
-
-pub const delete = ext.deleteObj;
-pub fn deleteMany(obj_slice: []const Obj) void {
-    for (obj_slice) |o| {
-        delete(o);
-    }
-}
-
-pub const out = struct {
-    pub inline fn array() Obj {
-        return wasm.make.array(.temp);
-    }
-
-    pub inline fn obj() Obj {
-        return wasm.make.obj(.temp);
-    }
-
-    pub inline fn slice(data: anytype) Obj {
-        return wasm.make.slice(.temp, data);
-    }
-
-    pub inline fn string(a: []const u8) Obj {
-        return wasm.make.string(.temp, a);
-    }
-
-    pub inline fn fmt(comptime format: []const u8, args: anytype) Obj {
-        return wasm.make.fmt(.temp, format, args);
-    }
-
-    pub fn exactExpFloatPrint(value: f64) Obj {
-        return wasm.make.exactExpFloatPrint(.temp, value);
-    }
-
-    pub fn fixedFloatPrint(value: f64, places: u32) Obj {
-        return wasm.make.fixedFloatPrint(.temp, value, places);
-    }
-};
 
 pub const in = struct {
     pub fn bytes(byte_object: Obj, alloc: Allocator) ![]u8 {
