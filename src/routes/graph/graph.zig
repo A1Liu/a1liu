@@ -34,13 +34,15 @@ export fn resumePromise(val: u32) void {
     resume frames.items[val];
 }
 
+var whar: @Frame(awaitTheGuy) = undefined;
+
 fn awaitTheGuy() void {
     const mark = wasm.watermark();
     defer wasm.setWatermark(mark);
 
     const url = wasm.make.string(.temp, "https://a1liu.com");
     const res = ext.fetch(url);
-    _ = await async awaitPromise(res);
+    _ = awaitPromise(res);
 
     wasm.post(.log, "Done!", .{});
 }
@@ -49,8 +51,7 @@ export fn init() void {
     liu.gamescreen.init(0);
     frames.ensureUnusedCapacity(16) catch unreachable;
 
-    var frame = async awaitTheGuy();
-    nosuspend await frame;
+    whar = async awaitTheGuy();
 
     wasm.post(.log, "init done", .{});
 }
