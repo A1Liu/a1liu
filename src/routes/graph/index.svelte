@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Screen from "@lib/svelte/gamescreen.svelte";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import { get } from "idb-keyval";
@@ -28,21 +27,35 @@
 
 <Toast location={"top-right"} />
 
-<Screen {worker}>
-  <div slot="overlay">
-    <div class="rightColumn">
-      <button
-        class="muiButton"
-        on:click={() => worker.postMessage({ kind: "click" })}
-      >
-        Click
-      </button>
-    </div>
+<div class="overlay">
+  <div class="rightColumn">
+    <button
+      class="muiButton"
+      on:click={() => worker.postMessage({ kind: "click" })}
+    >
+      Click
+    </button>
   </div>
-</Screen>
+</div>
 
 <style lang="postcss">
   @import "@lib/svelte/util.module.css";
+
+  .overlay {
+    position: fixed;
+    z-index: 10;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    cursor: default;
+    outline: 0px solid transparent;
+  }
 
   .rightColumn {
     position: fixed;

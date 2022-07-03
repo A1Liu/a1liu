@@ -4,8 +4,6 @@ const liu = @import("liu");
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
-const FrameInput = liu.gamescreen.FrameInput;
-
 // start with async/promise support
 
 const ext = struct {
@@ -32,8 +30,6 @@ fn awaitTheGuy() void {
 }
 
 export fn init() void {
-    liu.gamescreen.init(0);
-
     const slot = liu.Pages.create(@Frame(awaitTheGuy)) catch unreachable;
     slot.* = async awaitTheGuy();
 
