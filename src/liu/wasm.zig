@@ -268,7 +268,7 @@ pub const in = struct {
 
 pub fn exit(msg: []const u8) noreturn {
     const exit_message = wasm.make.string(.temp, msg);
-    return ext.exit(exit_message);
+    ext.exit(exit_message);
 }
 
 var initialized: bool = false;

@@ -25,9 +25,6 @@ const Timer = liu.gamescreen.Timer;
 const FrameInput = liu.gamescreen.FrameInput;
 
 pub fn gon_formatFloatValue(value: f64, writer: anytype) !void {
-    const wasm_mark = wasm.watermark();
-    defer wasm.setWatermark(wasm_mark);
-
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
