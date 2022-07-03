@@ -547,7 +547,7 @@ pub fn ArrayList2d(comptime T: type, comptime min_capa: ?u32) type {
 
         pub fn ensureUnusedCapacity(self: *Self, alloc: std.mem.Allocator, capacity: u32) !void {
             if (self.bytes.items.len + capacity > self.bytes.capacity) {
-                const needed_capacity = self.used_space + capacity;
+                const needed_capacity = std.math.max(self.used_space + capacity, self.bytes.capacity);
                 var new_data = std.ArrayListUnmanaged(T){};
                 try new_data.ensureTotalCapacity(alloc, needed_capacity);
 
