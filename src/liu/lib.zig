@@ -10,6 +10,8 @@ pub const gamescreen = @import("./gamescreen.zig");
 
 pub const id_swizzle = @import("./id_swizzle.zig");
 
+pub const async_util = @import("./async_util.zig");
+
 pub const fonts = @import("./fonts.zig");
 pub const sdf = @import("./sdf.zig");
 pub const img = @import("./img.zig");

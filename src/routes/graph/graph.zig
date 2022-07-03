@@ -1,8 +1,6 @@
 const std = @import("std");
 const liu = @import("liu");
 
-var frames: std.ArrayList(anyframe) = std.ArrayList(anyframe).init(liu.Pages);
-
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
@@ -12,46 +10,32 @@ const FrameInput = liu.gamescreen.FrameInput;
 
 const ext = struct {
     extern fn fetch(obj: wasm.Obj) wasm.Obj;
-    extern fn awaitHook(obj: wasm.Obj, out: wasm.Obj, frame: u32) void;
+    extern fn timeout(ms: u32) wasm.Obj;
 };
 
-fn awaitPromise(obj: wasm.Obj) wasm.Obj {
-    const output = wasm.make.obj(.manual);
-
-    suspend {
-        const frame = @as(anyframe, @frame());
-        const id = frames.items.len;
-        frames.appendAssumeCapacity(frame);
-
-        ext.awaitHook(obj, output, @truncate(u32, id));
-    }
-
-    return output;
-}
-
-export fn resumePromise(val: u32) void {
-    wasm.post(.log, "resumed", .{});
-    resume frames.items[val];
-}
-
-var whar: @Frame(awaitTheGuy) = undefined;
-
 fn awaitTheGuy() void {
-    const mark = wasm.watermark();
-    defer wasm.setWatermark(mark);
+    const url = wasm.make.string(.manual, "https://a1liu.com");
+    defer url.delete();
 
-    const url = wasm.make.string(.temp, "https://a1liu.com");
+    const timeout = ext.timeout(2000);
+    defer timeout.delete();
+
+    _ = timeout.Await();
+
     const res = ext.fetch(url);
-    _ = awaitPromise(res);
+    defer res.delete();
+
+    const out = res.Await();
+    defer out.delete();
 
     wasm.post(.log, "Done!", .{});
 }
 
 export fn init() void {
     liu.gamescreen.init(0);
-    frames.ensureUnusedCapacity(16) catch unreachable;
 
-    whar = async awaitTheGuy();
+    const slot = liu.Pages.create(@Frame(awaitTheGuy)) catch unreachable;
+    slot.* = async awaitTheGuy();
 
     wasm.post(.log, "init done", .{});
 }

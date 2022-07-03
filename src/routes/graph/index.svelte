@@ -44,10 +44,6 @@
 <style lang="postcss">
   @import "@lib/svelte/util.module.css";
 
-  .fileInput {
-    display: none;
-  }
-
   .rightColumn {
     position: fixed;
     right: 0px;

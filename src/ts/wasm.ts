@@ -57,7 +57,7 @@ function debugLoop(
     postMessage("log", JSON.stringify(data));
     // postMessage("log", data);
 
-    setTimeout(loop, 2000);
+    setTimeout(loop, 500);
   }
   loop();
 }
@@ -77,6 +77,10 @@ export const fetchWasm = async (
   const readObj = (id: number): any => objectBuffer[id] ?? objectMap.get(id);
 
   const addObj = (data: any, isTemp: boolean = false): number => {
+    if (data === undefined) return 0;
+    if (data === null) return 1;
+    if (data === "") return 2;
+
     if (isTemp) {
       const idx = objectBuffer.length;
       objectBuffer.push(data);
@@ -93,12 +97,8 @@ export const fetchWasm = async (
   };
 
   const updateObj = (objId: number, data: any): void => {
-    if (objId < 0) {
-      objectMap.set(objId, data);
-      return;
-    }
-
-    objectBuffer[objId] = data;
+    if (objId < 0) objectMap.set(objId, data);
+    else objectBuffer[objId] = data;
   };
 
   const ref: Ref = {
@@ -119,17 +119,10 @@ export const fetchWasm = async (
   );
 
   const env = {
-    fetch: (...a: number[]) => {
-      const res = fetch(...a.map(readObj)).then((res) => res.blob());
-      const id = addObj(res, false);
-
-      return id;
-    },
     awaitHook: (id: number, out: number, ptr: number) => {
-      const obj = readObj(id);
-      obj.then((result) => {
-        updateObj(out, result);
-        ref.abi.resumePromise(ptr);
+      readObj(id).then((result) => {
+        const outId = addObj(result, false);
+        ref.abi.resumePromise(ptr, out, outId);
       });
     },
 

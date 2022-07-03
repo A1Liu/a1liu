@@ -7,9 +7,10 @@ const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 const wasm = @This();
 
-pub const Obj = enum(u32) {
+// NOTE: this is i32 because Obj can be negative when put in the objMap
+pub const Obj = enum(i32) {
     // These are kept up to date with src/wasm.ts
-    jsundefined,
+    jsundefined = 0,
     jsnull,
     jsEmptyString,
 
@@ -30,70 +31,31 @@ pub const Obj = enum(u32) {
     pub const arrayPush = ext.arrayPush;
     pub const delete = ext.deleteObj;
 
-    // I read the things below; none of them helped here. I was very confused,
-    // and then randomly realized that the 'copy elision slot' from the "coroutine
-    // rewrite issue" below could be the way that the code from the example at
-    // the end of Ziglearn is able to figure out where the `resume` should jump
-    // to. This means that in this code:
-    //
-    // output_slot = async read_big_file();
-    //
-    // The lifetime of `output_slot` determines the lifetime of the variables in
-    // the async code; if I instead do
-    //
-    // const output_slot = async read_big_file();
-    //
-    // This would break things, because output_slot might die before `read_file`
-    // completes. This seems fucky, and confusing, but empirically, all of the
-    // following examples cause code breakage in confusing ways:
-    //
-    // const output_slot = async read_big_file();
-    //
-    // -------------
-    //
-    // const temp = async read_big_file();
-    // output_slot = temp;
-    //
-    // -------------
-    //
-    // _ = async read_big_file();
-    //
-    // I am no more happy or confident in my understanding, because I'm still
-    // unsure this mental model is true, but the code does work now, so whatever.
-    //
-    // Ziglearn: Zig Async -
-    //      https://ziglearn.org/chapter-5/
-    // Zigtastic Async (reading x86 output) -
-    //      https://iamgweej.github.io/jekyll/update/2020/07/07/zigtastic-async.html
-    // The Coroutine Rewrite Issue -
-    //      https://github.com/ziglang/zig/issues/2377
-    // Zig standard library Event Loop source -
-    //      https://github.com/ziglang/zig/blob/master/lib/std/event/loop.zig
-    // Someone's implementation - completely-broken
-    //      https://github.com/creationix/zig-wasm-async
-    // Someone's implementation - largely unhelpful in understanding what's going on
-    //      https://github.com/leroycep/zig-wasm-assets
-    //
-    //                              - Albert Liu, Jul 02, 2022 Sat 18:18 PDT
-    pub fn promiseAwait(self: Self) Self {
-        const output = make.obj(.manual);
-        _ = self;
+    pub fn Await(self: Self) Self {
+        var output: wasm.Obj = undefined;
 
         suspend {
-            // const frame = @as(anyframe, @frame());
-            // const id = frames.items.len;
-            // frames.appendAssumeCapacity(frame);
-
-            // ext.awaitHook(self, output, @truncate(u32, id));
+            const frame = @as(anyframe, @frame());
+            const opaque_frame = @ptrCast(*const anyopaque, frame);
+            ext.awaitHook(self, &output, opaque_frame);
         }
 
         return output;
     }
 };
 
+// TODO why is this i32?
 const Watermark = enum(i32) { _ };
 
+export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: Obj) void {
+    output_slot.* = obj;
+
+    resume @ptrCast(anyframe, val);
+}
+
 const ext = struct {
+    extern fn awaitHook(self: Obj, output: *Obj, slot: *align(4) const anyopaque) void;
+
     extern fn makeString(message: [*]const u8, length: usize, is_temp: bool) Obj;
     extern fn makeView(o: Obj, message: ?*const anyopaque, length: usize, is_temp: bool) Obj;
 
@@ -306,6 +268,7 @@ pub fn exit(msg: []const u8) noreturn {
 
 var initialized: bool = false;
 
+// TODO maybe this is just straight up not necessary
 pub fn initIfNecessary() void {
     if (builtin.target.cpu.arch != .wasm32) {
         return;
