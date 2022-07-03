@@ -48,4 +48,21 @@ const std = @import("std");
 
 // Another important tidbit: `anyframe` is not a frame, but a pointer to a
 // frame.
+pub const CancelToken = enum(u32) { _ };
 
+fn FrameSlot(comptime func: anytype) type {
+    return struct {
+        slot: *@Frame(func),
+        token: CancelToken,
+    };
+}
+
+pub const FrameAlloc = struct {
+    const Self = @This();
+
+    pub fn init() Self {
+        return .{};
+    }
+
+    pub fn frameSlot(func: anytype) FrameSlot(func) {}
+};

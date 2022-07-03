@@ -4,8 +4,6 @@ const liu = @import("liu");
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
-// start with async/promise support
-
 const ext = struct {
     extern fn fetch(obj: wasm.Obj) wasm.Obj;
     extern fn timeout(ms: u32) wasm.Obj;
