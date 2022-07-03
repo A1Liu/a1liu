@@ -2,6 +2,9 @@ const std = @import("std");
 const liu = @import("src/liu/lib.zig");
 const assets = @import("src/assets.zig");
 
+// var rnd = std.rand.RomuTrio.init(2);
+// const a = rnd.random().int(u64);
+
 const bld = std.build;
 const Arch = std.Target.Cpu.Arch;
 const Builder = bld.Builder;

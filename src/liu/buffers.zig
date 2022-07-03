@@ -471,6 +471,126 @@ pub fn LRU(comptime V: type) type {
     };
 }
 
+const ArrayList2dRange = struct {
+    start: u32,
+    len: u32,
+    capa: u32,
+};
+
+pub fn ArrayList2d(comptime T: type, comptime min_capa: ?u32) type {
+    return struct {
+        bytes: std.ArrayListUnmanaged(T) = .{},
+        ranges: std.ArrayListUnmanaged(ArrayList2dRange) = .{},
+        used_space: u32 = 0,
+
+        const Self = @This();
+
+        pub fn deinit(self: *Self, alloc: std.mem.Allocator) void {
+            self.bytes.deinit(alloc);
+            self.ranges.deinit(alloc);
+        }
+
+        pub fn get(self: *const Self, id: u32) ?[]T {
+            if (id >= self.ranges.items.len) return null;
+
+            const range = self.ranges.items[id];
+            return self.bytes.items[range.start..][0..range.len];
+        }
+
+        pub fn appendFor(self: *Self, alloc: std.mem.Allocator, id: u32, t: T) !void {
+            if (id >= self.ranges.items.len) return;
+
+            const range = &self.ranges.items[id];
+
+            if (range.capa == range.len) {
+                const addl_capa = range.capa / 2 + 8;
+                const new_capa = range.capa + addl_capa;
+
+                try self.ensureUnusedCapacity(alloc, new_capa);
+
+                const start = self.bytes.items.len;
+                try self.bytes.ensureUnusedCapacity(alloc, new_capa);
+
+                self.bytes.items.len += new_capa;
+                self.used_space += addl_capa;
+
+                const new_slice = self.bytes.items[start..][0..range.len];
+                const old_slice = self.bytes.items[range.start..][0..range.len];
+                std.mem.copy(T, new_slice, old_slice);
+
+                range.start = @intCast(u32, start);
+                range.capa = new_capa;
+            }
+
+            self.bytes.items[range.start + range.len] = t;
+            range.len += 1;
+        }
+
+        pub fn delete(self: *Self, id: u32) void {
+            if (id >= self.ranges.items.len) return;
+
+            const range = &self.ranges.items[id];
+
+            self.used_space -= range.capa;
+            range.capa = 0;
+            range.len = 0;
+        }
+
+        pub fn add(self: *Self, alloc: std.mem.Allocator, data: []const T) !u32 {
+            const id = try self.allocFor(alloc, @intCast(u32, data.len));
+            const slot = self.get(id).?;
+
+            std.mem.copy(T, slot, data);
+
+            return id;
+        }
+
+        pub fn ensureUnusedCapacity(self: *Self, alloc: std.mem.Allocator, capacity: u32) !void {
+            if (self.bytes.items.len + capacity > self.bytes.capacity) {
+                const needed_capacity = self.used_space + capacity;
+                var new_data = std.ArrayListUnmanaged(T){};
+                try new_data.ensureTotalCapacity(alloc, needed_capacity);
+
+                for (self.ranges.items) |*range| {
+                    const new_start = new_data.items.len;
+                    new_data.appendSliceAssumeCapacity(self.bytes.items[range.start..][0..range.capa]);
+
+                    range.start = @intCast(u32, new_start);
+                }
+
+                self.bytes.deinit(alloc);
+                self.bytes = new_data;
+            }
+        }
+
+        pub fn allocFor(self: *Self, alloc: std.mem.Allocator, size: u32) !u32 {
+            var capacity = min_capa orelse 8;
+            while (true) {
+                capacity += capacity / 2 + 8;
+                if (capacity >= size) break;
+            }
+
+            try self.ensureUnusedCapacity(alloc, capacity);
+
+            const id = @intCast(u32, self.ranges.items.len);
+            _ = try self.ranges.addOne(alloc);
+
+            const start = self.bytes.items.len;
+
+            try self.bytes.ensureUnusedCapacity(alloc, capacity);
+            self.bytes.items.len += capacity;
+            self.used_space += capacity;
+
+            const range = &self.ranges.items[id];
+            range.start = @intCast(u32, start);
+            range.len = size;
+            range.capa = capacity;
+
+            return id;
+        }
+    };
+}
+
 pub const StringTable = struct {
     bytes: std.ArrayListUnmanaged(u8) = .{},
     ranges: std.ArrayListUnmanaged(struct { start: i32, end: u32 }) = .{},
@@ -523,7 +643,7 @@ pub const StringTable = struct {
 
                 break :id id;
             } else {
-                const id = @truncate(u32, self.ranges.items.len);
+                const id = @intCast(u32, self.ranges.items.len);
 
                 _ = try self.ranges.addOne(alloc);
 
@@ -543,7 +663,7 @@ pub const StringTable = struct {
                 const new_start = new_data.items.len;
                 new_data.appendSliceAssumeCapacity(self.bytes.items[start..range.end]);
                 range.start = @intCast(i32, new_start);
-                range.end = @truncate(u32, new_data.items.len);
+                range.end = @intCast(u32, new_data.items.len);
             }
 
             self.bytes.deinit(alloc);
@@ -553,11 +673,11 @@ pub const StringTable = struct {
         const start = self.bytes.items.len;
 
         try self.bytes.appendSlice(alloc, data);
-        self.used_space += @truncate(u32, data.len);
+        self.used_space += @intCast(u32, data.len);
 
         const range = &self.ranges.items[id];
         range.start = @intCast(i32, start);
-        range.end = @truncate(u32, self.bytes.items.len);
+        range.end = @intCast(u32, self.bytes.items.len);
 
         return id;
     }
