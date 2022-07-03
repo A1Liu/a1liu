@@ -2,14 +2,35 @@ const std = @import("std");
 const liu = @import("liu");
 
 // I read the things below; none of them helped here. I was very confused, and
-// then randomly realized that the 'copy-elision' slot from the "coroutine rewrite issue"
-// could in fact be the way that the `resume` calls from the
-// complete-working-example from the end of Ziglearn is able to jump conceptual
-// callframes. Thus, the lifetime of the object you assign the output of `async`
-// to is vitally important.
+// then randomly realized that the 'copy elision slot' from the "coroutine rewrite
+// issue" below could be the way that the code from the example at the end of
+// Ziglearn is able to figure out where the `resume` should jump to. This means
+// that in this code:
+//
+// output_slot = async read_big_file();
+//
+// The lifetime of `output_slot` determines the lifetime of the variables in the
+// async code; if I instead do
+//
+// const output_slot = async read_big_file();
+//
+// This would break things, because output_slot might die before `read_file`
+// completes. This seems fucky, and confusing, but empirically, all of the following
+// examples cause code breakage in confusing ways:
+//
+// const output_slot = async read_big_file();
+//
+// -------------
+//
+// const temp = async read_big_file();
+// output_slot = temp;
+//
+// -------------
+//
+// _ = async read_big_file();
 //
 // I am no more happy or confident in my understanding, because I'm still unsure
-// this mental model is true, but the code does in fact work now, so whatever.
+// this mental model is true, but the code does work now, so whatever.
 //
 // Ziglearn: Zig Async -
 //      https://ziglearn.org/chapter-5/
@@ -23,9 +44,6 @@ const liu = @import("liu");
 //      https://github.com/creationix/zig-wasm-async
 // Someone's implementation (largely unhelpful in understanding what's going on) -
 //      https://github.com/leroycep/zig-wasm-assets
-//
-//
-//
 //
 //                              - Albert Liu, Jul 02, 2022 Sat 18:18 PDT
 
