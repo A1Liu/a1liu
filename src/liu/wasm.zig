@@ -14,6 +14,11 @@ pub const Obj = enum(i32) {
     jsnull,
     jsEmptyString,
 
+    // TODO: There's a finite number of falsy values; we can store them all
+    // as enum constants:
+    //
+    // https://developer.mozilla.org/en-US/docs/Glossary/Falsy
+
     log,
     info,
     warn,
