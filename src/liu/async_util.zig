@@ -49,7 +49,7 @@ const liu = @import("./lib.zig");
 
 // Another important tidbit: `anyframe` is not a frame, but a pointer to a
 // frame.
-pub const CancelToken = enum(i32) { unbounded, _ };
+const TokenKind = enum(u32) { unbounded, _ };
 
 fn FrameSlot(comptime func: anytype) type {
     return struct {
@@ -58,13 +58,59 @@ fn FrameSlot(comptime func: anytype) type {
     };
 }
 
-var frame_bytes = liu.Bump.init(1024, liu.Pages);
+pub const CancelToken = struct {
+    id: u32,
+    generation: u32,
 
-pub fn frameSlot(comptime func: anytype) !FrameSlot(func) {
-    const slot = try frame_bytes.allocator().create(@Frame(func));
+    pub fn finish(self: @This()) void {
+        _ = self;
+    }
+
+    pub fn cancel(self: @This()) void {
+        _ = self;
+    }
+
+    pub fn isCanceled(self: @This()) bool {
+        _ = self;
+    }
+
+    pub fn isDone(self: @This()) bool {
+        _ = self;
+    }
+};
+
+const TokenInfo = struct {
+    kind: TokenKind,
+    generation: u32,
+    canceled: bool = false,
+    done: bool = false,
+};
+
+var frame_bytes = liu.Bump.init(1024, liu.Pages);
+var generation: u32 = 0;
+var children = liu.Array2d(u32);
+var tokens = std.SegmentedList(TokenInfo, 1024){};
+
+pub fn frame(comptime func: anytype) !*@Frame(func) {
+    return try frame_bytes.allocator().create(@Frame(func));
+}
+
+pub fn frameWithCancel(comptime func: anytype) !FrameSlot(func) {
+    const slot = try frame(func);
+
+    const id = tokens.len;
+    try tokens.append(liu.Pages, .{
+        .kind = .unbounded,
+        .generation = generation,
+    });
+
+    try children.add(liu.Pages, &.{});
 
     return FrameSlot(func){
         .slot = slot,
-        .token = .unbounded,
+        .token = .{
+            .id = id,
+            .generation = generation,
+        },
     };
 }
