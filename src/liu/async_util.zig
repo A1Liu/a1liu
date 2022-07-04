@@ -51,7 +51,7 @@ const liu = @import("./lib.zig");
 // frame.
 
 var frame_bytes = std.heap.GeneralPurposeAllocator(.{}){};
-pub const frame_alloc = frame_bytes.allocator();
+pub const async_alloc = frame_bytes.allocator();
 
 // I tried to write some cancel token code, but tbh there's a bunch of design
 // decisions idk wtf to do with. I don't technically need this code yet, so
