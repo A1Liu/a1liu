@@ -86,9 +86,12 @@ const TokenInfo = struct {
     done: bool = false,
 };
 
+const NULL = std.math.maxInt(u32);
+
 var frame_bytes = liu.Bump.init(1024, liu.Pages);
 var generation: u32 = 0;
-var children = liu.Array2d(u32);
+var next_free: ?u32 = null;
+var children = liu.ArrayList2d(u32){};
 var tokens = std.SegmentedList(TokenInfo, 1024){};
 
 pub fn frame(comptime func: anytype) !*@Frame(func) {
@@ -98,13 +101,26 @@ pub fn frame(comptime func: anytype) !*@Frame(func) {
 pub fn frameWithCancel(comptime func: anytype) !FrameSlot(func) {
     const slot = try frame(func);
 
-    const id = tokens.len;
-    try tokens.append(liu.Pages, .{
-        .kind = .unbounded,
-        .generation = generation,
-    });
+    var id: u32 = undefined;
+    var info: *TokenInfo = undefined;
 
-    try children.add(liu.Pages, &.{});
+    if (next_free) |free| {
+        id = free;
+        info = tokens.at(free);
+
+        const next = @enumToInt(info.kind);
+        next_free = if (next == NULL) null else next;
+    } else {
+        id = tokens.len;
+        info = try tokens.addOne(liu.Pages);
+
+        try children.add(liu.Pages, &.{});
+    }
+
+    info.kind = .unbounded;
+    info.generation = generation;
+    info.canceled = false;
+    info.done = false;
 
     return FrameSlot(func){
         .slot = slot,

@@ -540,13 +540,11 @@ pub fn ArrayList2d(comptime T: type) type {
             range.len = 0;
         }
 
-        pub fn add(self: *Self, alloc: std.mem.Allocator, data: []const T) !u32 {
+        pub fn add(self: *Self, alloc: std.mem.Allocator, data: []const T) !void {
             const id = try self.allocFor(alloc, @intCast(u32, data.len));
             const slot = self.get(id).?;
 
             std.mem.copy(T, slot, data);
-
-            return id;
         }
 
         pub fn ensureUnusedCountCapacity(self: *Self, alloc: std.mem.Allocator, capacity: usize) !void {

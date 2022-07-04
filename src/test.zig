@@ -58,13 +58,13 @@ pub fn main() !void {
         try meh.ensureUnusedCapacity(Alloc, value_count);
         try meh.ensureUnusedCountCapacity(Alloc, value_count);
 
-        _ = try meh.add(Alloc, &.{});
+        try meh.add(Alloc, &.{});
 
         for (values.items) |value| {
             const id = value % meh.len();
 
             if (value % freq == 0) {
-                _ = try meh.add(Alloc, &.{});
+                try meh.add(Alloc, &.{});
             } else if (value % freq == 1) {
                 meh.clear(id);
                 continue;
