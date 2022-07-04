@@ -28,9 +28,9 @@ fn awaitTheGuy() void {
 }
 
 export fn init() void {
-    const slot = liu.async_util.frameWithCancel(awaitTheGuy) catch unreachable;
+    const slot = liu.frame_alloc.create(@Frame(awaitTheGuy)) catch unreachable;
     // liu.Pages.create(@Frame(awaitTheGuy)) catch unreachable;
-    slot.slot.* = async awaitTheGuy();
+    slot.* = async awaitTheGuy();
 
     wasm.post(.log, "init done", .{});
 }

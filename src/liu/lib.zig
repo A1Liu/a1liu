@@ -2,6 +2,7 @@ const alloc = @import("./allocators.zig");
 const buffers = @import("./buffers.zig");
 const math = @import("./math.zig");
 const interface = @import("./interface.zig");
+const async_util = @import("./async_util.zig");
 
 pub const packed_asset = @import("./packed_asset.zig");
 pub const ecs = @import("./ecs.zig");
@@ -9,8 +10,6 @@ pub const gon = @import("./gon.zig");
 pub const gamescreen = @import("./gamescreen.zig");
 
 pub const id_swizzle = @import("./id_swizzle.zig");
-
-pub const async_util = @import("./async_util.zig");
 
 pub const fonts = @import("./fonts.zig");
 pub const sdf = @import("./sdf.zig");
@@ -22,6 +21,7 @@ pub usingnamespace alloc;
 pub usingnamespace buffers;
 pub usingnamespace math;
 pub usingnamespace interface;
+pub usingnamespace async_util;
 
 // NOTE: this forces the compiler to run the tests in the listed folders when
 // running `zig test src/liu/lib.zig
