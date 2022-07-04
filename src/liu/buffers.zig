@@ -477,7 +477,7 @@ const ArrayList2dRange = struct {
     capa: u32,
 };
 
-pub fn ArrayList2d(comptime T: type, comptime min_capa: ?u32) type {
+pub fn ArrayList2d(comptime T: type) type {
     return struct {
         bytes: std.ArrayListUnmanaged(T) = .{},
         ranges: std.ArrayListUnmanaged(ArrayList2dRange) = .{},
@@ -488,6 +488,10 @@ pub fn ArrayList2d(comptime T: type, comptime min_capa: ?u32) type {
         pub fn deinit(self: *Self, alloc: std.mem.Allocator) void {
             self.bytes.deinit(alloc);
             self.ranges.deinit(alloc);
+        }
+
+        pub inline fn len(self: *const Self) u32 {
+            return @intCast(u32, self.ranges.items.len);
         }
 
         pub fn get(self: *const Self, id: u32) ?[]T {
@@ -564,10 +568,9 @@ pub fn ArrayList2d(comptime T: type, comptime min_capa: ?u32) type {
         }
 
         pub fn allocFor(self: *Self, alloc: std.mem.Allocator, size: u32) !u32 {
-            var capacity = min_capa orelse 8;
-            while (true) {
-                capacity += capacity / 2 + 8;
-                if (capacity >= size) break;
+            var capacity: u32 = 4;
+            while (capacity < size) {
+                capacity += capacity / 2 + 4;
             }
 
             try self.ensureUnusedCapacity(alloc, capacity);
