@@ -9,6 +9,10 @@ const ext = struct {
     extern fn timeout(ms: u32) wasm.Obj;
 };
 
+// permanent async "manager" task
+var manager_frame: @Frame(manager) = undefined;
+fn manager() void {}
+
 fn awaitTheGuy() void {
     const url = wasm.make.string(.manual, "https://a1liu.com");
     defer url.delete();
@@ -31,6 +35,8 @@ export fn init() void {
     const slot = liu.frame_alloc.create(@Frame(awaitTheGuy)) catch unreachable;
     // liu.Pages.create(@Frame(awaitTheGuy)) catch unreachable;
     slot.* = async awaitTheGuy();
+
+    manager_frame = async manager();
 
     wasm.post(.log, "init done", .{});
 }
