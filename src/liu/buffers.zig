@@ -481,7 +481,7 @@ pub fn ArrayList2d(comptime T: type) type {
     return struct {
         bytes: std.ArrayListUnmanaged(T) = .{},
         ranges: std.ArrayListUnmanaged(ArrayList2dRange) = .{},
-        used_space: u32 = 0,
+        used_space: usize = 0,
 
         const Self = @This();
 
@@ -490,8 +490,8 @@ pub fn ArrayList2d(comptime T: type) type {
             self.ranges.deinit(alloc);
         }
 
-        pub inline fn len(self: *const Self) u32 {
-            return @intCast(u32, self.ranges.items.len);
+        pub inline fn len(self: *const Self) usize {
+            return self.ranges.items.len;
         }
 
         pub fn get(self: *const Self, id: u32) ?[]T {
@@ -501,7 +501,7 @@ pub fn ArrayList2d(comptime T: type) type {
             return self.bytes.items[range.start..][0..range.len];
         }
 
-        pub fn appendFor(self: *Self, alloc: std.mem.Allocator, id: u32, t: T) !void {
+        pub fn appendFor(self: *Self, alloc: std.mem.Allocator, id: usize, t: T) !void {
             if (id >= self.ranges.items.len) return;
 
             const range = &self.ranges.items[id];
@@ -530,7 +530,7 @@ pub fn ArrayList2d(comptime T: type) type {
             range.len += 1;
         }
 
-        pub fn delete(self: *Self, id: u32) void {
+        pub fn delete(self: *Self, id: usize) void {
             if (id >= self.ranges.items.len) return;
 
             const range = &self.ranges.items[id];
@@ -547,6 +547,10 @@ pub fn ArrayList2d(comptime T: type) type {
             std.mem.copy(T, slot, data);
 
             return id;
+        }
+
+        pub fn ensureUnusedCountCapacity(self: *Self, alloc: std.mem.Allocator, capacity: usize) !void {
+            try self.ranges.ensureUnusedCapacity(alloc, capacity);
         }
 
         pub fn ensureUnusedCapacity(self: *Self, alloc: std.mem.Allocator, capacity: u32) !void {
