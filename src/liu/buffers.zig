@@ -507,7 +507,7 @@ pub fn ArrayList2d(comptime T: type) type {
             const range = &self.ranges.items[id];
 
             if (range.capa == range.len) {
-                const addl_capa = range.capa / 2 + 8;
+                const addl_capa = range.capa / 2 + 4;
                 const new_capa = range.capa + addl_capa;
 
                 try self.ensureUnusedCapacity(alloc, new_capa);
@@ -530,7 +530,7 @@ pub fn ArrayList2d(comptime T: type) type {
             range.len += 1;
         }
 
-        pub fn delete(self: *Self, id: usize) void {
+        pub fn clear(self: *Self, id: usize) void {
             if (id >= self.ranges.items.len) return;
 
             const range = &self.ranges.items[id];

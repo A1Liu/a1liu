@@ -1,4 +1,5 @@
 const std = @import("std");
+const liu = @import("./lib.zig");
 
 // I read the things below; none of them helped here. I was very confused,
 // and then randomly realized that the 'copy elision slot' from the "coroutine
@@ -48,7 +49,7 @@ const std = @import("std");
 
 // Another important tidbit: `anyframe` is not a frame, but a pointer to a
 // frame.
-pub const CancelToken = enum(u32) { _ };
+pub const CancelToken = enum(i32) { unbounded, _ };
 
 fn FrameSlot(comptime func: anytype) type {
     return struct {
@@ -57,12 +58,13 @@ fn FrameSlot(comptime func: anytype) type {
     };
 }
 
-pub const FrameAlloc = struct {
-    const Self = @This();
+var frame_bytes = liu.Bump.init(1024, liu.Pages);
 
-    pub fn init() Self {
-        return .{};
-    }
+pub fn frameSlot(comptime func: anytype) !FrameSlot(func) {
+    const slot = try frame_bytes.allocator().create(@Frame(func));
 
-    pub fn frameSlot(func: anytype) FrameSlot(func) {}
-};
+    return FrameSlot(func){
+        .slot = slot,
+        .token = .unbounded,
+    };
+}
