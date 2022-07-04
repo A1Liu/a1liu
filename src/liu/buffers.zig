@@ -577,7 +577,8 @@ pub fn ArrayList2d(comptime T: type, comptime min_capa: ?u32) type {
 
             const start = self.bytes.items.len;
 
-            try self.bytes.ensureUnusedCapacity(alloc, capacity);
+            // try self.bytes.ensureUnusedCapacity(alloc, capacity);
+            assert(self.bytes.items.len + capacity <= self.bytes.capacity);
             self.bytes.items.len += capacity;
             self.used_space += capacity;
 
