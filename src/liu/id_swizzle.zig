@@ -114,7 +114,7 @@ pub fn testData(comptime T: type) !void {
         const id = Id.fromRaw(value).swizzle();
         const out_value = Id.fromSwizzle(id).raw();
 
-        std.debug.print("{:>3} -> {:>20}\n", .{ value, id });
+        // std.debug.print("{:>3} -> {:>20}\n", .{ value, id });
 
         try std.testing.expectEqual(value, out_value);
     }
