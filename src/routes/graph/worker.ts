@@ -1,6 +1,7 @@
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/info-graph.wasm?url";
 import { WorkerCtx, timeout } from "@lib/ts/util";
+import { get } from "idb-keyval";
 
 const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
@@ -47,6 +48,7 @@ const init = async () => {
 
         return id;
       },
+      idbGet: (id: number) => wasmRef.addObj(get(id)),
     }),
     imports: {},
   });

@@ -6,6 +6,7 @@ pub usingnamespace wasm;
 
 const ext = struct {
     extern fn fetch(obj: wasm.Obj) wasm.Obj;
+    extern fn idbGet(id: u32) wasm.Obj;
     extern fn timeout(ms: u32) wasm.Obj;
 };
 
@@ -17,7 +18,7 @@ fn awaitTheGuy() void {
     const url = wasm.make.string(.manual, "https://a1liu.com");
     defer url.delete();
 
-    const timeout = ext.timeout(2000);
+    const timeout = ext.timeout(500);
     defer timeout.delete();
 
     _ = timeout.Await();
