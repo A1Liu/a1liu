@@ -92,9 +92,9 @@ pub fn testData(comptime T: type) !void {
             const value = Id.fromSwizzle(id);
             const out_id = value.swizzle();
 
-            // println!("{} -> {}", id, value);
+            // std.debug.print("{} -> {}\n", .{ id, value.raw() });
 
-            // println!("{:>10}", value);
+            // std.debug.print("{:>10}\n", value);
 
             try std.testing.expectEqual(id, out_id);
         }
@@ -104,17 +104,17 @@ pub fn testData(comptime T: type) !void {
         const value = Id.fromSwizzle(id);
         const out_id = value.swizzle();
 
-        // println!("{} -> {}", id, value);
+        // std.debug.print("{} -> {}\n", .{ id, value.raw() });
 
         try std.testing.expectEqual(id, out_id);
     }
 
     var value: T = 0;
-    while (value < 100) : (value += 100) {
-        const id = Id.fromSwizzle(value);
-        const out_value = id.swizzle();
+    while (value < 100) : (value += 1) {
+        const id = Id.fromRaw(value).swizzle();
+        const out_value = Id.fromSwizzle(id).raw();
 
-        // println!("{} -> {}", id, value);
+        std.debug.print("{:>3} -> {:>20}\n", .{ value, id });
 
         try std.testing.expectEqual(value, out_value);
     }
