@@ -1,7 +1,7 @@
 import * as wasm from "@lib/ts/wasm";
 import wasmUrl from "@zig/info-graph.wasm?url";
 import { WorkerCtx, timeout } from "@lib/ts/util";
-import { get } from "idb-keyval";
+import * as idb from "idb-keyval";
 
 const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
@@ -22,6 +22,9 @@ const initGl = async (canvas: any): Promise<GlContext | null> => {
 };
 
 const main = async (wasmRef: wasm.Ref) => {
+  // idb.set(0, new TextEncoder().encode("warg"));
+  idb.del(0);
+
   while (true) {
     const captured = await ctx.msgWait();
 
@@ -48,7 +51,7 @@ const init = async () => {
 
         return id;
       },
-      idbGet: (id: number) => wasmRef.addObj(get(id)),
+      idbGet: (id: number) => wasmRef.addObj(idb.get(id)),
     }),
     imports: {},
   });

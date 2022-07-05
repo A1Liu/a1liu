@@ -10,6 +10,19 @@ const ext = struct {
     extern fn timeout(ms: u32) wasm.Obj;
 };
 
+fn readData(alloc: std.mem.Allocator, id: u32) !?[]const u8 {
+    const promise = ext.idbGet(id);
+    defer promise.delete();
+
+    const data_obj = promise.Await();
+    if (data_obj == .jsundefined) return null;
+
+    defer data_obj.delete();
+
+    const bytes = try wasm.in.bytes(data_obj, alloc);
+    return bytes;
+}
+
 // permanent async "manager" task
 var manager_frame: @Frame(manager) = undefined;
 fn manager() void {}
@@ -22,6 +35,13 @@ fn awaitTheGuy() void {
     defer timeout.delete();
 
     _ = timeout.Await();
+
+    const data_o = readData(liu.Pages, 0) catch unreachable;
+    if (data_o) |data| {
+        wasm.post(.log, "{s}", .{data});
+    } else {
+        wasm.post(.log, "hello", .{});
+    }
 
     const res = ext.fetch(url);
     defer res.delete();
