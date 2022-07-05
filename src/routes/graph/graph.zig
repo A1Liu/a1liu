@@ -34,7 +34,6 @@ fn awaitTheGuy() void {
 
 export fn init() void {
     const slot = liu.async_alloc.create(@Frame(awaitTheGuy)) catch unreachable;
-    // liu.Pages.create(@Frame(awaitTheGuy)) catch unreachable;
     slot.* = async awaitTheGuy();
 
     manager_frame = async manager();
