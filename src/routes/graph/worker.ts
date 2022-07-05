@@ -23,7 +23,7 @@ const initGl = async (canvas: any): Promise<GlContext | null> => {
 
 const main = async (wasmRef: wasm.Ref) => {
   // idb.set(0, new TextEncoder().encode("warg"));
-  idb.del(0);
+  // idb.del(0);
 
   while (true) {
     const captured = await ctx.msgWait();
