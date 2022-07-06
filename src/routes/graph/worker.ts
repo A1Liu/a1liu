@@ -52,6 +52,10 @@ const init = async () => {
         return id;
       },
       idbGet: (id: number) => wasmRef.addObj(idb.get(id)),
+      idbSet: (id: number, objId: number) => {
+        const obj = wasmRef.readObj(obj);
+        wasmRef.addObj(idb.set(id, obj));
+      },
     }),
     imports: {},
   });
