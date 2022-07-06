@@ -12,6 +12,7 @@ export type OutMessage =
 
 interface GlContext {}
 
+let db = undefined;
 let glCtx = null;
 
 const initGl = async (canvas: any): Promise<GlContext | null> => {
@@ -41,7 +42,13 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm(wasmUrl, {
+  const request = indexedDB.open("info-graph");
+  request.onupgradeneeded = () => {
+    request.result.createObjectStore("graph-data", { autoIncrement: true });
+  };
+  const dbPromise = idb.promisifyRequest(request);
+
+  const wasmPromise = wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
       timeout: () => wasmRef.addObj(timeout(2000)),
@@ -51,14 +58,19 @@ const init = async () => {
 
         return id;
       },
-      idbGet: (id: number) => wasmRef.addObj(idb.get(id)),
+      idbGet: (id: number) => {
+        return wasmRef.addObj(idb.get(id));
+      },
       idbSet: (id: number, objId: number) => {
-        const obj = wasmRef.readObj(obj);
-        wasmRef.addObj(idb.set(id, obj));
+        const obj = wasmRef.readObj(objId);
+        return wasmRef.addObj(idb.set(id, obj));
       },
     }),
     imports: {},
   });
+
+  db = await dbPromise;
+  const wasmRef = await wasmPromise;
 
   wasmRef.abi.init();
 

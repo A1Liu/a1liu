@@ -6,12 +6,12 @@ pub usingnamespace wasm;
 
 const ext = struct {
     extern fn fetch(obj: wasm.Obj) wasm.Obj;
-    extern fn idbGet(id: u64) wasm.Obj;
-    extern fn idbSet(id: u64, obj: wasm.Obj) wasm.Obj;
+    extern fn idbGet(id: u32) wasm.Obj;
+    extern fn idbSet(id: u32, obj: wasm.Obj) wasm.Obj;
     extern fn timeout(ms: u32) wasm.Obj;
 };
 
-fn setData(id: u64, bytes: []const u8) wasm.Obj {
+fn setData(id: u32, bytes: []const u8) wasm.Obj {
     const obj = wasm.make.slice(.manual, bytes);
     defer obj.delete();
 
@@ -20,7 +20,7 @@ fn setData(id: u64, bytes: []const u8) wasm.Obj {
     return promise;
 }
 
-fn readData(alloc: std.mem.Allocator, id: u64) !?[]const u8 {
+fn readData(alloc: std.mem.Allocator, id: u32) !?[]const u8 {
     const promise = ext.idbGet(id);
     defer promise.delete();
 
