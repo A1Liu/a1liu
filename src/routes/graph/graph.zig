@@ -46,6 +46,10 @@ fn awaitTheGuy() void {
 
     _ = timeout.Await();
 
+    const promise = setData(0, "blarg");
+    promise.Await().delete();
+    promise.delete();
+
     const data_o = readData(liu.Pages, 0) catch unreachable;
     if (data_o) |data| {
         wasm.post(.log, "{s}", .{data});

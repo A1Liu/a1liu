@@ -41,10 +41,12 @@ const main = async (wasmRef: wasm.Ref) => {
   }
 };
 
+const graphStore = "graph-data";
+
 const init = async () => {
   const request = indexedDB.open("info-graph");
   request.onupgradeneeded = () => {
-    request.result.createObjectStore("graph-data", { autoIncrement: true });
+    request.result.createObjectStore(graphStore, { autoIncrement: true });
   };
   const dbPromise = idb.promisifyRequest(request);
 
@@ -59,11 +61,26 @@ const init = async () => {
         return id;
       },
       idbGet: (id: number) => {
-        return wasmRef.addObj(idb.get(id));
+        const transaction = db.transaction(graphStore, "readonly");
+        const store = transaction.objectStore(graphStore);
+        const promise = idb.promisifyRequest(store.get(id));
+
+        return wasmRef.addObj(promise);
       },
       idbSet: (id: number, objId: number) => {
+        const transaction = db.transaction(graphStore, "readwrite");
+        const store = transaction.objectStore(graphStore);
+        const promise = idb.promisifyRequest(transaction);
+
+        // This prevents the entire ArrayBuffer from being structurally cloned
         const obj = wasmRef.readObj(objId);
-        return wasmRef.addObj(idb.set(id, obj));
+        const storage = new ArrayBuffer(obj.length);
+        const byteView = new Uint8Array(storage);
+        byteView.set(obj);
+
+        store.put(byteView, id);
+
+        return wasmRef.addObj(promise);
       },
     }),
     imports: {},
