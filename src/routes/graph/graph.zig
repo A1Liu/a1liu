@@ -6,8 +6,8 @@ pub usingnamespace wasm;
 
 const ext = struct {
     extern fn fetch(obj: wasm.Obj) wasm.Obj;
-    extern fn idbGet(id: u32) wasm.Obj;
-    extern fn idbSet(id: u32, obj: wasm.Obj) wasm.Obj;
+    extern fn idbGet(store: wasm.Obj, id: u32) wasm.Obj;
+    extern fn idbSet(store: wasm.Obj, id: u32, obj: wasm.Obj) wasm.Obj;
     extern fn timeout(ms: u32) wasm.Obj;
 };
 
@@ -15,13 +15,13 @@ fn setData(id: u32, bytes: []const u8) wasm.Obj {
     const obj = wasm.make.slice(.manual, bytes);
     defer obj.delete();
 
-    const promise = ext.idbSet(id, obj);
+    const promise = ext.idbSet(store_id, id, obj);
 
     return promise;
 }
 
 fn readData(alloc: std.mem.Allocator, id: u32) !?[]const u8 {
-    const promise = ext.idbGet(id);
+    const promise = ext.idbGet(store_id, id);
     defer promise.delete();
 
     const data_obj = promise.Await();
@@ -66,9 +66,13 @@ fn awaitTheGuy() void {
     wasm.post(.log, "Done!", .{});
 }
 
+var store_id: wasm.Obj = undefined;
+
 export fn init() void {
     const slot = liu.async_alloc.create(@Frame(awaitTheGuy)) catch unreachable;
     slot.* = async awaitTheGuy();
+
+    store_id = wasm.make.string(.manual, "graph-data");
 
     manager_frame = async manager();
 

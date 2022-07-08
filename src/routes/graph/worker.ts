@@ -60,15 +60,17 @@ const init = async () => {
 
         return id;
       },
-      idbGet: (id: number) => {
-        const transaction = db.transaction(graphStore, "readonly");
+      idbGet: (storeId: number, id: number) => {
+        const storeName = wasmRef.readObj(storeId);
+        const transaction = db.transaction(storeName, "readonly");
         const store = transaction.objectStore(graphStore);
         const promise = idb.promisifyRequest(store.get(id));
 
         return wasmRef.addObj(promise);
       },
-      idbSet: (id: number, objId: number) => {
-        const transaction = db.transaction(graphStore, "readwrite");
+      idbSet: (storeId: number, id: number, objId: number) => {
+        const storeName = wasmRef.readObj(storeId);
+        const transaction = db.transaction(storeName, "readwrite");
         const store = transaction.objectStore(graphStore);
         const promise = idb.promisifyRequest(transaction);
 
