@@ -148,6 +148,7 @@ export const fetchWasm = async (
 
       return encodedString.length;
     },
+
     exactExpFloatFormat: (value: number, isTemp: boolean) => {
       return addObj(value.toExponential(), isTemp);
     },
@@ -162,6 +163,7 @@ export const fetchWasm = async (
       const value = readObj(idx);
       return Number(value);
     },
+
     readBytes: (idx: number, begin: number): void => {
       const array = readObj(idx);
       const writeTo = new Uint8Array(ref.memory.buffer, begin, array.length);
