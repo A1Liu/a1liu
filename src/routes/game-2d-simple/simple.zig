@@ -72,6 +72,8 @@ export fn init() void {
 }
 
 fn initErr() !void {
+    // keys = Table.init();
+
     large_font = wasm.make.string(.manual, "bold 48px sans-serif");
     med_font = wasm.make.string(.manual, "24px sans-serif");
     small_font = wasm.make.string(.manual, "10px sans-serif");
@@ -92,6 +94,16 @@ const Static: std.mem.Allocator = static_storage.allocator();
 
 var tools: std.ArrayListUnmanaged(editor.Tool) = .{};
 var tool_index: u32 = 0;
+
+// const Table = wasm.StringTable(.{
+//     .large_font = wasm.make.string(.manual, "bold 48px sans-serif"),
+//     .med_font = wasm.make.string(.manual, "24px sans-serif"),
+//     .small_font = wasm.make.string(.manual, "10px sans-serif"),
+//     .level_download = wasm.make.string(.manual, "levelDownload"),
+//     .save_level = wasm.make.string(.manual, "saveLevel"),
+// });
+
+// pub var keys: Table.Keys = undefined;
 
 pub var large_font: wasm.Obj = undefined;
 pub var med_font: wasm.Obj = undefined;

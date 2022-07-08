@@ -329,14 +329,56 @@ pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) nore
     exit(msg);
 }
 
-pub fn StringTable(comptime field_enum: type) type {
-    comptime {
-        const variants = @typeInfo(field_enum).Enum.fields;
+const TableField = struct {
+    name: []const u8,
+    value: []const u8,
+};
 
-        var fields: []const Field = &.{};
-        for (variants) |variant| {
-            fields = fields ++ &[_]Field{.{
-                .name = variant.name,
+pub fn StringTable(comptime table_info: anytype) type {
+    comptime {
+        const InfoType = @TypeOf(table_info);
+
+        var fields: []const TableField = &.{};
+        fields: {
+            switch (@typeInfo(InfoType)) {
+                .Type => {},
+
+                .Struct => |info| {
+                    for (info.fields) |field| {
+                        fields = fields ++ &[_]TableField{.{
+                            .name = field.name,
+                            .value = @field(table_info, field.name),
+                        }};
+                    }
+
+                    break :fields;
+                },
+
+                else => |data| @compileError("unsupported input to StringTable: " ++ @tagName(data)),
+            }
+
+            switch (@typeInfo(table_info)) {
+                .Enum => |info| {
+                    const variants = info.fields;
+
+                    for (variants) |variant| {
+                        fields = fields ++ &[_]TableField{.{
+                            .name = variant.name,
+                            .value = variant.name,
+                        }};
+                    }
+
+                    break :fields;
+                },
+
+                else => |data| @compileError("unsupported input to StringTable: " ++ @tagName(data)),
+            }
+        }
+
+        var struct_fields: []const Field = &.{};
+        for (fields) |field| {
+            struct_fields = struct_fields ++ &[_]Field{.{
+                .name = field.name,
                 .field_type = Obj,
                 .default_value = null,
                 .is_comptime = false,
@@ -348,7 +390,7 @@ pub fn StringTable(comptime field_enum: type) type {
             .layout = .Auto,
             .decls = &.{},
             .is_tuple = false,
-            .fields = fields,
+            .fields = struct_fields,
         } });
 
         return struct {
@@ -357,8 +399,8 @@ pub fn StringTable(comptime field_enum: type) type {
             pub fn init() Data {
                 var output: Data = undefined;
 
-                inline for (@typeInfo(Data).Struct.fields) |field| {
-                    @field(output, field.name) = make.string(.manual, field.name);
+                inline for (fields) |field| {
+                    @field(output, field.name) = make.string(.manual, field.value);
                 }
 
                 return output;
