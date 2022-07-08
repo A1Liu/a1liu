@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
-  import Screen from "@lib/svelte/gamescreen.svelte";
+  import Screen from "@lib/svelte/sidebar_gamescreen.svelte";
   import Toast, { addToast, postToast } from "@lib/svelte/errors.svelte";
   import { githubIssueLink } from "@lib/ts/util";
   import * as GL from "@lib/ts/webgl";

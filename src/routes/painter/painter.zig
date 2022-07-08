@@ -241,10 +241,13 @@ var tool_kind: ToolKind = .triangle;
 var render: Render = .{};
 var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 
-var obj_click: wasm.Obj = undefined;
-var obj_triangle: wasm.Obj = undefined;
-var obj_line: wasm.Obj = undefined;
-var obj_draw: wasm.Obj = undefined;
+const StringKeys = enum {
+    click,
+    triangle,
+    line,
+    draw,
+};
+var strings: wasm.StringTable(StringKeys) = undefined;
 
 const Math = struct {
     const EPSILON: f32 = 0.0000001;
@@ -451,22 +454,22 @@ export fn toggleTool() wasm.Obj {
         .click => {
             tool = Tool.init(&tool_triangle);
             tool_kind = .triangle;
-            return obj_triangle;
+            return strings.triangle;
         },
         .triangle => {
             tool = Tool.init(&tool_line);
             tool_kind = .line;
-            return obj_line;
+            return strings.line;
         },
         .line => {
             tool = Tool.init(&tool_draw);
             tool_kind = .draw;
-            return obj_draw;
+            return strings.draw;
         },
         .draw => {
             tool = Tool.init(&tool_click);
             tool_kind = .click;
-            return obj_click;
+            return strings.click;
         },
     }
 }
@@ -495,10 +498,7 @@ export fn onClick(posX: f32, posY: f32) void {
 export fn init() void {
     wasm.initIfNecessary();
 
-    obj_line = wasm.make.string(.manual, "line");
-    obj_triangle = wasm.make.string(.manual, "triangle");
-    obj_click = wasm.make.string(.manual, "click");
-    obj_draw = wasm.make.string(.manual, "draw");
+    strings = wasm.makeStringTable(StringKeys);
 
     wasm.post(.log, "WASM initialized!", .{});
 }

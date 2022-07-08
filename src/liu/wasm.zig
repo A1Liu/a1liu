@@ -87,12 +87,11 @@ const ext = struct {
     extern fn exit(objIndex: Obj) noreturn;
 };
 
-var error_code: ?u32 = null;
-
 comptime {
     @export(liuWasmErrorCode, .{ .name = "liuWasmErrorCode", .linkage = .Strong });
 }
 
+var error_code: ?u32 = null;
 fn liuWasmErrorCode(code: u32) callconv(.C) void {
     error_code = code;
 }
@@ -239,7 +238,11 @@ pub const in = struct {
         return alignedBytes(byte_object, alloc, null);
     }
 
-    pub fn alignedBytes(byte_object: Obj, alloc: Allocator, comptime alignment: ?u29) ![]align(alignment orelse 1) u8 {
+    pub fn alignedBytes(
+        byte_object: Obj,
+        alloc: Allocator,
+        comptime alignment: ?u29,
+    ) ![]align(alignment orelse 1) u8 {
         if (builtin.target.cpu.arch != .wasm32) return &.{};
 
         defer ext.deleteObj(byte_object);
@@ -271,9 +274,8 @@ pub fn exit(msg: []const u8) noreturn {
     ext.exit(exit_message);
 }
 
-var initialized: bool = false;
-
 // TODO maybe this is just straight up not necessary
+var initialized: bool = false;
 pub fn initIfNecessary() void {
     if (builtin.target.cpu.arch != .wasm32) {
         return;
@@ -324,4 +326,40 @@ pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) nore
     _ = error_return_trace;
 
     exit(msg);
+}
+
+const Field = std.builtin.Type.StructField;
+pub fn StringTable(comptime field_enum: type) type {
+    comptime {
+        const variants = @typeInfo(field_enum).Enum.fields;
+
+        var fields: []const Field = &.{};
+        for (variants) |variant| {
+            fields = fields ++ &[_]Field{.{
+                .name = variant.name,
+                .field_type = Obj,
+                .default_value = null,
+                .is_comptime = false,
+                .alignment = @alignOf(Obj),
+            }};
+        }
+
+        return @Type(.{ .Struct = .{
+            .layout = .Auto,
+            .decls = &.{},
+            .is_tuple = false,
+            .fields = fields,
+        } });
+    }
+}
+
+pub fn makeStringTable(comptime field_enum: type) StringTable(field_enum) {
+    const T = StringTable(field_enum);
+    var output: T = undefined;
+
+    inline for (@typeInfo(T).Struct.fields) |field| {
+        @field(output, field.name) = make.string(.manual, field.name);
+    }
+
+    return output;
 }

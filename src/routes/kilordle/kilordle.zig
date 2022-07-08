@@ -55,27 +55,19 @@ const Match = union(MatchKind) {
     letter: u8,
 };
 
-const Keys = struct {
-    solution: wasm.Obj,
-    filled: wasm.Obj,
-    submits: wasm.Obj,
+const Keys = enum {
+    solution,
+    filled,
+    submits,
 };
 
 // Initialized at start of program
 var wordles: [5][]const u8 = undefined;
 var wordle_words: [5][]const u8 = undefined;
-var keys: Keys = undefined;
+var keys: wasm.StringTable(Keys) = undefined;
 
 var wordles_left: ArrayList(Wordle) = undefined;
 var submissions: ArrayList([5]u8) = undefined;
-
-fn makeKeys() Keys {
-    return .{
-        .solution = wasm.make.string(.manual, "solution"),
-        .filled = wasm.make.string(.manual, "filled"),
-        .submits = wasm.make.string(.manual, "submits"),
-    };
-}
 
 fn setPuzzles(puzzles: []Puzzle) void {
     const mark = wasm.watermark();
@@ -378,7 +370,7 @@ pub fn init(l_asset: wasm.Obj) !void {
     wordle_words[3] = parsed.words[3].slice();
     wordle_words[4] = parsed.words[4].slice();
 
-    keys = makeKeys();
+    keys = wasm.makeStringTable(Keys);
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
     submissions = ArrayList([5]u8).init(liu.Pages);

@@ -68,6 +68,7 @@ const init = async () => {
 
         return wasmRef.addObj(promise);
       },
+
       idbSet: (storeId: number, id: number, objId: number) => {
         const storeName = wasmRef.readObj(storeId);
         const transaction = db.transaction(storeName, "readwrite");

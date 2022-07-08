@@ -119,6 +119,9 @@ export fn uploadLevel(data: wasm.Obj) void {
 }
 
 export fn download() void {
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
+
     const mark = liu.TempMark;
     defer liu.TempMark = mark;
 
