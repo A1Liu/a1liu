@@ -180,7 +180,22 @@ const TempAlloc = struct {
     }
 };
 
-const SlabAlloc = struct {};
+const SlabAlloc = struct {
+    pub fn alloc(
+        _: *anyopaque,
+        len: usize,
+        ptr_align: u29,
+        len_align: u29,
+        ret_addr: usize,
+    ) Allocator.Error![]u8 {
+        _ = len;
+        _ = ptr_align;
+        _ = len_align;
+        _ = ret_addr;
+    }
+};
+
+test "Slab" {}
 
 // pub fn slabFrameBoundary() void {
 //     if (!std.debug.runtime_safety) return;
@@ -231,7 +246,3 @@ const SlabAlloc = struct {};
 //     }
 // };
 
-// test "Slab" {
-//     try SlabAlloc.globalInit();
-//     slabFrameBoundary();
-// }
