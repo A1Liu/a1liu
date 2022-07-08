@@ -334,77 +334,77 @@ const TableField = struct {
     value: []const u8,
 };
 
-pub fn StringTable(comptime table_info: anytype) type {
-    comptime {
-        const InfoType = @TypeOf(table_info);
+fn getFieldsForTable(comptime table_info: anytype) []const TableField {
+    const InfoType = @TypeOf(table_info);
 
-        var fields: []const TableField = &.{};
-        fields: {
-            switch (@typeInfo(InfoType)) {
-                .Type => {},
+    var fields: []const TableField = &.{};
+    switch (@typeInfo(InfoType)) {
+        .Type => {},
 
-                .Struct => |info| {
-                    for (info.fields) |field| {
-                        fields = fields ++ &[_]TableField{.{
-                            .name = field.name,
-                            .value = @field(table_info, field.name),
-                        }};
-                    }
-
-                    break :fields;
-                },
-
-                else => |data| @compileError("unsupported input to StringTable: " ++ @tagName(data)),
+        .Struct => |info| {
+            for (info.fields) |field| {
+                fields = fields ++ &[_]TableField{.{
+                    .name = field.name,
+                    .value = @field(table_info, field.name),
+                }};
             }
 
-            switch (@typeInfo(table_info)) {
-                .Enum => |info| {
-                    const variants = info.fields;
+            return fields;
+        },
 
-                    for (variants) |variant| {
-                        fields = fields ++ &[_]TableField{.{
-                            .name = variant.name,
-                            .value = variant.name,
-                        }};
-                    }
-
-                    break :fields;
-                },
-
-                else => |data| @compileError("unsupported input to StringTable: " ++ @tagName(data)),
-            }
-        }
-
-        var struct_fields: []const Field = &.{};
-        for (fields) |field| {
-            struct_fields = struct_fields ++ &[_]Field{.{
-                .name = field.name,
-                .field_type = Obj,
-                .default_value = null,
-                .is_comptime = false,
-                .alignment = @alignOf(Obj),
-            }};
-        }
-
-        const Data = @Type(.{ .Struct = .{
-            .layout = .Auto,
-            .decls = &.{},
-            .is_tuple = false,
-            .fields = struct_fields,
-        } });
-
-        return struct {
-            pub const Keys = Data;
-
-            pub fn init() Data {
-                var output: Data = undefined;
-
-                inline for (fields) |field| {
-                    @field(output, field.name) = make.string(.manual, field.value);
-                }
-
-                return output;
-            }
-        };
+        else => |data| @compileError("unsupported input to StringTable: " ++ @tagName(data)),
     }
+
+    switch (@typeInfo(table_info)) {
+        .Enum => |info| {
+            const variants = info.fields;
+
+            for (variants) |variant| {
+                fields = fields ++ &[_]TableField{.{
+                    .name = variant.name,
+                    .value = variant.name,
+                }};
+            }
+
+            return fields;
+        },
+
+        else => |data| @compileError("unsupported input to StringTable: " ++ @tagName(data)),
+    }
+}
+
+pub fn StringTable(comptime table_info: anytype) type {
+    const fields = getFieldsForTable(table_info);
+
+    var struct_fields: []const Field = &.{};
+    for (fields) |field| {
+        struct_fields = struct_fields ++ &[_]Field{.{
+            .name = field.name,
+            .field_type = Obj,
+            .default_value = null,
+            .is_comptime = false,
+            .alignment = @alignOf(Obj),
+        }};
+    }
+
+    const Data = @Type(.{ .Struct = .{
+        .layout = .Auto,
+        .decls = &.{},
+        .is_tuple = false,
+        .fields = struct_fields,
+    } });
+
+    return struct {
+        pub const Keys = Data;
+
+        pub fn init() Data {
+            var output: Data = undefined;
+
+            inline for (fields) |field| {
+                @field(output, field.name) = make.string(.manual, field.value);
+            }
+
+            return output;
+        }
+    };
 }
