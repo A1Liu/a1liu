@@ -241,12 +241,7 @@ var tool_kind: ToolKind = .triangle;
 var render: Render = .{};
 var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 
-const Table = wasm.StringTable(enum {
-    click,
-    triangle,
-    line,
-    draw,
-});
+const Table = wasm.StringTable(ToolKind);
 
 var strings: Table.Keys = undefined;
 

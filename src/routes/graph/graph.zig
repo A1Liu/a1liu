@@ -15,13 +15,13 @@ fn setData(id: u32, bytes: []const u8) wasm.Obj {
     const obj = wasm.make.slice(.manual, bytes);
     defer obj.delete();
 
-    const promise = ext.idbSet(store_id, id, obj);
+    const promise = ext.idbSet(keys.store_id, id, obj);
 
     return promise;
 }
 
 fn readData(alloc: std.mem.Allocator, id: u32) !?[]const u8 {
-    const promise = ext.idbGet(store_id, id);
+    const promise = ext.idbGet(keys.store_id, id);
     defer promise.delete();
 
     const data_obj = promise.Await();
@@ -66,13 +66,17 @@ fn awaitTheGuy() void {
     wasm.post(.log, "Done!", .{});
 }
 
-var store_id: wasm.Obj = undefined;
+const Table = wasm.StringTable(.{
+    .store_id = "graph-data",
+});
+
+var keys: Table.Keys = undefined;
 
 export fn init() void {
     const slot = liu.async_alloc.create(@Frame(awaitTheGuy)) catch unreachable;
     slot.* = async awaitTheGuy();
 
-    store_id = wasm.make.string(.manual, "graph-data");
+    keys = Table.init();
 
     manager_frame = async manager();
 
