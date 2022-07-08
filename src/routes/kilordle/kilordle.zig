@@ -55,16 +55,16 @@ const Match = union(MatchKind) {
     letter: u8,
 };
 
-const Keys = enum {
+const Table = wasm.StringTable(enum {
     solution,
     filled,
     submits,
-};
+});
 
 // Initialized at start of program
 var wordles: [5][]const u8 = undefined;
 var wordle_words: [5][]const u8 = undefined;
-var keys: wasm.StringTable(Keys) = undefined;
+var keys: Table.Keys = undefined;
 
 var wordles_left: ArrayList(Wordle) = undefined;
 var submissions: ArrayList([5]u8) = undefined;
@@ -370,7 +370,7 @@ pub fn init(l_asset: wasm.Obj) !void {
     wordle_words[3] = parsed.words[3].slice();
     wordle_words[4] = parsed.words[4].slice();
 
-    keys = wasm.makeStringTable(Keys);
+    keys = Table.init();
 
     wordles_left = ArrayList(Wordle).init(liu.Pages);
     submissions = ArrayList([5]u8).init(liu.Pages);

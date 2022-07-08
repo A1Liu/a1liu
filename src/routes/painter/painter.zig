@@ -241,13 +241,14 @@ var tool_kind: ToolKind = .triangle;
 var render: Render = .{};
 var current_color: Vec3 = Vec3{ 0.5, 0.5, 0.5 };
 
-const StringKeys = enum {
+const Table = wasm.StringTable(enum {
     click,
     triangle,
     line,
     draw,
-};
-var strings: wasm.StringTable(StringKeys) = undefined;
+});
+
+var strings: Table.Keys = undefined;
 
 const Math = struct {
     const EPSILON: f32 = 0.0000001;
@@ -498,7 +499,7 @@ export fn onClick(posX: f32, posY: f32) void {
 export fn init() void {
     wasm.initIfNecessary();
 
-    strings = wasm.makeStringTable(StringKeys);
+    strings = Table.init();
 
     wasm.post(.log, "WASM initialized!", .{});
 }

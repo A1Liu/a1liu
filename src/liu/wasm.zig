@@ -4,6 +4,7 @@ const liu = @import("./lib.zig");
 const builtin = @import("builtin");
 
 const Allocator = std.mem.Allocator;
+const Field = std.builtin.Type.StructField;
 const ArrayList = std.ArrayList;
 const wasm = @This();
 
@@ -328,7 +329,6 @@ pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) nore
     exit(msg);
 }
 
-const Field = std.builtin.Type.StructField;
 pub fn StringTable(comptime field_enum: type) type {
     comptime {
         const variants = @typeInfo(field_enum).Enum.fields;
@@ -344,22 +344,25 @@ pub fn StringTable(comptime field_enum: type) type {
             }};
         }
 
-        return @Type(.{ .Struct = .{
+        const Data = @Type(.{ .Struct = .{
             .layout = .Auto,
             .decls = &.{},
             .is_tuple = false,
             .fields = fields,
         } });
+
+        return struct {
+            pub const Keys = Data;
+
+            pub fn init() Data {
+                var output: Data = undefined;
+
+                inline for (@typeInfo(Data).Struct.fields) |field| {
+                    @field(output, field.name) = make.string(.manual, field.name);
+                }
+
+                return output;
+            }
+        };
     }
-}
-
-pub fn makeStringTable(comptime field_enum: type) StringTable(field_enum) {
-    const T = StringTable(field_enum);
-    var output: T = undefined;
-
-    inline for (@typeInfo(T).Struct.fields) |field| {
-        @field(output, field.name) = make.string(.manual, field.name);
-    }
-
-    return output;
 }
