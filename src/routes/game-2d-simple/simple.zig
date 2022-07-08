@@ -72,13 +72,7 @@ export fn init() void {
 }
 
 fn initErr() !void {
-    // keys = Table.init();
-
-    large_font = wasm.make.string(.manual, "bold 48px sans-serif");
-    med_font = wasm.make.string(.manual, "24px sans-serif");
-    small_font = wasm.make.string(.manual, "10px sans-serif");
-    level_download = wasm.make.string(.manual, "levelDownload");
-    save_level = wasm.make.string(.manual, "saveLevel");
+    keys = Table.init();
 
     try tools.appendSlice(Static, &.{
         try editor.Tool.create(Static, editor.LineTool{}),
@@ -95,22 +89,15 @@ const Static: std.mem.Allocator = static_storage.allocator();
 var tools: std.ArrayListUnmanaged(editor.Tool) = .{};
 var tool_index: u32 = 0;
 
-// const Table = wasm.StringTable(.{
-//     .large_font = wasm.make.string(.manual, "bold 48px sans-serif"),
-//     .med_font = wasm.make.string(.manual, "24px sans-serif"),
-//     .small_font = wasm.make.string(.manual, "10px sans-serif"),
-//     .level_download = wasm.make.string(.manual, "levelDownload"),
-//     .save_level = wasm.make.string(.manual, "saveLevel"),
-// });
+const Table = wasm.StringTable(.{
+    .large_font = "bold 48px sans-serif",
+    .med_font = "24px sans-serif",
+    .small_font = "10px sans-serif",
+    .level_download = "levelDownload",
+    .save_level = "saveLevel",
+});
 
-// pub var keys: Table.Keys = undefined;
-
-pub var large_font: wasm.Obj = undefined;
-pub var med_font: wasm.Obj = undefined;
-pub var small_font: wasm.Obj = undefined;
-
-pub var level_download: wasm.Obj = undefined;
-pub var save_level: wasm.Obj = undefined;
+pub var keys: Table.Keys = undefined;
 
 pub var is_editor_mode: bool = false;
 
@@ -139,7 +126,7 @@ export fn download() void {
 
     const text = editor.serializeLevel() catch return;
 
-    return wasm.post(level_download, "{s}", .{text});
+    return wasm.post(keys.level_download, "{s}", .{text});
 }
 
 export fn setInitialTime(timestamp: f64) void {
@@ -444,7 +431,7 @@ fn newToolIndex(diff: i32) u32 {
 pub fn renderDebugInfo(input: FrameInput) void {
     if (builtin.mode != .Debug) {
         if (input.frame_id % 256 == 0) {
-            wasm.pushMessage(save_level, .jsundefined);
+            wasm.pushMessage(keys.save_level, .jsundefined);
         }
     }
 
@@ -459,7 +446,7 @@ pub fn renderDebugInfo(input: FrameInput) void {
 
     ext.fillStyle(0.5, 0.5, 0.5, 1);
 
-    ext.setFont(large_font);
+    ext.setFont(keys.large_font);
 
     {
         const fps_text = wasm.make.string(.temp, "FPS:");
@@ -483,14 +470,14 @@ pub fn renderDebugInfo(input: FrameInput) void {
     }
 
     if (is_editor_mode) {
-        ext.setFont(med_font);
+        ext.setFont(keys.med_font);
         const prev_tool = wasm.make.string(.temp, tools.items[newToolIndex(-1)].name);
         const next_tool = wasm.make.string(.temp, tools.items[newToolIndex(1)].name);
         ext.fillText(prev_tool, 530, 25);
         ext.fillText(next_tool, 530, 110);
     }
 
-    ext.setFont(small_font);
+    ext.setFont(keys.small_font);
 
     var topY: i32 = 5;
 
