@@ -180,57 +180,58 @@ const TempAlloc = struct {
     }
 };
 
-pub const Slab = SlabAlloc.allocator;
-pub fn slabFrameBoundary() void {
-    if (!std.debug.runtime_safety) return;
+const SlabAlloc = struct {};
 
-    const value = @atomicLoad(u64, &SlabAlloc.next, .SeqCst);
-    SlabAlloc.frame_begin = value;
-}
+// pub fn slabFrameBoundary() void {
+//     if (!std.debug.runtime_safety) return;
+//
+//     const value = @atomicLoad(u64, &SlabAlloc.next, .SeqCst);
+//     SlabAlloc.frame_begin = value;
+// }
 
-const SlabAlloc = struct {
-    // Naughty dog-inspired allocator, takes 2MB chunks from a pool, and its
-    // ownership of chunks does not outlive the frame boundary.
+// const SlabAlloc = struct {
+//     // Naughty dog-inspired allocator, takes 2MB chunks from a pool, and its
+//     // ownership of chunks does not outlive the frame boundary.
+//
+//     const SlabCount = if (@hasDecl(root, "liu_SlabAlloc_SlabCount"))
+//         root.liu_SlabAlloc_SlabCount
+//     else
+//         1024;
+//
+//     const page = [4096]u8;
+//
+//     var frame_begin: if (std.debug.runtime_safety) ?u64 else void = if (std.debug.runtime_safety)
+//         null
+//     else {};
+//
+//     var next: usize = 0;
+//     var slab_begin: [*]align(1024) page = undefined;
+//
+//     pub fn globalInit() !void {
+//         assert(next == 0);
+//
+//         if (std.debug.runtime_safety) {
+//             assert(frame_begin == null);
+//         }
+//
+//         const slabs = try Pages.alignedAlloc(page, SlabCount, 1024);
+//         slab_begin = slabs.ptr;
+//     }
+//
+//     pub fn getMem() *[4096]u8 {
+//         const out = @atomicRmw(u64, &SlabAlloc.next, .Add, 1, .SeqCst);
+//
+//         if (std.debug.runtime_safety) {
+//             if (frame_begin) |begin| {
+//                 assert(begin - out < SlabCount);
+//             }
+//         }
+//
+//         return &slab_begin[out % SlabCount];
+//     }
+// };
 
-    const SlabCount = if (@hasDecl(root, "liu_SlabAlloc_SlabCount"))
-        root.liu_SlabAlloc_SlabCount
-    else
-        1024;
-
-    const page = [4096]u8;
-
-    var frame_begin: if (std.debug.runtime_safety) ?u64 else void = if (std.debug.runtime_safety)
-        null
-    else {};
-
-    var next: usize = 0;
-    var slab_begin: [*]align(1024) page = undefined;
-
-    pub fn globalInit() !void {
-        assert(next == 0);
-
-        if (std.debug.runtime_safety) {
-            assert(frame_begin == null);
-        }
-
-        const slabs = try Pages.alignedAlloc(page, SlabCount, 1024);
-        slab_begin = slabs.ptr;
-    }
-
-    pub fn getMem() *[4096]u8 {
-        const out = @atomicRmw(u64, &SlabAlloc.next, .Add, 1, .SeqCst);
-
-        if (std.debug.runtime_safety) {
-            if (frame_begin) |begin| {
-                assert(begin - out < SlabCount);
-            }
-        }
-
-        return &slab_begin[out % SlabCount];
-    }
-};
-
-test "Slab" {
-    try SlabAlloc.globalInit();
-    slabFrameBoundary();
-}
+// test "Slab" {
+//     try SlabAlloc.globalInit();
+//     slabFrameBoundary();
+// }
