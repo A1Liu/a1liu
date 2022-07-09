@@ -229,11 +229,13 @@ const init = async () => {
       setColorExt: (r: number, g: number, b: number): void => {
         postMessage({ kind: "setColor", data: [r, g, b] });
       },
+      renderExt: (triId: number, colorsId: number) => {
+        const tri = wasmRef.readObj(triId);
+        const colors = wasmRef.readObj(colorsId);
+        updateState(tri, colors);
+      },
     }),
-    imports: {
-      renderExt: (tri: Float32Array | null, colors: Float32Array | null) =>
-        updateState(tri, colors),
-    },
+    imports: {},
   });
 
   wasmRef.abi.init();

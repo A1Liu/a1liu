@@ -113,14 +113,20 @@
     const data = wasm.fetchAsset("/kilordle/data.rtf");
     const wasmPromise = wasm.fetchWasm(wasmUrl, {
       postMessage: postToast,
-      imports: { setPuzzles: (p: PuzzleData[]) => (puzzles = p) },
-      raw: () => ({
+      imports: {},
+
+      raw: (wasmRef: wasm.Ref) => ({
         resetSubmission: () => {
           word = "";
           submitError = false;
         },
+
         incrementSubmissionCount: () => (submissionCount += 1),
         setWordsLeft: (words: number) => (wordsLeft = words),
+        setPuzzles: (puzzleDataId: number) => {
+          puzzles = wasmRef.readObj(puzzleDataId);
+        },
+
         addChar: (code: number) => {
           const character = String.fromCharCode(code);
           addChar(character);

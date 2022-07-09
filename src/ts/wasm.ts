@@ -19,6 +19,46 @@ const initialObjectBuffer: any[] = [
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;
 
+export class Reff {
+  public readonly memory: WebAssembly.Memory;
+  public readonly abi: { readonly [x: string]: WasmFunc };
+
+  public readonly objArray: any[] = [...initialObjectBuffer];
+  public readonly objMap = new Map<number, any>();
+  nextObjId: number = -1;
+
+  // Read object from object buffer
+  public readonly readObj = (id: number): any => {
+    return this.objArray[id] ?? this.objMap.get(id);
+  };
+
+  // Add object to objectMap and return id for the object added
+  public readonly addObj = (data: any, isTemp: boolean = false): number => {
+    if (data === undefined) return 0;
+    if (data === null) return 1;
+    if (data === "") return 2;
+
+    if (isTemp) {
+      const idx = this.objArray.length;
+      this.objArray.push(data);
+
+      return idx;
+    }
+
+    const idx = this.nextObjId;
+    this.nextObjId -= 1;
+    this.objMap.set(idx, data);
+
+    return idx;
+  };
+
+  public static constructor(instance: WebAssembly.Instance) {
+    this.memory = instance.memory;
+    this.abi = instance.exports.memory;
+    this.readObj = () => {};
+  }
+}
+
 export interface Ref {
   readonly instance: any;
   readonly memory: WebAssembly.Memory;
@@ -33,7 +73,6 @@ export interface Ref {
 interface Imports {
   readonly postMessage: (kind: string, data: any) => void;
   readonly raw?: (ref: Ref) => { readonly [x: string]: WasmFunc };
-  readonly imports: { readonly [x: string]: WasmFunc };
 }
 
 export const fetchAsset = async (path: string): Promise<Uint8Array> => {
@@ -111,14 +150,18 @@ export const fetchWasm = async (
 
   // debugLoop(postMessage, objectBuffer, objectMap);
 
-  const wasmImports = {} as any;
-  Object.entries({ postMessage, ...importData.imports }).forEach(
-    ([key, value]: [string, any]) => {
-      wasmImports[key] = (...args: number[]) => value(...args.map(readObj));
-    }
-  );
+  // const wasmImports = {} as any;
+  // Object.entries({ postMessage }).forEach(
+  //   ([key, value]: [string, any]) => {
+  //     wasmImports[key] = (...args: number[]) => value(...args.map(readObj));
+  //   }
+  // );
 
   const env = {
+    postMessage: (kind: number, data: number): void => {
+      postMessage(ref.readObj(kind), ref.readObj(data));
+    },
+
     awaitHook: (id: number, out: number, ptr: number) => {
       readObj(id).then((result) => {
         const outId = addObj(result, false);
@@ -201,7 +244,6 @@ export const fetchWasm = async (
       throw new Error(`Crashed: ${value}`);
     },
 
-    ...wasmImports,
     ...raw?.(ref),
   };
 
