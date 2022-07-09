@@ -180,11 +180,34 @@ const TempAlloc = struct {
     }
 };
 
-const SlabAlloc = struct {
-    threadlocal var slab: *align(8) [2 * 1024 * 1024 * 1024]u8 = undefined;
+const SlabHeader = extern struct {
+    size: u32,
+    flags: packed struct {
+        free: bool,
+    },
+};
 
-    // size u32
-    // flags u32
+const SlabData = extern struct {
+    // alignments are always to 8
+    //
+    // cutoff is 1MB
+
+    // next slab data
+    next: *align(8) @This(),
+
+    // Size of data after this slab object
+    size: u32,
+
+    // next in free-list
+    next_free: u32,
+
+    // next in bump list
+    next_bump: u32,
+};
+
+const SlabAlloc = struct {
+    threadlocal var first: *align(8) SlabData = undefined;
+    threadlocal var current: *align(8) SlabData = undefined;
 
     pub fn alloc(
         _: *anyopaque,
