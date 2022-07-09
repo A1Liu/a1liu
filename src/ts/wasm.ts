@@ -76,6 +76,7 @@ export const fetchWasm = async (
   const readObj = (id: number): any => objectBuffer[id] ?? objectMap.get(id);
 
   const addObj = (data: any, isTemp: boolean = false): number => {
+    // These are the indices of jsundefined, jsnull, and jsempty_string
     if (data === undefined) return 0;
     if (data === null) return 1;
     if (data === "") return 2;
@@ -176,9 +177,7 @@ export const fetchWasm = async (
     // or whatever
 
     watermark: (idx: number) => objectBuffer.length,
-    setWatermark: (idx: number) => {
-      objectBuffer.length = idx;
-    },
+    setWatermark: (idx: number) => (objectBuffer.length = idx),
 
     deleteObj: (idx: number) => objectMap.delete(idx),
 
