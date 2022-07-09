@@ -181,6 +181,8 @@ const TempAlloc = struct {
 };
 
 const SlabAlloc = struct {
+    threadlocal var slab: *align(8) [2 * 1024 * 1024 * 1024]u8 = undefined;
+
     pub fn alloc(
         _: *anyopaque,
         len: usize,
