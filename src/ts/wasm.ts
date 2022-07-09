@@ -110,13 +110,6 @@ export const fetchWasm = async (
 
   // debugLoop(postMessage, objectBuffer, objectMap);
 
-  // const wasmImports = {} as any;
-  // Object.entries({ postMessage }).forEach(
-  //   ([key, value]: [string, any]) => {
-  //     wasmImports[key] = (...args: number[]) => value(...args.map(readObj));
-  //   }
-  // );
-
   const env = {
     postMessage: (kind: number, data: number): void => {
       postMessage(ref.readObj(kind), ref.readObj(data));
