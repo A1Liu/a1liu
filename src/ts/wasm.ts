@@ -20,7 +20,6 @@ const initialObjectBuffer: any[] = [
 type WasmFunc = (...data: any[]) => any;
 
 export interface Ref {
-  readonly instance: any;
   readonly memory: WebAssembly.Memory;
   readonly abi: { readonly [x: string]: WasmFunc };
 
