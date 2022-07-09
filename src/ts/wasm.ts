@@ -19,46 +19,6 @@ const initialObjectBuffer: any[] = [
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;
 
-export class Reff {
-  public readonly memory: WebAssembly.Memory;
-  public readonly abi: { readonly [x: string]: WasmFunc };
-
-  public readonly objArray: any[] = [...initialObjectBuffer];
-  public readonly objMap = new Map<number, any>();
-  nextObjId: number = -1;
-
-  // Read object from object buffer
-  public readonly readObj = (id: number): any => {
-    return this.objArray[id] ?? this.objMap.get(id);
-  };
-
-  // Add object to objectMap and return id for the object added
-  public readonly addObj = (data: any, isTemp: boolean = false): number => {
-    if (data === undefined) return 0;
-    if (data === null) return 1;
-    if (data === "") return 2;
-
-    if (isTemp) {
-      const idx = this.objArray.length;
-      this.objArray.push(data);
-
-      return idx;
-    }
-
-    const idx = this.nextObjId;
-    this.nextObjId -= 1;
-    this.objMap.set(idx, data);
-
-    return idx;
-  };
-
-  public static constructor(instance: WebAssembly.Instance) {
-    this.memory = instance.memory;
-    this.abi = instance.exports.memory;
-    this.readObj = () => {};
-  }
-}
-
 export interface Ref {
   readonly instance: any;
   readonly memory: WebAssembly.Memory;
@@ -93,6 +53,7 @@ function debugLoop(
       objectBuffer,
       objectMap: [...objectMap.entries()],
     };
+
     postMessage("log", JSON.stringify(data));
     // postMessage("log", data);
 
@@ -141,7 +102,6 @@ export const fetchWasm = async (
   };
 
   const ref: Ref = {
-    instance: {} as any,
     memory: {} as any,
     abi: {} as any,
     readObj,
@@ -251,7 +211,6 @@ export const fetchWasm = async (
 
   const refAny = ref as any;
 
-  refAny.instance = result.instance;
   refAny.abi = result.instance.exports;
   refAny.memory = result.instance.exports.memory;
 
