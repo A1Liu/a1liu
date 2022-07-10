@@ -175,6 +175,7 @@ const TempAlloc = struct {
 };
 
 // TODO: rewrite Pages to be the same on native but to use wasmGrow on webassembly
+// TODO: finish this implementation lol
 
 const Slab = struct {
     const NULL = std.math.maxInt(u32);
@@ -208,7 +209,7 @@ const Slab = struct {
         // indices start at &arena.first_header, are in bytes
 
         // next slab data
-        next: *align(8) Self align(8),
+        next: ?*align(8) Self align(8),
 
         // Size of data after this slab object
         size: u32,
@@ -222,13 +223,18 @@ const Slab = struct {
         first_header: Header,
 
         fn init(size: usize) !*Self {
-            if (size >= NULL) return error.ArenaSizeTooLarge;
+            if (size >= NULL - @sizeOf(Header)) return error.ArenaSizeTooLarge;
 
             const arena_size = std.math.max(size, min_arena_size);
 
+            // allocAdvanced
             const chunk_ptr = try Pages.alignedAlloc(u8, 8, @sizeOf(Self) + arena_size);
-            const self = @ptrCast(*Self, chunk_ptr);
+            const self = @ptrCast(*Self, chunk_ptr.ptr);
+
+            self.next = null;
             self.size = @truncate(u32, arena_size);
+            self.next_free = NULL;
+            self.next_bump = 0;
 
             return self;
         }
