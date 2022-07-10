@@ -6,24 +6,18 @@ const mem = std.mem;
 const assert = std.debug.assert;
 
 const Allocator = mem.Allocator;
-// const ArrayList = std.ArrayList;
-const ByteList = std.ArrayListAlignedUnmanaged([]u8, null);
-const GlobalAlloc = std.heap.GeneralPurposeAllocator(.{});
 
-// general purpose global allocator for small allocations
-var GlobalAllocator: GlobalAlloc = .{};
-pub const Alloc = GlobalAllocator.allocator();
 pub const Pages = std.heap.page_allocator;
 
 const BumpState = struct {
     const Self = @This();
 
-    ranges: ByteList,
+    ranges: std.ArrayListAlignedUnmanaged([]u8, null),
     next_size: usize,
 
     fn init(initial_size: usize) Self {
         return .{
-            .ranges = ByteList{},
+            .ranges = .{},
             .next_size = initial_size,
         };
     }
@@ -180,50 +174,144 @@ const TempAlloc = struct {
     }
 };
 
-const SlabHeader = extern struct {
-    size: u32,
-    flags: packed struct {
-        free: bool,
-    },
-};
+// TODO: rewrite Pages to be the same on native but to use wasmGrow on webassembly
 
-const SlabData = extern struct {
-    // alignments are always to 8
-    //
-    // cutoff is 1MB
+const Slab = struct {
+    const NULL = std.math.maxInt(u32);
 
-    // next slab data
-    next: *align(8) @This(),
+    const min_arena_size: usize = 1024 * 1024;
 
-    // Size of data after this slab object
-    size: u32,
+    const Header = extern struct {
+        prev_size: u32 align(8),
+        current: packed struct {
+            is_free: bool,
+            size: u31,
+        },
+    };
 
-    // next in free-list
-    next_free: u32,
+    const FreeHeader = extern struct {
+        header: Header,
 
-    // next in bump list
-    next_bump: u32,
-};
+        // relative, use header_address - prev_free
+        prev_free: u32,
 
-const SlabAlloc = struct {
-    threadlocal var first: *align(8) SlabData = undefined;
-    threadlocal var current: *align(8) SlabData = undefined;
+        // relative, use header_address + next_free
+        next_free: u32,
+    };
+
+    const Arena = extern struct {
+        const Self = @This();
+        // alignments are always to 8
+        //
+        // cutoff is 1MB
+
+        // indices start at &arena.first_header, are in bytes
+
+        // next slab data
+        next: *align(8) Self align(8),
+
+        // Size of data after this slab object
+        size: u32,
+
+        // next in free-list; should start out as NULL
+        next_free: u32,
+
+        // next in bump list; should start out as 0
+        next_bump: u32,
+
+        first_header: Header,
+
+        fn init(size: usize) !*Self {
+            if (size >= NULL) return error.ArenaSizeTooLarge;
+
+            const arena_size = std.math.max(size, min_arena_size);
+
+            const chunk_ptr = try Pages.alignedAlloc(u8, 8, @sizeOf(Self) + arena_size);
+            const self = @ptrCast(*Self, chunk_ptr);
+            self.size = @truncate(u32, arena_size);
+
+            return self;
+        }
+
+        fn deinit(self: *const Self) void {
+            var bytes: []const u8 = undefined;
+            bytes.ptr = @ptrCast([*]const u8, self);
+            bytes.len = self.size;
+
+            Pages.free(bytes);
+        }
+
+        fn freeHeaderFromIndex(self: *Self, index: u32) ?*FreeHeader {
+            if (index == NULL) return null;
+
+            const value = @ptrToInt(&self.first_header) + index;
+            const header = @intToPtr(*FreeHeader, value);
+
+            std.debug.assert(header.header.current.is_free);
+
+            return header;
+        }
+
+        fn alloc(self: *@This(), len: usize, ptr_align: u29, len_align: u29) ?[]u8 {
+            // const self_too_small = len > self.size;
+
+            if (self.freeHeaderFromIndex(self.next_bump)) |header| {
+                _ = header;
+            }
+
+            // const addr = @ptrToInt(range.ptr) + mark.index_in_range;
+            // const adjusted_addr = mem.alignForward(addr, ptr_align);
+            // const adjusted_index = mark.index_in_range + (adjusted_addr - addr);
+            // const new_end_index = adjusted_index + len;
+
+            _ = self;
+            _ = len;
+            _ = ptr_align;
+            _ = len_align;
+
+            // if (self.next_bump +  <  ) {
+            // }
+
+            // const nothing_free = self.next_free !=  NULL;
+            // if (self_too_small or nothing_free) return null;
+
+        }
+    };
+
+    first: *align(8) Arena = undefined,
+    current: *align(8) Arena = undefined,
 
     pub fn alloc(
-        _: *anyopaque,
+        self: *@This(),
         len: usize,
         ptr_align: u29,
         len_align: u29,
         ret_addr: usize,
     ) Allocator.Error![]u8 {
-        _ = len;
-        _ = ptr_align;
-        _ = len_align;
-        _ = ret_addr;
+        if (self.current.alloc(len, ptr_align, len_align)) |a| {
+            return a;
+        }
+
+        return Pages.rawAlloc(len, ptr_align, len_align, ret_addr);
+
+        // _ = self;
+        // _ = len;
+        // _ = ptr_align;
+        // _ = len_align;
+        // _ = ret_addr;
     }
 };
 
-test "Slab" {}
+test "Slab" {
+    try std.testing.expectEqual(@sizeOf(Slab.Header), 8);
+    try std.testing.expectEqual(@alignOf(Slab.Header), 8);
+    try std.testing.expectEqual(@sizeOf(Slab.FreeHeader), 16);
+    try std.testing.expectEqual(@alignOf(Slab.FreeHeader), 8);
+    try std.testing.expectEqual(@alignOf(Slab.Arena), 8);
+
+    const arena = try Slab.Arena.init(0);
+    defer arena.deinit();
+}
 
 // pub fn slabFrameBoundary() void {
 //     if (!std.debug.runtime_safety) return;
