@@ -149,10 +149,7 @@ pub const Temp = TempAlloc.allocator;
 pub threadlocal var TempMark: Mark = Mark.ZERO;
 
 const TempAlloc = struct {
-    const InitialSize = if (@hasDecl(root, "liu_TempAlloc_InitialSize"))
-        root.liu_TempAlloc_InitialSize
-    else
-        256 * 1024;
+    const InitialSize = 256 * 1024;
 
     threadlocal var bump = BumpState.init(InitialSize);
 
