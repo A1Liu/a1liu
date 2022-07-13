@@ -1,6 +1,29 @@
 export const timeout = (ms: number): Promise<void> =>
   new Promise((res) => setTimeout(res, ms));
 
+const timeVals = [
+  { div: 1000, s: "ms", precision: 1 },
+  { div: 60, s: "s", precision: 0 },
+  { div: 60, s: "m", precision: 0 },
+  { div: 24, s: "h", precision: 0 },
+];
+
+export const fmtTime = (msTime: number): string => {
+  let output = "";
+
+  for (const val of timeVals) {
+    output = (msTime % val.div).toFixed(val.precision) + val.s + output;
+
+    if (msTime < val.div) break;
+
+    output = " " + output;
+
+    msTime = Math.floor(msTime / val.div);
+  }
+
+  return output;
+};
+
 export async function defer<T>(cb: () => T): Promise<T> {
   await timeout(0);
   return cb();

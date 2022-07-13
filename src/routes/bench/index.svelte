@@ -1,6 +1,7 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { onMount } from "svelte";
+  import { fmtTime } from "@lib/ts/util";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import * as wasm from "@lib/ts/wasm";
@@ -27,6 +28,7 @@
 
         case "benchStarted": {
           start = message.data;
+          end = null;
           break;
         }
 
@@ -93,7 +95,7 @@
     {#each benchHistory as info (info.id)}
       <div class="row history-item" transition:slide>
         <p>Count: {info.count}</p>
-        <p>Duration: {info.duration.toFixed(3)}</p>
+        <p>Duration: {fmtTime(info.duration)}</p>
       </div>
     {/each}
   </div>
