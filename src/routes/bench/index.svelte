@@ -33,17 +33,14 @@
         }
 
         case "benchDone": {
+          const newItem = {
+            id: benchId,
+            count: runningCount,
+            duration: message.data - start,
+          };
+
+          benchHistory = [...benchHistory, newItem];
           end = message.data;
-
-          benchHistory = [
-            ...benchHistory,
-            {
-              id: benchId,
-              count: runningCount,
-              duration: end - start,
-            },
-          ];
-
           runningCount = null;
           benchId += 1;
           break;
