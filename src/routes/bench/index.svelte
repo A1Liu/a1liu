@@ -88,10 +88,10 @@
   </div>
 </div>
 
-<div class="row" style="position: fixed; right: 0px; top: 0px">
-  <div class="col" style="flex-direction: column-reverse">
+<div class="history-box">
+  <div class="col" style="flex-direction: column-reverse; gap: 4px">
     {#each benchHistory as info (info.id)}
-      <div class="row" transition:slide>
+      <div class="row history-item" transition:slide>
         <p>Count: {info.count}</p>
         <p>Duration: {info.duration.toFixed(3)}</p>
       </div>
@@ -101,6 +101,20 @@
 
 <style lang="postcss">
   @import "@lib/svelte/util.module.css";
+
+  .history-box {
+    height: 100vh;
+
+    padding: 8px;
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    overflow-y: scroll;
+  }
+
+  .history-item {
+    border: 1px solid black;
+  }
 
   .col {
     display: flex;
