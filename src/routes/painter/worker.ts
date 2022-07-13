@@ -235,7 +235,6 @@ const init = async () => {
         updateState(tri, colors);
       },
     }),
-    imports: {},
   });
 
   wasmRef.abi.init();

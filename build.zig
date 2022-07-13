@@ -70,6 +70,9 @@ pub fn build(b: *Builder) !void {
         .name = "painter",
         .root = "./src/routes/painter/painter.zig",
     }, .{
+        .name = "bench",
+        .root = "./src/routes/bench/bench.zig",
+    }, .{
         .name = "info-graph",
         .root = "./src/routes/graph/graph.zig",
     }, .{

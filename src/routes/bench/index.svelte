@@ -6,6 +6,8 @@
 
   let worker = undefined;
 
+  let count = 0;
+
   onMount(() => {
     worker = new MyWorker();
 
@@ -17,6 +19,7 @@
         }
 
         case "":
+          count += 1;
           break;
 
         default:
@@ -24,12 +27,9 @@
           break;
       }
     };
-    });
-
+  });
 </script>
 
 <Toast location={"bottom-left"} />
 
-<div>
-
-</div>
+<div />

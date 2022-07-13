@@ -119,7 +119,6 @@ const init = async () => {
         glCtx.fillRect(x, y, width, height);
       },
     }),
-    imports: {},
   });
 
   wasmRef.abi.init();

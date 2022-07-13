@@ -86,7 +86,6 @@ const init = async () => {
         return wasmRef.addObj(promise);
       },
     }),
-    imports: {},
   });
 
   db = await dbPromise;

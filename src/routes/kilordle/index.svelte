@@ -113,7 +113,6 @@
     const data = wasm.fetchAsset("/kilordle/data.rtf");
     const wasmPromise = wasm.fetchWasm(wasmUrl, {
       postMessage: postToast,
-      imports: {},
 
       raw: (wasmRef: wasm.Ref) => ({
         resetSubmission: () => {
