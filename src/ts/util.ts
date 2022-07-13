@@ -6,6 +6,7 @@ const timeVals = [
   { div: 60, s: "s", precision: 0 },
   { div: 60, s: "m", precision: 0 },
   { div: 24, s: "h", precision: 0 },
+  { div: Infinity, s: "d", precision: 0 },
 ];
 
 export const fmtTime = (msTime: number): string => {
