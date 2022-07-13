@@ -5,17 +5,26 @@ import wasmUrl from "@zig/bench.wasm?url";
 const ctx = new WorkerCtx<Message>();
 onmessage = ctx.onmessageCallback();
 
-const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {};
+const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
+  switch (msg.kind) {
+    case "doBench": {
+      postMessage({ kind: "benchStarted", data: performance.now() });
 
-const main = async (wasmRef: wasm.Ref) => {
-  while (true) {
-    const captured = await ctx.msgWait();
+      const count = msg.data;
+      for (let i = 0; i < count; i++) {
+        wasmRef.abi.run();
+      }
 
-    captured.forEach((msg) => handleMessage(wasmRef, msg));
+      postMessage({ kind: "benchDone", data: performance.now() });
+      break;
+    }
+
+    default:
+      break;
   }
 };
 
-const init = async () => {
+const main = async () => {
   const wasmRef = await wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({}),
@@ -25,7 +34,11 @@ const init = async () => {
 
   postMessage({ kind: "initDone" });
 
-  main(wasmRef);
+  while (true) {
+    const captured = await ctx.msgWait();
+
+    captured.forEach((msg) => handleMessage(wasmRef, msg));
+  }
 };
 
-init();
+main();
