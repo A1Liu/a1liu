@@ -84,7 +84,7 @@
       {:else if end === null}
         <p>Running...</p>
       {:else}
-        <p>Duration: {(end - start).toFixed(3)}</p>
+        <p>Duration: {fmtTime(end - start)}</p>
       {/if}
     </div>
   </div>
