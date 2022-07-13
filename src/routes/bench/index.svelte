@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { slide } from "svelte/transition";
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
@@ -9,6 +10,7 @@
   let count = 1000;
   let benchHistory = [];
 
+  let benchId = 0;
   let runningCount = null;
   let start = null;
   let end = null;
@@ -34,12 +36,14 @@
           benchHistory = [
             ...benchHistory,
             {
+              id: benchId,
               count: runningCount,
               duration: end - start,
             },
           ];
 
           runningCount = null;
+          benchId += 1;
           break;
         }
 
@@ -86,8 +90,8 @@
 
 <div class="row" style="position: fixed; right: 0px; top: 0px">
   <div class="col" style="flex-direction: column-reverse">
-    {#each benchHistory as info, idx (idx)}
-      <div class="row">
+    {#each benchHistory as info (info.id)}
+      <div class="row" transition:slide>
         <p>Count: {info.count}</p>
         <p>Duration: {info.duration.toFixed(3)}</p>
       </div>
