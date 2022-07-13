@@ -13,6 +13,10 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
       const count = msg.data;
       for (let i = 0; i < count; i++) {
         wasmRef.abi.run();
+
+        if (i % 32 === 0) {
+          postMessage({ kind: "" });
+        }
       }
 
       postMessage({ kind: "benchDone", data: performance.now() });

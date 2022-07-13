@@ -8,11 +8,12 @@
 
   let worker = undefined;
 
-  let count = 1000;
+  let inputCount = 1000;
+  let benchId = 0;
   let benchHistory = [];
 
-  let benchId = 0;
-  let runningCount = null;
+  let count = null;
+  let done = 0;
   let start = null;
   let end = null;
 
@@ -26,7 +27,13 @@
           break;
         }
 
+        case "": {
+          done += 32;
+          break;
+        }
+
         case "benchStarted": {
+          done = 0;
           start = message.data;
           end = null;
           break;
@@ -35,13 +42,13 @@
         case "benchDone": {
           const newItem = {
             id: benchId,
-            count: runningCount,
+            count,
             duration: message.data - start,
           };
 
           benchHistory = [...benchHistory, newItem];
           end = message.data;
-          runningCount = null;
+          count = null;
           benchId += 1;
           break;
         }
@@ -58,18 +65,18 @@
 
 <div class="col">
   <div class="row">
-    <input type="number" bind:value={count} min="1" />
+    <input type="number" bind:value={inputCount} min="1" />
 
     <button
       class="muiButton"
-      disabled={runningCount !== null}
+      disabled={count !== null}
       on:click={() => {
-        if (runningCount !== null) return;
-        if (count === null) return;
+        if (count !== null) return;
+        if (inputCount === null) return;
 
-        runningCount = count;
+        count = inputCount;
 
-        worker.postMessage({ kind: "doBench", data: count });
+        worker.postMessage({ kind: "doBench", data: inputCount });
       }}
     >
       run
@@ -79,7 +86,7 @@
       {#if start === null}
         <p>Click the run button to benchmark</p>
       {:else if end === null}
-        <p>Running...</p>
+        <p>Running... {((done / count) * 100).toFixed(2)}%</p>
       {:else}
         <p>Duration: {fmtTime(end - start)}</p>
       {/if}
