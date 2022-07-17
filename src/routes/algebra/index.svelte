@@ -11,11 +11,7 @@
   let tree = new Map();
   let root = undefined;
 
-  $: {
-    if (worker) {
-      worker.postMessage({ kind: "equationChange", data: equation });
-    }
-  }
+  $: worker?.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
     worker = new MyWorker();
@@ -55,14 +51,13 @@
 <Toast location={"bottom-left"} />
 
 <div class="overlay">
-  {#if root !== undefined}
-    <div class="exprArea">
-      <Expr {tree} id={root} />
-    </div>
-  {/if}
-
   <div class="rightColumn">
-    <input type="text" bind:value={equation} />
+    <div class="exprArea">
+      <input type="text" bind:value={equation} />
+      {#if root !== undefined}
+        <Expr {tree} id={root} />
+      {/if}
+    </div>
 
     <button
       class="muiButton"
@@ -79,6 +74,7 @@
   .exprArea {
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 8px;
 
     padding: 16px;
@@ -88,6 +84,7 @@
     border: 2px solid lightgray;
     border-radius: 8px;
     padding: 4px;
+    margin-right: 8px;
   }
 
   .overlay {
@@ -108,7 +105,7 @@
 
   .rightColumn {
     position: fixed;
-    right: 0px;
+    left: 0px;
     top: 0px;
 
     display: flex;
