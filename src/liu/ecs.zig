@@ -142,7 +142,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
             return value;
         }
 
-        pub fn get(self: *Iter, id: EntityId) ?ViewType {
+        pub fn get(self: *const Iter, id: EntityId) ?ViewType {
             const index = self.registry.indexOf(id) orelse return null;
 
             return read(self.registry, index);
@@ -232,6 +232,10 @@ pub fn Registry(comptime InDense: type) type {
         pub fn deinit(self: *Self) void {
             self.strings.deinit(self.alloc);
             self.dense.deinit(self.alloc);
+        }
+
+        pub fn ensureUnusedCapacity(self: *Self, capacity: usize) !void {
+            try self.dense.ensureUnusedCapacity(self.alloc, capacity);
         }
 
         pub fn create(self: *Self, name: []const u8) !EntityId {
