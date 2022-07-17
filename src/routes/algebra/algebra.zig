@@ -221,14 +221,14 @@ fn addTree(id: liu.ecs.EntityId) void {
     if (children.left) |left| {
         addTree(left);
 
-        const id_obj = wasm.make.number(.temp, @intToFloat(f64, left.index));
+        const id_obj = wasm.make.integer(.temp, left.index);
         obj.objSet(keys.left, id_obj);
     }
 
     if (children.right) |right| {
         addTree(right);
 
-        const id_obj = wasm.make.number(.temp, @intToFloat(f64, right.index));
+        const id_obj = wasm.make.integer(.temp, right.index);
         obj.objSet(keys.right, id_obj);
     }
 
@@ -247,7 +247,7 @@ fn addTree(id: liu.ecs.EntityId) void {
         obj.objSet(keys.value, value_obj);
     }
 
-    const id_obj = wasm.make.number(.temp, @intToFloat(f64, id.index));
+    const id_obj = wasm.make.integer(.temp, id.index);
     obj.objSet(keys.id, id_obj);
 
     wasm.postMessage(keys.add_tree_item, obj);
@@ -262,7 +262,7 @@ fn delTree(id: liu.ecs.EntityId) void {
 
     _ = registry.delete(id);
 
-    const id_obj = wasm.make.number(.temp, @intToFloat(f64, id.index));
+    const id_obj = wasm.make.integer(.temp, id.index);
     wasm.postMessage(keys.del_tree_item, id_obj);
 }
 

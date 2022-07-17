@@ -6,9 +6,10 @@
   import * as wasm from "@lib/ts/wasm";
   import Expr from "@lib/svelte/algebra/expression.svelte";
 
+  const tree = new Map();
+
   let equation = "";
   let worker = undefined;
-  let tree = new Map();
   let root = undefined;
 
   $: worker?.postMessage({ kind: "equationChange", data: equation });
@@ -54,6 +55,7 @@
   <div class="rightColumn">
     <div class="exprArea">
       <input type="text" bind:value={equation} />
+
       {#if root !== undefined}
         <Expr {tree} id={root} />
       {/if}
