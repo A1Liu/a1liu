@@ -63,6 +63,7 @@ export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: 
 const ext = struct {
     extern fn awaitHook(self: Obj, output: *Obj, slot: *align(4) const anyopaque) void;
 
+    extern fn makeNumber(number: f64, is_temp: bool) Obj;
     extern fn makeString(message: [*]const u8, length: usize, is_temp: bool) Obj;
     extern fn makeView(o: Obj, message: ?*const anyopaque, length: usize, is_temp: bool) Obj;
 
@@ -102,6 +103,7 @@ pub const watermark = ext.watermark;
 pub const setWatermark = ext.setWatermark;
 
 pub const pushMessage = ext.pushMessage;
+pub const postMessage = ext.postMessage;
 
 pub const Lifetime = enum {
     manual,
@@ -162,6 +164,10 @@ pub fn parseFloat(bytes: []const u8) std.fmt.ParseFloatError!f64 {
 }
 
 pub const make = struct {
+    pub fn number(life: Lifetime, n: f64) Obj {
+        return ext.makeNumber(n, life.isTemp());
+    }
+
     pub fn slice(life: Lifetime, data: anytype) Obj {
         const ptr: ?*const anyopaque = ptr: {
             switch (@typeInfo(@TypeOf(data))) {

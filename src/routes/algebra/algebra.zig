@@ -26,6 +26,18 @@ pub usingnamespace wasm;
 
 const Table = wasm.StringTable(.{
     .equation_change = "equationChange",
+    .add_tree_item = "addTreeItem",
+    .del_tree_item = "delTreeItem",
+    .set_root = "setRoot",
+
+    .kind = "kind",
+    .id = "id",
+    .value = "value",
+    .right = "right",
+    .left = "left",
+
+    .plus = "+",
+    .integer = "integer",
 });
 
 var keys: Table.Keys = undefined;
@@ -43,9 +55,14 @@ pub const Registry = liu.ecs.Registry(struct {
 });
 
 const EKind = enum(u8) {
-    Add = '+',
+    plus = '+',
 
-    Integer = 128,
+    integer = 128,
+};
+
+const ChildrenView = struct {
+    left: ?liu.ecs.EntityId,
+    right: ?liu.ecs.EntityId,
 };
 
 const ParseError = error{
@@ -90,6 +107,15 @@ const op_precedence = op_precedence: {
     precedence['+'] = 10;
 
     break :op_precedence precedence;
+};
+
+const expr_name_obj = expr_name_obj: {
+    var names: [256]?*wasm.Obj = [_]?*wasm.Obj{null} ** 256;
+
+    names[@enumToInt(EKind.plus)] = &keys.plus;
+    names[@enumToInt(EKind.integer)] = &keys.integer;
+
+    break :expr_name_obj names;
 };
 
 fn peek(index: *usize) ?u8 {
@@ -173,7 +199,7 @@ fn parseAtom(index: *usize) ParseError!liu.ecs.EntityId {
 
             const id = try registry.create("");
 
-            registry.addComponent(id, .kind).?.* = .Integer;
+            registry.addComponent(id, .kind).?.* = .integer;
             registry.addComponent(id, .value).?.* = @intToFloat(f64, value);
 
             return id;
@@ -187,17 +213,57 @@ export fn equationChange(equation_obj: wasm.Obj) void {
     equationChangeImpl(equation_obj) catch return;
 }
 
+fn addTree(id: liu.ecs.EntityId) void {
+    const children = registry.view(ChildrenView).get(id) orelse return;
+
+    const obj = wasm.make.obj(.temp);
+
+    if (children.left) |left| {
+        addTree(left);
+
+        const id_obj = wasm.make.number(.temp, @intToFloat(f64, left.index));
+        obj.objSet(keys.left, id_obj);
+    }
+
+    if (children.right) |right| {
+        addTree(right);
+
+        const id_obj = wasm.make.number(.temp, @intToFloat(f64, right.index));
+        obj.objSet(keys.right, id_obj);
+    }
+
+    const FieldView = struct {
+        value: ?f64,
+        kind: EKind,
+    };
+
+    const fields = registry.view(FieldView).get(id) orelse unreachable;
+
+    const kind_obj = expr_name_obj[@enumToInt(fields.kind)] orelse unreachable;
+    obj.objSet(keys.kind, kind_obj.*);
+
+    if (fields.value) |value| {
+        const value_obj = wasm.make.number(.temp, value);
+        obj.objSet(keys.value, value_obj);
+    }
+
+    const id_obj = wasm.make.number(.temp, @intToFloat(f64, id.index));
+    obj.objSet(keys.id, id_obj);
+
+    wasm.postMessage(keys.add_tree_item, obj);
+}
+
 fn delTree(id: liu.ecs.EntityId) void {
-    const view = registry.view(struct {
-        left: ?liu.ecs.EntityId,
-        right: ?liu.ecs.EntityId,
-    });
+    const view = registry.view(ChildrenView);
 
     const children = view.get(id) orelse return;
     if (children.left) |left| delTree(left);
     if (children.right) |right| delTree(right);
 
     _ = registry.delete(id);
+
+    const id_obj = wasm.make.number(.temp, @intToFloat(f64, id.index));
+    wasm.postMessage(keys.del_tree_item, id_obj);
 }
 
 fn equationChangeImpl(equation_obj: wasm.Obj) !void {
@@ -223,15 +289,23 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
     var index: usize = 0;
     const prev_root = root;
 
-    root = parseEquation(&index) catch |e| {
+    const new_root = parseEquation(&index) catch |e| {
         wasm.post(.log, "failed {s}: {s}", .{ @errorName(e), equation.items });
 
         return e;
     };
 
+    root = new_root;
+
+    addTree(new_root);
+
+    const id_obj = wasm.make.number(.temp, @intToFloat(f64, new_root.index));
+    wasm.postMessage(keys.set_root, id_obj);
+
     if (prev_root) |r| delTree(r);
 
     wasm.post(.log, "equation: {s}", .{equation.items});
+    wasm.post(keys.equation_change, "", .{});
 }
 
 export fn init() void {

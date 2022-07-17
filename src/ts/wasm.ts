@@ -124,6 +124,7 @@ export const fetchWasm = async (
 
     makeArray: (isTemp: boolean) => addObj([], isTemp),
     makeObj: (isTemp: boolean) => addObj({}, isTemp),
+    makeNumber: (n: number, isTemp: boolean) => addObj(n, isTemp),
     makeString: (location: number, size: number, isTemp: boolean) => {
       const array = new Uint8Array(ref.memory.buffer, location, size);
       return addObj(decoder.decode(array), isTemp);

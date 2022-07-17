@@ -42,7 +42,6 @@ const init = async () => {
       // fetch: (...a: number[]) => {
       //   const res = fetch(...a.map(wasmRef.readObj)).then((res) => res.blob());
       //   const id = wasmRef.addObj(res, false);
-
       //   return id;
       // },
     }),

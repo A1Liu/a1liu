@@ -232,6 +232,8 @@ pub fn Registry(comptime InDense: type) type {
         pub fn deinit(self: *Self) void {
             self.strings.deinit(self.alloc);
             self.dense.deinit(self.alloc);
+            self.count = 0;
+            self.free_head = NULL;
         }
 
         pub fn ensureUnusedCapacity(self: *Self, capacity: usize) !void {

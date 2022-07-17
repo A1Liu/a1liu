@@ -4,9 +4,12 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import { get } from "idb-keyval";
   import * as wasm from "@lib/ts/wasm";
+  import Expr from "@lib/svelte/algebra/expression.svelte";
 
   let equation = "";
   let worker = undefined;
+  let tree = new Map();
+  let root = undefined;
 
   $: {
     if (worker) {
@@ -25,6 +28,20 @@
         }
 
         case "equationChange":
+          // console.log("tree", [...tree.entries()]);
+          break;
+
+        case "addTreeItem":
+          tree.set(message.data.id, message.data);
+          break;
+
+        case "delTreeItem":
+          // console.log(message);
+          tree.delete(message.data);
+          break;
+
+        case "setRoot":
+          root = message.data;
           break;
 
         default:
@@ -38,6 +55,12 @@
 <Toast location={"bottom-left"} />
 
 <div class="overlay">
+  {#if root !== undefined}
+    <div class="exprArea">
+      <Expr {tree} id={root} />
+    </div>
+  {/if}
+
   <div class="rightColumn">
     <input type="text" bind:value={equation} />
 
@@ -52,6 +75,14 @@
 
 <style lang="postcss">
   @import "@lib/svelte/util.module.css";
+
+  .exprArea {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+
+    padding: 16px;
+  }
 
   input {
     border: 2px solid lightgray;
