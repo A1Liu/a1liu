@@ -27,14 +27,18 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
     const watermark = wasm.watermark();
     defer wasm.setWatermark(watermark);
 
-    const new_equation = try wasm.in.string(equation_obj, liu.Temp);
-    if (std.mem.eql(u8, equation.items, new_equation)) {
-        return;
-    }
+    {
+        var new_equation: []const u8 = try wasm.in.string(equation_obj, liu.Temp);
+        new_equation = std.mem.trim(u8, new_equation, " \t\n");
 
-    try equation.ensureTotalCapacity(new_equation.len);
-    equation.clearRetainingCapacity();
-    equation.appendSliceAssumeCapacity(new_equation);
+        if (std.mem.eql(u8, equation.items, new_equation)) {
+            return;
+        }
+
+        try equation.ensureTotalCapacity(new_equation.len);
+        equation.clearRetainingCapacity();
+        equation.appendSliceAssumeCapacity(new_equation);
+    }
 
     wasm.post(.log, "equation: {s}", .{equation.items});
 }
