@@ -4,10 +4,10 @@ const liu = @import("liu");
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
-const ext = struct {
-    extern fn fetch(obj: wasm.Obj) wasm.Obj;
-    extern fn timeout(ms: u32) wasm.Obj;
-};
+// const ext = struct {
+//     extern fn fetch(obj: wasm.Obj) wasm.Obj;
+//     extern fn timeout(ms: u32) wasm.Obj;
+// };
 
 const Table = wasm.StringTable(.{
     .equation_change = "equationChange",

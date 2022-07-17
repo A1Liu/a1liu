@@ -38,13 +38,13 @@ const init = async () => {
   const wasmPromise = wasm.fetchWasm(wasmUrl, {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
-      timeout: () => wasmRef.addObj(timeout(2000)),
-      fetch: (...a: number[]) => {
-        const res = fetch(...a.map(wasmRef.readObj)).then((res) => res.blob());
-        const id = wasmRef.addObj(res, false);
+      // timeout: () => wasmRef.addObj(timeout(2000)),
+      // fetch: (...a: number[]) => {
+      //   const res = fetch(...a.map(wasmRef.readObj)).then((res) => res.blob());
+      //   const id = wasmRef.addObj(res, false);
 
-        return id;
-      },
+      //   return id;
+      // },
     }),
   });
 
