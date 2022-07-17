@@ -5,7 +5,14 @@
   import { get } from "idb-keyval";
   import * as wasm from "@lib/ts/wasm";
 
+  let equation = "";
   let worker = undefined;
+
+  $: {
+    if (worker) {
+      worker.postMessage({ kind: "equationChange", data: equation });
+    }
+  }
 
   onMount(() => {
     worker = new MyWorker();
@@ -17,6 +24,9 @@
           break;
         }
 
+        case "equationChange":
+          break;
+
         default:
           postToast(message.kind, message.data);
           break;
@@ -25,10 +35,12 @@
   });
 </script>
 
-<Toast location={"top-right"} />
+<Toast location={"bottom-left"} />
 
 <div class="overlay">
   <div class="rightColumn">
+    <input type="text" bind:value={equation} />
+
     <button
       class="muiButton"
       on:click={() => worker.postMessage({ kind: "click" })}
@@ -40,6 +52,12 @@
 
 <style lang="postcss">
   @import "@lib/svelte/util.module.css";
+
+  input {
+    border: 2px solid lightgray;
+    border-radius: 8px;
+    padding: 4px;
+  }
 
   .overlay {
     position: fixed;

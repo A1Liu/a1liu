@@ -73,8 +73,8 @@ pub fn build(b: *Builder) !void {
         .name = "bench",
         .root = "./src/routes/bench/bench.zig",
     }, .{
-        .name = "info-graph",
-        .root = "./src/routes/graph/graph.zig",
+        .name = "algebra",
+        .root = "./src/routes/algebra/algebra.zig",
     }, .{
         .name = "game-2d-simple",
         .root = "./src/routes/game-2d-simple/simple.zig",

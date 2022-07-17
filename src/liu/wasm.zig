@@ -33,6 +33,7 @@ pub const Obj = enum(i32) {
 
     const Self = @This();
 
+    pub const objLen = ext.objLen;
     pub const objSet = ext.objSet;
     pub const arrayPush = ext.arrayPush;
     pub const delete = ext.deleteObj;
@@ -80,7 +81,7 @@ const ext = struct {
     extern fn fixedFormatFloat(value: f64, decimal_places: u32, is_temp: bool) Obj;
     extern fn parseFloat(obj: Obj) f64;
 
-    extern fn objLen(idx: Obj) usize;
+    extern fn objLen(idx: Obj) u32;
     extern fn readBytes(idx: Obj, begin: [*]u8) void;
 
     extern fn postMessage(tagIdx: Obj, id: Obj) void;
