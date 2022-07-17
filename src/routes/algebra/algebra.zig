@@ -1,6 +1,21 @@
 const std = @import("std");
 const liu = @import("liu");
 
+// TODO
+// 1. parser, simple pretty-print to GUI
+// 2. incremental parser
+// 3. visualizers/GUIs
+//
+// - Easy manipulation of expressions
+// - pick/copy/edit points
+// - size of things
+// - evaluator of expressions
+// - grapher (chart.js?)
+// - simplification actions + printer of steps
+// - GUI follows PEMDAS
+// - Bug reporting
+// - Tutorials (with video?)
+
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
