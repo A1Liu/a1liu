@@ -112,10 +112,15 @@ fn searchList(word: [5]u8, dict: [5][]const u8) bool {
             return false;
         }
 
-        if (idx == 4) return true;
+        for (letter_dict[start..]) |l, offset| {
+            if (l != letter) {
+                end = start + offset;
+                break;
+            }
+        }
     }
 
-    return false;
+    return true;
 }
 
 // Returns array of matches. Value v at index i is a match between wordle[i]

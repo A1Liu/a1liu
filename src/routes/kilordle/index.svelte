@@ -77,6 +77,7 @@
             foundLetters[letter] = true;
           });
         });
+
         break;
       }
 
