@@ -290,11 +290,9 @@ pub fn submitWord(word: [5]u8) !bool {
     ext.resetSubmission();
     ext.incrementSubmissionCount();
 
-    if (builtin.mode != .Debug) return true;
-
-    if (puzzles.items.len == 0) return true;
-
-    for (puzzles.items[0].solution) |c| ext.addChar(c);
+    if (builtin.mode == .Debug and puzzles.items.len > 0) {
+        for (puzzles.items[0].solution) |c| ext.addChar(c);
+    }
 
     return true;
 }
