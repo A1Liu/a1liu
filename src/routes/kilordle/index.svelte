@@ -72,8 +72,7 @@
             return;
           }
 
-          const notFound = chars.filter((l) => !foundLetters[l]);
-          notFound.forEach((letter) => {
+          chars.forEach((letter) => {
             foundLetters[letter] = true;
           });
         });
