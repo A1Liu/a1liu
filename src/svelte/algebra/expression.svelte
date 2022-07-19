@@ -8,22 +8,28 @@
 </script>
 
 <span class={`expr${info.kind}`}>
+  {#if info.paren}
+    (
+  {/if}
+
   {#if info.left !== undefined}
     <svelte:self {tree} id={info.left} />
   {/if}
 
-  {#if info.kind === "+"}
-    <div>+</div>
-  {:else if info.kind === "integer"}
+  {#if info.kind === "integer"}
     <div>
       {info.value}
     </div>
   {:else}
-    ?
+    <div>{info.kind}</div>
   {/if}
 
   {#if info.right !== undefined}
     <svelte:self {tree} id={info.right} />
+  {/if}
+
+  {#if info.paren}
+    )
   {/if}
 </span>
 

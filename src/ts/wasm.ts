@@ -1,9 +1,19 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const initialObjectBuffer: any[] = [
+const constantObjects: any[] = [
   undefined,
   null,
+  true,
+  false,
+
+  Uint8Array,
+  Float32Array,
+];
+
+const initialObjectBuffer: any[] = [
+  ...constantObjects,
+
   "",
 
   "log",
@@ -11,9 +21,6 @@ const initialObjectBuffer: any[] = [
   "warn",
   "error",
   "success",
-
-  Uint8Array,
-  Float32Array,
 ];
 
 // These could be more advanced but, meh
@@ -77,9 +84,10 @@ export const fetchWasm = async (
 
   const addObj = (data: any, isTemp: boolean = false): number => {
     // These are the indices of jsundefined, jsnull, and jsempty_string
-    if (data === undefined) return 0;
-    if (data === null) return 1;
-    if (data === "") return 2;
+    const foundIndex = constantObjects.indexOf(data);
+    if (foundIndex !== -1) {
+      return foundIndex;
+    }
 
     if (isTemp) {
       const idx = objectBuffer.length;
@@ -98,7 +106,12 @@ export const fetchWasm = async (
 
   const updateObj = (objId: number, data: any): void => {
     if (objId < 0) objectMap.set(objId, data);
-    else objectBuffer[objId] = data;
+    else {
+      if (objId < initialObjectBuffer.length)
+        throw new Error("tried to update an object from the initial buffer");
+
+      objectBuffer[objId] = data;
+    }
   };
 
   const ref: Ref = {

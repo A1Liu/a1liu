@@ -19,11 +19,6 @@ const liu = @import("liu");
 const wasm = liu.wasm;
 pub usingnamespace wasm;
 
-// const ext = struct {
-//     extern fn fetch(obj: wasm.Obj) wasm.Obj;
-//     extern fn timeout(ms: u32) wasm.Obj;
-// };
-
 const Table = wasm.StringTable(.{
     .equation_change = "equationChange",
     .add_tree_item = "addTreeItem",
@@ -35,10 +30,50 @@ const Table = wasm.StringTable(.{
     .value = "value",
     .right = "right",
     .left = "left",
+    .paren = "paren",
 
     .plus = "+",
+    .minus = "-",
+    .multiply = "*",
+    .divide = "/",
+
     .integer = "integer",
 });
+
+const EKind = enum(u8) {
+    plus = '+',
+    minus = '-',
+    multiply = '*',
+    divide = '/',
+
+    integer = 128,
+};
+
+const op_precedence = op_precedence: {
+    var precedence: [256]?u8 = [_]?u8{null} ** 256;
+
+    precedence['+'] = 10;
+    precedence['-'] = 10;
+
+    precedence['*'] = 20;
+    precedence['/'] = 20;
+
+    break :op_precedence precedence;
+};
+
+const expr_name_obj = expr_name_obj: {
+    var names: [256]?*wasm.Obj = [_]?*wasm.Obj{null} ** 256;
+
+    names[@enumToInt(EKind.plus)] = &keys.plus;
+    names[@enumToInt(EKind.minus)] = &keys.minus;
+
+    names[@enumToInt(EKind.multiply)] = &keys.multiply;
+    names[@enumToInt(EKind.divide)] = &keys.divide;
+
+    names[@enumToInt(EKind.integer)] = &keys.integer;
+
+    break :expr_name_obj names;
+};
 
 var keys: Table.Keys = undefined;
 var root: ?liu.ecs.EntityId = null;
@@ -52,13 +87,8 @@ pub const Registry = liu.ecs.Registry(struct {
     value: f64,
     left: liu.ecs.EntityId,
     right: liu.ecs.EntityId,
+    paren: void,
 });
-
-const EKind = enum(u8) {
-    plus = '+',
-
-    integer = 128,
-};
 
 const ChildrenView = struct {
     left: ?liu.ecs.EntityId,
@@ -68,6 +98,7 @@ const ChildrenView = struct {
 const ParseError = error{
     FailedToParse,
     ExpectedAtom,
+    ExpectedClosingParenthesis,
     UnrecognizedAtom,
     DidntFullyConsume,
     OutOfMemory,
@@ -78,7 +109,6 @@ fn skipWhitespace(index: *usize) void {
         switch (equation.items[index.*]) {
             ' ', '\t', '\n' => {
                 index.* += 1;
-                continue;
             },
 
             else => break,
@@ -87,9 +117,6 @@ fn skipWhitespace(index: *usize) void {
 }
 
 fn parseEquation(index: *usize) ParseError!liu.ecs.EntityId {
-    _ = index;
-    // _ = matched_id;
-
     const id = try parseOp(index, 0);
 
     skipWhitespace(index);
@@ -101,23 +128,6 @@ fn parseEquation(index: *usize) ParseError!liu.ecs.EntityId {
     return id;
 }
 
-const op_precedence = op_precedence: {
-    var precedence: [256]?u8 = [_]?u8{null} ** 256;
-
-    precedence['+'] = 10;
-
-    break :op_precedence precedence;
-};
-
-const expr_name_obj = expr_name_obj: {
-    var names: [256]?*wasm.Obj = [_]?*wasm.Obj{null} ** 256;
-
-    names[@enumToInt(EKind.plus)] = &keys.plus;
-    names[@enumToInt(EKind.integer)] = &keys.integer;
-
-    break :expr_name_obj names;
-};
-
 fn peek(index: *usize) ?u8 {
     if (index.* < equation.items.len) return equation.items[index.*];
 
@@ -128,6 +138,7 @@ fn pop(index: *usize) ?u8 {
     if (index.* < equation.items.len) {
         const char = equation.items[index.*];
         index.* += 1;
+
         return char;
     }
 
@@ -135,21 +146,6 @@ fn pop(index: *usize) ?u8 {
 }
 
 fn parseOp(index: *usize, min_precedence: u8) ParseError!liu.ecs.EntityId {
-
-    // const view = registry.view(struct {
-    //     left: ?liu.ecs.EntityId,
-    //     right: ?liu.ecs.EntityId,
-    // });
-
-    // var prev_left_id = matched_id;
-    // var prev_right_id = matched_id;
-
-    // if (matched_id) |id| {
-    //     const values = view.get(id) orelse unreachable;
-    //     prev_left_id = values.left orelse id;
-    //     prev_right_id = values.right orelse id;
-    // }
-
     skipWhitespace(index);
 
     var left_id = try parseAtom(index);
@@ -180,8 +176,6 @@ fn parseOp(index: *usize, min_precedence: u8) ParseError!liu.ecs.EntityId {
 fn parseAtom(index: *usize) ParseError!liu.ecs.EntityId {
     skipWhitespace(index);
 
-    // _ = matched_id;
-
     const first = pop(index) orelse return error.ExpectedAtom;
     switch (first) {
         '0'...'9' => {
@@ -203,6 +197,27 @@ fn parseAtom(index: *usize) ParseError!liu.ecs.EntityId {
             registry.addComponent(id, .value).?.* = @intToFloat(f64, value);
 
             return id;
+        },
+
+        '(' => {
+            const op = try parseOp(index, 0);
+
+            skipWhitespace(index);
+
+            const char = pop(index) orelse return error.ExpectedClosingParenthesis;
+            if (char != ')') return error.ExpectedClosingParenthesis;
+
+            _ = registry.addComponent(op, .paren);
+
+            return op;
+        },
+
+        'a'...'z' => {
+            return error.UnrecognizedAtom;
+        },
+
+        'A'...'Z' => {
+            return error.UnrecognizedAtom;
         },
 
         else => return error.UnrecognizedAtom,
@@ -235,12 +250,17 @@ fn addTree(id: liu.ecs.EntityId) void {
     const FieldView = struct {
         value: ?f64,
         kind: EKind,
+        paren: ?void,
     };
 
     const fields = registry.view(FieldView).get(id) orelse unreachable;
 
     const kind_obj = expr_name_obj[@enumToInt(fields.kind)] orelse unreachable;
     obj.objSet(keys.kind, kind_obj.*);
+
+    if (fields.paren != null) {
+        obj.objSet(keys.paren, .jstrue);
+    }
 
     if (fields.value) |value| {
         const value_obj = wasm.make.number(.temp, value);
@@ -287,25 +307,24 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
     }
 
     var index: usize = 0;
-    const prev_root = root;
-
     const new_root = parseEquation(&index) catch |e| {
         wasm.post(.log, "failed {s}: {s}", .{ @errorName(e), equation.items });
 
         return e;
     };
 
-    root = new_root;
+    if (root) |r| delTree(r);
 
     addTree(new_root);
+    {
+        const id_obj = wasm.make.integer(.temp, new_root.index);
+        wasm.postMessage(keys.set_root, id_obj);
+    }
 
-    const id_obj = wasm.make.number(.temp, @intToFloat(f64, new_root.index));
-    wasm.postMessage(keys.set_root, id_obj);
-
-    if (prev_root) |r| delTree(r);
+    root = new_root;
 
     wasm.post(.log, "equation: {s}", .{equation.items});
-    wasm.post(keys.equation_change, "", .{});
+    wasm.postMessage(keys.equation_change, .jsundefined);
 }
 
 export fn init() void {

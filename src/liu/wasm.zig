@@ -13,21 +13,24 @@ pub const Obj = enum(i32) {
     // These are kept up to date with src/wasm.ts
     jsundefined = 0,
     jsnull,
-    jsEmptyString,
+    jstrue,
+    jsfalse,
+
+    U8Array,
+    F32Array,
 
     // TODO: There's a finite number of falsy values; we can store them all
     // as enum constants:
     //
     // https://developer.mozilla.org/en-US/docs/Glossary/Falsy
 
+    jsEmptyString,
+
     log,
     info,
     warn,
     err,
     success,
-
-    U8Array,
-    F32Array,
 
     _,
 
