@@ -85,9 +85,7 @@ export const fetchWasm = async (
   const addObj = (data: any, isTemp: boolean = false): number => {
     // These are the indices of jsundefined, jsnull, and jsempty_string
     const foundIndex = constantObjects.indexOf(data);
-    if (foundIndex !== -1) {
-      return foundIndex;
-    }
+    if (foundIndex !== -1) return foundIndex;
 
     if (isTemp) {
       const idx = objectBuffer.length;
@@ -138,9 +136,11 @@ export const fetchWasm = async (
 
     makeArray: (isTemp: boolean) => addObj([], isTemp),
     makeObj: (isTemp: boolean) => addObj({}, isTemp),
+
     makeNumber: makeRaw,
     makeU32: makeRaw,
     makeBool: makeRaw,
+
     makeString: (location: number, size: number, isTemp: boolean) => {
       const array = new Uint8Array(ref.memory.buffer, location, size);
       return addObj(decoder.decode(array), isTemp);
@@ -165,12 +165,8 @@ export const fetchWasm = async (
     exactExpFloatFormat: (value: number, isTemp: boolean) => {
       return addObj(value.toExponential(), isTemp);
     },
-    fixedFormatFloat: (
-      value: number,
-      decimalPlaces: number,
-      isTemp: boolean
-    ) => {
-      return addObj(value.toFixed(decimalPlaces), isTemp);
+    fixedFormatFloat: (value: number, places: number, isTemp: boolean) => {
+      return addObj(value.toFixed(places), isTemp);
     },
     parseFloat: (idx: number) => {
       const value = readObj(idx);
