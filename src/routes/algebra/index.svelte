@@ -62,10 +62,7 @@
       {/if}
     </div>
 
-    <button
-      class="muiButton"
-      on:click={() => console.log([...tree.entries()])}
-    >
+    <button class="muiButton" on:click={() => console.log([...tree.entries()])}>
       Click
     </button>
   </div>

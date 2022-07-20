@@ -27,6 +27,7 @@ const Table = wasm.StringTable(.{
 
     .kind = "kind",
     .id = "id",
+    .implicit = "implicit",
     .value = "value",
     .right = "right",
     .left = "left",
@@ -38,6 +39,7 @@ const Table = wasm.StringTable(.{
     .divide = "/",
 
     .integer = "integer",
+    .variable = "variable",
 });
 
 var keys: Table.Keys = undefined;
@@ -54,13 +56,16 @@ const EKind = enum(u8) {
     divide = '/',
 
     integer = 128,
+    variable = 129,
 };
 
 pub const Registry = liu.ecs.Registry(struct {
     kind: EKind,
+    text: []const u8,
     value: f64,
     left: liu.ecs.EntityId,
     right: liu.ecs.EntityId,
+    is_implicit: void,
     paren: void,
 });
 
@@ -82,6 +87,7 @@ const expr_name_obj = expr_name_obj: {
     const EKindInfo = struct {
         name_obj: *const wasm.Obj,
     };
+
     var names = [_]?EKindInfo{null} ** 256;
 
     names[@enumToInt(EKind.plus)] = .{
@@ -101,6 +107,9 @@ const expr_name_obj = expr_name_obj: {
     names[@enumToInt(EKind.integer)] = .{
         .name_obj = &keys.integer,
     };
+    names[@enumToInt(EKind.variable)] = .{
+        .name_obj = &keys.variable,
+    };
 
     break :expr_name_obj names;
 };
@@ -111,8 +120,6 @@ const Parser = struct {
 
     const Self = @This();
 
-    const MUL_PRECEDENCE: u8 = 20;
-
     const PrecedenceInfo = struct {
         op: u8,
         precedence: u8,
@@ -121,6 +128,8 @@ const Parser = struct {
     };
 
     const op_info = op_info: {
+        const MUL_PRECEDENCE: u8 = 20;
+
         var info = [_]?PrecedenceInfo{null} ** 256;
 
         info['+'] = .{ .op = '+', .precedence = 10 };
@@ -129,6 +138,10 @@ const Parser = struct {
         info['*'] = .{ .op = '*', .precedence = MUL_PRECEDENCE };
         info['/'] = .{ .op = '/', .precedence = MUL_PRECEDENCE };
 
+        // For cases like "4(1 + 2)", and more commonly, 4x + 3, we want
+        // to interpret stuff next to each other as a multiply. the `is_explicit`
+        // field says whether to eat a character, and the `op` field says which
+        // op we *actually* are, because `(` and `x` are not valid ops.
         const implicit_multiply = PrecedenceInfo{
             .op = '*',
             .precedence = MUL_PRECEDENCE,
@@ -137,15 +150,19 @@ const Parser = struct {
 
         info['('] = implicit_multiply;
 
-        var i: u8 = 'a';
-        while (i <= 'z') : (i += 1) {
-            info[i] = implicit_multiply;
-            info[i - 'a' + 'A'] = implicit_multiply;
+        {
+            var i: u8 = 'a';
+            while (i <= 'z') : (i += 1) {
+                info[i] = implicit_multiply;
+                info[i - 'a' + 'A'] = implicit_multiply;
+            }
         }
 
-        i = '0';
-        while (i <= '9') : (i += 1) {
-            info[i] = implicit_multiply;
+        {
+            var i = '0';
+            while (i <= '9') : (i += 1) {
+                info[i] = implicit_multiply;
+            }
         }
 
         break :op_info info;
@@ -211,6 +228,7 @@ const Parser = struct {
 
             if (info.precedence < min_precedence) break;
 
+            // See op_info definition for explanation
             self.index += @boolToInt(info.is_explicit);
 
             const new_min = if (info.is_left) info.precedence + 1 else info.precedence;
@@ -218,6 +236,11 @@ const Parser = struct {
 
             const op_id = try registry.create("");
             registry.addComponent(op_id, .kind).?.* = @intToEnum(EKind, info.op);
+
+            if (!info.is_explicit) {
+                _ = registry.addComponent(op_id, .is_implicit);
+            }
+
             registry.addComponent(op_id, .left).?.* = left_id;
             registry.addComponent(op_id, .right).?.* = right_id;
 
@@ -231,6 +254,8 @@ const Parser = struct {
 
     fn parseAtom(self: *Self) ParseError!liu.ecs.EntityId {
         self.skipWhitespace();
+
+        const begin = self.index;
 
         const first = self.pop() orelse return error.ExpectedAtom;
         switch (first) {
@@ -252,6 +277,7 @@ const Parser = struct {
                 const id = try registry.create("");
 
                 registry.addComponent(id, .kind).?.* = .integer;
+                registry.addComponent(id, .text).?.* = self.data[begin..self.index];
                 registry.addComponent(id, .value).?.* = @intToFloat(f64, value);
 
                 return id;
@@ -271,7 +297,12 @@ const Parser = struct {
             },
 
             'a'...'z' => {
-                return error.UnrecognizedAtom;
+                const id = try registry.create("");
+
+                registry.addComponent(id, .kind).?.* = .variable;
+                registry.addComponent(id, .text).?.* = self.data[begin..self.index];
+
+                return id;
             },
 
             'A'...'Z' => {
@@ -307,8 +338,9 @@ fn addTree(id: liu.ecs.EntityId) void {
     }
 
     const FieldView = struct {
-        value: ?f64,
+        text: ?*[]const u8,
         kind: EKind,
+        is_implicit: ?void,
         paren: ?void,
     };
 
@@ -321,8 +353,12 @@ fn addTree(id: liu.ecs.EntityId) void {
         obj.objSet(keys.paren, .jstrue);
     }
 
-    if (fields.value) |value| {
-        const value_obj = wasm.make.number(.temp, value);
+    if (fields.is_implicit != null) {
+        obj.objSet(keys.implicit, .jstrue);
+    }
+
+    if (fields.text) |value| {
+        const value_obj = wasm.make.string(.temp, value.*);
         obj.objSet(keys.value, value_obj);
     }
 
@@ -382,7 +418,7 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
 
     root = new_root;
 
-    wasm.post(.log, "equation: {s}", .{equation.items});
+    // wasm.post(.log, "equation: {s}", .{equation.items});
     wasm.postMessage(keys.equation_change, .jsundefined);
 }
 

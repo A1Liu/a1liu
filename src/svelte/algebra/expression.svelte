@@ -3,6 +3,11 @@
 
   export const tree = new Map();
 
+  const ShouldPrintValue: Record<string, true> = {
+    integer: true,
+    variable: true,
+  };
+
   interface Ctx {
     selected: Map<number, true>;
   }
@@ -82,24 +87,26 @@
     <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
   {/if}
 
-  <div
-    class="expr"
-    on:click={(evt) => {
-      evt.preventDefault();
+  {#if !info.implicit}
+    <div
+      class="expr"
+      on:click={(evt) => {
+        evt.preventDefault();
 
-      if (evt.shiftKey) {
-        globalCtx.select(id);
-      } else {
-        globalCtx.click(id);
-      }
-    }}
-  >
-    {#if info.kind === "integer"}
-      {info.value}
-    {:else}
-      {info.kind}
-    {/if}
-  </div>
+        if (evt.shiftKey) {
+          globalCtx.select(id);
+        } else {
+          globalCtx.click(id);
+        }
+      }}
+    >
+      {#if ShouldPrintValue[info.kind]}
+        {info.value}
+      {:else}
+        {info.kind}
+      {/if}
+    </div>
+  {/if}
 
   {#if info.right !== undefined}
     <svelte:self id={info.right} bind:selectedMessage={rightSelected} />
