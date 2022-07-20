@@ -125,7 +125,7 @@
     align-items: center;
 
     border-radius: 4px;
-    padding: 2px;
+    padding: 2px 3px 2px 3px;
   }
 
   .selected {
