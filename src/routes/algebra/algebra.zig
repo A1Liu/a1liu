@@ -79,15 +79,28 @@ const ParseError = error{
 };
 
 const expr_name_obj = expr_name_obj: {
-    var names: [256]?*wasm.Obj = [_]?*wasm.Obj{null} ** 256;
+    const EKindInfo = struct {
+        name_obj: *const wasm.Obj,
+    };
+    var names = [_]?EKindInfo{null} ** 256;
 
-    names[@enumToInt(EKind.plus)] = &keys.plus;
-    names[@enumToInt(EKind.minus)] = &keys.minus;
+    names[@enumToInt(EKind.plus)] = .{
+        .name_obj = &keys.plus,
+    };
+    names[@enumToInt(EKind.minus)] = .{
+        .name_obj = &keys.minus,
+    };
 
-    names[@enumToInt(EKind.multiply)] = &keys.multiply;
-    names[@enumToInt(EKind.divide)] = &keys.divide;
+    names[@enumToInt(EKind.multiply)] = .{
+        .name_obj = &keys.multiply,
+    };
+    names[@enumToInt(EKind.divide)] = .{
+        .name_obj = &keys.divide,
+    };
 
-    names[@enumToInt(EKind.integer)] = &keys.integer;
+    names[@enumToInt(EKind.integer)] = .{
+        .name_obj = &keys.integer,
+    };
 
     break :expr_name_obj names;
 };
@@ -98,32 +111,55 @@ const Parser = struct {
 
     const Self = @This();
 
-    const op_info = op_precedence: {
-        const PrecedenceInfo = struct {
-            precedence: u8,
-            is_left: bool = true,
+    const MUL_PRECEDENCE: u8 = 20;
+
+    const PrecedenceInfo = struct {
+        op: u8,
+        precedence: u8,
+        is_explicit: bool = true,
+        is_left: bool = true,
+    };
+
+    const op_info = op_info: {
+        var info = [_]?PrecedenceInfo{null} ** 256;
+
+        info['+'] = .{ .op = '+', .precedence = 10 };
+        info['-'] = .{ .op = '-', .precedence = 10 };
+
+        info['*'] = .{ .op = '*', .precedence = MUL_PRECEDENCE };
+        info['/'] = .{ .op = '/', .precedence = MUL_PRECEDENCE };
+
+        const implicit_multiply = PrecedenceInfo{
+            .op = '*',
+            .precedence = MUL_PRECEDENCE,
+            .is_explicit = false,
         };
 
-        var precedence = [_]?PrecedenceInfo{null} ** 256;
+        info['('] = implicit_multiply;
 
-        precedence['+'] = .{ .precedence = 10 };
-        precedence['-'] = .{ .precedence = 10 };
+        var i: u8 = 'a';
+        while (i <= 'z') : (i += 1) {
+            info[i] = implicit_multiply;
+            info[i - 'a' + 'A'] = implicit_multiply;
+        }
 
-        precedence['*'] = .{ .precedence = 20 };
-        precedence['/'] = .{ .precedence = 20 };
+        i = '0';
+        while (i <= '9') : (i += 1) {
+            info[i] = implicit_multiply;
+        }
 
-        break :op_precedence precedence;
+        break :op_info info;
     };
 
     fn peek(self: *const Self) ?u8 {
-        if (self.index < equation.items.len) return equation.items[self.index];
+        if (self.index < self.data.len) return self.data[self.index];
 
         return null;
     }
 
     fn pop(self: *Self) ?u8 {
-        if (self.index < equation.items.len) {
-            const char = equation.items[self.index];
+        if (self.index < self.data.len) {
+            const char = self.data[self.index];
             self.index += 1;
 
             return char;
@@ -133,8 +169,8 @@ const Parser = struct {
     }
 
     fn skipWhitespace(self: *Self) void {
-        while (self.index < equation.items.len) {
-            switch (equation.items[self.index]) {
+        for (self.data[self.index..]) |char| {
+            switch (char) {
                 ' ', '\t', '\n' => {
                     self.index += 1;
                 },
@@ -145,35 +181,43 @@ const Parser = struct {
     }
 
     fn parseEquation(self: *Self) ParseError!liu.ecs.EntityId {
-        const id = try self.parseOp(0);
+        const id = try self.parseOp();
 
         self.skipWhitespace();
 
-        if (self.index != equation.items.len) {
+        if (self.index != self.data.len) {
             return error.DidntFullyConsume;
         }
 
         return id;
     }
 
-    fn parseOp(self: *Self, min_precedence: u8) ParseError!liu.ecs.EntityId {
+    fn parseOp(self: *Self) ParseError!liu.ecs.EntityId {
+        return self.parseOpRec(0);
+    }
+
+    fn parseOpRec(self: *Self, min_precedence: u8) ParseError!liu.ecs.EntityId {
         self.skipWhitespace();
 
         var left_id = try self.parseAtom();
 
         self.skipWhitespace();
 
-        while (self.peek()) |op| {
-            const info = op_info[op] orelse break;
+        while (self.peek()) |char| {
+            const info: PrecedenceInfo = op_info[char] orelse {
+                // error condition here I guess
+                break;
+            };
+
             if (info.precedence < min_precedence) break;
 
-            self.index += 1;
+            self.index += @boolToInt(info.is_explicit);
 
             const new_min = if (info.is_left) info.precedence + 1 else info.precedence;
-            const right_id = try self.parseOp(new_min);
+            const right_id = try self.parseOpRec(new_min);
 
             const op_id = try registry.create("");
-            registry.addComponent(op_id, .kind).?.* = @intToEnum(EKind, op);
+            registry.addComponent(op_id, .kind).?.* = @intToEnum(EKind, info.op);
             registry.addComponent(op_id, .left).?.* = left_id;
             registry.addComponent(op_id, .right).?.* = right_id;
 
@@ -191,6 +235,8 @@ const Parser = struct {
         const first = self.pop() orelse return error.ExpectedAtom;
         switch (first) {
             '0'...'9' => {
+                // TODO: overflow
+
                 var value: u32 = first - '0';
 
                 while (self.peek()) |char| : (self.index += 1) {
@@ -212,7 +258,7 @@ const Parser = struct {
             },
 
             '(' => {
-                const op = try self.parseOp(0);
+                const op = try self.parseOp();
 
                 self.skipWhitespace();
 
@@ -268,8 +314,8 @@ fn addTree(id: liu.ecs.EntityId) void {
 
     const fields = registry.view(FieldView).get(id) orelse unreachable;
 
-    const kind_obj = expr_name_obj[@enumToInt(fields.kind)] orelse unreachable;
-    obj.objSet(keys.kind, kind_obj.*);
+    const kind_info = expr_name_obj[@enumToInt(fields.kind)] orelse unreachable;
+    obj.objSet(keys.kind, kind_info.name_obj.*);
 
     if (fields.paren != null) {
         obj.objSet(keys.paren, .jstrue);
@@ -321,7 +367,7 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
 
     var parser = Parser{ .data = equation.items };
     const new_root = parser.parseEquation() catch |e| {
-        wasm.post(.log, "failed {s}: {s}", .{ @errorName(e), equation.items });
+        wasm.post(.log, "failed {s} at {}: {s}", .{ @errorName(e), parser.index, equation.items });
 
         return e;
     };

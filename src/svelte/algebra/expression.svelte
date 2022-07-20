@@ -44,7 +44,7 @@
     };
   }
 
-  const globalCtx = createCtx();
+  export const globalCtx = createCtx();
 </script>
 
 <script lang="ts">

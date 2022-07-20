@@ -4,9 +4,10 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import { get } from "idb-keyval";
   import * as wasm from "@lib/ts/wasm";
-  import Expr, { tree } from "@lib/svelte/algebra/expression.svelte";
+  import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
 
-  let equation = "1 + 2 + 3 * 4 + 5 / 3 * 4";
+  // let equation = "1 + 3 * 4 + 5 / 3 * 4";
+  let equation = "1(1 + 2)";
   let worker = undefined;
   let root = undefined;
 
@@ -37,6 +38,8 @@
 
         case "setRoot":
           root = message.data;
+          globalCtx.reset();
+
           break;
 
         default:
@@ -61,7 +64,7 @@
 
     <button
       class="muiButton"
-      on:click={() => worker.postMessage({ kind: "click" })}
+      on:click={() => console.log([...tree.entries()])}
     >
       Click
     </button>
