@@ -4,9 +4,7 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import { get } from "idb-keyval";
   import * as wasm from "@lib/ts/wasm";
-  import Expr from "@lib/svelte/algebra/expression.svelte";
-
-  const tree = new Map();
+  import Expr, { tree } from "@lib/svelte/algebra/expression.svelte";
 
   let equation = "";
   let worker = undefined;
@@ -57,7 +55,7 @@
       <input type="text" bind:value={equation} />
 
       {#if root !== undefined}
-        <Expr {tree} id={root} />
+        <Expr id={root} />
       {/if}
     </div>
 

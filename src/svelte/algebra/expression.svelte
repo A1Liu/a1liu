@@ -1,31 +1,103 @@
+<script lang="ts" context="module">
+  import { writable } from "svelte/store";
+
+  export const tree = new Map();
+
+  interface Ctx {
+    selected: Map<number, true>;
+  }
+
+  function newCtx(): Ctx {
+    return {
+      selected: new Map(),
+    };
+  }
+
+  function createCtx() {
+    const { subscribe, set, update } = writable(newCtx());
+
+    return {
+      subscribe,
+
+      reset: () => set(newCtx()),
+      select: (id: number) =>
+        update((prev) => {
+          const selected = prev.selected;
+          if (selected.get(id)) {
+            selected.delete(id);
+          } else {
+            selected.set(id, true);
+          }
+
+          return {
+            ...prev,
+            selected,
+          };
+        }),
+      click: (id: number) =>
+        update((prev) => {
+          return {
+            ...prev,
+            selected: new Map([[id, true]]),
+          };
+        }),
+    };
+  }
+
+  const globalCtx = createCtx();
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
 
-  export let tree;
+  export let selectedMessage = false;
   export let id;
+
+  let selected = false;
+  let leftSelected = false;
+  let rightSelected = false;
+
+  $: {
+    selected = $globalCtx.selected.has(id) || (leftSelected && rightSelected);
+    selectedMessage = leftSelected || rightSelected || selected;
+  }
 
   $: info = tree.get(id);
 </script>
 
-<span class={`expr${info.kind}`}>
+<span
+  class:selected
+  class={`expr${info.kind}`}
+  on:mousedown={(evt) => evt.preventDefault()}
+>
   {#if info.paren}
     (
   {/if}
 
   {#if info.left !== undefined}
-    <svelte:self {tree} id={info.left} />
+    <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
   {/if}
 
-  {#if info.kind === "integer"}
-    <div>
+  <div
+    class="expr"
+    on:click={(evt) => {
+      evt.preventDefault();
+      if (evt.shiftKey) {
+        globalCtx.select(id);
+      } else {
+        globalCtx.click(id);
+      }
+    }}
+  >
+    {#if info.kind === "integer"}
       {info.value}
-    </div>
-  {:else}
-    <div>{info.kind}</div>
-  {/if}
+    {:else}
+      {info.kind}
+    {/if}
+  </div>
 
   {#if info.right !== undefined}
-    <svelte:self {tree} id={info.right} />
+    <svelte:self id={info.right} bind:selectedMessage={rightSelected} />
   {/if}
 
   {#if info.paren}
@@ -38,12 +110,26 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+
     gap: 2px;
     padding-left: 2px;
     padding-right: 2px;
   }
 
-  div {
-    font-size: 24px;
+  .expr {
+    font-size: 36px;
+    line-height: 1.2;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    border-radius: 4px;
+    padding: 2px;
+  }
+
+  .selected {
+    border-radius: 4px;
+    background-color: lightblue;
   }
 </style>

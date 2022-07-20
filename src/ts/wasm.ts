@@ -1,7 +1,7 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const constantObjects: any[] = [
+const initialObjectBuffer: any[] = [
   undefined,
   null,
   true,
@@ -9,10 +9,6 @@ const constantObjects: any[] = [
 
   Uint8Array,
   Float32Array,
-];
-
-const initialObjectBuffer: any[] = [
-  ...constantObjects,
 
   "",
 
@@ -83,10 +79,6 @@ export const fetchWasm = async (
   const readObj = (id: number): any => objectBuffer[id] ?? objectMap.get(id);
 
   const addObj = (data: any, isTemp: boolean = false): number => {
-    // These are the indices of jsundefined, jsnull, and jsempty_string
-    const foundIndex = constantObjects.indexOf(data);
-    if (foundIndex !== -1) return foundIndex;
-
     if (isTemp) {
       const idx = objectBuffer.length;
       objectBuffer.push(data);
@@ -133,6 +125,8 @@ export const fetchWasm = async (
         ref.abi.resumePromise(ptr, out, outId);
       });
     },
+
+    // boolEval: (id: number) => !!readObj(id),
 
     makeArray: (isTemp: boolean) => addObj([], isTemp),
     makeObj: (isTemp: boolean) => addObj({}, isTemp),

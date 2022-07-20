@@ -49,14 +49,19 @@ const EKind = enum(u8) {
     integer = 128,
 };
 
-const op_precedence = op_precedence: {
-    var precedence: [256]?u8 = [_]?u8{null} ** 256;
+const op_info = op_precedence: {
+    const PrecedenceInfo = struct {
+        precedence: u8,
+        is_left: bool = true,
+    };
 
-    precedence['+'] = 10;
-    precedence['-'] = 10;
+    var precedence = [_]?PrecedenceInfo{null} ** 256;
 
-    precedence['*'] = 20;
-    precedence['/'] = 20;
+    precedence['+'] = .{ .precedence = 10 };
+    precedence['-'] = .{ .precedence = 10 };
+
+    precedence['*'] = .{ .precedence = 20 };
+    precedence['/'] = .{ .precedence = 20 };
 
     break :op_precedence precedence;
 };
@@ -153,12 +158,13 @@ fn parseOp(index: *usize, min_precedence: u8) ParseError!liu.ecs.EntityId {
     skipWhitespace(index);
 
     while (peek(index)) |op| {
-        const precedence = op_precedence[op] orelse break;
-        if (precedence < min_precedence) break;
+        const info = op_info[op] orelse break;
+        if (info.precedence < min_precedence) break;
 
         index.* += 1;
 
-        const right_id = try parseOp(index, precedence);
+        const new_min = if (info.is_left) info.precedence + 1 else info.precedence;
+        const right_id = try parseOp(index, new_min);
 
         const op_id = try registry.create("");
         registry.addComponent(op_id, .kind).?.* = @intToEnum(EKind, op);

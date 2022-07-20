@@ -66,6 +66,8 @@ export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: 
 const ext = struct {
     extern fn awaitHook(self: Obj, output: *Obj, slot: *align(4) const anyopaque) void;
 
+    // extern fn boolEval(id: Obj) bool;
+
     extern fn makeNumber(number: f64, is_temp: bool) Obj;
     extern fn makeU32(number: u32, is_temp: bool) Obj;
     extern fn makeBool(number: bool, is_temp: bool) Obj;
