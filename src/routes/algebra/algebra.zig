@@ -40,6 +40,13 @@ const Table = wasm.StringTable(.{
     .integer = "integer",
 });
 
+var keys: Table.Keys = undefined;
+var root: ?liu.ecs.EntityId = null;
+var equation = std.ArrayList(u8).init(liu.Pages);
+
+pub const registry: *Registry = &registry_data;
+var registry_data: Registry = Registry.init(liu.Pages);
+
 const EKind = enum(u8) {
     plus = '+',
     minus = '-',
@@ -48,44 +55,6 @@ const EKind = enum(u8) {
 
     integer = 128,
 };
-
-const op_info = op_precedence: {
-    const PrecedenceInfo = struct {
-        precedence: u8,
-        is_left: bool = true,
-    };
-
-    var precedence = [_]?PrecedenceInfo{null} ** 256;
-
-    precedence['+'] = .{ .precedence = 10 };
-    precedence['-'] = .{ .precedence = 10 };
-
-    precedence['*'] = .{ .precedence = 20 };
-    precedence['/'] = .{ .precedence = 20 };
-
-    break :op_precedence precedence;
-};
-
-const expr_name_obj = expr_name_obj: {
-    var names: [256]?*wasm.Obj = [_]?*wasm.Obj{null} ** 256;
-
-    names[@enumToInt(EKind.plus)] = &keys.plus;
-    names[@enumToInt(EKind.minus)] = &keys.minus;
-
-    names[@enumToInt(EKind.multiply)] = &keys.multiply;
-    names[@enumToInt(EKind.divide)] = &keys.divide;
-
-    names[@enumToInt(EKind.integer)] = &keys.integer;
-
-    break :expr_name_obj names;
-};
-
-var keys: Table.Keys = undefined;
-var root: ?liu.ecs.EntityId = null;
-var equation = std.ArrayList(u8).init(liu.Pages);
-
-pub const registry: *Registry = &registry_data;
-var registry_data: Registry = Registry.init(liu.Pages);
 
 pub const Registry = liu.ecs.Registry(struct {
     kind: EKind,
@@ -109,126 +78,164 @@ const ParseError = error{
     OutOfMemory,
 };
 
-fn skipWhitespace(index: *usize) void {
-    while (index.* < equation.items.len) {
-        switch (equation.items[index.*]) {
-            ' ', '\t', '\n' => {
-                index.* += 1;
-            },
+const expr_name_obj = expr_name_obj: {
+    var names: [256]?*wasm.Obj = [_]?*wasm.Obj{null} ** 256;
 
-            else => break,
+    names[@enumToInt(EKind.plus)] = &keys.plus;
+    names[@enumToInt(EKind.minus)] = &keys.minus;
+
+    names[@enumToInt(EKind.multiply)] = &keys.multiply;
+    names[@enumToInt(EKind.divide)] = &keys.divide;
+
+    names[@enumToInt(EKind.integer)] = &keys.integer;
+
+    break :expr_name_obj names;
+};
+
+const Parser = struct {
+    data: []const u8,
+    index: usize = 0,
+
+    const Self = @This();
+
+    const op_info = op_precedence: {
+        const PrecedenceInfo = struct {
+            precedence: u8,
+            is_left: bool = true,
+        };
+
+        var precedence = [_]?PrecedenceInfo{null} ** 256;
+
+        precedence['+'] = .{ .precedence = 10 };
+        precedence['-'] = .{ .precedence = 10 };
+
+        precedence['*'] = .{ .precedence = 20 };
+        precedence['/'] = .{ .precedence = 20 };
+
+        break :op_precedence precedence;
+    };
+
+    fn peek(self: *const Self) ?u8 {
+        if (self.index < equation.items.len) return equation.items[self.index];
+
+        return null;
+    }
+
+    fn pop(self: *Self) ?u8 {
+        if (self.index < equation.items.len) {
+            const char = equation.items[self.index];
+            self.index += 1;
+
+            return char;
+        }
+
+        return null;
+    }
+
+    fn skipWhitespace(self: *Self) void {
+        while (self.index < equation.items.len) {
+            switch (equation.items[self.index]) {
+                ' ', '\t', '\n' => {
+                    self.index += 1;
+                },
+
+                else => break,
+            }
         }
     }
-}
 
-fn parseEquation(index: *usize) ParseError!liu.ecs.EntityId {
-    const id = try parseOp(index, 0);
+    fn parseEquation(self: *Self) ParseError!liu.ecs.EntityId {
+        const id = try self.parseOp(0);
 
-    skipWhitespace(index);
+        self.skipWhitespace();
 
-    if (index.* != equation.items.len) {
-        return error.DidntFullyConsume;
+        if (self.index != equation.items.len) {
+            return error.DidntFullyConsume;
+        }
+
+        return id;
     }
 
-    return id;
-}
+    fn parseOp(self: *Self, min_precedence: u8) ParseError!liu.ecs.EntityId {
+        self.skipWhitespace();
 
-fn peek(index: *usize) ?u8 {
-    if (index.* < equation.items.len) return equation.items[index.*];
+        var left_id = try self.parseAtom();
 
-    return null;
-}
+        self.skipWhitespace();
 
-fn pop(index: *usize) ?u8 {
-    if (index.* < equation.items.len) {
-        const char = equation.items[index.*];
-        index.* += 1;
+        while (self.peek()) |op| {
+            const info = op_info[op] orelse break;
+            if (info.precedence < min_precedence) break;
 
-        return char;
+            self.index += 1;
+
+            const new_min = if (info.is_left) info.precedence + 1 else info.precedence;
+            const right_id = try self.parseOp(new_min);
+
+            const op_id = try registry.create("");
+            registry.addComponent(op_id, .kind).?.* = @intToEnum(EKind, op);
+            registry.addComponent(op_id, .left).?.* = left_id;
+            registry.addComponent(op_id, .right).?.* = right_id;
+
+            left_id = op_id;
+
+            self.skipWhitespace();
+        }
+
+        return left_id;
     }
 
-    return null;
-}
+    fn parseAtom(self: *Self) ParseError!liu.ecs.EntityId {
+        self.skipWhitespace();
 
-fn parseOp(index: *usize, min_precedence: u8) ParseError!liu.ecs.EntityId {
-    skipWhitespace(index);
+        const first = self.pop() orelse return error.ExpectedAtom;
+        switch (first) {
+            '0'...'9' => {
+                var value: u32 = first - '0';
 
-    var left_id = try parseAtom(index);
+                while (self.peek()) |char| : (self.index += 1) {
+                    switch (char) {
+                        '0'...'9' => {},
+                        else => break,
+                    }
 
-    skipWhitespace(index);
-
-    while (peek(index)) |op| {
-        const info = op_info[op] orelse break;
-        if (info.precedence < min_precedence) break;
-
-        index.* += 1;
-
-        const new_min = if (info.is_left) info.precedence + 1 else info.precedence;
-        const right_id = try parseOp(index, new_min);
-
-        const op_id = try registry.create("");
-        registry.addComponent(op_id, .kind).?.* = @intToEnum(EKind, op);
-        registry.addComponent(op_id, .left).?.* = left_id;
-        registry.addComponent(op_id, .right).?.* = right_id;
-
-        left_id = op_id;
-
-        skipWhitespace(index);
-    }
-
-    return left_id;
-}
-
-fn parseAtom(index: *usize) ParseError!liu.ecs.EntityId {
-    skipWhitespace(index);
-
-    const first = pop(index) orelse return error.ExpectedAtom;
-    switch (first) {
-        '0'...'9' => {
-            var value: u32 = first - '0';
-
-            while (peek(index)) |char| : (index.* += 1) {
-                switch (char) {
-                    '0'...'9' => {},
-                    else => break,
+                    value *= 10;
+                    value += char - '0';
                 }
 
-                value *= 10;
-                value += char - '0';
-            }
+                const id = try registry.create("");
 
-            const id = try registry.create("");
+                registry.addComponent(id, .kind).?.* = .integer;
+                registry.addComponent(id, .value).?.* = @intToFloat(f64, value);
 
-            registry.addComponent(id, .kind).?.* = .integer;
-            registry.addComponent(id, .value).?.* = @intToFloat(f64, value);
+                return id;
+            },
 
-            return id;
-        },
+            '(' => {
+                const op = try self.parseOp(0);
 
-        '(' => {
-            const op = try parseOp(index, 0);
+                self.skipWhitespace();
 
-            skipWhitespace(index);
+                const char = self.pop() orelse return error.ExpectedClosingParenthesis;
+                if (char != ')') return error.ExpectedClosingParenthesis;
 
-            const char = pop(index) orelse return error.ExpectedClosingParenthesis;
-            if (char != ')') return error.ExpectedClosingParenthesis;
+                _ = registry.addComponent(op, .paren);
 
-            _ = registry.addComponent(op, .paren);
+                return op;
+            },
 
-            return op;
-        },
+            'a'...'z' => {
+                return error.UnrecognizedAtom;
+            },
 
-        'a'...'z' => {
-            return error.UnrecognizedAtom;
-        },
+            'A'...'Z' => {
+                return error.UnrecognizedAtom;
+            },
 
-        'A'...'Z' => {
-            return error.UnrecognizedAtom;
-        },
-
-        else => return error.UnrecognizedAtom,
+            else => return error.UnrecognizedAtom,
+        }
     }
-}
+};
 
 export fn equationChange(equation_obj: wasm.Obj) void {
     equationChangeImpl(equation_obj) catch return;
@@ -312,8 +319,8 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
         equation.appendSliceAssumeCapacity(new_equation);
     }
 
-    var index: usize = 0;
-    const new_root = parseEquation(&index) catch |e| {
+    var parser = Parser{ .data = equation.items };
+    const new_root = parser.parseEquation() catch |e| {
         wasm.post(.log, "failed {s}: {s}", .{ @errorName(e), equation.items });
 
         return e;

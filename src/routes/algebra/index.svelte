@@ -6,15 +6,13 @@
   import * as wasm from "@lib/ts/wasm";
   import Expr, { tree } from "@lib/svelte/algebra/expression.svelte";
 
-  let equation = "";
+  let equation = "1 + 2 + 3 * 4 + 5 / 3 * 4";
   let worker = undefined;
   let root = undefined;
 
   $: worker?.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
-    equation = "1 + 2 + 3 * 4 + 5 / 3 * 4";
-
     worker = new MyWorker();
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {

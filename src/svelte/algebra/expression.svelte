@@ -69,6 +69,7 @@
 
 <span
   class:selected={selected || childSelected}
+  class:clickSelected={selected}
   class:childSelected={!selected && childSelected}
   class={`expr${info.kind}`}
   on:mousedown={(evt) => evt.preventDefault()}
@@ -83,7 +84,6 @@
 
   <div
     class="expr"
-    class:clickSelected={selected}
     on:click={(evt) => {
       evt.preventDefault();
 
@@ -131,7 +131,6 @@
 
     border-radius: 4px;
     padding: 0px 3px 0px 3px;
-    margin: 2px 0px 2px 0px;
   }
 
   .selected {
@@ -141,6 +140,7 @@
   }
 
   .clickSelected {
+    margin: 2px;
     background-color: lightblue;
   }
 
