@@ -130,7 +130,8 @@
     align-items: center;
 
     border-radius: 4px;
-    padding: 2px 3px 2px 3px;
+    padding: 0px 3px 0px 3px;
+    margin: 2px 0px 2px 0px;
   }
 
   .selected {
