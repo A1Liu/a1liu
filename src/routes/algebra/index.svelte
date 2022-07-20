@@ -13,6 +13,8 @@
   $: worker?.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
+    equation = "1 + 2 + 3 * 4 + 5 / 3 * 4";
+
     worker = new MyWorker();
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {

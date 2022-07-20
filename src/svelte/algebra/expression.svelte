@@ -54,11 +54,13 @@
   export let id;
 
   let selected = false;
+  let childSelected = false;
   let leftSelected = false;
   let rightSelected = false;
 
   $: {
-    selected = $globalCtx.selected.has(id) || (leftSelected && rightSelected);
+    selected = $globalCtx.selected.has(id);
+    childSelected = leftSelected && rightSelected;
     selectedMessage = leftSelected || rightSelected || selected;
   }
 
@@ -66,7 +68,8 @@
 </script>
 
 <span
-  class:selected
+  class:selected={selected || childSelected}
+  class:childSelected={!selected && childSelected}
   class={`expr${info.kind}`}
   on:mousedown={(evt) => evt.preventDefault()}
 >
@@ -80,8 +83,10 @@
 
   <div
     class="expr"
+    class:clickSelected={selected}
     on:click={(evt) => {
       evt.preventDefault();
+
       if (evt.shiftKey) {
         globalCtx.select(id);
       } else {
@@ -129,7 +134,16 @@
   }
 
   .selected {
+    padding-left: 2px;
+    padding-right: 2px;
     border-radius: 4px;
+  }
+
+  .clickSelected {
     background-color: lightblue;
+  }
+
+  .childSelected {
+    background-color: lightgreen;
   }
 </style>
