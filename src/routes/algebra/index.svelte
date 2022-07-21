@@ -6,9 +6,8 @@
   import * as wasm from "@lib/ts/wasm";
   import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
 
-  let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
-  // let equation = "1x(1 + 2)";
-  let evalValue = 0;
+  // let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
+  let equation = "1x";
   let worker = undefined;
   let root = undefined;
 
@@ -27,11 +26,8 @@
         case "equationChange":
           break;
 
-        case "equationValue":
-          evalValue = message.data;
-          break;
-
         case "addTreeItem":
+        console.log(message.kind ,message.data);
           tree.set(message.data.id, message.data);
           break;
 
@@ -44,7 +40,7 @@
           root = message.data;
           break;
 
-          case "resetState":
+        case "resetState":
           globalCtx.reset();
           break;
 
@@ -53,7 +49,6 @@
           break;
 
         default:
-          console.log(message.kind, message.data);
           postToast(message.kind, message.data);
           break;
       }
@@ -75,12 +70,18 @@
 
     {#if $globalCtx.selected.size === 1}
       <div>
-        Selected Value: {tree.get([...$globalCtx.selected.keys()][0]).value}
+        Selected Value: {tree.get([...$globalCtx.selected.keys()][0]).evalValue}
       </div>
     {/if}
-    <div>Expression Value: {tree.get(root)?.value}</div>
+    <div>Expression Value: {tree.get(root)?.evalValue}</div>
 
-    <button class="muiButton" on:click={() => console.log([...tree.entries()])}>
+    <button
+      class="muiButton"
+      on:click={() =>
+        [...tree.entries()].forEach(([key, value]) => {
+          console.log(key, value);
+        })}
+    >
       Click
     </button>
 

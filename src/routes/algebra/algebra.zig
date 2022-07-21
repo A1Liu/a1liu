@@ -21,7 +21,6 @@ pub usingnamespace wasm;
 
 const Table = wasm.StringTable(.{
     .equation_change = "equationChange",
-    .equation_value = "equationValue",
     .new_variable = "newVariable",
     .add_tree_item = "addTreeItem",
     .del_tree_item = "delTreeItem",
@@ -33,6 +32,7 @@ const Table = wasm.StringTable(.{
     .implicit = "implicit",
     .name = "name",
     .value = "value",
+    .eval_value = "evalValue",
     .right = "right",
     .left = "left",
     .paren = "paren",
@@ -357,9 +357,12 @@ fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
         if (!std.mem.eql(u8, var_info.name, name)) continue;
 
         registry.addComponent(var_info.id, .value).?.* = new_value;
+        wasm.post(.log, "variableUpdate of {s}: done", .{name});
+        break;
     }
 
     if (root) |r| {
+        _ = evalTree(r);
         addTree(r);
 
         const id_obj = wasm.make.integer(.temp, r.index);
@@ -377,14 +380,11 @@ fn evalTree(id: liu.ecs.EntityId) f64 {
 
     const node = view.get(id).?;
 
-    if (node.kind == .variable) {
-        return node.value.?;
-    }
+    const left = node.left orelse return node.value.?;
+    const right = node.right orelse return node.value.?;
 
-    if (node.value) |v| return v;
-
-    const l = evalTree(node.left.?);
-    const r = evalTree(node.right.?);
+    const l = evalTree(left);
+    const r = evalTree(right);
 
     const value = switch (node.kind) {
         .plus => l + r,
@@ -393,7 +393,7 @@ fn evalTree(id: liu.ecs.EntityId) f64 {
         .multiply => l * r,
         .divide => l / r,
 
-        else => unreachable,
+        else => return node.value.?,
     };
 
     registry.addComponent(id, .value).?.* = value;
@@ -444,9 +444,11 @@ fn addTree(id: liu.ecs.EntityId) void {
     if (fields.text) |value| {
         const value_obj = wasm.make.string(.temp, value.*);
         obj.objSet(keys.value, value_obj);
-    } else if (fields.value) |value| {
+    }
+
+    if (fields.value) |value| {
         const value_obj = wasm.make.number(.temp, value);
-        obj.objSet(keys.value, value_obj);
+        obj.objSet(keys.eval_value, value_obj);
     }
 
     const id_obj = wasm.make.integer(.temp, id.index);
@@ -499,10 +501,7 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
 
     if (root) |r| delTree(r);
 
-    {
-        const value_obj = wasm.make.number(.temp, evalTree(new_root));
-        wasm.postMessage(keys.equation_value, value_obj);
-    }
+    _ = evalTree(new_root);
 
     addTree(new_root);
     {
