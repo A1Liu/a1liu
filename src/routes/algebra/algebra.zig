@@ -21,13 +21,17 @@ pub usingnamespace wasm;
 
 const Table = wasm.StringTable(.{
     .equation_change = "equationChange",
+    .equation_value = "equationValue",
+    .new_variable = "newVariable",
     .add_tree_item = "addTreeItem",
     .del_tree_item = "delTreeItem",
     .set_root = "setRoot",
+    .reset_state = "resetState",
 
     .kind = "kind",
     .id = "id",
     .implicit = "implicit",
+    .name = "name",
     .value = "value",
     .right = "right",
     .left = "left",
@@ -35,7 +39,7 @@ const Table = wasm.StringTable(.{
 
     .plus = "+",
     .minus = "-",
-    .multiply = "*",
+    .multiply = "×",
     .divide = "/",
 
     .integer = "integer",
@@ -45,6 +49,7 @@ const Table = wasm.StringTable(.{
 var keys: Table.Keys = undefined;
 var root: ?liu.ecs.EntityId = null;
 var equation = std.ArrayList(u8).init(liu.Pages);
+var variables = std.ArrayList(struct { name: []const u8, id: liu.ecs.EntityId }).init(liu.Pages);
 
 pub const registry: *Registry = &registry_data;
 var registry_data: Registry = Registry.init(liu.Pages);
@@ -73,6 +78,8 @@ const ChildrenView = struct {
     left: ?liu.ecs.EntityId,
     right: ?liu.ecs.EntityId,
 };
+
+const ValueView = struct { value: f64 };
 
 const ParseError = error{
     FailedToParse,
@@ -297,10 +304,23 @@ const Parser = struct {
             },
 
             'a'...'z' => {
-                const id = try registry.create("");
+                const name = self.data[begin..self.index];
+                const id = id: {
+                    for (variables.items) |var_info| {
+                        if (std.mem.eql(u8, var_info.name, name)) {
+                            break :id var_info.id;
+                        }
+                    }
 
-                registry.addComponent(id, .kind).?.* = .variable;
-                registry.addComponent(id, .text).?.* = self.data[begin..self.index];
+                    const id = try registry.create("");
+                    registry.addComponent(id, .kind).?.* = .variable;
+                    registry.addComponent(id, .text).?.* = name;
+                    registry.addComponent(id, .value).?.* = 1;
+
+                    try variables.append(.{ .name = name, .id = id });
+
+                    break :id id;
+                };
 
                 return id;
             },
@@ -316,6 +336,69 @@ const Parser = struct {
 
 export fn equationChange(equation_obj: wasm.Obj) void {
     equationChangeImpl(equation_obj) catch return;
+}
+
+export fn variableUpdate(variable_name: wasm.Obj, new_value: f64) void {
+    return variableUpdateImpl(variable_name, new_value) catch unreachable;
+}
+
+fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
+    const temp_mark = liu.TempMark;
+    defer liu.TempMark = temp_mark;
+
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
+
+    const name = try wasm.in.string(variable_name, liu.Temp);
+
+    wasm.post(.log, "variableUpdate of {s}: {}", .{ name, new_value });
+
+    for (variables.items) |var_info| {
+        if (!std.mem.eql(u8, var_info.name, name)) continue;
+
+        registry.addComponent(var_info.id, .value).?.* = new_value;
+    }
+
+    if (root) |r| {
+        addTree(r);
+
+        const id_obj = wasm.make.integer(.temp, r.index);
+        wasm.postMessage(keys.set_root, id_obj);
+    }
+}
+
+fn evalTree(id: liu.ecs.EntityId) f64 {
+    const view = registry.view(struct {
+        kind: EKind,
+        value: ?f64,
+        left: ?liu.ecs.EntityId,
+        right: ?liu.ecs.EntityId,
+    });
+
+    const node = view.get(id).?;
+
+    if (node.kind == .variable) {
+        return node.value.?;
+    }
+
+    if (node.value) |v| return v;
+
+    const l = evalTree(node.left.?);
+    const r = evalTree(node.right.?);
+
+    const value = switch (node.kind) {
+        .plus => l + r,
+        .minus => l - r,
+
+        .multiply => l * r,
+        .divide => l / r,
+
+        else => unreachable,
+    };
+
+    registry.addComponent(id, .value).?.* = value;
+
+    return value;
 }
 
 fn addTree(id: liu.ecs.EntityId) void {
@@ -338,8 +421,9 @@ fn addTree(id: liu.ecs.EntityId) void {
     }
 
     const FieldView = struct {
-        text: ?*[]const u8,
         kind: EKind,
+        text: ?*[]const u8,
+        value: ?f64,
         is_implicit: ?void,
         paren: ?void,
     };
@@ -359,6 +443,9 @@ fn addTree(id: liu.ecs.EntityId) void {
 
     if (fields.text) |value| {
         const value_obj = wasm.make.string(.temp, value.*);
+        obj.objSet(keys.value, value_obj);
+    } else if (fields.value) |value| {
+        const value_obj = wasm.make.number(.temp, value);
         obj.objSet(keys.value, value_obj);
     }
 
@@ -385,8 +472,8 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
     const temp_mark = liu.TempMark;
     defer liu.TempMark = temp_mark;
 
-    const watermark = wasm.watermark();
-    defer wasm.setWatermark(watermark);
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
 
     {
         var new_equation: []const u8 = try wasm.in.string(equation_obj, liu.Temp);
@@ -399,6 +486,8 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
         try equation.ensureTotalCapacity(new_equation.len);
         equation.clearRetainingCapacity();
         equation.appendSliceAssumeCapacity(new_equation);
+
+        variables.clearRetainingCapacity();
     }
 
     var parser = Parser{ .data = equation.items };
@@ -410,10 +499,23 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
 
     if (root) |r| delTree(r);
 
+    {
+        const value_obj = wasm.make.number(.temp, evalTree(new_root));
+        wasm.postMessage(keys.equation_value, value_obj);
+    }
+
     addTree(new_root);
     {
         const id_obj = wasm.make.integer(.temp, new_root.index);
         wasm.postMessage(keys.set_root, id_obj);
+    }
+
+    wasm.postMessage(keys.reset_state, .jsundefined);
+
+    for (variables.items) |var_info| {
+        const name_obj = wasm.make.string(.temp, var_info.name);
+
+        wasm.postMessage(keys.new_variable, name_obj);
     }
 
     root = new_root;

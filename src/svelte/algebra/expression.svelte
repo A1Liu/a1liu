@@ -10,11 +10,13 @@
 
   interface Ctx {
     selected: Map<number, true>;
+    variables: Map<string, number>;
   }
 
   function newCtx(): Ctx {
     return {
       selected: new Map(),
+      variables: new Map(),
     };
   }
 
@@ -25,6 +27,14 @@
       subscribe,
 
       reset: () => set(newCtx()),
+
+      addVariable: (name: string, value: number) =>
+        update((prev) => {
+          prev.variables.set(name, value);
+
+          return { ...prev };
+        }),
+
       select: (id: number) =>
         update((prev) => {
           const selected = prev.selected;
@@ -34,11 +44,9 @@
             selected.set(id, true);
           }
 
-          return {
-            ...prev,
-            selected,
-          };
+          return { ...prev };
         }),
+
       click: (id: number) =>
         update((prev) => {
           return {
@@ -87,26 +95,25 @@
     <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
   {/if}
 
-  {#if !info.implicit}
-    <div
-      class="expr"
-      on:click={(evt) => {
-        evt.preventDefault();
+  <div
+    class="expr"
+    class:implicit={info.implicit}
+    on:click={(evt) => {
+      evt.preventDefault();
 
-        if (evt.shiftKey) {
-          globalCtx.select(id);
-        } else {
-          globalCtx.click(id);
-        }
-      }}
-    >
-      {#if ShouldPrintValue[info.kind]}
-        {info.value}
-      {:else}
-        {info.kind}
-      {/if}
-    </div>
-  {/if}
+      if (evt.shiftKey) {
+        globalCtx.select(id);
+      } else {
+        globalCtx.click(id);
+      }
+    }}
+  >
+    {#if ShouldPrintValue[info.kind]}
+      {info.value}
+    {:else}
+      {info.kind}
+    {/if}
+  </div>
 
   {#if info.right !== undefined}
     <svelte:self id={info.right} bind:selectedMessage={rightSelected} />
@@ -138,6 +145,11 @@
 
     border-radius: 4px;
     padding: 0px 3px 0px 3px;
+  }
+
+  .implicit {
+    font-size: 16px;
+    padding: 0px;
   }
 
   .selected {

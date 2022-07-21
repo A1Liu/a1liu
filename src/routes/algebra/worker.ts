@@ -23,6 +23,12 @@ const main = async (wasmRef: wasm.Ref) => {
           break;
         }
 
+        case "variableUpdate": {
+          const obj = wasmRef.addObj(msg.data.name);
+          wasmRef.abi.variableUpdate(obj, msg.data.value);
+          break;
+        }
+
         default:
           postMessage(msg);
       }

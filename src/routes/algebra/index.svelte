@@ -6,8 +6,9 @@
   import * as wasm from "@lib/ts/wasm";
   import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
 
-  // let equation = "1 + 3 * 4 + 5 / 3 * 4";
-  let equation = "1(1 + 2)";
+  let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
+  // let equation = "1x(1 + 2)";
+  let evalValue = 0;
   let worker = undefined;
   let root = undefined;
 
@@ -24,7 +25,10 @@
         }
 
         case "equationChange":
-          // console.log("tree", [...tree.entries()]);
+          break;
+
+        case "equationValue":
+          evalValue = message.data;
           break;
 
         case "addTreeItem":
@@ -38,11 +42,18 @@
 
         case "setRoot":
           root = message.data;
-          globalCtx.reset();
+          break;
 
+          case "resetState":
+          globalCtx.reset();
+          break;
+
+        case "newVariable":
+          globalCtx.addVariable(message.data, 1);
           break;
 
         default:
+          console.log(message.kind, message.data);
           postToast(message.kind, message.data);
           break;
       }
@@ -62,9 +73,37 @@
       {/if}
     </div>
 
+    {#if $globalCtx.selected.size === 1}
+      <div>
+        Selected Value: {tree.get([...$globalCtx.selected.keys()][0]).value}
+      </div>
+    {/if}
+    <div>Expression Value: {tree.get(root)?.value}</div>
+
     <button class="muiButton" on:click={() => console.log([...tree.entries()])}>
       Click
     </button>
+
+    {#each [...$globalCtx.variables.keys()] as name (name)}
+      <div>
+        {name}:
+        <input
+          type="number"
+          on:input={(evt) => {
+            console.log("hello", evt.target.value);
+            const value = Number.parseFloat(evt.target.value);
+            if (!isNaN(value)) {
+              globalCtx.addVariable(name, value);
+              worker?.postMessage({
+                kind: "variableUpdate",
+                data: { name, value },
+              });
+            }
+          }}
+          value={$globalCtx.variables.get(name)}
+        />
+      </div>
+    {/each}
   </div>
 </div>
 
