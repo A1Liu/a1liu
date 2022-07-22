@@ -31,7 +31,6 @@
           break;
 
         case "delTreeItem":
-          // console.log(message);
           tree.delete(message.data);
           break;
 
@@ -44,7 +43,6 @@
           break;
 
         case "newVariable":
-          console.log(message);
           globalCtx.updateVariable(message.data, 1);
           break;
 
@@ -73,14 +71,12 @@
         Selected Value: {tree.get([...$globalCtx.selected.keys()][0]).evalValue}
       </div>
     {/if}
+
     <div>Expression Value: {tree.get(root)?.evalValue}</div>
 
     <button
       class="muiButton"
-      on:click={() =>
-        [...tree.entries()].forEach(([key, value]) => {
-          console.log(key, value);
-        })}
+      on:click={() => [...tree.entries()].forEach((e) => console.log(...e))}
     >
       Click
     </button>
@@ -90,18 +86,16 @@
         {name}:
         <input
           type="number"
+          value={$globalCtx.variables.get(name)}
           on:input={(evt) => {
-            console.log("hello", evt.target.value);
             const value = Number.parseFloat(evt.target.value);
+
             if (!isNaN(value)) {
               globalCtx.updateVariable(name, value);
-              worker?.postMessage({
-                kind: "variableUpdate",
-                data: { name, value },
-              });
+              const data = { name, value };
+              worker?.postMessage({ kind: "variableUpdate", data });
             }
           }}
-          value={$globalCtx.variables.get(name)}
         />
       </div>
     {/each}
