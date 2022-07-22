@@ -25,7 +25,7 @@ const Table = wasm.StringTable(.{
     .add_tree_item = "addTreeItem",
     .del_tree_item = "delTreeItem",
     .set_root = "setRoot",
-    .reset_state = "resetState",
+    .reset_selected = "resetSelected",
 
     .kind = "kind",
     .id = "id",
@@ -49,7 +49,7 @@ const Table = wasm.StringTable(.{
 var keys: Table.Keys = undefined;
 var root: ?liu.ecs.EntityId = null;
 var equation = std.ArrayList(u8).init(liu.Pages);
-var variables = std.ArrayList(struct { name: []const u8, id: liu.ecs.EntityId }).init(liu.Pages);
+var variables = std.ArrayList(struct { name: []const u8, value: f64 }).init(liu.Pages);
 
 pub const registry: *Registry = &registry_data;
 var registry_data: Registry = Registry.init(liu.Pages);
@@ -305,22 +305,31 @@ const Parser = struct {
 
             'a'...'z' => {
                 const name = self.data[begin..self.index];
-                const id = id: {
+
+                const id = try registry.create("");
+                errdefer _ = registry.delete(id);
+
+                const value = variable: {
                     for (variables.items) |var_info| {
                         if (std.mem.eql(u8, var_info.name, name)) {
-                            break :id var_info.id;
+                            break :variable var_info.value;
                         }
                     }
 
-                    const id = try registry.create("");
-                    registry.addComponent(id, .kind).?.* = .variable;
-                    registry.addComponent(id, .text).?.* = name;
-                    registry.addComponent(id, .value).?.* = 1;
+                    const var_info = try variables.addOne();
+                    var_info.* = .{ .name = name, .value = 1 };
 
-                    try variables.append(.{ .name = name, .id = id });
+                    const name_obj = wasm.make.string(.manual, name);
+                    defer name_obj.delete();
 
-                    break :id id;
+                    wasm.postMessage(keys.new_variable, name_obj);
+
+                    break :variable 1;
                 };
+
+                registry.addComponent(id, .kind).?.* = .variable;
+                registry.addComponent(id, .text).?.* = name;
+                registry.addComponent(id, .value).?.* = value;
 
                 return id;
             },
@@ -340,34 +349,6 @@ export fn equationChange(equation_obj: wasm.Obj) void {
 
 export fn variableUpdate(variable_name: wasm.Obj, new_value: f64) void {
     return variableUpdateImpl(variable_name, new_value) catch unreachable;
-}
-
-fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
-    const temp_mark = liu.TempMark;
-    defer liu.TempMark = temp_mark;
-
-    const wasm_mark = wasm.watermark();
-    defer wasm.setWatermark(wasm_mark);
-
-    const name = try wasm.in.string(variable_name, liu.Temp);
-
-    wasm.post(.log, "variableUpdate of {s}: {}", .{ name, new_value });
-
-    for (variables.items) |var_info| {
-        if (!std.mem.eql(u8, var_info.name, name)) continue;
-
-        registry.addComponent(var_info.id, .value).?.* = new_value;
-        wasm.post(.log, "variableUpdate of {s}: done", .{name});
-        break;
-    }
-
-    if (root) |r| {
-        _ = evalTree(r);
-        addTree(r);
-
-        const id_obj = wasm.make.integer(.temp, r.index);
-        wasm.postMessage(keys.set_root, id_obj);
-    }
 }
 
 fn evalTree(id: liu.ecs.EntityId) f64 {
@@ -470,6 +451,29 @@ fn delTree(id: liu.ecs.EntityId) void {
     wasm.postMessage(keys.del_tree_item, id_obj);
 }
 
+fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
+    const temp_mark = liu.TempMark;
+    defer liu.TempMark = temp_mark;
+
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
+
+    const name = try wasm.in.string(variable_name, liu.Temp);
+
+    wasm.post(.log, "variableUpdate of {s}: {}", .{ name, new_value });
+
+    for (variables.items) |*var_info| {
+        if (!std.mem.eql(u8, var_info.name, name)) continue;
+
+        var_info.value = new_value;
+
+        wasm.post(.log, "variableUpdate of {s}: done", .{name});
+        break;
+    }
+
+    try rebuildEquationTree();
+}
+
 fn equationChangeImpl(equation_obj: wasm.Obj) !void {
     const temp_mark = liu.TempMark;
     defer liu.TempMark = temp_mark;
@@ -488,9 +492,19 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
         try equation.ensureTotalCapacity(new_equation.len);
         equation.clearRetainingCapacity();
         equation.appendSliceAssumeCapacity(new_equation);
-
-        variables.clearRetainingCapacity();
     }
+
+    try rebuildEquationTree();
+
+    wasm.postMessage(keys.equation_change, .jsundefined);
+}
+
+fn rebuildEquationTree() !void {
+    const temp_mark = liu.TempMark;
+    defer liu.TempMark = temp_mark;
+
+    const wasm_mark = wasm.watermark();
+    defer wasm.setWatermark(wasm_mark);
 
     var parser = Parser{ .data = equation.items };
     const new_root = parser.parseEquation() catch |e| {
@@ -498,6 +512,8 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
 
         return e;
     };
+
+    wasm.postMessage(keys.reset_selected, .jsundefined);
 
     if (root) |r| delTree(r);
 
@@ -509,18 +525,7 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
         wasm.postMessage(keys.set_root, id_obj);
     }
 
-    wasm.postMessage(keys.reset_state, .jsundefined);
-
-    for (variables.items) |var_info| {
-        const name_obj = wasm.make.string(.temp, var_info.name);
-
-        wasm.postMessage(keys.new_variable, name_obj);
-    }
-
     root = new_root;
-
-    // wasm.post(.log, "equation: {s}", .{equation.items});
-    wasm.postMessage(keys.equation_change, .jsundefined);
 }
 
 export fn init() void {

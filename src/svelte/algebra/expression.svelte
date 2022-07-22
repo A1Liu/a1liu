@@ -26,9 +26,16 @@
     return {
       subscribe,
 
-      reset: () => set(newCtx()),
+      resetSelected: () => {
+        update((prev) => {
+          return {
+          ...prev,
+          selected: new Map(),
+          };
+        });
+      },
 
-      addVariable: (name: string, value: number) =>
+      updateVariable: (name: string, value: number) =>
         update((prev) => {
           prev.variables.set(name, value);
 

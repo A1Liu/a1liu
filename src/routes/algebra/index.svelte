@@ -6,8 +6,8 @@
   import * as wasm from "@lib/ts/wasm";
   import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
 
-  // let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
-  let equation = "1x";
+  let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
+  // let equation = "1x";
   let worker = undefined;
   let root = undefined;
 
@@ -27,7 +27,6 @@
           break;
 
         case "addTreeItem":
-        console.log(message.kind ,message.data);
           tree.set(message.data.id, message.data);
           break;
 
@@ -40,12 +39,13 @@
           root = message.data;
           break;
 
-        case "resetState":
-          globalCtx.reset();
+        case "resetSelected":
+          globalCtx.resetSelected();
           break;
 
         case "newVariable":
-          globalCtx.addVariable(message.data, 1);
+          console.log(message);
+          globalCtx.updateVariable(message.data, 1);
           break;
 
         default:
@@ -94,7 +94,7 @@
             console.log("hello", evt.target.value);
             const value = Number.parseFloat(evt.target.value);
             if (!isNaN(value)) {
-              globalCtx.addVariable(name, value);
+              globalCtx.updateVariable(name, value);
               worker?.postMessage({
                 kind: "variableUpdate",
                 data: { name, value },
