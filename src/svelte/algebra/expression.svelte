@@ -9,7 +9,7 @@
   };
 
   interface Ctx {
-    selected: Map<number, true>;
+    selected: Map<number, boolean>;
     variables: Map<string, number>;
   }
 
