@@ -44,11 +44,7 @@
       select: (id: number) =>
         update((prev) => {
           const selected = prev.selected;
-          if (selected.get(id)) {
-            selected.delete(id);
-          } else {
-            selected.set(id, true);
-          }
+          selected.set(id, !selected.get(id));
 
           return { ...prev };
         }),
@@ -78,7 +74,7 @@
   let rightSelected = false;
 
   $: {
-    selected = $globalCtx.selected.has(id);
+    selected = !!$globalCtx.selected.get(id);
     childSelected = leftSelected && rightSelected;
     selectedMessage = leftSelected || rightSelected || selected;
   }
