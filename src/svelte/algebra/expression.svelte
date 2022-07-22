@@ -26,14 +26,13 @@
     return {
       subscribe,
 
-      resetSelected: () => {
+      resetSelected: () =>
         update((prev) => {
           return {
             ...prev,
             selected: new Map(),
           };
-        });
-      },
+        }),
 
       updateVariable: (name: string, value: number) =>
         update((prev) => {
