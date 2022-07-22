@@ -29,8 +29,8 @@
       resetSelected: () => {
         update((prev) => {
           return {
-          ...prev,
-          selected: new Map(),
+            ...prev,
+            selected: new Map(),
           };
         });
       },
