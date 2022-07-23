@@ -1,5 +1,8 @@
 import { build, files, version } from "$service-worker";
 
+// Using
+// https://blog.logrocket.com/building-a-pwa-with-svelte/
+
 const worker = self as unknown as any;
 const FILES = `cache${version}`;
 const to_cache = build.concat(files);
@@ -46,8 +49,11 @@ async function fetchAndCache(request: Request) {
 
 // listen for the fetch events
 worker.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || event.request.headers.has("range"))
-    return;
+  const req = event.request;
+
+  if (req.method !== "GET") return;
+  if (req.headers.has("range")) return;
+
   const url = new URL(event.request.url);
   // only cache files that are local to your application
   const isHttp = url.protocol.startsWith("http");
