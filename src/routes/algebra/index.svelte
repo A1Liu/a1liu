@@ -6,12 +6,18 @@
   import * as wasm from "@lib/ts/wasm";
   import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
 
+  let Chart = undefined;
   let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
   // let equation = "1x";
   let worker = undefined;
   let root = undefined;
 
   $: worker?.postMessage({ kind: "equationChange", data: equation });
+
+  const initChart = () => {
+    Chart = window.Chart;
+    console.log("init charts");
+  };
 
   onMount(() => {
     worker = new MyWorker();
@@ -53,6 +59,13 @@
     };
   });
 </script>
+
+<svelte:head>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"
+    on:load={initChart}>
+  </script>
+</svelte:head>
 
 <Toast location={"bottom-left"} />
 
