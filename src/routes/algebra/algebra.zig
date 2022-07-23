@@ -55,37 +55,6 @@ var equation = std.ArrayList(u8).init(liu.Pages);
 pub const keys = &keys_;
 var keys_: Table.Keys = undefined;
 
-pub const variables = &variables_;
-var variables_ = std.ArrayList(struct { name: []const u8, value: f64 }).init(liu.Pages);
-
-pub const registry: *Registry = &registry_data;
-var registry_data: Registry = Registry.init(liu.Pages);
-
-pub const EKind = enum(u8) {
-    plus = '+',
-    minus = '-',
-    multiply = '*',
-    divide = '/',
-
-    integer = 128,
-    variable = 129,
-};
-
-pub const Registry = liu.ecs.Registry(struct {
-    kind: EKind,
-    text: []const u8,
-    value: f64,
-    left: liu.ecs.EntityId,
-    right: liu.ecs.EntityId,
-    is_implicit: void,
-    paren: void,
-});
-
-pub const ChildrenView = struct {
-    left: ?liu.ecs.EntityId,
-    right: ?liu.ecs.EntityId,
-};
-
 const ValueView = struct { value: f64 };
 
 export fn equationChange(equation_obj: wasm.Obj) void {
@@ -103,19 +72,7 @@ fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
-    const name = try wasm.in.string(variable_name, liu.Temp);
-
-    wasm.post(.log, "variableUpdate of {s}: {}", .{ name, new_value });
-
-    for (variables.items) |*var_info| {
-        if (!std.mem.eql(u8, var_info.name, name)) continue;
-
-        var_info.value = new_value;
-
-        wasm.post(.log, "variableUpdate of {s}: done", .{name});
-        break;
-    }
-
+    try tree.updateVariable(variable_name, new_value);
     try rebuildEquationTree();
 }
 
@@ -180,7 +137,7 @@ export fn init() void {
 fn initImpl() !void {
     wasm.initIfNecessary();
 
-    try registry.ensureUnusedCapacity(128);
+    try tree.registry.ensureUnusedCapacity(128);
 
     keys.* = Table.init();
 

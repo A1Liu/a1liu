@@ -5,9 +5,47 @@ const root = @import("root");
 const wasm = liu.wasm;
 
 const keys = root.keys;
-const variables = root.variables;
-const registry = root.registry;
-const EKind = root.EKind;
+
+const EKind = enum(u8) {
+    plus = '+',
+    minus = '-',
+    multiply = '*',
+    divide = '/',
+
+    integer = 128,
+    variable = 129,
+};
+
+const FieldView = struct {
+    kind: EKind,
+    text: ?*[]const u8,
+    left: ?liu.ecs.EntityId,
+    right: ?liu.ecs.EntityId,
+    value: ?f64,
+    is_implicit: ?void,
+    paren: ?void,
+};
+
+const ChildrenView = struct {
+    left: ?liu.ecs.EntityId,
+    right: ?liu.ecs.EntityId,
+};
+
+pub const Registry = liu.ecs.Registry(struct {
+    kind: EKind,
+    text: []const u8,
+    value: f64,
+    left: liu.ecs.EntityId,
+    right: liu.ecs.EntityId,
+    is_implicit: void,
+    paren: void,
+});
+
+pub const registry: *Registry = &registry_data;
+var registry_data: Registry = Registry.init(liu.Pages);
+
+const variables = &variables_;
+var variables_ = std.ArrayList(struct { name: []const u8, value: f64 }).init(liu.Pages);
 
 const ParseError = error{
     FailedToParse,
@@ -272,44 +310,29 @@ const expr_name_obj = expr_name_obj: {
 };
 
 pub fn addTree(id: liu.ecs.EntityId) void {
-    const children = registry.view(root.ChildrenView).get(id) orelse return;
+    const fields = registry.view(FieldView).get(id) orelse return;
 
     const obj = wasm.make.obj(.temp);
 
-    if (children.left) |left| {
+    if (fields.left) |left| {
         addTree(left);
 
         const id_obj = wasm.make.integer(.temp, left.index);
         obj.objSet(keys.left, id_obj);
     }
 
-    if (children.right) |right| {
+    if (fields.right) |right| {
         addTree(right);
 
         const id_obj = wasm.make.integer(.temp, right.index);
         obj.objSet(keys.right, id_obj);
     }
 
-    const FieldView = struct {
-        kind: EKind,
-        text: ?*[]const u8,
-        value: ?f64,
-        is_implicit: ?void,
-        paren: ?void,
-    };
-
-    const fields = registry.view(FieldView).get(id) orelse unreachable;
-
     const kind_info = expr_name_obj[@enumToInt(fields.kind)] orelse unreachable;
     obj.objSet(keys.kind, kind_info.name_obj.*);
 
-    if (fields.paren != null) {
-        obj.objSet(keys.paren, .jstrue);
-    }
-
-    if (fields.is_implicit != null) {
-        obj.objSet(keys.implicit, .jstrue);
-    }
+    if (fields.paren != null) obj.objSet(keys.paren, .jstrue);
+    if (fields.is_implicit != null) obj.objSet(keys.implicit, .jstrue);
 
     if (fields.text) |value| {
         const value_obj = wasm.make.string(.temp, value.*);
@@ -328,7 +351,7 @@ pub fn addTree(id: liu.ecs.EntityId) void {
 }
 
 pub fn delTree(id: liu.ecs.EntityId) void {
-    const view = registry.view(root.ChildrenView);
+    const view = registry.view(ChildrenView);
 
     const children = view.get(id) orelse return;
     if (children.left) |left| delTree(left);
@@ -369,4 +392,18 @@ pub fn evalTree(id: liu.ecs.EntityId) f64 {
     registry.addComponent(id, .value).?.* = value;
 
     return value;
+}
+
+pub fn updateVariable(variable_name: wasm.Obj, new_value: f64) !void {
+    const temp_mark = liu.TempMark;
+    defer liu.TempMark = temp_mark;
+
+    const name = try wasm.in.string(variable_name, liu.Temp);
+
+    for (variables.items) |*var_info| {
+        if (!std.mem.eql(u8, var_info.name, name)) continue;
+
+        var_info.value = new_value;
+        break;
+    }
 }
