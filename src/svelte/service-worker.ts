@@ -61,16 +61,16 @@ worker.addEventListener("fetch", (event) => {
   const isHttp = url.protocol.startsWith("http");
   if (!isHttp) return;
 
-  const isDevServerRequest =
-    url.hostname === self.location.hostname && url.port !== self.location.port;
-  if (isDevServerRequest) return;
-
-  const skipBecauseUncached =
-    event.request.cache === "only-if-cached" && !isStaticAsset;
-  if (skipBecauseUncached) return;
+  // I don't really get what this does tbh, so whatever
+  // const isDevServerRequest =
+  //   url.hostname === self.location.hostname && url.port !== self.location.port;
+  // if (isDevServerRequest) return;
 
   const isStaticAsset =
     url.host === self.location.host && staticAssets.has(url.pathname);
+
+  const skipBecauseUncached = req.cache === "only-if-cached" && !isStaticAsset;
+  if (skipBecauseUncached) return;
 
   // always serve static files and bundler-generated assets from cache.
   // if your application has other URLs with data that will never change,
