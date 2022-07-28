@@ -7,6 +7,22 @@ const assert = std.debug.assert;
 
 const Allocator = mem.Allocator;
 
+const AllocTracker = struct {
+    alloc: Allocator,
+    parent: Allocator,
+    name: []const u8,
+    used_bytes: usize,
+    free_bytes: usize,
+};
+
+var tracked_allocators = [_]?AllocTracker{null} ** 20;
+
+pub fn trackedAllocator(obj: anytype) Allocator {
+    _ = obj;
+
+    unreachable;
+}
+
 pub const Pages = std.heap.page_allocator;
 
 const BumpState = struct {
