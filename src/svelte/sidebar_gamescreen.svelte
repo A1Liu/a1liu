@@ -92,10 +92,10 @@
 
 <style lang="postcss">
   .wrapper {
-    height: 100vh;
-    width: 100vw;
-    max-height: 100vh;
-    max-width: 100vw;
+    height: 100%;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
 
     display: flex;
     flex-direction: row;
@@ -105,8 +105,7 @@
   canvas {
     height: 100%;
 
-    /* Painter uses this and the slot to put a sidebar on the right; unclear
-     * if that functionality would be useful elsewhere */
+    /* Painter uses this and the slot to put a sidebar on the right */
     min-width: 0px;
     width: inherit;
     max-width: inherit;

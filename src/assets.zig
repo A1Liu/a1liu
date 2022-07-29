@@ -1,6 +1,25 @@
 const std = @import("std");
 const liu = @import("./liu/lib.zig");
 
+pub const alloc_bench = struct {
+    pub const Kind = enum(u8) {
+        alloc,
+        free,
+        resize,
+    };
+
+    pub const AllocInfo = struct {
+        kind: Kind,
+        ptr: usize,
+        size: usize,
+        return_addr: usize,
+    };
+
+    pub const Spec = struct {
+        history: []AllocInfo,
+    };
+};
+
 // This file stores the specifications of created assets and the code to
 // re-generate them from valid data, where the valid data is easier to reason
 // about than the produced asset files. Ideally the valid data is human-readable.
