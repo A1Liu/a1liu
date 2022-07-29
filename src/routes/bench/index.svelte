@@ -6,6 +6,8 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import * as wasm from "@lib/ts/wasm";
 
+  // import Kilordle from "../kilordle/index.svelte";
+
   let worker = undefined;
 
   let inputCount = 1000;
