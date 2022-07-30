@@ -32,3 +32,8 @@ MacOS is slow when using `/etc/hosts` on multiple lines, so just put all the ali
 for an IP address on a single line.
 
 https://superuser.com/questions/1189379/chrome-slow-to-resolve-etc-hosts-on-macos-os-x
+
+### iTerm Fix for Cmd+R
+IDK what this key sequence does, but it messes up the iTerm screen. You can disable
+it by setting a keybinding for Cmd+R to ignore (this is already done in the iTerm
+config in the `programs` folder).
