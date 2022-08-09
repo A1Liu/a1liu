@@ -28,7 +28,10 @@ function work() {
     fi
 
     tmux new-session -d -s "work$1" -c "$HOME/code/orthly$1"
+
     tmux split-window -h -c "$HOME/code/orthly$1"
+    # tmux split-window -h -c "$HOME/code/sidekick"
+
     tmux attach -d -t "work$1"
 }
 
