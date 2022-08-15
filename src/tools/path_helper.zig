@@ -36,6 +36,8 @@ pub fn main() !void {
     try addPath("~/go/bin");
 
     try addPath("/opt/homebrew/bin");
+    try addPath("/opt/homebrew/Cellar/llvm/14.0.6/bin:$PATH");
+
     try addPath("~/.rbenv/bin");
 
     {
