@@ -14,10 +14,9 @@
 
     <h2>About Me</h2>
     <p>
-      Hi, I&apos;m Albert, and this is my website! I&apos;m a Senior at NYU
-      majoring in Computer Science. This website is mainly for my own personal
-      use, but feel free to use the stuff on here or copy the source code into
-      your own project!
+      Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer
+      at Dandy. I recently graduated from New York University. In high school,
+      I once ate 2 whole hot dogs for lunch.
     </p>
 
     <h2>What I&apos;m Doing Now</h2>
@@ -29,14 +28,13 @@
     <h2>Projects</h2>
     <ul>
       <li>
-        <a href="https://schedge.a1liu.com/">Schedge</a>{" "}
-        - API for NYU&apos;s course catalog
+        <a href="/game-2d-simple/">Simple 2D Game</a>{" "}
+        - Really simple 2D game
       </li>
 
       <li>
-        <a href="https://tci.a1liu.com/">Teaching C Interpreter</a>{" "}
-        - interpreter for the C programming language that tries to make it easier
-        to debug programs.
+        <a href="/painter/">Painter</a>{" "}
+        - Tiny WebGL2 drawing app
       </li>
 
       <li>
@@ -49,13 +47,14 @@
       </li>
 
       <li>
-        <a href="/painter/">Painter</a>{" "}
-        - Tiny WebGL2 drawing app
+        <a href="https://tci.a1liu.com/">Teaching C Interpreter</a>{" "}
+        - interpreter for the C programming language that tries to make it easier
+        to debug programs.
       </li>
 
       <li>
-        <a href="/game-2d-simple/">Simple 2D Game</a>{" "}
-        - Really simple 2D game
+        <a href="https://schedge.a1liu.com/">Schedge</a>{" "}
+        - API for NYU&apos;s course catalog
       </li>
     </ul>
   </div>
