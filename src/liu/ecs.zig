@@ -187,8 +187,6 @@ pub fn Registry(comptime InDense: type) type {
             bitset: std.StaticBitSet(Fields.len),
         };
 
-        const InDense = InDense;
-
         // Field ordering matters here, the meta field is listed last, so it
         // gets the highest enum integer value; this makes it safe to do
         // @enumToInt on the meta bitset
