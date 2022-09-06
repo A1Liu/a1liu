@@ -11,7 +11,7 @@ pub const gamescreen = @import("./gamescreen.zig");
 
 pub const id_swizzle = @import("./id_swizzle.zig");
 
-pub const fonts = @import("./fonts.zig");
+// pub const fonts = @import("./fonts.zig");
 pub const sdf = @import("./sdf.zig");
 pub const img = @import("./img.zig");
 
@@ -27,7 +27,7 @@ pub usingnamespace async_util;
 // running `zig test src/liu/lib.zig
 test {
     _ = id_swizzle;
-    _ = fonts;
+    // _ = fonts;
     _ = sdf;
     _ = img;
     _ = packed_asset;
