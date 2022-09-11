@@ -40,6 +40,10 @@ pub fn main() !void {
 
     try addPath("~/.rbenv/bin");
 
+    // MacPorts
+    try addPath("/opt/local/bin");
+    try addPath("/opt/local/sbin");
+
     {
         var it = std.mem.split(u8, path, ":");
         while (it.next()) |p| {
