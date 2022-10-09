@@ -44,11 +44,10 @@ before the install script was run. Note that this requires the appropriate files
 to have been saved in `local/preconf`.
 
 ### MacOS
-1. Install XCode tools using `xcode-select --install`
-2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-3. Remap Caps Lock to control: System Preferences > Keyboard > Keyboard > Modifier Keys
+See `MacOS.md`.
 
-The remainder of the settings are described in `install/MacOS.md`.
+### Windows
+See `Windows.md`.
 
 ### ElementaryOS
 1. Install Git using `sudo apt-get install git`
@@ -62,6 +61,3 @@ The remainder of the settings are described in `install/MacOS.md`.
    -  https://www.reddit.com/r/elementaryos/comments/3akt9g/black_screen_after_wake_up_from_suspend/
    -  https://www.reddit.com/r/elementaryos/comments/382e76/how_to_fix_cannot_wake_up_from_suspend_issue/
 7. [Set up virtual console](https://askubuntu.com/questions/982863/change-caps-lock-to-control-in-virtual-console-on-ubuntu-17)
-
-### Windows
-See `Windows.md`.
