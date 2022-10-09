@@ -11,6 +11,10 @@ function! ReadBgFlag()
 endfunction
 
 function! CheckTermGui()
+  if has('gui_running')
+    return 1
+  endif
+
   if !exists('+termguicolors') || !has("termguicolors")
     return 0
   endif
@@ -19,9 +23,9 @@ function! CheckTermGui()
     return 0
   endif
 
-  if g:os ==? 'Windows'
-    return 0
-  endif
+  " if g:os ==? 'Windows'
+  "   return 0
+  " endif
 
   return 1
 endfunction
