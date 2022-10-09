@@ -35,7 +35,7 @@ as much bloatware and spyware as Microsoft will allow you to:
 4. [Install Vim](https://github.com/vim/vim-win32-installer/releases). Make sure
    it's the 64-bit version.
 
-5. [Download SharpKeys](https://www.randyrants.com/category/sharpkeys/) and load
+5. [Download SharpKeys](https://apps.microsoft.com/store/detail/XPFFCG7M673D4F) and load
    the settings stored in this repository under `compat\windows\keybindings.skl`
 
 6. Install Python 3.8 using the [Python 3.8 installer](https://www.python.org/downloads/release/python-382/),
