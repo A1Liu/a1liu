@@ -1,5 +1,14 @@
 # De-Stupifying MacOS Guide
 
+### Set up for development
+
+1. Install XCode tools using `xcode-select --install`
+2. Clone repository with `git clone https://github.com/A1Liu/config.git`
+3. Remap Caps Lock to control: System Preferences > Keyboard > Keyboard > Modifier Keys
+
+The remainder of the settings are described in `install/MacOS.md`.
+
+### Fixing the settings
 1. Fix the Keyboard (System Preferences -> Keyboard)
    1. Turn OFF: Shortcuts -> Mission Control -> ALL
    1. Turn OFF: Shortcuts -> Input Sources -> ALL
@@ -22,10 +31,8 @@
    1. Turn ON: Show Bluetooth in menu bar
    1. Set to "when last connected to this mac": `AIRPOD NAME` -> Options ->
       Connect to This Mac
-
-### Bluetooth
-Airpods should have the setting "when connecting to this macbook" set to "".
-Otherwise they'll keep changing what they're connected to randomly.
+      
+      (This prevents airpods from switching back and forth between devices)
 
 ### `/etc/hosts` Performance
 MacOS is slow when using `/etc/hosts` on multiple lines, so just put all the aliases
