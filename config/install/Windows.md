@@ -10,8 +10,16 @@ things that are installed by default, like:
 4. Microsoft Teams
 
 There's also a number of "widgets" that Microsoft integrates directly into the
-user interface through the task bar, and the only way to fully remove things like
-the news widget is to disable the task bar completely, so do that as well.
+user interface through the task bar; these can't really be removed from the OS
+officially, but can be disabled entirely by running this command in PowerShell
+as administrator:
+
+```
+winget uninstall "windows web experience pack"
+```
+
+Also, see [this article](https://nerdschalk.com/how-to-disable-web-results-in-windows-11-start-or-search-menu/)
+to disable web results/Bing in the windows search section.
 
 ## Actual Setup
 There are a few things that are useful to do in addition to removing
