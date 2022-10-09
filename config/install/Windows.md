@@ -13,7 +13,8 @@ There's also a number of "widgets" that Microsoft integrates directly into the
 user interface through the task bar, and the only way to fully remove things like
 the news widget is to disable the task bar completely, so do that as well.
 
-However, there are a few things that are useful to do in addition to removing
+## Actual Setup
+There are a few things that are useful to do in addition to removing
 as much bloatware and spyware as Microsoft will allow you to:
 
 1. Enable developer mode and associated features (Settings -&gt; Updates &amp; Security
@@ -43,3 +44,19 @@ as much bloatware and spyware as Microsoft will allow you to:
 
 7. Windows is broken, so follow this to get debugging native files to work:
    https://docs.microsoft.com/en-us/visualstudio/debugger/debug-using-the-just-in-time-debugger?view=vs-2019#jit_errors
+
+### Windows Subsystem for Linux
+1. Install Windows Subsystem for Linux
+
+   ```
+   Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+   ```
+
+   And then restart your computer.
+
+2. Install a distribution of Linux, then open it, right click on the window bar,
+   and select properties. Then enable "Use Ctrl+Shift+C/V as Copy/Paste"
+
+3. Enable copy-paste functionality in Vim using
+   [VcXsrv](https://sourceforge.net/projects/vcxsrv/) with its default configurations,
+   then save those configurations to `$HOME\AppData\Roaming\Microsoft\Windows\Startup`
