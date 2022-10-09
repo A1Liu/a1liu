@@ -6,8 +6,6 @@
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`
 3. Remap Caps Lock to control: System Preferences > Keyboard > Keyboard > Modifier Keys
 
-The remainder of the settings are described in `install/MacOS.md`.
-
 ### Fixing the settings
 1. Fix the Keyboard (System Preferences -> Keyboard)
    1. Turn OFF: Shortcuts -> Mission Control -> ALL
