@@ -53,6 +53,10 @@ as much bloatware and spyware as Microsoft will allow you to:
 7. Windows is broken, so follow this to get debugging native files to work:
    https://docs.microsoft.com/en-us/visualstudio/debugger/debug-using-the-just-in-time-debugger?view=vs-2019#jit_errors
 
+8. Install [NVM for Windows, version 1.1.7](https://github.com/coreybutler/nvm-windows/releases/tag/1.1.7), and make
+   sure to install Node version `16.13.2` (or at least, that version has a working version of `npm` where the latest
+   fails for most operations with a JS parse error).
+
 ### Windows Subsystem for Linux
 1. Install Windows Subsystem for Linux
 
