@@ -5,7 +5,13 @@
 	ui = true
 [core]
 	excludesfile = ~/.gitignore_global
-	autocrlf = input
+	# Going to use true here so that it's LF on unix and CRLF on Windows.
+	# I think the previous thing was because Git would change the line-endings
+	# of files that weren't text, so hopefully if that happens in the future I
+	# will simply use .gitattributes
+	#
+	#                                     - Albert Liu, Oct 09, 2022 Sun 04:55 PDT
+	autocrlf = true
 [pager]
 	branch = false
 	tag = false
