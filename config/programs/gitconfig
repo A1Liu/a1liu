@@ -11,7 +11,11 @@
 	# will simply use .gitattributes
 	#
 	#                                     - Albert Liu, Oct 09, 2022 Sun 04:55 PDT
-	autocrlf = true
+	#
+	# ^ This did not work
+	#
+	#                                     - Albert Liu, Oct 10, 2022 Mon 02:38 EDT
+	autocrlf = false
 [pager]
 	branch = false
 	tag = false

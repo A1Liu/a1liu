@@ -46,6 +46,7 @@ My Vim config uses these environment variables at startup:
   - `light-mode` - Whether or not Vim is dark or light mode
   - `aliu` - Whether or not `<C-T>` is bound to a timestamped signature
   - `plug-base` - Whether or not the default plugins are enabled
+  - `plug-files` - Whether or not file system plugins enabled
   - `plug-format` - Whether or not vim-autoformat is enabled
   - `plug-fzf` - Whether or not fzf is enabled
   - `plug-solarized` - Whether or not the color scheme plugin is enabled
