@@ -64,6 +64,10 @@ if PlugFlag('format')
   augroup END
 endif
 
+if PlugFlag('files')
+  Plug 'justinmk/vim-dirvish'
+endif
+
 if PlugFlag('fzf')
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
