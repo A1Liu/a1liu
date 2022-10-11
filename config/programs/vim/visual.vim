@@ -74,8 +74,8 @@ ReadBgFlag
 
 " Font on GUI Programs
 if g:os ==? 'Windows'
-  if &guifont !=? 'Consolas:h8'
-    set guifont=Consolas:h8
+  if &guifont !=? 'Consolas:h16'
+    set guifont=Consolas:h16
   endif
 elseif g:os ==? 'Darwin'
   if &guifont !=? 'Menlo:h8'
