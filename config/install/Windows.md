@@ -18,8 +18,21 @@ as administrator:
 winget uninstall "windows web experience pack"
 ```
 
-Also, see [this article](https://nerdschalk.com/how-to-disable-web-results-in-windows-11-start-or-search-menu/)
-to disable web results/Bing in the windows search section.
+
+
+### Removing Web Results/Bing from Windows Search
+Following [this article](https://nerdschalk.com/how-to-disable-web-results-in-windows-11-start-or-search-menu/):
+
+Make a DWORD at Computer\HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer\DisableSearchBoxSuggestions and set it to 1.
+
+### Removing Microsoft Teams
+Following [this reddit comment](https://www.reddit.com/r/sysadmin/comments/q771i4/comment/ho15fvm/?utm_source=share&utm_medium=web2x&context=3):
+
+> After a long running ticket with Microsoft, they sent us a registry key to set which resolves this problem.
+>
+> Make a DWORD at HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications\ConfigureChatAutoInstall and set to 0
+>
+> We use this in tandem with the DWORD at HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Chat\ChatIcon set to 3, which disables the chat icon and chat settings slider for all users.
 
 ## Actual Setup
 There are a few things that are useful to do in addition to removing
