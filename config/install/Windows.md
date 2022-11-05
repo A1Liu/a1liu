@@ -18,8 +18,6 @@ as administrator:
 winget uninstall "windows web experience pack"
 ```
 
-
-
 ### Removing Web Results/Bing from Windows Search
 Following [this article](https://nerdschalk.com/how-to-disable-web-results-in-windows-11-start-or-search-menu/):
 
@@ -52,6 +50,8 @@ as much bloatware and spyware as Microsoft will allow you to:
 2. Add ssh stuff with `ssh-keygen`
 
 3. Clone the repository using `git clone git@github.com:A1Liu/config`
+
+4. [Install Clink](https://chrisant996.github.io/clink/).
 
 4. [Install Vim](https://github.com/vim/vim-win32-installer/releases). Make sure
    it's the 64-bit version.
