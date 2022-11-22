@@ -49,6 +49,7 @@ My Vim config uses these environment variables at startup:
   - `plug-files` - Whether or not file system plugins enabled
   - `plug-format` - Whether or not vim-autoformat is enabled
   - `plug-fzf` - Whether or not fzf is enabled
+  - `plug-files` - Whether or not file explorer settings + plugin are enabled
   - `plug-solarized` - Whether or not the color scheme plugin is enabled
   - `plug-polyglot` - Whether or not vim-polyglot is enabled
   - `plug-snippets` - Whether or not vim-snippets is enabled
