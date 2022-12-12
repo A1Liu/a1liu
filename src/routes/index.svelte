@@ -53,7 +53,7 @@
       </li>
 
       <li>
-        <a href="https://schedge.a1liu.com/">Schedge</a>{" "}
+        <a href="https://nyu.a1liu.com/api/">Schedge</a>{" "}
         - API for NYU&apos;s course catalog
       </li>
     </ul>
