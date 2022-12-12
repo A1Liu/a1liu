@@ -1,0 +1,173 @@
+{
+  ".svelte-kit/runtime/client/start.js": {
+    "file": "start-4001072d.js",
+    "src": ".svelte-kit/runtime/client/start.js",
+    "isEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "dynamicImports": [
+      ".svelte-kit/runtime/components/layout.svelte",
+      ".svelte-kit/runtime/components/error.svelte",
+      "src/routes/algebra/index.svelte",
+      "src/routes/bench/index.svelte",
+      "src/routes/game-2d-simple/index.svelte",
+      "src/routes/index.svelte",
+      "src/routes/kilordle/index.svelte",
+      "src/routes/painter/index.svelte"
+    ]
+  },
+  ".svelte-kit/runtime/components/layout.svelte": {
+    "file": "layout.svelte-40aabdf5.js",
+    "src": ".svelte-kit/runtime/components/layout.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js"
+    ]
+  },
+  ".svelte-kit/runtime/components/error.svelte": {
+    "file": "error.svelte-be903dfb.js",
+    "src": ".svelte-kit/runtime/components/error.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js"
+    ]
+  },
+  "src/routes/algebra/index.svelte": {
+    "file": "pages/algebra/index.svelte-9a623ca4.js",
+    "src": "src/routes/algebra/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_errors-24dc42ac.js",
+      "_wasm-e70d817c.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "css": [
+      "assets/pages/algebra/index.svelte-6399099c.css"
+    ],
+    "assets": [
+      "assets/worker.3c9e647e.js"
+    ]
+  },
+  "src/routes/bench/index.svelte": {
+    "file": "pages/bench/index.svelte-f864ec60.js",
+    "src": "src/routes/bench/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_util-93425279.js",
+      "_errors-24dc42ac.js",
+      "_wasm-e70d817c.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "css": [
+      "assets/pages/bench/index.svelte-a4b29ed6.css"
+    ],
+    "assets": [
+      "assets/worker.3bbd7e0c.js"
+    ]
+  },
+  "src/routes/game-2d-simple/index.svelte": {
+    "file": "pages/game-2d-simple/index.svelte-0176743a.js",
+    "src": "src/routes/game-2d-simple/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_gamescreen-125cf4fe.js",
+      "_errors-24dc42ac.js",
+      "_wasm-e70d817c.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "css": [
+      "assets/pages/game-2d-simple/index.svelte-61c9f58e.css"
+    ],
+    "assets": [
+      "assets/worker.4f703258.js"
+    ]
+  },
+  "src/routes/index.svelte": {
+    "file": "pages/index.svelte-511d2249.js",
+    "src": "src/routes/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js"
+    ],
+    "css": [
+      "assets/pages/index.svelte-76f9793e.css"
+    ]
+  },
+  "src/routes/kilordle/index.svelte": {
+    "file": "pages/kilordle/index.svelte-87b4d473.js",
+    "src": "src/routes/kilordle/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_wasm-e70d817c.js",
+      "_errors-24dc42ac.js",
+      "_util-93425279.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "css": [
+      "assets/pages/kilordle/index.svelte-79a80acd.css"
+    ],
+    "assets": [
+      "assets/kilordle-cdf7a0b1.wasm"
+    ]
+  },
+  "src/routes/painter/index.svelte": {
+    "file": "pages/painter/index.svelte-7f5419d0.js",
+    "src": "src/routes/painter/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_gamescreen-125cf4fe.js",
+      "_errors-24dc42ac.js",
+      "_util-93425279.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "css": [
+      "assets/pages/painter/index.svelte-7a55bec7.css"
+    ],
+    "assets": [
+      "assets/worker.f0e4f857.js"
+    ]
+  },
+  "_index-d7f9ae17.js": {
+    "file": "chunks/index-d7f9ae17.js"
+  },
+  "_index-fd4f8e4a.js": {
+    "file": "chunks/index-fd4f8e4a.js",
+    "imports": [
+      "_index-d7f9ae17.js"
+    ]
+  },
+  "_errors-24dc42ac.js": {
+    "file": "chunks/errors-24dc42ac.js",
+    "imports": [
+      "_index-d7f9ae17.js",
+      "_index-fd4f8e4a.js"
+    ],
+    "css": [
+      "assets/errors-7b4c2b46.css"
+    ]
+  },
+  "_wasm-e70d817c.js": {
+    "file": "chunks/wasm-e70d817c.js"
+  },
+  "_util-93425279.js": {
+    "file": "chunks/util-93425279.js"
+  },
+  "_gamescreen-125cf4fe.js": {
+    "file": "chunks/gamescreen-125cf4fe.js"
+  }
+}
