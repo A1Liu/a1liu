@@ -32,6 +32,15 @@ Following [this reddit comment](https://www.reddit.com/r/sysadmin/comments/q771i
 >
 > We use this in tandem with the DWORD at HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Chat\ChatIcon set to 3, which disables the chat icon and chat settings slider for all users.
 
+### Turning off Windows Update
+To turn it off, following [this guide](https://www.minitool.com/data-recovery/how-to-stop-windows-11-update.html):
+
+1. Press Windows + R, type services.msc in Run dialog, and press Enter to open Windows Services.
+2. Scroll down in the services list and find Windows Update service. Double-click Windows Update service to open its properties window.
+3. Under General tab, next to Startup type option, you can click the drop-down icon to select Disabled option.
+4. Click Apply and click OK to apply the changes. In this way, it will permanently disable Windows 11 automatic updates.
+
+
 ## Actual Setup
 There are a few things that are useful to do in addition to removing
 as much bloatware and spyware as Microsoft will allow you to:
