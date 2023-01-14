@@ -39,7 +39,10 @@ if PlugFlag('format')
   let g:formatdef_clangformat = "'clang-format " . s:clangfmt . "'"
   let g:formatdef_swiftformat = "'swiftformat --quiet'"
 
-  let g:formatters_java = ['clangformat']
+  " Meh, clang-format not pulling its weight with Java 19, and also it's not
+  " well supported by Java ecosystem, so difficult to get other peeps to use
+  " it easily
+  " let g:formatters_java = ['clangformat']
 
   let g:formatters_typescriptreact = ['prettier']
   let g:formatters_javascriptreact = ['prettier']
