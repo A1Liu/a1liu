@@ -123,9 +123,11 @@ a1liu_load_nvm () {
         [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
         [ -s "$NVM_SCRIPT" ] && . "$NVM_SCRIPT"
         [ -s "$NVM_COMPLETIONS" ] && . "$NVM_COMPLETIONS"
-    fi
 
-    nvm use || true
+        # This is kept in the condition to prevent auto-overriding explicit
+        # calls to nvm use X
+        nvm use || true
+    fi
 }
 
 # The unalias happens above, so it's unnecessary here.
