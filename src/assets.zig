@@ -1,5 +1,5 @@
 const std = @import("std");
-const liu = @import("./liu/lib.zig");
+const liu = @import("root");
 
 pub const alloc_bench = struct {
     pub const Kind = enum(u8) {

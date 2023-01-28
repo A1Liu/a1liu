@@ -1,5 +1,4 @@
 const std = @import("std");
-const root = @import("root");
 const liu = @import("./lib.zig");
 const builtin = @import("builtin");
 
@@ -41,27 +40,27 @@ pub const Obj = enum(i32) {
     pub const arrayPush = ext.arrayPush;
     pub const delete = ext.deleteObj;
 
-    pub fn Await(self: Self) Self {
-        var output: wasm.Obj = undefined;
+    // pub fn Await(self: Self) Self {
+    //     var output: wasm.Obj = undefined;
 
-        suspend {
-            const frame = @as(anyframe, @frame());
-            const opaque_frame = @ptrCast(*const anyopaque, frame);
-            ext.awaitHook(self, &output, opaque_frame);
-        }
+    //     suspend {
+    //         const frame = @as(anyframe, @frame());
+    //         const opaque_frame = @ptrCast(*const anyopaque, frame);
+    //         ext.awaitHook(self, &output, opaque_frame);
+    //     }
 
-        return output;
-    }
+    //     return output;
+    // }
 };
 
 // TODO why is this i32?
 const Watermark = enum(i32) { _ };
 
-export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: Obj) void {
-    output_slot.* = obj;
-
-    resume @ptrCast(anyframe, val);
-}
+// export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: Obj) void {
+//     output_slot.* = obj;
+//
+//     resume @ptrCast(anyframe, val);
+// }
 
 const ext = struct {
     extern fn awaitHook(self: Obj, output: *Obj, slot: *align(4) const anyopaque) void;
@@ -308,44 +307,44 @@ pub fn initIfNecessary() void {
     }
 }
 
+pub const std_options = struct {
+    pub fn logFn(
+        comptime message_level: std.log.Level,
+        comptime scope: @Type(.EnumLiteral),
+        comptime fmt: []const u8,
+        args: anytype,
+    ) void {
+        if (builtin.target.cpu.arch != .wasm32) {
+            std.log.defaultLog(message_level, scope, fmt, args);
+            return;
+        }
+
+        if (@enumToInt(message_level) > @enumToInt(std.options.log_level)) {
+            return;
+        }
+
+        const level_obj: Obj = switch (message_level) {
+            .debug => .info,
+            .info => .info,
+            .warn => .warn,
+            .err => .err,
+        };
+
+        post(level_obj, fmt ++ "\n", args);
+    }
+};
+
 pub const strip_debug_info = true;
 pub const have_error_return_tracing = false;
 
-pub fn log(
-    comptime message_level: std.log.Level,
-    comptime scope: @Type(.EnumLiteral),
-    comptime fmt: []const u8,
-    args: anytype,
-) void {
-    if (builtin.target.cpu.arch != .wasm32) {
-        std.log.defaultLog(message_level, scope, fmt, args);
-        return;
-    }
-
-    _ = scope;
-
-    if (@enumToInt(message_level) > @enumToInt(std.log.level)) {
-        return;
-    }
-
-    const level_obj: Obj = switch (message_level) {
-        .debug => .info,
-        .info => .info,
-        .warn => .warn,
-        .err => .err,
-    };
-
-    post(level_obj, fmt ++ "\n", args);
-}
-
-pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) noreturn {
+pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace, idk: ?usize) noreturn {
     @setCold(true);
+
+    _ = idk;
 
     if (builtin.target.cpu.arch != .wasm32) {
         std.builtin.default_panic(msg, error_return_trace);
     }
-
-    _ = error_return_trace;
 
     exit(msg);
 }
@@ -401,7 +400,7 @@ pub fn StringTable(comptime table_info: anytype) type {
     for (fields) |field| {
         struct_fields = struct_fields ++ &[_]Field{.{
             .name = field.name,
-            .field_type = Obj,
+            .type = Obj,
             .default_value = null,
             .is_comptime = false,
             .alignment = @alignOf(Obj),

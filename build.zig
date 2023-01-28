@@ -63,22 +63,26 @@ pub fn build(b: *Builder) !void {
 
     b.prominent_compile_errors = true;
 
-    const wasmPrograms = [_]ProgData{ .{
-        .name = "kilordle",
-        .root = "./src/routes/kilordle/kilordle.zig",
-    }, .{
-        .name = "painter",
-        .root = "./src/routes/painter/painter.zig",
-    }, .{
-        .name = "bench",
-        .root = "./src/routes/bench/bench.zig",
-    }, .{
-        .name = "algebra",
-        .root = "./src/routes/algebra/algebra.zig",
-    }, .{
-        .name = "game-2d-simple",
-        .root = "./src/routes/game-2d-simple/simple.zig",
-    } };
+    const wasmPrograms = [_]ProgData{
+        .{
+            .name = "kilordle",
+            .root = "./src/routes/kilordle/kilordle.zig",
+        },
+        // .{
+        //     .name = "painter",
+        //     .root = "./src/routes/painter/painter.zig",
+        // },
+        //     .{
+        //         .name = "bench",
+        //         .root = "./src/routes/bench/bench.zig",
+        //     }, .{
+        //         .name = "algebra",
+        //         .root = "./src/routes/algebra/algebra.zig",
+        //     }, .{
+        //         .name = "game-2d-simple",
+        //         .root = "./src/routes/game-2d-simple/simple.zig",
+        //     }
+    };
 
     const pathTools = [_]ProgData{.{
         .name = "aliu_path_helper",

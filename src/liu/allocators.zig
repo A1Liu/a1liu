@@ -1,5 +1,4 @@
 const std = @import("std");
-const root = @import("root");
 
 const mem = std.mem;
 
@@ -38,7 +37,7 @@ const BumpState = struct {
         };
     }
 
-    fn allocate(bump: *Self, mark: *Mark, alloc: Allocator, len: usize, ptr_align: u29, ret_addr: usize) Allocator.Error![]u8 {
+    fn allocate(bump: *Self, mark: *Mark, alloc: Allocator, len: usize, ptr_align: u8, ret_addr: usize) ?[*]u8 {
         if (mark.range < bump.ranges.items.len) {
             const range = bump.ranges.items[mark.range];
 
@@ -50,11 +49,11 @@ const BumpState = struct {
             if (new_end_index <= range.len) {
                 mark.index_in_range = new_end_index;
 
-                return range[adjusted_index..new_end_index];
+                return range[adjusted_index..new_end_index].ptr;
             }
         }
 
-        const size = @maximum(len, bump.next_size);
+        const size = @max(len, bump.next_size);
 
         // Holy crap if you mess up the alignment, boyo the Zig UB detector
         // will come for you with an assertion failure 10 frames deep into
@@ -67,17 +66,17 @@ const BumpState = struct {
         // safely return the allocation we're given to the caller.
         //
         // https://github.com/ziglang/zig/blob/master/lib/std/mem/Allocator.zig
-        const slice = try alloc.rawAlloc(size, ptr_align, 1, ret_addr);
-        try bump.ranges.append(alloc, slice);
+        const slice = alloc.rawAlloc(size, ptr_align, ret_addr) orelse return null;
+        bump.ranges.append(alloc, slice[0..size]) catch return null;
 
         // grow the next arena, but keep it to at most 1GB please
         bump.next_size = size * 3 / 2;
-        bump.next_size = @minimum(1024 * 1024 * 1024, bump.next_size);
+        bump.next_size = @min(1024 * 1024 * 1024, bump.next_size);
 
         mark.range = bump.ranges.items.len - 1;
         mark.index_in_range = len;
 
-        return slice[0..len];
+        return slice;
     }
 };
 
@@ -136,10 +135,17 @@ pub const Bump = struct {
     }
 
     pub fn allocator(self: *Self) Allocator {
-        const resize = Allocator.NoResize(Self).noResize;
-        const free = Allocator.NoOpFree(Self).noOpFree;
+        const resize = Allocator.noResize;
+        const free = Allocator.noFree;
 
-        return Allocator.init(self, Self.allocate, resize, free);
+        return .{
+            .ptr = self,
+            .vtable = &.{
+                .alloc = Self.allocate,
+                .resize = resize,
+                .free = free,
+            },
+        };
     }
 
     fn allocate(
@@ -148,7 +154,7 @@ pub const Bump = struct {
         ptr_align: u29,
         len_align: u29,
         ret_addr: usize,
-    ) Allocator.Error![]u8 {
+    ) ?[]u8 {
         _ = len_align;
 
         return self.bump.allocate(
@@ -169,20 +175,24 @@ const TempAlloc = struct {
 
     threadlocal var bump = BumpState.init(InitialSize);
 
-    const allocator = Allocator.init(@intToPtr(*anyopaque, 1), alloc, resize, free);
+    const allocator: Allocator = .{
+        .ptr = @intToPtr(*anyopaque, 1),
+        .vtable = &.{
+            .alloc = alloc,
+            .resize = resize,
+            .free = free,
+        },
+    };
 
-    const resize = Allocator.NoResize(anyopaque).noResize;
-    const free = Allocator.NoOpFree(anyopaque).noOpFree;
+    const resize = Allocator.noResize;
+    const free = Allocator.noFree;
 
     fn alloc(
         _: *anyopaque,
         len: usize,
-        ptr_align: u29,
-        len_align: u29,
+        ptr_align: u8,
         ret_addr: usize,
-    ) Allocator.Error![]u8 {
-        _ = len_align;
-
+    ) ?[*]u8 {
         return bump.allocate(&TempMark, Pages, len, ptr_align, ret_addr);
     }
 };
@@ -283,7 +293,6 @@ const Slab = struct {
             // const adjusted_index = mark.index_in_range + (adjusted_addr - addr);
             // const new_end_index = adjusted_index + len;
 
-            _ = self;
             _ = len;
             _ = ptr_align;
             _ = len_align;
@@ -304,14 +313,13 @@ const Slab = struct {
         self: *@This(),
         len: usize,
         ptr_align: u29,
-        len_align: u29,
         ret_addr: usize,
-    ) Allocator.Error![]u8 {
-        if (self.current.alloc(len, ptr_align, len_align)) |a| {
+    ) ?[*]u8 {
+        if (self.current.alloc(len, ptr_align)) |a| {
             return a;
         }
 
-        return Pages.rawAlloc(len, ptr_align, len_align, ret_addr);
+        return Pages.rawAlloc(len, ptr_align, ret_addr);
 
         // _ = self;
         // _ = len;

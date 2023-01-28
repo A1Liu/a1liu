@@ -268,7 +268,7 @@ pub const Spec = struct {
 
             for (info.fields) |field| {
                 const BField = @TypeOf(@field(b, field.name));
-                const encode_info = makeInfo(field.field_type, BField);
+                const encode_info = makeInfo(field.type, BField);
 
                 // Empirically, this reduces the number of branches needed at
                 // compile time.
@@ -355,12 +355,12 @@ pub const Spec = struct {
             // mark right now for one of the test cases.
             var change_count: usize = 0;
             for (info.fields) |field| {
-                const FieldT = translateType(field.field_type);
-                change_count += @boolToInt(FieldT != field.field_type);
+                const FieldT = translateType(field.type);
+                change_count += @boolToInt(FieldT != field.type);
 
                 const to_add = Field{
                     .name = field.name,
-                    .field_type = FieldT,
+                    .type = FieldT,
                     .default_value = null,
                     .is_comptime = false,
                     .alignment = @alignOf(FieldT),
@@ -778,7 +778,7 @@ pub fn parse(comptime T: type, bytes: []align(8) const u8) !*const Spec.fromType
     // while () {
     // }
 
-    return @ptrCast(*const spec.Type, bytes[header.data_begin..]);
+    return @ptrCast(*const spec.Type, @alignCast(8, bytes[header.data_begin..]));
 }
 
 test {

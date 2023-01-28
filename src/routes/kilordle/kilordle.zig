@@ -7,6 +7,7 @@ const Spec = assets.Spec;
 
 const wasm = liu.wasm;
 pub usingnamespace wasm;
+pub const log = wasm.log;
 
 const ArrayList = std.ArrayList;
 
