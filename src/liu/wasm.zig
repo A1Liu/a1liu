@@ -334,8 +334,8 @@ pub const std_options = struct {
     }
 };
 
-pub const strip_debug_info = true;
-pub const have_error_return_tracing = false;
+// pub const strip_debug_info = true;
+// pub const have_error_return_tracing = false;
 
 pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace, idk: ?usize) noreturn {
     @setCold(true);

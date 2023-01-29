@@ -41,6 +41,11 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
 
     program.setBuildMode(mode);
 
+    // This is documented literally nowhere; I found it because someone on Discord
+    // looked through the source code. The Zig-sponsored way to do this is by
+    // using -rdynamic from the CLI, which seems unhelpful to say the least.
+    program.rdynamic = true;
+
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
     // Output straight to static folder by default to make things easier

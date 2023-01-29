@@ -1,10 +1,9 @@
 const std = @import("std");
 const mem = std.mem;
 const assert = std.debug.assert;
-
 const Allocator = mem.Allocator;
-pub const Bump = std.heap.ArenaAllocator;
 
+pub const Bump = std.heap.ArenaAllocator;
 pub const Pages = std.heap.page_allocator;
 
 // TODO:
@@ -27,8 +26,9 @@ const TempState = struct {
 
 pub fn Temp() *TempState {
     const alloc = TemporaryAllocator.allocator();
-    const temp = alloc.create(TempState) catch @panic("ooof");
-    const bump = alloc.create(Bump) catch @panic("oooof");
+
+    const temp = alloc.create(TempState) catch @panic("failed to create TempState");
+    const bump = alloc.create(Bump) catch @panic("failed to create Bump");
 
     bump.* = Bump.init(alloc);
     temp.* = .{
