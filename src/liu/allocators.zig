@@ -7,7 +7,9 @@ pub const Bump = std.heap.ArenaAllocator;
 
 pub const Pages = std.heap.page_allocator;
 
-// TODO: https://github.com/mattconte/tlsf
+// TODO:
+// - https://twitter.com/SebAaltonen/status/1616771875413049344
+// - https://github.com/mattconte/tlsf
 
 threadlocal var TemporaryAllocator = std.heap.ArenaAllocator.init(Pages);
 
