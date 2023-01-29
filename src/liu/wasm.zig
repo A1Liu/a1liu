@@ -3,6 +3,7 @@ const liu = @import("./lib.zig");
 const builtin = @import("builtin");
 
 const Allocator = std.mem.Allocator;
+const FixedBufferAllocator = std.heap.FixedBufferAllocator;
 const Field = std.builtin.Type.StructField;
 const ArrayList = std.ArrayList;
 const wasm = @This();
@@ -169,6 +170,8 @@ pub fn parseFloat(bytes: []const u8) std.fmt.ParseFloatError!f64 {
     return val;
 }
 
+var format_buffer: [128]u8 = undefined;
+
 pub const make = struct {
     pub fn number(life: Lifetime, n: f64) Obj {
         return ext.makeNumber(n, life.isTemp());
@@ -211,16 +214,25 @@ pub const make = struct {
     }
 
     pub fn fmt(life: Lifetime, comptime format: []const u8, args: anytype) Obj {
+        static_buffer: {
+            var buffer_alloc = FixedBufferAllocator.init(&format_buffer);
+            const alloc = buffer_alloc.allocator();
+            const data = std.fmt.allocPrint(alloc, format, args) catch
+                break :static_buffer;
+            return string(life, data);
+        }
+
         const temp = liu.Temp();
         defer temp.deinit();
 
         const allocResult = std.fmt.allocPrint(temp.alloc, format, args);
         const data = allocResult catch @panic("failed to print");
 
-        return ext.makeString(data.ptr, data.len, life.isTemp());
+        return string(life, data);
     }
 
     pub fn string(life: Lifetime, a: []const u8) Obj {
+        if (a.len == 0) return .jsEmptyString;
         return ext.makeString(a.ptr, a.len, life.isTemp());
     }
 

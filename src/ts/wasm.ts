@@ -176,6 +176,10 @@ export const fetchWasm = async (
     // TODO some kind of pop stack operation that makes full objects or arrays
     // or whatever
 
+    /* NOTE: Watermark modification is relatively safe because the Watermark
+     * type in liu/wasm.zig is distinct from the Obj type, so you can only
+     * set the watermark to a previous watermark value.
+     */
     watermark: (idx: number) => objectBuffer.length,
     setWatermark: (idx: number) => (objectBuffer.length = idx),
 
