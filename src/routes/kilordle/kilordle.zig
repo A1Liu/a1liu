@@ -154,8 +154,8 @@ fn matchWordle(wordle: [5]u8, submission: [5]u8) [5]Match {
 }
 
 pub fn submitWord(word: [5]u8) !bool {
-    var mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    var temp = liu.Temp();
+    defer temp.deinit();
 
     // lowercase
     for (word) |letter| {
@@ -220,9 +220,9 @@ pub fn submitWord(word: [5]u8) !bool {
 
     wordles_left.items.len = write_head;
 
-    var puzzles = ArrayList(Puzzle).init(liu.Temp);
+    var puzzles = ArrayList(Puzzle).init(temp.alloc);
     for (top_values.slice()) |wordle| {
-        var relevant_submits = ArrayList(u8).init(liu.Temp);
+        var relevant_submits = ArrayList(u8).init(temp.alloc);
         var matches = [_]Match{.none} ** 5;
 
         // This gets displayed in the app; in debug mode, we output the lowercase

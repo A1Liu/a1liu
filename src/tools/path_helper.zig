@@ -14,17 +14,20 @@ pub fn addPath(path: []const u8) !void {
 }
 
 pub fn main() !void {
-    output = std.ArrayList(u8).init(liu.Temp);
-    paths = std.StringArrayHashMap(void).init(liu.Pages);
+    var arena_ = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = arena_.allocator();
 
-    const env_map = try std.process.getEnvMap(liu.Pages);
+    output = std.ArrayList(u8).init(arena);
+    paths = std.StringArrayHashMap(void).init(arena);
+
+    const env_map = try std.process.getEnvMap(arena);
     const stdout = std.io.getStdOut().writer();
 
     const path = env_map.get("PATH") orelse return error.MissingPathVariable;
     const cfg_dir = env_map.get("CFG_DIR") orelse return error.MissingCfgVariable;
 
     {
-        const local_path = try std.mem.concat(liu.Temp, u8, &.{ cfg_dir, "/local/path" });
+        const local_path = try std.mem.concat(arena, u8, &.{ cfg_dir, "/local/path" });
         try addPath(local_path);
     }
 

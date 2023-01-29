@@ -211,10 +211,10 @@ pub const make = struct {
     }
 
     pub fn fmt(life: Lifetime, comptime format: []const u8, args: anytype) Obj {
-        const mark = liu.TempMark;
-        defer liu.TempMark = mark;
+        const temp = liu.Temp();
+        defer temp.deinit();
 
-        const allocResult = std.fmt.allocPrint(liu.Temp, format, args);
+        const allocResult = std.fmt.allocPrint(temp.alloc, format, args);
         const data = allocResult catch @panic("failed to print");
 
         return ext.makeString(data.ptr, data.len, life.isTemp());
