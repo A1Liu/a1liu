@@ -39,22 +39,22 @@
       return;
     }
 
-    const stream = canvas.captureStream(24);
-    mediaRecorder = new MediaRecorder(stream);
-    const recordedChunks = [];
+     const stream = canvas.captureStream(24);
+     mediaRecorder = new MediaRecorder(stream);
+     const recordedChunks = [];
 
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
+     mediaRecorder.ondataavailable = (e) => {
+       if (e.data.size > 0) recordedChunks.push(e.data);
+     };
 
-    mediaRecorder.onstop = (e) => {
-      const blob = new Blob(recordedChunks, { type: "video/webm" });
-      if (recordingUrl) {
-        URL.revokeObjectURL(recordingUrl);
-      }
+     mediaRecorder.onstop = (e) => {
+       const blob = new Blob(recordedChunks, { type: "video/webm" });
+       if (recordingUrl) {
+         URL.revokeObjectURL(recordingUrl);
+       }
 
-      recordingUrl = URL.createObjectURL(blob);
-    };
+       recordingUrl = URL.createObjectURL(blob);
+     };
 
     mediaRecorder.start();
   };

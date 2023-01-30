@@ -26,14 +26,14 @@ const ext = struct {
 };
 
 const Render = struct {
-    const List = std.ArrayListUnmanaged;
+    const List = std.ArrayList(f32);
     const Self = @This();
 
     const LINE_SIZE: u32 = 12;
 
     dims: Vec2 = Vec2{ 0, 0 },
-    triangles: List(f32) = .{},
-    colors: List(f32) = .{},
+    triangles: List = List.init(liu.Pages),
+    colors: List = List.init(liu.Pages),
     temp_begin: ?usize = null,
 
     pub fn pixelPosition(self: *Self, pos: Vec2) @Vector(2, u32) {
@@ -101,8 +101,8 @@ const Render = struct {
         color[3..6].* = pts[1].color;
         color[6..9].* = pts[2].color;
 
-        try self.triangles.appendSlice(liu.Pages, &pos);
-        try self.colors.appendSlice(liu.Pages, &color);
+        try self.triangles.appendSlice(&pos);
+        try self.colors.appendSlice(&color);
 
         self.render();
     }
@@ -117,8 +117,8 @@ const Render = struct {
 
     pub fn pushVert(self: *Self, count: usize) !u32 {
         const len = self.triangles.items.len;
-        try self.triangles.appendNTimes(liu.Pages, 0, count * 2);
-        try self.colors.appendNTimes(liu.Pages, 0, count * 3);
+        try self.triangles.appendNTimes(0, count * 2);
+        try self.colors.appendNTimes(0, count * 3);
 
         return len;
     }
@@ -157,11 +157,11 @@ const Tool = struct {
     const Self = @This();
 
     const VTable = struct {
-        reset: fn (self: *anyopaque) void,
-        rightClick: fn (self: *anyopaque, pt: Point) anyerror!void,
-        key: fn (self: *anyopaque, code: u32) anyerror!void,
-        move: fn (self: *anyopaque, pt: Point) anyerror!void,
-        click: fn (self: *anyopaque, pt: Point) anyerror!void,
+        reset: *const fn (self: *anyopaque) void,
+        rightClick: *const fn (self: *anyopaque, pt: Point) anyerror!void,
+        key: *const fn (self: *anyopaque, code: u32) anyerror!void,
+        move: *const fn (self: *anyopaque, pt: Point) anyerror!void,
+        click: *const fn (self: *anyopaque, pt: Point) anyerror!void,
     };
 
     ptr: *anyopaque,
@@ -174,9 +174,7 @@ const Tool = struct {
         return initWithVtable(T, obj, T);
     }
 
-    pub fn initWithVtable(comptime T: type, obj: *T, comptime VtableType: type) Self {
-        const info = std.meta.fieldInfo;
-
+    fn initWithVtable(comptime T: type, obj: *T, comptime VtableType: type) Self {
         const Impls = struct {
             fn rightClickMethod(o: *anyopaque, pt: Point) anyerror!void {
                 const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
@@ -194,17 +192,32 @@ const Tool = struct {
                 const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
                 return VtableType.key(self, code);
             }
+
+            fn resetMethod(o: *anyopaque) void {
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+                return VtableType.reset(self);
+            }
+
+            fn moveMethod(o: *anyopaque, pt: Point) anyerror!void {
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+                return VtableType.move(self, pt);
+            }
+
+            fn clickMethod(o: *anyopaque, pt: Point) anyerror!void {
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+                return VtableType.click(self, pt);
+            }
         };
 
         const vtable = comptime VTable{
-            .reset = @ptrCast(info(VTable, .reset).field_type, VtableType.reset),
+            .reset = Impls.resetMethod,
             .rightClick = Impls.rightClickMethod,
             .key = Impls.keyMethod,
-            .move = @ptrCast(info(VTable, .move).field_type, VtableType.move),
-            .click = @ptrCast(info(VTable, .click).field_type, VtableType.click),
+            .move = Impls.moveMethod,
+            .click = Impls.clickMethod,
         };
 
-        return Self{ .ptr = @ptrCast(*anyopaque, obj), .vtable = &vtable };
+        return Self{ .ptr = obj, .vtable = &vtable };
     }
 
     pub fn reset(self: *Self) void {
@@ -391,12 +404,12 @@ const ClickTool = struct {
     fn rightClick(self: *Self, pt: Point) !void {
         _ = self;
 
-        const mark = liu.TempMark;
-        defer liu.TempMark = mark;
+        const temp = liu.Temp();
+        defer temp.deinit();
 
         const pixPos = render.pixelPosition(pt.pos);
         const pixObj = ext.readPixel(pixPos[0], pixPos[1]);
-        const bytes = try wasm.in.bytes(pixObj, liu.Temp);
+        const bytes = try wasm.in.bytes(pixObj, temp.alloc);
 
         current_color[0] = @intToFloat(f32, bytes[0]) / 255;
         current_color[1] = @intToFloat(f32, bytes[1]) / 255;

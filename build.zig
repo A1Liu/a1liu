@@ -73,10 +73,10 @@ pub fn build(b: *Builder) !void {
             .name = "kilordle",
             .root = "./src/routes/kilordle/kilordle.zig",
         },
-        // .{
-        //     .name = "painter",
-        //     .root = "./src/routes/painter/painter.zig",
-        // },
+        .{
+            .name = "painter",
+            .root = "./src/routes/painter/painter.zig",
+        },
         //     .{
         //         .name = "bench",
         //         .root = "./src/routes/bench/bench.zig",
