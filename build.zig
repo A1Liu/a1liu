@@ -80,13 +80,15 @@ pub fn build(b: *Builder) !void {
         //     .{
         //         .name = "bench",
         //         .root = "./src/routes/bench/bench.zig",
-        //     }, .{
+        //     },
+        //     .{
         //         .name = "algebra",
         //         .root = "./src/routes/algebra/algebra.zig",
-        //     }, .{
-        //         .name = "game-2d-simple",
-        //         .root = "./src/routes/game-2d-simple/simple.zig",
-        //     }
+        //     },
+        .{
+            .name = "game-2d-simple",
+            .root = "./src/routes/game-2d-simple/simple.zig",
+        },
     };
 
     const pathTools = [_]ProgData{.{

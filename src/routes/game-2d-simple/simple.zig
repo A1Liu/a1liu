@@ -25,11 +25,11 @@ const Timer = liu.gamescreen.Timer;
 const FrameInput = liu.gamescreen.FrameInput;
 
 pub fn gon_formatFloatValue(value: f64, writer: anytype) !void {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
     const wasm_obj = wasm.make.exactExpFloatPrint(.temp, value);
-    const output = try wasm.in.string(wasm_obj, liu.Temp);
+    const output = try wasm.in.string(wasm_obj, temp.alloc);
 
     try writer.writeAll(output);
 }
@@ -83,7 +83,8 @@ fn initErr() !void {
 }
 
 var start_timer: Timer = undefined;
-var static_storage: liu.Bump = liu.Bump.init(1024, liu.Pages);
+var static_storage_buffer: [1024]u8 = undefined;
+var static_storage: liu.Fixed = liu.Fixed.init(&static_storage_buffer);
 const Static: std.mem.Allocator = static_storage.allocator();
 
 var tools: std.ArrayListUnmanaged(editor.Tool) = .{};
@@ -102,10 +103,10 @@ pub var keys: Table.Keys = undefined;
 pub var is_editor_mode: bool = false;
 
 export fn uploadLevel(data: wasm.Obj) void {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
-    const asset_data = wasm.in.string(data, liu.Temp) catch |e| {
+    const asset_data = wasm.in.string(data, temp.alloc) catch |e| {
         data.delete();
         wasm.post(.err, "Error reading string data: {}", .{e});
         return;
@@ -121,12 +122,10 @@ export fn download() void {
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const text = editor.serializeLevel() catch return;
+    defer text.deinit();
 
-    return wasm.post(keys.level_download, "{s}", .{text});
+    return wasm.post(keys.level_download, "{s}", .{text.items});
 }
 
 export fn setInitialTime(timestamp: f64) void {
@@ -156,9 +155,6 @@ export fn run(timestamp: f64) void {
         wasm.post(.log, "skipped frame", .{});
         return;
     }
-
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
 
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
@@ -506,10 +502,9 @@ export fn saveLevel() void {
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const text = editor.serializeLevel() catch return;
-    const wasm_text = wasm.make.string(.temp, text);
+    defer text.deinit();
+
+    const wasm_text = wasm.make.string(.temp, text.items);
     ext.saveLevelToIdb(wasm_text);
 }

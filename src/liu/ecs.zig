@@ -47,14 +47,14 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 .fields = std.meta.fields(InViewType) ++ [_]std.builtin.Type.StructField{
                     .{
                         .name = "id",
-                        .field_type = EntityId,
+                        .type = EntityId,
                         .default_value = null,
                         .is_comptime = false,
                         .alignment = @alignOf(EntityId),
                     },
                     .{
                         .name = "name",
-                        .field_type = []const u8,
+                        .type = []const u8,
                         .default_value = null,
                         .is_comptime = false,
                         .alignment = @alignOf([]const u8),
@@ -79,7 +79,7 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
                 if (comptime std.mem.eql(u8, field.name, "name")) continue;
 
-                const unwrapped = UnwrappedField(field.field_type);
+                const unwrapped = UnwrappedField(field.type);
                 if (unwrapped.is_optional) continue;
 
                 const field_enum = comptime std.meta.stringToEnum(Reg.FieldEnum, field.name) orelse
@@ -89,24 +89,15 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                 const is_set = meta.bitset.isSet(@enumToInt(field_enum));
                 if (!is_set) return null;
 
-                if (@sizeOf(unwrapped.T) == 0) {
-                    if (@sizeOf(*unwrapped.T) != 0) {
-                        @compileLog("The Zig compiler no longer uses zero-sized pointers for zero-sized types");
-                    }
-
-                    var a: unwrapped.T = .{};
-                    @field(value, field.name) = if (unwrapped.is_pointer) &a else a;
-                } else {
-                    const ptr = &registry.dense.items(field_enum)[index];
-                    @field(value, field.name) = if (unwrapped.is_pointer) ptr else ptr.*;
-                }
+                const ptr = &registry.dense.items(field_enum)[index];
+                @field(value, field.name) = if (unwrapped.is_pointer) ptr else ptr.*;
             }
 
             inline for (std.meta.fields(ViewType)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "id")) continue;
                 if (comptime std.mem.eql(u8, field.name, "name")) continue;
 
-                const unwrapped = UnwrappedField(field.field_type);
+                const unwrapped = UnwrappedField(field.type);
                 if (!unwrapped.is_optional) continue;
 
                 const field_enum = comptime std.meta.stringToEnum(Reg.FieldEnum, field.name) orelse
@@ -114,29 +105,15 @@ fn RegistryView(comptime Reg: type, comptime InViewType: type) type {
                     "name=" ++ field.name ++ ", type=" ++ @typeName(unwrapped.T));
 
                 const is_set = meta.bitset.isSet(@enumToInt(field_enum));
-                if (@sizeOf(unwrapped.T) == 0) {
-                    if (@sizeOf(*unwrapped.T) != 0) {
-                        @compileLog("The Zig compiler no longer uses zero-sized pointers for zero-sized types");
+
+                @field(value, field.name) = value: {
+                    if (!is_set) {
+                        break :value null;
                     }
 
-                    @field(value, field.name) = value: {
-                        if (!is_set) {
-                            break :value null;
-                        }
-
-                        var a: unwrapped.T = .{};
-                        break :value if (unwrapped.is_pointer) &a else a;
-                    };
-                } else {
-                    @field(value, field.name) = value: {
-                        if (!is_set) {
-                            break :value null;
-                        }
-
-                        const ptr = &registry.dense.items(field_enum)[index];
-                        break :value if (unwrapped.is_pointer) ptr else ptr.*;
-                    };
-                }
+                    const ptr = &registry.dense.items(field_enum)[index];
+                    break :value if (unwrapped.is_pointer) ptr else ptr.*;
+                };
             }
 
             return value;
@@ -198,7 +175,7 @@ pub fn Registry(comptime InDense: type) type {
                 .fields = Fields ++ [_]std.builtin.Type.StructField{
                     .{
                         .name = "meta",
-                        .field_type = Meta,
+                        .type = Meta,
                         .default_value = null,
                         .is_comptime = false,
                         .alignment = @alignOf(Meta),
@@ -296,7 +273,7 @@ pub fn Registry(comptime InDense: type) type {
             return true;
         }
 
-        pub fn addComponent(self: *Self, id: EntityId, comptime field: FieldEnum) ?*std.meta.fieldInfo(Dense, field).field_type {
+        pub fn addComponent(self: *Self, id: EntityId, comptime field: FieldEnum) ?*std.meta.fieldInfo(Dense, field).type {
             if (field == .meta) @compileError("Tried to add a Meta component");
 
             const index = self.indexOf(id) orelse return null;
@@ -307,18 +284,8 @@ pub fn Registry(comptime InDense: type) type {
             const meta = &self.dense.items(.meta)[index];
             defer meta.bitset.set(@enumToInt(field));
 
-            const T = std.meta.fieldInfo(Dense, field).field_type;
-            if (@sizeOf(T) == 0) {
-                if (@sizeOf(*T) != 0) {
-                    @compileLog("The Zig compiler no longer uses zero-sized pointers for zero-sized types");
-                }
-
-                var a: T = .{};
-                return &a;
-            } else {
-                const elements = self.dense.items(field);
-                return &elements[index];
-            }
+            const elements = self.dense.items(field);
+            return &elements[index];
         }
 
         pub fn view(self: *Self, comptime ViewType: type) RegistryView(Self, ViewType) {

@@ -47,8 +47,9 @@ pub const Value = union(enum) {
         value: Value,
     };
 
-    pub fn init(val: anytype) SchemaSerializeError!Self {
+    pub fn init(bump: *liu.Bump, val: anytype) SchemaSerializeError!Self {
         const T = @TypeOf(val);
+        const alloc = bump.allocator();
 
         if (T == Self) {
             return val;
@@ -56,7 +57,7 @@ pub const Value = union(enum) {
 
         switch (@typeInfo(T)) {
             .Struct => |info| {
-                var map = std.ArrayList(KV).init(liu.Pages);
+                var map = std.ArrayList(KV).init(alloc);
                 defer map.deinit();
 
                 try map.ensureTotalCapacity(info.fields.len);
@@ -65,13 +66,13 @@ pub const Value = union(enum) {
                     const field_val = @field(val, field.name);
 
                     if (@typeInfo(@TypeOf(field_val)) != .Optional) {
-                        const field_gon = try Value.init(field_val);
+                        const field_gon = try Value.init(bump, field_val);
                         map.appendAssumeCapacity(.{
                             .key = field.name,
                             .value = field_gon,
                         });
                     } else if (field_val) |f| {
-                        const field_gon = try Value.init(f);
+                        const field_gon = try Value.init(bump, f);
                         map.appendAssumeCapacity(.{
                             .key = field.name,
                             .value = field_gon,
@@ -79,11 +80,11 @@ pub const Value = union(enum) {
                     }
                 }
 
-                return Self{ .map = try liu.Temp.dupe(KV, map.items) };
+                return Self{ .map = map.items };
             },
 
             .Int => |_| {
-                var bytes = std.ArrayList(u8).init(liu.Temp);
+                var bytes = std.ArrayList(u8).init(alloc);
                 try std.fmt.format(bytes.writer(), "{}", .{val});
                 return Self{ .value = bytes.items };
             },
@@ -91,12 +92,12 @@ pub const Value = union(enum) {
             .Float => |info| {
                 if (info.bits > 64) @compileError("Only support floats up to f64");
 
-                var bytes = std.ArrayList(u8).init(liu.Pages);
+                var bytes = std.ArrayList(u8).init(alloc);
                 defer bytes.deinit();
 
                 try formatFloatValue(val, bytes.writer());
 
-                return Self{ .value = try liu.Temp.dupe(u8, bytes.items) };
+                return Self{ .value = bytes.items };
             },
 
             .Bool => {
@@ -117,53 +118,55 @@ pub const Value = union(enum) {
                     return Self{ .value = val };
                 }
 
-                var array = std.ArrayList(Self).init(liu.Pages);
+                var array = std.ArrayList(Self).init(alloc);
                 defer array.deinit();
 
                 try array.ensureTotalCapacity(val.len);
 
                 for (val) |v| {
-                    array.appendAssumeCapacity(try Value.init(v));
+                    array.appendAssumeCapacity(try Value.init(bump, v));
                 }
 
-                return Self{ .array = try liu.Temp.dupe(Self, array.items) };
+                return Self{ .array = array.items };
             },
 
             .Array => |info| {
-                var array = std.ArrayList(Self).init(liu.Pages);
+                var array = std.ArrayList(Self).init(alloc);
                 defer array.deinit();
 
                 try array.ensureTotalCapacity(info.len);
 
                 for (val) |v| {
-                    array.appendAssumeCapacity(try Value.init(v));
+                    array.appendAssumeCapacity(try Value.init(bump, v));
                 }
 
-                return Self{ .array = try liu.Temp.dupe(Self, array.items) };
+                return Self{ .array = array.items };
             },
 
             .Vector => |info| {
-                var array = std.ArrayList(Self).init(liu.Pages);
+                var array = std.ArrayList(Self).init(alloc);
                 defer array.deinit();
 
                 try array.ensureTotalCapacity(info.len);
 
                 const elements: [info.len]info.child = val;
                 for (elements) |v| {
-                    array.appendAssumeCapacity(try Value.init(v));
+                    array.appendAssumeCapacity(try Value.init(bump, v));
                 }
 
-                return Self{ .array = try liu.Temp.dupe(Self, array.items) };
+                return Self{ .array = array.items };
             },
 
             else => @compileError("unsupported type '" ++ @typeName(T) ++ "' for GON"),
         }
     }
 
-    pub fn expect(self: *const Self, comptime T: type) SchemaParseError!T {
+    pub fn expect(self: *const Self, bump: *liu.Bump, comptime T: type) SchemaParseError!T {
         if (T == Self) {
             return self.*;
         }
+
+        const alloc = bump.allocator();
 
         switch (@typeInfo(T)) {
             .Struct => |info| {
@@ -181,24 +184,24 @@ pub const Value = union(enum) {
                         }
                     }
 
-                    const field_info = @typeInfo(field.field_type);
+                    const field_info = @typeInfo(field.type);
                     if (field_info == .Optional) {
                         if (map_value) |value| {
                             const field_type = field_info.Optional.child;
-                            @field(t, field.name) = try value.expect(field_type);
+                            @field(t, field.name) = try value.expect(bump, field_type);
                         } else {
                             @field(t, field.name) = null;
                         }
                     } else if (field.default_value) |default| {
                         if (map_value) |value| {
-                            @field(t, field.name) = try value.expect(field.field_type);
+                            @field(t, field.name) = try value.expect(bump, field.type);
                         } else {
-                            @field(t, field.name) = @ptrCast(*const field.field_type, default).*;
+                            @field(t, field.name) = @ptrCast(*const field.type, default).*;
                         }
                     } else {
                         const value = map_value orelse return error.MissingField;
 
-                        @field(t, field.name) = try value.expect(field.field_type);
+                        @field(t, field.name) = try value.expect(bump, field.type);
                     }
                 }
 
@@ -249,7 +252,7 @@ pub const Value = union(enum) {
                 var out: [info.len]info.child = undefined;
 
                 for (values) |v, i| {
-                    out[i] = try v.expect(info.child);
+                    out[i] = try v.expect(bump, info.child);
                 }
 
                 return out;
@@ -267,10 +270,10 @@ pub const Value = union(enum) {
                 if (self.* != .array) return error.ExpectedArray;
 
                 const vals = self.array;
-                const out = try liu.Temp.alloc(info.child, vals.len);
+                const out = try alloc.alloc(info.child, vals.len);
 
                 for (vals) |v, i| {
-                    out[i] = try v.expect(info.child);
+                    out[i] = try v.expect(bump, info.child);
                 }
 
                 return out;
@@ -405,13 +408,16 @@ const ParseError = error{
 
 const Parser = struct {
     tokens: []const Token,
+    arena: *liu.Bump,
     index: u32 = 0,
 
     fn parseGonRecursive(self: *@This(), is_root: bool) ParseError!Value {
+        const alloc = self.arena.allocator();
+
         while (self.index < self.tokens.len) {
             if (self.tokens[self.index] == .lbracket) {
                 self.index += 1;
-                var values = std.ArrayList(Value).init(liu.Temp);
+                var values = std.ArrayList(Value).init(alloc);
 
                 while (self.index < self.tokens.len) {
                     if (self.tokens[self.index] == .rbracket) {
@@ -432,7 +438,7 @@ const Parser = struct {
             };
 
             if (parse_as_object) {
-                var values = std.ArrayList(Value.KV).init(liu.Temp);
+                var values = std.ArrayList(Value.KV).init(alloc);
 
                 while (self.index < self.tokens.len) {
                     const tok = self.tokens[self.index];
@@ -471,11 +477,11 @@ const Parser = struct {
 
 // TODO Made a mistake with Temp allocator... rip
 
-pub fn parseGon(bytes: []const u8) ParseError!Value {
+pub fn parseGon(bump: *liu.Bump, bytes: []const u8) ParseError!Value {
     const tokens = try tokenize(bytes);
     defer tokens.deinit();
 
-    var parser = Parser{ .tokens = tokens.items };
+    var parser = Parser{ .tokens = tokens.items, .arena = bump };
     return parser.parseGonRecursive(true);
 }
 
