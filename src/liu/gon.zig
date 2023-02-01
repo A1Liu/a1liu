@@ -58,7 +58,6 @@ pub const Value = union(enum) {
         switch (@typeInfo(T)) {
             .Struct => |info| {
                 var map = std.ArrayList(KV).init(alloc);
-                defer map.deinit();
 
                 try map.ensureTotalCapacity(info.fields.len);
 
@@ -93,7 +92,6 @@ pub const Value = union(enum) {
                 if (info.bits > 64) @compileError("Only support floats up to f64");
 
                 var bytes = std.ArrayList(u8).init(alloc);
-                defer bytes.deinit();
 
                 try formatFloatValue(val, bytes.writer());
 
@@ -119,7 +117,6 @@ pub const Value = union(enum) {
                 }
 
                 var array = std.ArrayList(Self).init(alloc);
-                defer array.deinit();
 
                 try array.ensureTotalCapacity(val.len);
 
@@ -132,7 +129,6 @@ pub const Value = union(enum) {
 
             .Array => |info| {
                 var array = std.ArrayList(Self).init(alloc);
-                defer array.deinit();
 
                 try array.ensureTotalCapacity(info.len);
 
@@ -145,7 +141,6 @@ pub const Value = union(enum) {
 
             .Vector => |info| {
                 var array = std.ArrayList(Self).init(alloc);
-                defer array.deinit();
 
                 try array.ensureTotalCapacity(info.len);
 
@@ -486,12 +481,12 @@ pub fn parseGon(bump: *liu.Bump, bytes: []const u8) ParseError!Value {
 }
 
 test "GON: parse" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
-    const output = try parseGon("Hello { blarg werp }\nKerrz [ helo blarg\n ]fasd 13\n merp farg\nwatta 1.0");
+    const output = try parseGon(temp.bump, "Hello { blarg werp }\nKerrz [ helo blarg\n ]fasd 13\n merp farg\nwatta 1.0");
 
-    var writer_out = std.ArrayList(u8).init(liu.Pages);
+    var writer_out = std.ArrayList(u8).init(temp.alloc);
     defer writer_out.deinit();
 
     try output.write(writer_out.writer(), true);
@@ -499,7 +494,7 @@ test "GON: parse" {
     const expected = "Hello {\n  blarg werp\n}\nKerrz [\n  helo\n  blarg\n]\nfasd 13\nmerp farg\nwatta 1.0\n";
     try std.testing.expectEqualSlices(u8, expected, writer_out.items);
 
-    const parsed = try output.expect(struct {
+    const parsed = try output.expect(temp.bump, struct {
         Hello: Value,
         Kerrz: Value,
         fasd: u32,
@@ -514,8 +509,8 @@ test "GON: parse" {
 }
 
 test "GON: serialize" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
     const Test = struct {
         merp: []const u8 = "hello",
@@ -526,9 +521,9 @@ test "GON: serialize" {
 
     const a = Test{};
 
-    const value = try Value.init(a);
+    const value = try Value.init(temp.bump, a);
 
-    var writer_out = std.ArrayList(u8).init(liu.Pages);
+    var writer_out = std.ArrayList(u8).init(temp.alloc);
     defer writer_out.deinit();
 
     try value.write(writer_out.writer(), true);
@@ -539,9 +534,6 @@ test "GON: serialize" {
 }
 
 test "GON: tokenize" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const tokens = try tokenize("Hello { blarg werp } Mark\n");
     const expected = [_]Token{
         .{ .string = "Hello" },

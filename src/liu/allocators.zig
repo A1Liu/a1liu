@@ -41,18 +41,20 @@ const TempState = struct {
 };
 
 pub fn Temp() *TempState {
-    const alloc = TemporaryAllocator.allocator();
-
     // I wish this didn't have to be eager like this, but I think its the best
     // option for now.
     if (!temp_is_init) {
+        // https://github.com/ziglang/zig/issues/11364
         TemporaryAllocator = std.heap.ArenaAllocator.init(Pages);
+        const alloc = TemporaryAllocator.allocator();
 
         const ptr = alloc.create([1024]u8) catch
             @panic("failed to pre-allocate to Temporary Allocator");
         alloc.destroy(ptr);
         temp_is_init = true;
     }
+
+    const alloc = TemporaryAllocator.allocator();
 
     const temp = alloc.create(TempState) catch @panic("failed to create TempState");
     const bump = alloc.create(Bump) catch @panic("failed to create Bump");
