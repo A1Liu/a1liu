@@ -23,9 +23,9 @@ var LogPagesAllocator = std.heap.LoggingAllocator(
 // TODO: This REALLY shouldn't be connected directly to Pages
 threadlocal var temp_is_init = false;
 threadlocal var TemporaryAllocator =
-    if (builtin.mode == .Debug)
-    std.heap.ArenaAllocator.init(LogPages)
-else
+    //     if (builtin.mode == .Debug)
+    //     std.heap.ArenaAllocator.init(LogPages)
+    // else
     std.heap.ArenaAllocator.init(Pages);
 
 const TempState = struct {
@@ -46,6 +46,8 @@ pub fn Temp() *TempState {
     // I wish this didn't have to be eager like this, but I think its the best
     // option for now.
     if (!temp_is_init) {
+        TemporaryAllocator = std.heap.ArenaAllocator.init(Pages);
+
         const ptr = alloc.create([1024]u8) catch
             @panic("failed to pre-allocate to Temporary Allocator");
         alloc.destroy(ptr);

@@ -583,7 +583,10 @@ const Encoder = struct {
             self.iter.index = sa.next_index;
 
             if (sa.slice_info) |info| {
-                const raw_slice = @bitCast([]const u8, field_mem[0..@sizeOf([]u8)].*);
+                // This should be safe, because field_mem is a pointer to a Zig
+                // object, and we're reading it as a Zig object
+                const aligned_ptr = @alignCast(@alignOf(*const []const u8), field_mem);
+                const raw_slice = @ptrCast(*const []const u8, aligned_ptr).*;
 
                 const obj_left = @truncate(u32, raw_slice.len);
                 const offset = if (obj_left == 0) 0 else offset: {
@@ -715,7 +718,7 @@ fn Encoded(comptime chunk_size: u32) type {
 }
 
 const DefaultChunkSize = 16 * 4096;
-pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_size_ orelse DefaultChunkSize) {
+pub fn tempEncode(bump: *liu.Bump, value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_size_ orelse DefaultChunkSize) {
     const chunk_size = chunk_size_ orelse DefaultChunkSize;
     if (comptime chunk_size % 8 != 0)
         @compileError("chunk size must be aligned to 8 bytes");
@@ -724,16 +727,18 @@ pub fn tempEncode(value: anytype, comptime chunk_size_: ?u32) !Encoded(chunk_siz
     if (comptime chunk_size < spec.header.data_begin)
         @compileError("chunk size should be at least enough bytes to hold the header");
 
+    const alloc = bump.allocator();
+
     const ChunkT = [chunk_size]u8;
     const ChunkPtrT = *align(8) ChunkT;
 
     var encoder = Encoder.init(@TypeOf(value), &value);
     defer encoder.deinit();
 
-    var list = std.ArrayList(ChunkPtrT).init(liu.Temp);
+    var list = std.ArrayList(ChunkPtrT).init(alloc);
 
     while (true) {
-        const chunk_ = try liu.Temp.alignedAlloc(ChunkT, 8, 1);
+        const chunk_ = try alloc.alignedAlloc(ChunkT, 8, 1);
         const chunk = &chunk_[0];
 
         if (try encoder.encode(chunk)) |size| {
