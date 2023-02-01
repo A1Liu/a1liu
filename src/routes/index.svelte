@@ -15,8 +15,8 @@
     <h2>About Me</h2>
     <p>
       Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer
-      at Dandy. I recently graduated from New York University. In high school,
-      I once ate 2 whole hot dogs for lunch.
+      at Dandy. I recently graduated from New York University. In high school, I
+      once ate 2 whole hot dogs for lunch.
     </p>
 
     <h2>What I&apos;m Doing Now</h2>

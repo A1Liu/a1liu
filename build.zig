@@ -41,6 +41,11 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
 
     program.setBuildMode(mode);
 
+    // This is documented literally nowhere; I found it because someone on Discord
+    // looked through the source code. The Zig-sponsored way to do this is by
+    // using -rdynamic from the CLI, which seems unhelpful to say the least.
+    program.rdynamic = true;
+
     program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
     // Output straight to static folder by default to make things easier
@@ -63,22 +68,28 @@ pub fn build(b: *Builder) !void {
 
     b.prominent_compile_errors = true;
 
-    const wasmPrograms = [_]ProgData{ .{
-        .name = "kilordle",
-        .root = "./src/routes/kilordle/kilordle.zig",
-    }, .{
-        .name = "painter",
-        .root = "./src/routes/painter/painter.zig",
-    }, .{
-        .name = "bench",
-        .root = "./src/routes/bench/bench.zig",
-    }, .{
-        .name = "algebra",
-        .root = "./src/routes/algebra/algebra.zig",
-    }, .{
-        .name = "game-2d-simple",
-        .root = "./src/routes/game-2d-simple/simple.zig",
-    } };
+    const wasmPrograms = [_]ProgData{
+        .{
+            .name = "kilordle",
+            .root = "./src/routes/kilordle/kilordle.zig",
+        },
+        .{
+            .name = "painter",
+            .root = "./src/routes/painter/painter.zig",
+        },
+        //     .{
+        //         .name = "bench",
+        //         .root = "./src/routes/bench/bench.zig",
+        //     },
+        //     .{
+        //         .name = "algebra",
+        //         .root = "./src/routes/algebra/algebra.zig",
+        //     },
+        .{
+            .name = "game-2d-simple",
+            .root = "./src/routes/game-2d-simple/simple.zig",
+        },
+    };
 
     const pathTools = [_]ProgData{.{
         .name = "aliu_path_helper",

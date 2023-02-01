@@ -9,9 +9,6 @@ const parse = liu.packed_asset.parse;
 const U32Slice = liu.packed_asset.U32Slice;
 
 test "Packed Asset: spec generation" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const TestE = extern struct {
         data: U32Slice(u8),
         field: u8,
@@ -37,9 +34,6 @@ test "Packed Asset: spec generation" {
 }
 
 test "Packed Asset: spec encode/decode simple" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const Test = struct {
         field2: struct { asdf: u8, wasd: u8 },
         field: u64,
@@ -57,8 +51,11 @@ test "Packed Asset: spec encode/decode simple" {
         .ustruct_close_8,
     });
 
+    const temp = liu.Temp();
+    defer temp.deinit();
+
     const t: Test = .{ .field = 120303113, .field2 = .{ .asdf = 100, .wasd = 255 } };
-    const encoded = try tempEncode(t, null);
+    const encoded = try tempEncode(temp.bump, t, null);
 
     try std.testing.expect(encoded.chunks.len == 0);
 
@@ -70,9 +67,6 @@ test "Packed Asset: spec encode/decode simple" {
 }
 
 test "Packed Asset: encode/decode extern" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const TestE = extern struct {
         data: u64,
         field: u8,
@@ -92,12 +86,15 @@ test "Packed Asset: encode/decode extern" {
         .ustruct_close_8,
     });
 
+    const temp = liu.Temp();
+    defer temp.deinit();
+
     const t: TestE = .{ .field = 123, .data = 12398145 };
-    const encoded = try tempEncode(t, 24);
+    const encoded = try tempEncode(temp.bump, t, 24);
 
     try std.testing.expect(encoded.chunks.len == 1);
 
-    const bytes = try encoded.copyContiguous(liu.Temp);
+    const bytes = try encoded.copyContiguous(temp.alloc);
 
     const value = try parse(TestE, bytes);
 
@@ -105,8 +102,8 @@ test "Packed Asset: encode/decode extern" {
 }
 
 test "Packed Asset: spec encode/decode multiple chunks" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
     const Test = struct {
         field: u16,
@@ -145,11 +142,11 @@ test "Packed Asset: spec encode/decode multiple chunks" {
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
         },
     };
-    const encoded = try tempEncode(t, 32);
+    const encoded = try tempEncode(temp.bump, t, 32);
 
     try std.testing.expectEqual(encoded.chunks.len, 41);
 
-    const bytes = try encoded.copyContiguous(liu.Temp);
+    const bytes = try encoded.copyContiguous(temp.alloc);
 
     const value = try parse(Test, bytes);
 
@@ -216,9 +213,6 @@ test "Packed Asset: alignment" {
 }
 
 test "Packed Asset: spec encode/decode slices" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const Test = struct {
         field: u16,
         data: []const u8,
@@ -235,15 +229,18 @@ test "Packed Asset: spec encode/decode slices" {
         .ustruct_close_4,
     });
 
+    const temp = liu.Temp();
+    defer temp.deinit();
+
     const t: Test = .{
         .field = 16,
         .data = &.{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
     };
-    const encoded = try tempEncode(t, 1024);
+    const encoded = try tempEncode(temp.bump, t, 1024);
 
     try std.testing.expect(encoded.chunks.len == 0);
 
-    const bytes = try encoded.copyContiguous(liu.Temp);
+    const bytes = try encoded.copyContiguous(temp.alloc);
 
     const value = try parse(Test, bytes);
 
@@ -261,9 +258,6 @@ test "Packed Asset: spec encode/decode slices" {
 }
 
 test "Packed Asset: spec branch quota" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const Test = struct {
         field1: u64,
         field2: u64,
@@ -378,9 +372,6 @@ test "Packed Asset: spec branch quota" {
 }
 
 test "Packed Asset: arrays" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const Test = struct { data: [10]u64 };
 
     const spec = Spec.fromType(Test);
@@ -399,11 +390,14 @@ test "Packed Asset: arrays" {
         513459, 62312347,    712389477,   81203498, 91203948,
     } };
 
-    const encoded = try tempEncode(t, 1024);
+    const temp = liu.Temp();
+    defer temp.deinit();
+
+    const encoded = try tempEncode(temp.bump, t, 1024);
 
     try std.testing.expect(encoded.chunks.len == 0);
 
-    const bytes = try encoded.copyContiguous(liu.Temp);
+    const bytes = try encoded.copyContiguous(temp.alloc);
 
     const value = try parse(Test, bytes);
 
@@ -411,9 +405,6 @@ test "Packed Asset: arrays" {
 }
 
 test "Packed Asset: wordle" {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
-
     const Test = struct {
         words: [5][]const u8,
         wordles: [5][]const u8,
@@ -443,11 +434,14 @@ test "Packed Asset: wordle" {
         .wordles = .{ "bsdf", "bsdf;lk", "wedtn", "swoi", "wgrnt" },
     };
 
-    const encoded = try tempEncode(t, 1024);
+    const temp = liu.Temp();
+    defer temp.deinit();
+
+    const encoded = try tempEncode(temp.bump, t, 1024);
 
     try std.testing.expect(encoded.chunks.len == 0);
 
-    const bytes = try encoded.copyContiguous(liu.Temp);
+    const bytes = try encoded.copyContiguous(temp.alloc);
 
     const value = try parse(Test, bytes);
 

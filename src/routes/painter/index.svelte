@@ -8,6 +8,8 @@
 
   type String3 = [string, string, string];
 
+  // <input type="color">
+
   let worker = undefined;
   let canvas = undefined;
   let palette = undefined;

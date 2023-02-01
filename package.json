@@ -7,6 +7,7 @@
     "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-safe && echo DONE' src/",
     "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache",
     "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small",
+    "test:zig": "zig test --cache-dir .zig/zig-cache src/liu/lib.zig",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",

@@ -1,9 +1,9 @@
 const std = @import("std");
-const root = @import("root");
 const liu = @import("./lib.zig");
 const builtin = @import("builtin");
 
 const Allocator = std.mem.Allocator;
+const FixedBufferAllocator = std.heap.FixedBufferAllocator;
 const Field = std.builtin.Type.StructField;
 const ArrayList = std.ArrayList;
 const wasm = @This();
@@ -41,27 +41,27 @@ pub const Obj = enum(i32) {
     pub const arrayPush = ext.arrayPush;
     pub const delete = ext.deleteObj;
 
-    pub fn Await(self: Self) Self {
-        var output: wasm.Obj = undefined;
+    // pub fn Await(self: Self) Self {
+    //     var output: wasm.Obj = undefined;
 
-        suspend {
-            const frame = @as(anyframe, @frame());
-            const opaque_frame = @ptrCast(*const anyopaque, frame);
-            ext.awaitHook(self, &output, opaque_frame);
-        }
+    //     suspend {
+    //         const frame = @as(anyframe, @frame());
+    //         const opaque_frame = @ptrCast(*const anyopaque, frame);
+    //         ext.awaitHook(self, &output, opaque_frame);
+    //     }
 
-        return output;
-    }
+    //     return output;
+    // }
 };
 
 // TODO why is this i32?
 const Watermark = enum(i32) { _ };
 
-export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: Obj) void {
-    output_slot.* = obj;
-
-    resume @ptrCast(anyframe, val);
-}
+// export fn resumePromise(val: *align(4) const anyopaque, output_slot: *Obj, obj: Obj) void {
+//     output_slot.* = obj;
+//
+//     resume @ptrCast(anyframe, val);
+// }
 
 const ext = struct {
     extern fn awaitHook(self: Obj, output: *Obj, slot: *align(4) const anyopaque) void;
@@ -170,6 +170,8 @@ pub fn parseFloat(bytes: []const u8) std.fmt.ParseFloatError!f64 {
     return val;
 }
 
+var format_buffer: [128]u8 = undefined;
+
 pub const make = struct {
     pub fn number(life: Lifetime, n: f64) Obj {
         return ext.makeNumber(n, life.isTemp());
@@ -212,16 +214,25 @@ pub const make = struct {
     }
 
     pub fn fmt(life: Lifetime, comptime format: []const u8, args: anytype) Obj {
-        const mark = liu.TempMark;
-        defer liu.TempMark = mark;
+        static_buffer: {
+            var buffer_alloc = FixedBufferAllocator.init(&format_buffer);
+            const alloc = buffer_alloc.allocator();
+            const data = std.fmt.allocPrint(alloc, format, args) catch
+                break :static_buffer;
+            return string(life, data);
+        }
 
-        const allocResult = std.fmt.allocPrint(liu.Temp, format, args);
+        const temp = liu.Temp();
+        defer temp.deinit();
+
+        const allocResult = std.fmt.allocPrint(temp.alloc, format, args);
         const data = allocResult catch @panic("failed to print");
 
-        return ext.makeString(data.ptr, data.len, life.isTemp());
+        return string(life, data);
     }
 
     pub fn string(life: Lifetime, a: []const u8) Obj {
+        if (a.len == 0) return .jsEmptyString;
         return ext.makeString(a.ptr, a.len, life.isTemp());
     }
 
@@ -308,44 +319,44 @@ pub fn initIfNecessary() void {
     }
 }
 
-pub const strip_debug_info = true;
-pub const have_error_return_tracing = false;
+pub const std_options = struct {
+    pub fn logFn(
+        comptime message_level: std.log.Level,
+        comptime scope: @Type(.EnumLiteral),
+        comptime fmt: []const u8,
+        args: anytype,
+    ) void {
+        if (builtin.target.cpu.arch != .wasm32) {
+            std.log.defaultLog(message_level, scope, fmt, args);
+            return;
+        }
 
-pub fn log(
-    comptime message_level: std.log.Level,
-    comptime scope: @Type(.EnumLiteral),
-    comptime fmt: []const u8,
-    args: anytype,
-) void {
-    if (builtin.target.cpu.arch != .wasm32) {
-        std.log.defaultLog(message_level, scope, fmt, args);
-        return;
+        if (@enumToInt(message_level) > @enumToInt(std.options.log_level)) {
+            return;
+        }
+
+        const level_obj: Obj = switch (message_level) {
+            .debug => .info,
+            .info => .info,
+            .warn => .warn,
+            .err => .err,
+        };
+
+        post(level_obj, fmt ++ "\n", args);
     }
+};
 
-    _ = scope;
+// pub const strip_debug_info = true;
+// pub const have_error_return_tracing = false;
 
-    if (@enumToInt(message_level) > @enumToInt(std.log.level)) {
-        return;
-    }
-
-    const level_obj: Obj = switch (message_level) {
-        .debug => .info,
-        .info => .info,
-        .warn => .warn,
-        .err => .err,
-    };
-
-    post(level_obj, fmt ++ "\n", args);
-}
-
-pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) noreturn {
+pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace, idk: ?usize) noreturn {
     @setCold(true);
+
+    _ = idk;
 
     if (builtin.target.cpu.arch != .wasm32) {
         std.builtin.default_panic(msg, error_return_trace);
     }
-
-    _ = error_return_trace;
 
     exit(msg);
 }
@@ -401,7 +412,7 @@ pub fn StringTable(comptime table_info: anytype) type {
     for (fields) |field| {
         struct_fields = struct_fields ++ &[_]Field{.{
             .name = field.name,
-            .field_type = Obj,
+            .type = Obj,
             .default_value = null,
             .is_comptime = false,
             .alignment = @alignOf(Obj),

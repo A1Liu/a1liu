@@ -19,8 +19,8 @@ pub const Tool = struct {
     const Self = @This();
 
     const VTable = struct {
-        frame: fn (self: *anyopaque, input: FrameInput) void,
-        reset: fn (self: *anyopaque) void,
+        frame: *const fn (self: *anyopaque, input: FrameInput) void,
+        reset: *const fn (self: *anyopaque) void,
     };
 
     name: []const u8,
@@ -42,11 +42,21 @@ pub const Tool = struct {
     }
 
     pub fn initWithVtable(comptime T: type, obj: *T, comptime VtableType: type) Self {
-        const info = std.meta.fieldInfo;
+        const Impls = struct {
+            fn frame(o: *anyopaque, input: FrameInput) void {
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+                return VtableType.frame(self, input);
+            }
+
+            fn reset(o: *anyopaque) void {
+                const self = @ptrCast(*T, @alignCast(@alignOf(T), o));
+                return VtableType.reset(self);
+            }
+        };
 
         const vtable = comptime VTable{
-            .frame = @ptrCast(info(VTable, .frame).field_type, VtableType.frame),
-            .reset = @ptrCast(info(VTable, .reset).field_type, VtableType.reset),
+            .frame = Impls.frame,
+            .reset = Impls.reset,
         };
 
         return Self{
@@ -245,8 +255,11 @@ const OutputEntity = struct {
 };
 
 // Use stable declaration on type
-pub fn serializeLevel() ![]const u8 {
-    var entities = std.ArrayList(AssetEntity).init(liu.Pages);
+pub fn serializeLevel() !std.ArrayList(u8) {
+    const temp = liu.Temp();
+    defer temp.deinit();
+
+    var entities = std.ArrayList(AssetEntity).init(temp.alloc);
     defer entities.deinit();
 
     var view = ty.registry.view(OutputEntity);
@@ -263,25 +276,21 @@ pub fn serializeLevel() ![]const u8 {
         });
     }
 
-    const mark = liu.TempMark;
-
-    const gon_data = try gon.Value.init(.{
+    const gon_data = try gon.Value.init(temp.bump, .{
         .entities = entities.items,
     });
 
     var output = std.ArrayList(u8).init(liu.Pages);
-    defer output.deinit();
+    errdefer output.deinit();
 
     try gon_data.write(output.writer(), true);
 
-    liu.TempMark = mark;
-
-    return liu.Temp.dupe(u8, output.items);
+    return output;
 }
 
 pub fn readFromAsset(bytes: []const u8) !void {
-    const mark = liu.TempMark;
-    defer liu.TempMark = mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
     const registry = ty.registry;
 
@@ -292,8 +301,8 @@ pub fn readFromAsset(bytes: []const u8) !void {
         }
     }
 
-    const gon_data = try gon.parseGon(bytes);
-    const asset_data = try gon_data.expect(struct {
+    const gon_data = try gon.parseGon(temp.bump, bytes);
+    const asset_data = try gon_data.expect(temp.bump, struct {
         entities: []const AssetEntity,
     });
 
