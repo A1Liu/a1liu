@@ -80,8 +80,8 @@ pub fn Temp() *TempState {
     return temp;
 }
 
-// This code should cause a panic, but that's not something that can be tested
-// right now.
+// This code should cause a panic, but that's not something that can be
+// automatically tested right now.
 // test "ALLOC: temporary allocator should panic when called incorrectly" {
 //     const temp = Temp();
 //     defer temp.deinit();
