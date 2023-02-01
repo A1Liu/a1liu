@@ -22,39 +22,49 @@ var LogPagesAllocator = std.heap.LoggingAllocator(
 
 // TODO: This REALLY shouldn't be connected directly to Pages
 threadlocal var temp_is_init = false;
-threadlocal var TemporaryAllocator =
-    //     if (builtin.mode == .Debug)
-    //     std.heap.ArenaAllocator.init(LogPages)
-    // else
+threadlocal var current_temp_object: ?*TempState = null;
+threadlocal var temp_alloc =
+    // std.heap.ArenaAllocator.init(LogPages);
     std.heap.ArenaAllocator.init(Pages);
 
 const TempState = struct {
     bump: *Bump,
     alloc: Allocator,
+    prev: ?*@This() = null,
 
     pub fn deinit(self: *@This()) void {
-        const alloc = TemporaryAllocator.allocator();
+        const alloc = temp_alloc.allocator();
         self.bump.deinit();
         alloc.destroy(self.bump);
         alloc.destroy(self);
+
+        if (self != current_temp_object) {
+            @panic("detected misuse of liu.Temp(): need to call defer temp.deinit() directly after liu.Temp()");
+        }
+
+        current_temp_object = self.prev;
     }
 };
 
 pub fn Temp() *TempState {
-    // I wish this didn't have to be eager like this, but I think its the best
-    // option for now.
     if (!temp_is_init) {
-        // https://github.com/ziglang/zig/issues/11364
-        TemporaryAllocator = std.heap.ArenaAllocator.init(Pages);
-        const alloc = TemporaryAllocator.allocator();
+        // Thread local storage in Zig seems to break at times. This assignment
+        // prevents at least 1 bug that surfaces during testing.
+        // Tracked here: https://github.com/ziglang/zig/issues/11364
+        //
+        //                          - Albert Liu, Jan 31, 2023 Tue 23:37
+        temp_alloc = std.heap.ArenaAllocator.init(Pages);
+        const alloc = temp_alloc.allocator();
 
+        // I wish this didn't have to be eager like this, but I think its
+        // the best option for now.
         const ptr = alloc.create([1024]u8) catch
             @panic("failed to pre-allocate to Temporary Allocator");
         alloc.destroy(ptr);
         temp_is_init = true;
     }
 
-    const alloc = TemporaryAllocator.allocator();
+    const alloc = temp_alloc.allocator();
 
     const temp = alloc.create(TempState) catch @panic("failed to create TempState");
     const bump = alloc.create(Bump) catch @panic("failed to create Bump");
@@ -63,7 +73,27 @@ pub fn Temp() *TempState {
     temp.* = .{
         .bump = bump,
         .alloc = bump.allocator(),
+        .prev = current_temp_object,
     };
+    current_temp_object = temp;
 
     return temp;
 }
+
+// This code should cause a panic, but that's not something that can be tested
+// right now.
+// test "ALLOC: temporary allocator should panic when called incorrectly" {
+//     const temp = Temp();
+//     defer temp.deinit();
+//
+//     const hello = struct {
+//         fn hello(a: usize) usize {
+//             const t = Temp();
+//             _ = t;
+//
+//             return a;
+//         }
+//     }.hello;
+//
+//     _ = hello(2);
+// }

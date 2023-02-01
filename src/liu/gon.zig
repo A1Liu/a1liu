@@ -337,8 +337,8 @@ pub const Token = union(enum) {
     rbracket,
 };
 
-fn tokenize(bytes: []const u8) !std.ArrayList(Token) {
-    var tokens = std.ArrayList(Token).init(liu.Pages);
+fn tokenize(alloc: std.mem.Allocator, bytes: []const u8) !std.ArrayList(Token) {
+    var tokens = std.ArrayList(Token).init(alloc);
     errdefer tokens.deinit();
 
     var i: u32 = 0;
@@ -473,7 +473,7 @@ const Parser = struct {
 // TODO Made a mistake with Temp allocator... rip
 
 pub fn parseGon(bump: *liu.Bump, bytes: []const u8) ParseError!Value {
-    const tokens = try tokenize(bytes);
+    const tokens = try tokenize(bump.allocator(), bytes);
     defer tokens.deinit();
 
     var parser = Parser{ .tokens = tokens.items, .arena = bump };
@@ -534,7 +534,10 @@ test "GON: serialize" {
 }
 
 test "GON: tokenize" {
-    const tokens = try tokenize("Hello { blarg werp } Mark\n");
+    const temp = liu.Temp();
+    defer temp.deinit();
+
+    const tokens = try tokenize(temp.alloc, "Hello { blarg werp } Mark\n");
     const expected = [_]Token{
         .{ .string = "Hello" },
         .lbrace,
