@@ -4,9 +4,9 @@
   "scripts": {
     "dev": "svelte-kit dev -p 1337",
     "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
-    "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-safe && echo DONE' src/",
+    "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Doptimize=ReleaseSafe && echo DONE' src/",
     "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache",
-    "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Drelease-small",
+    "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Doptimize=ReleaseSmall",
     "test:zig": "zig test --cache-dir .zig/zig-cache src/liu/lib.zig",
     "build": "svelte-kit build",
     "package": "svelte-kit package",

@@ -8,7 +8,7 @@ const assets = @import("src/assets.zig");
 const bld = std.build;
 const Arch = std.Target.Cpu.Arch;
 const Builder = bld.Builder;
-const Mode = std.builtin.Mode;
+const Mode = std.builtin.OptimizeMode;
 
 var mode: Mode = undefined;
 
@@ -18,11 +18,13 @@ const ProgData = struct {
 };
 
 fn pathTool(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
-    const program = b.addExecutable(prog.name, prog.root);
+    const program = b.addExecutable(.{
+        .name = prog.name,
+        .root_source_file = .{ .path = prog.root },
+        .optimize = mode,
+    });
 
     program.addPackagePath("liu", "src/liu/lib.zig");
-
-    program.setBuildMode(mode);
 
     program.setOutputDir("config/local/path");
 
@@ -33,20 +35,21 @@ fn pathTool(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
 }
 
 fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
-    const vers = b.version(0, 0, 0);
-    const program = b.addSharedLibrary(prog.name, prog.root, vers);
+    const program = b.addSharedLibrary(.{
+        .name = prog.name,
+        .root_source_file = .{ .path = prog.root },
+        .version = .{ .major = 0, .minor = 0, .patch = 0 },
+        .target = .{ .cpu_arch = .wasm32, .os_tag = .freestanding },
+        .optimize = mode,
+    });
 
     program.addPackagePath("liu", "src/liu/lib.zig");
     program.addPackagePath("assets", "src/assets.zig");
-
-    program.setBuildMode(mode);
 
     // This is documented literally nowhere; I found it because someone on Discord
     // looked through the source code. The Zig-sponsored way to do this is by
     // using -rdynamic from the CLI, which seems unhelpful to say the least.
     program.rdynamic = true;
-
-    program.setTarget(.{ .cpu_arch = .wasm32, .os_tag = .freestanding });
 
     // Output straight to static folder by default to make things easier
     program.setOutputDir("./.zig/zig-out/");
@@ -64,7 +67,8 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
 pub fn build(b: *Builder) !void {
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    mode = b.standardReleaseOptions();
+    // const target = b.standardTargetOptions(.{});
+    mode = b.standardOptimizeOption(.{});
 
     b.prominent_compile_errors = true;
 
