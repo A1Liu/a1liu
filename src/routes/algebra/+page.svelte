@@ -4,7 +4,7 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import { get } from "idb-keyval";
   import * as wasm from "@lib/ts/wasm";
-  import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
+  import Expr, { tree, globalCtx } from "./expression.svelte";
 
   let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
   // let equation = "1x";
