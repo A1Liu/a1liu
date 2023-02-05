@@ -91,7 +91,6 @@
   <div
     bind:this={overlay}
     class="overlay"
-    tabindex="0"
     on:mousedown={(evt) => evt.preventDefault()}
   >
     <slot name="overlay" />
