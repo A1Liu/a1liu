@@ -1,4 +1,5 @@
-import * as wasm from "@lib/ts/wasm";
+import { initWasm } from "@lib/ts/wasm";
+import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/game-2d-simple.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
 import { set } from "idb-keyval";
@@ -22,7 +23,7 @@ const initGl = async (canvas: any): Promise<GlContext | null> => {
   return ctx;
 };
 
-const main = async (wasmRef: wasm.Ref) => {
+const main = async (wasmRef: WasmRef) => {
   function run(timestamp: number) {
     wasmRef.abi.run(timestamp);
 
@@ -71,9 +72,9 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm(wasmUrl, {
+  const wasmRef = await initWasm(fetch(wasmUrl), {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: (wasmRef: wasm.Ref) => ({
+    raw: (wasmRef: WasmRef) => ({
       pushMessage: (kindId: number, dataId: number) => {
         const kind = wasmRef.readObj(kindId);
         const data = wasmRef.readObj(dataId);

@@ -1,7 +1,8 @@
-import * as wasm from "@lib/ts/wasm";
+import { initWasm } from "@lib/ts/wasm";
+import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/algebra.wasm?url";
 import { WorkerCtx, timeout } from "@lib/ts/util";
-import * as idb from "idb-keyval";
+import type { InputMessage } from "@lib/ts/gamescreen";
 
 const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
@@ -10,7 +11,7 @@ export type OutMessage =
   | { kind: "initDone"; data?: void }
   | { kind: string; data: any };
 
-const main = async (wasmRef: wasm.Ref) => {
+const main = async (wasmRef: WasmRef) => {
   while (true) {
     const captured = await ctx.msgWait();
 
@@ -41,7 +42,7 @@ const main = async (wasmRef: wasm.Ref) => {
 const graphStore = "graph-data";
 
 const init = async () => {
-  const wasmPromise = wasm.fetchWasm(wasmUrl, {
+  const wasmPromise = initWasm(fetch(wasmUrl), {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
     raw: (wasmRef: wasm.Ref) => ({
       // timeout: () => wasmRef.addObj(timeout(2000)),

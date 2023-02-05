@@ -2,9 +2,8 @@
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
-  import { get } from "idb-keyval";
-  import * as wasm from "@lib/ts/wasm";
   import Expr, { tree, globalCtx } from "./expression.svelte";
+  import type { OutMessage } from "./worker";
 
   let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
   // let equation = "1x";

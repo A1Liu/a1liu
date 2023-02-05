@@ -1,6 +1,7 @@
 {
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions":{
+    "baseUrl": "./",
     "allowJs": true,
     "checkJs": true,
     "esModuleInterop": true,
@@ -8,6 +9,12 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@lib/**/*": ["./src/**/*"],
+      "@zig/*": ["./.zig/zig-out/*"],
+      "$lib":["./src"],
+      "$lib/*":["./src/*"]
+    }
   }
 }

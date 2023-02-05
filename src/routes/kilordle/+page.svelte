@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import * as wasm from "@lib/ts/wasm";
+  import type { WasmRef } from "@lib/ts/wasm";
+  import { fetchAsset, initWasm } from "@lib/ts/wasm";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import wasmUrl from "@zig/kilordle.wasm?url";
   import { defer } from "@lib/ts/util";
@@ -17,7 +18,7 @@
     ["Go", ..."zxcvbnm".split(""), "Del"],
   ];
 
-  let wasmRef: wasm.Ref | undefined = undefined;
+  let wasmRef: WasmRef | undefined = undefined;
 
   let word: string = "";
   let puzzles: PuzzleData[] = [];
@@ -110,11 +111,11 @@
   onMount(() => {
     // NOTE: we use RTF file extension here, even though this file is technically
     // binary, because RTF is gzip'd by Github Pages. For non-gzip files, use `.bin`
-    const data = wasm.fetchAsset("/kilordle/data.rtf");
-    const wasmPromise = wasm.fetchWasm(wasmUrl, {
+    const data = fetchAsset("/kilordle/data.rtf");
+    const wasmPromise = initWasm(fetch(wasmUrl), {
       postMessage: postToast,
 
-      raw: (wasmRef: wasm.Ref) => ({
+      raw: (wasmRef: WasmRef) => ({
         resetSubmission: () => {
           word = "";
           submitError = false;

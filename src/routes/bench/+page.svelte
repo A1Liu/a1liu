@@ -4,7 +4,6 @@
   import { fmtTime } from "@lib/ts/util";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
-  import * as wasm from "@lib/ts/wasm";
 
   // import Kilordle from "../kilordle/index.svelte";
 

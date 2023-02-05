@@ -5,7 +5,7 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import levelUrl from "./levels/simple.txt?url";
   import { get } from "idb-keyval";
-  import * as wasm from "@lib/ts/wasm";
+  import type { OutMessage } from "./worker";
 
   let worker = undefined;
   let fileInput = undefined;

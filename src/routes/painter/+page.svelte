@@ -4,7 +4,6 @@
   import Screen from "@lib/svelte/sidebar_gamescreen.svelte";
   import Toast, { addToast, postToast } from "@lib/svelte/errors.svelte";
   import { githubIssueLink } from "@lib/ts/util";
-  import * as GL from "@lib/ts/webgl";
 
   type String3 = [string, string, string];
 
