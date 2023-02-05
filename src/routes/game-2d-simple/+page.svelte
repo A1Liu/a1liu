@@ -71,7 +71,7 @@
 
     // clear the current file so that the next submission will also
     // trigger onchange
-    target.value = '';
+    target.value = "";
 
     const data = await file.text();
     worker.postMessage({ kind: "uploadLevel", data });
@@ -106,10 +106,7 @@
         Save
       </button>
 
-      <button
-        class="muiButton"
-        on:click={() => fileInput?.click()}
-      >
+      <button class="muiButton" on:click={() => fileInput?.click()}>
         Open
       </button>
     </div>

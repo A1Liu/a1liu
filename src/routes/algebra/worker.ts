@@ -15,7 +15,7 @@ const main = async (wasmRef: WasmRef) => {
   while (true) {
     const captured = await ctx.msgWait();
 
-    const seen = {};
+    const seen: Record<string, any> = {};
     captured.forEach((msg) => {
       switch (msg.kind) {
         case "equationChange": {
@@ -44,7 +44,7 @@ const graphStore = "graph-data";
 const init = async () => {
   const wasmPromise = initWasm(fetch(wasmUrl), {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: (wasmRef: wasm.Ref) => ({
+    raw: (wasmRef: WasmRef) => ({
       // timeout: () => wasmRef.addObj(timeout(2000)),
       // fetch: (...a: number[]) => {
       //   const res = fetch(...a.map(wasmRef.readObj)).then((res) => res.blob());

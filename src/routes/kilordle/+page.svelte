@@ -63,12 +63,13 @@
       case "Go": {
         if (word.length < 5) break;
         if (!wasmRef) break;
+        const wasmRefIn = wasmRef;
 
         const chars = word.split("");
         const codes = chars.map((c) => c.charCodeAt(0));
 
         defer(() => {
-          if (!wasmRef.abi.submitWord(...codes)) {
+          if (!wasmRefIn.abi.submitWord(...codes)) {
             submitError = true;
             return;
           }
