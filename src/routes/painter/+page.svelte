@@ -16,9 +16,9 @@
 
   type String3 = [string, string, string];
 
-  let worker: Worker | undefined = undefined;
-  let canvas: HTMLCanvasElement | null = null;
-  let palette: HTMLDivElement | null = null;
+  let worker: Worker = undefined as any;
+  let canvas: HTMLCanvasElement | undefined = undefined;
+  let palette: HTMLDivElement | undefined = undefined;
 
   let color = [0.5, 0.5, 0.5];
   let colorNullable = [0.5, 0.5, 0.5];
@@ -74,7 +74,7 @@
   $: {
     const [r, g, b] = color;
     const colorStyle = `rgb(${r * 255}, ${g * 255}, ${b * 255})`;
-    if (palette && worker) {
+    if (palette) {
       palette.style.backgroundColor = colorStyle;
       worker.postMessage({ kind: "setColor", data: [r, g, b] });
     }
@@ -88,10 +88,8 @@
   }
 
   onMount(() => {
-    const w = new MyWorker();
-    worker = w;
-
-    w.onmessage = (ev: MessageEvent<OutMessage>) => {
+    worker = new MyWorker();
+    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
         case "setTool":
@@ -106,7 +104,7 @@
         case "initDone":
           const width = canvas?.clientWidth;
           const height = canvas?.clientHeight;
-          w.postMessage({ kind: "resize", data: [width, height] });
+          worker.postMessage({ kind: "resize", data: [width, height] });
           break;
 
         default:

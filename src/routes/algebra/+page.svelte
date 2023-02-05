@@ -16,12 +16,13 @@
 
   let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
   // let equation = "1x";
-  const worker = new MyWorker();
+  let worker: Worker | undefined = undefined;
   let root: number | undefined = undefined;
 
-  $: worker.postMessage({ kind: "equationChange", data: equation });
+  $: worker?.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
+    worker = new MyWorker();
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
@@ -66,7 +67,7 @@
     if (!isNaN(value)) {
       globalCtx.updateVariable(name, value);
       const data = { name, value };
-      worker.postMessage({ kind: "variableUpdate", data });
+      worker?.postMessage({ kind: "variableUpdate", data });
     }
   }
 </script>

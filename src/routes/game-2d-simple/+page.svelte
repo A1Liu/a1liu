@@ -16,7 +16,7 @@
   import { get } from "idb-keyval";
   import type { OutMessage } from "./worker";
 
-  const worker = new MyWorker();
+  let worker : Worker = undefined as any;
   let fileInput: HTMLInputElement | undefined = undefined;
   let defaultLevel = "";
 
@@ -27,6 +27,8 @@
       .catch(() => {});
 
     req.then((t) => (defaultLevel = t));
+
+    worker = new MyWorker();
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;

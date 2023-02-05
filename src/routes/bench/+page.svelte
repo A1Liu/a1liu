@@ -18,7 +18,7 @@
     duration: number;
   }
 
-  const worker = new MyWorker();
+  let worker : Worker | undefined = undefined;
 
   let inputCount = 1000;
   let benchId = 0;
@@ -30,6 +30,7 @@
   let end: number | null = null;
 
   onMount(() => {
+    worker = new MyWorker();
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
@@ -91,7 +92,7 @@
 
         count = inputCount;
 
-        worker.postMessage({ kind: "doBench", data: inputCount });
+        worker?.postMessage({ kind: "doBench", data: inputCount });
       }}
     >
       run
