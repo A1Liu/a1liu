@@ -3,7 +3,8 @@ import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/game-2d-simple.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
 import { set } from "idb-keyval";
-import { handleInput, findCanvas, InputMessage } from "@lib/ts/gamescreen";
+import { handleInput, findCanvas } from "@lib/ts/gamescreen";
+import type { InputMessage } from "./+page.svelte";
 
 const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
@@ -12,11 +13,11 @@ export type OutMessage =
   | { kind: "initDone"; data?: void }
   | { kind: string; data: any };
 
-interface GlContext {}
+let glCtx: CanvasRenderingContext2D | null = null;
 
-let glCtx = null;
-
-const initGl = async (canvas: any): Promise<GlContext | null> => {
+const initGl = async (
+  canvas: any
+): Promise<CanvasRenderingContext2D | null> => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
@@ -40,7 +41,7 @@ const main = async (wasmRef: WasmRef) => {
   while (true) {
     const captured = await ctx.msgWait();
 
-    const seen = {};
+    const seen: Record<string, true> = {};
     captured.forEach((msg) => {
       switch (msg.kind) {
         case "uploadLevel": {
@@ -82,6 +83,7 @@ const init = async () => {
       },
 
       clearScreen: () => {
+        if (!glCtx) return;
         glCtx.clearRect(0, 0, glCtx.canvas.width, glCtx.canvas.height);
       },
 
@@ -91,22 +93,26 @@ const init = async () => {
       },
 
       setFont: (fontId: number) => {
+        if (!glCtx) return;
         const font = wasmRef.readObj(fontId);
         glCtx.font = font;
       },
 
       fillText: (textId: number, x: number, y: number) => {
+        if (!glCtx) return;
         const text = wasmRef.readObj(textId);
         glCtx.fillText(text, x, y);
       },
 
       strokeStyle: (rF: number, gF: number, bF: number, a: number) => {
+        if (!glCtx) return;
         glCtx.globalAlpha = a;
         const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
 
         glCtx.strokeStyle = `rgba(${r},${g},${b})`;
       },
       fillStyle: (rF: number, gF: number, bF: number, a: number) => {
+        if (!glCtx) return;
         glCtx.globalAlpha = a;
         const [r, g, b] = [rF, gF, bF].map((f) => Math.floor(255 * f));
 
@@ -114,9 +120,11 @@ const init = async () => {
       },
 
       strokeRect: (x: number, y: number, width: number, height: number) => {
+        if (!glCtx) return;
         glCtx.strokeRect(x, y, width, height);
       },
       fillRect: (x: number, y: number, width: number, height: number) => {
+        if (!glCtx) return;
         glCtx.fillRect(x, y, width, height);
       },
     }),

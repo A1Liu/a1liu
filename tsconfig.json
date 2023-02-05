@@ -11,10 +11,15 @@
     "sourceMap": true,
     "strict": true,
     "paths": {
-      "@lib/**/*": ["./src/**/*"],
+      "@lib/*": ["./src/*"],
       "@zig/*": ["./.zig/zig-out/*"],
       "$lib":["./src"],
       "$lib/*":["./src/*"]
     }
-  }
+  },
+  "exclude": [
+    "./config",
+    "./static",
+    "./node_modules"
+  ]
 }

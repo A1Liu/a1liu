@@ -76,7 +76,7 @@ export async function get(urlString: string, query: any): Promise<any> {
 
 export class WorkerCtx<T> {
   private messages: T[] = [];
-  private resolve?: (t: T) => void;
+  private resolve?: (t: T[]) => void;
 
   onmessageCallback(): (event: MessageEvent<T>) => void {
     return (event) => this.push(event.data);

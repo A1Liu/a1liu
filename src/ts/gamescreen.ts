@@ -1,11 +1,11 @@
-import * as wasm from "@lib/ts/wasm";
-import { WorkerCtx } from "@lib/ts/util";
+import type { WasmRef } from "@lib/ts/wasm";
+import type { WorkerCtx } from "@lib/ts/util";
 
 export type Number2 = [number, number];
 
 export interface Message {
   kind: string;
-  data: any;
+  data?: any;
 }
 
 export type InputMessage =
@@ -71,7 +71,7 @@ export const KeyId: Record<string, number> = {
   ArrowRight: 131,
 };
 
-const resize = (wasmRef: wasm.Ref, ctx: any, width: number, height: number) => {
+const resize = (wasmRef: WasmRef, ctx: any, width: number, height: number) => {
   if (!ctx || !ctx.canvas) return;
 
   // Check if the canvas is not the same size.
@@ -92,7 +92,7 @@ const resize = (wasmRef: wasm.Ref, ctx: any, width: number, height: number) => {
 };
 
 export const handleInput = (
-  wasmRef: wasm.Ref,
+  wasmRef: WasmRef,
   ctx: any,
   msg: Message
 ): boolean => {
@@ -144,13 +144,15 @@ export const handleInput = (
   return true;
 };
 
-interface FindCanvasResult {
+interface FindCanvasResult<T> {
   canvas: any;
-  remainder: Message[];
+  remainder: T[];
 }
 
-export const findCanvas = async (ctx: WorkerCtx): Promise<FindCanvasResult> => {
-  const result: FindCanvasResult = { canvas: null, remainder: [] };
+export async function findCanvas<T extends Message>(
+  ctx: WorkerCtx<T>
+): Promise<FindCanvasResult<T>> {
+  const result: FindCanvasResult<T> = { canvas: null, remainder: [] };
   while (true) {
     const messages = await ctx.msgWait();
     messages.forEach((msg) => {
@@ -169,4 +171,4 @@ export const findCanvas = async (ctx: WorkerCtx): Promise<FindCanvasResult> => {
       return result;
     }
   }
-};
+}

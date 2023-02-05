@@ -1,29 +1,36 @@
+<script lang="ts" context="module">
+  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+  export type InputMessage =
+    | BaseMessage
+    | { kind: "setColor"; data: [number, number, number] }
+    | { kind: "toggleTool"; data?: undefined };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
   import Screen from "@lib/svelte/sidebar_gamescreen.svelte";
   import Toast, { addToast, postToast } from "@lib/svelte/errors.svelte";
   import { githubIssueLink } from "@lib/ts/util";
+  import type { OutMessage } from "./worker";
 
   type String3 = [string, string, string];
 
-  // <input type="color">
-
-  let worker = undefined;
-  let canvas = undefined;
-  let palette = undefined;
+  let worker: Worker | undefined = undefined;
+  let canvas: HTMLCanvasElement | null = null;
+  let palette: HTMLDivElement | null = null;
 
   let color = [0.5, 0.5, 0.5];
   let colorNullable = [0.5, 0.5, 0.5];
 
   let tool: string = "triangle";
 
-  let mediaRecorder = null;
+  let mediaRecorder: MediaRecorder | null = null;
   let recordingUrl: string | null = null;
 
   const urlString = githubIssueLink({ title: "Painter: Bug Report" });
 
-  const recordButtonHandler = (evt) => {
+  const recordButtonHandler = (evt: Event) => {
     if (navigator.userAgent.indexOf("Firefox") != -1) {
       addToast(
         "warn",
@@ -31,6 +38,10 @@
         "Recording on Firefox isn't supported right now"
       );
 
+      return;
+    }
+
+    if (!canvas || !palette) {
       return;
     }
 
@@ -42,7 +53,7 @@
 
     const stream = canvas.captureStream(24);
     mediaRecorder = new MediaRecorder(stream);
-    const recordedChunks = [];
+    const recordedChunks: Blob[] = [];
 
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) recordedChunks.push(e.data);
@@ -63,7 +74,7 @@
   $: {
     const [r, g, b] = color;
     const colorStyle = `rgb(${r * 255}, ${g * 255}, ${b * 255})`;
-    if (palette) {
+    if (palette && worker) {
       palette.style.backgroundColor = colorStyle;
       worker.postMessage({ kind: "setColor", data: [r, g, b] });
     }
@@ -77,9 +88,10 @@
   }
 
   onMount(() => {
-    worker = new MyWorker();
+    const w = new MyWorker();
+    worker = w;
 
-    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
+    w.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
         case "setTool":
@@ -92,9 +104,9 @@
           break;
 
         case "initDone":
-          const width = canvas.clientWidth;
-          const height = canvas.clientHeight;
-          worker.postMessage({ kind: "resize", data: [width, height] });
+          const width = canvas?.clientWidth;
+          const height = canvas?.clientHeight;
+          w.postMessage({ kind: "resize", data: [width, height] });
           break;
 
         default:
@@ -114,7 +126,7 @@
 
       <button
         class="muiButton"
-        on:click={() => worker.postMessage({ kind: "toggleTool" })}
+        on:click={() => worker?.postMessage({ kind: "toggleTool" })}
       >
         {tool}
       </button>
@@ -160,7 +172,7 @@
             class="muiButton"
             on:click={() => {
               const a = document.createElement("a");
-              a.href = recordingUrl;
+              a.href = recordingUrl ?? "";
               a.download = "recording.webm";
               a.click();
             }}

@@ -1,3 +1,15 @@
+<script lang="ts" context="module">
+  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+
+  export type InputMessage =
+    | BaseMessage
+    | {
+        kind: "equationChange";
+        data: any;
+      }
+    | { kind: "variableChange"; data: any };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";

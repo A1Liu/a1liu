@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { KeyId } from "@lib/ts/gamescreen";
 
-  export let worker;
+  export let worker: Worker | undefined;
   export let canvas: any = undefined;
 
   const listener = (evt: any) => {

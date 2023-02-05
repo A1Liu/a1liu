@@ -1,3 +1,12 @@
+<script lang="ts" context="module">
+  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+  export type InputMessage =
+    | BaseMessage
+    | { kind: "uploadLevel"; data: any }
+    | { kind: "levelDownload"; data: any }
+    | { kind: "saveLevel"; data: any };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import Screen from "@lib/svelte/gamescreen.svelte";
@@ -7,13 +16,11 @@
   import { get } from "idb-keyval";
   import type { OutMessage } from "./worker";
 
-  let worker = undefined;
-  let fileInput = undefined;
+  const worker = new MyWorker();
+  let fileInput: HTMLInputElement | undefined = undefined;
   let defaultLevel = "";
 
   onMount(() => {
-    worker = new MyWorker();
-
     const req = fetch(levelUrl).then((r) => r.text());
     const levelText = get("level")
       .then((text) => text ?? req)
@@ -54,6 +61,21 @@
       }
     };
   });
+
+  const fileUpload = async (evt: Event) => {
+    const target: HTMLInputElement = evt.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file || !worker) {
+      return;
+    }
+
+    // clear the current file so that the next submission will also
+    // trigger onchange
+    target.value = '';
+
+    const data = await file.text();
+    worker.postMessage({ kind: "uploadLevel", data });
+  };
 </script>
 
 <Toast location={"top-right"} />
@@ -65,18 +87,7 @@
         bind:this={fileInput}
         class="fileInput"
         type="file"
-        on:change={(evt) => {
-          const file = evt.target.files[0];
-          if (!file) return;
-
-          // clear the current file so that the next submission will also
-          // trigger onchange
-          evt.target.value = null;
-
-          file.text().then((data) => {
-            worker.postMessage({ kind: "uploadLevel", data });
-          });
-        }}
+        on:change={fileUpload}
       />
 
       <button
@@ -97,9 +108,7 @@
 
       <button
         class="muiButton"
-        on:click={() => {
-          fileInput.click();
-        }}
+        on:click={() => fileInput?.click()}
       >
         Open
       </button>

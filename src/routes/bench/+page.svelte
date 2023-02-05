@@ -1,26 +1,35 @@
+<script lang="ts" context="module">
+  export type Message = { kind: string; data: any };
+</script>
+
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { onMount } from "svelte";
   import { fmtTime } from "@lib/ts/util";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
+  import type { OutMessage } from "./worker";
 
   // import Kilordle from "../kilordle/index.svelte";
 
-  let worker = undefined;
+  interface BenchEntry {
+    id: number;
+    count: number;
+    duration: number;
+  }
+
+  const worker = new MyWorker();
 
   let inputCount = 1000;
   let benchId = 0;
-  let benchHistory = [];
+  let benchHistory: BenchEntry[] = [];
 
-  let count = null;
+  let count: number | null = null;
   let done = 0;
-  let start = null;
-  let end = null;
+  let start: number | null = null;
+  let end: number | null = null;
 
   onMount(() => {
-    worker = new MyWorker();
-
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
@@ -41,6 +50,11 @@
         }
 
         case "benchDone": {
+          if (start === null || count === null) {
+            // TODO: warn here, this should never happen
+            return;
+          }
+
           const newItem = {
             id: benchId,
             count,
@@ -86,9 +100,9 @@
     <div class="col" style="padding-left: 32px">
       {#if start === null}
         <p>Click the run button to benchmark</p>
-      {:else if end === null}
+      {:else if end === null && count !== null}
         <p>Running... {((done / count) * 100).toFixed(2)}%</p>
-      {:else}
+      {:else if end !== null}
         <p>Duration: {fmtTime(end - start)}</p>
       {/if}
     </div>

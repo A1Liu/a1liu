@@ -2,6 +2,9 @@ import { WorkerCtx } from "@lib/ts/util";
 import type { WasmRef } from "@lib/ts/wasm";
 import { initWasm } from "@lib/ts/wasm";
 import wasmUrl from "@zig/bench.wasm?url";
+import type { Message } from "./+page.svelte";
+
+export type OutMessage = { kind: string; data: any };
 
 const ctx = new WorkerCtx<Message>();
 onmessage = ctx.onmessageCallback();

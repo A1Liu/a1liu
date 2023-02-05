@@ -1,8 +1,8 @@
 import { initWasm } from "@lib/ts/wasm";
 import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/algebra.wasm?url";
-import { WorkerCtx, timeout } from "@lib/ts/util";
-import type { InputMessage } from "@lib/ts/gamescreen";
+import { WorkerCtx } from "@lib/ts/util";
+import type { InputMessage } from "./+page.svelte";
 
 const ctx = new WorkerCtx<InputMessage>();
 onmessage = ctx.onmessageCallback();
