@@ -97,12 +97,16 @@
     <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
   {/if}
 
+  <!--
+    The on:keydown is for A11y; I don't understand what it's for right now,
+    but hopefully I'll understand soon enough.
+                                  - Albert Liu, Feb 04, 2023 Sat 23:48
+    -->
   <div
     class="expr"
     class:implicit={info.implicit}
+    on:keydown={(e) => e.preventDefault()}
     on:click={(evt) => {
-      evt.preventDefault();
-
       if (evt.shiftKey) {
         globalCtx.select(id);
       } else {

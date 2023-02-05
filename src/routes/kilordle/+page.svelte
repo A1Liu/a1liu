@@ -256,7 +256,7 @@
 </div>
 
 <style lang="postcss">
-  @import "@lib/svelte/util.module.css";
+  @import "@lib/svelte/button.module.css";
 
   .wrapper {
     height: 100%;

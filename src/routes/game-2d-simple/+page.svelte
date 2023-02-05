@@ -108,7 +108,7 @@
 </Screen>
 
 <style lang="postcss">
-  @import "@lib/svelte/util.module.css";
+  @import "@lib/svelte/button.module.css";
 
   .fileInput {
     display: none;
