@@ -18,21 +18,15 @@
     worker.postMessage({ kind: "resize", data: [width, height] });
   };
 
-  $: workerRef = worker.ref;
-
-  $: {
-    if (workerRef && canvas) {
-      listener(null);
-
-      const offscreen = canvas.transferControlToOffscreen();
-      workerRef.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
-    }
-  }
-
   onMount(() => {
     overlay.focus();
 
+    listener(null);
+    const offscreen = canvas!.transferControlToOffscreen();
+    worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
+
     window.addEventListener("resize", listener);
+
     return () => window.removeEventListener("resize", listener);
   });
 
@@ -81,7 +75,6 @@
     if (evt.target !== overlay) return;
 
     const data = KeyId[evt.code] ?? 0;
-    console.log("keydown", data);
     worker.postMessage({ kind: "keydown", data });
   }}
   on:keyup={(evt) => {
