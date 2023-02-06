@@ -1,30 +1,36 @@
+<script lang="ts" context="module">
+  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+  export type InputMessage =
+    | BaseMessage
+    | { kind: "setColor"; data: [number, number, number] }
+    | { kind: "toggleTool"; data?: undefined };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
   import Screen from "@lib/svelte/sidebar_gamescreen.svelte";
   import Toast, { addToast, postToast } from "@lib/svelte/errors.svelte";
   import { githubIssueLink } from "@lib/ts/util";
-  import * as GL from "@lib/ts/webgl";
+  import type { OutMessage } from "./worker";
 
   type String3 = [string, string, string];
 
-  // <input type="color">
-
-  let worker = undefined;
-  let canvas = undefined;
-  let palette = undefined;
+  let worker: Worker = undefined as any;
+  let canvas: HTMLCanvasElement | undefined = undefined;
+  let palette: HTMLDivElement | undefined = undefined;
 
   let color = [0.5, 0.5, 0.5];
   let colorNullable = [0.5, 0.5, 0.5];
 
   let tool: string = "triangle";
 
-  let mediaRecorder = null;
+  let mediaRecorder: MediaRecorder | null = null;
   let recordingUrl: string | null = null;
 
   const urlString = githubIssueLink({ title: "Painter: Bug Report" });
 
-  const recordButtonHandler = (evt) => {
+  const recordButtonHandler = (evt: Event) => {
     if (navigator.userAgent.indexOf("Firefox") != -1) {
       addToast(
         "warn",
@@ -32,6 +38,10 @@
         "Recording on Firefox isn't supported right now"
       );
 
+      return;
+    }
+
+    if (!canvas || !palette) {
       return;
     }
 
@@ -43,7 +53,7 @@
 
     const stream = canvas.captureStream(24);
     mediaRecorder = new MediaRecorder(stream);
-    const recordedChunks = [];
+    const recordedChunks: Blob[] = [];
 
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) recordedChunks.push(e.data);
@@ -79,7 +89,6 @@
 
   onMount(() => {
     worker = new MyWorker();
-
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
@@ -93,8 +102,8 @@
           break;
 
         case "initDone":
-          const width = canvas.clientWidth;
-          const height = canvas.clientHeight;
+          const width = canvas?.clientWidth;
+          const height = canvas?.clientHeight;
           worker.postMessage({ kind: "resize", data: [width, height] });
           break;
 
@@ -115,7 +124,7 @@
 
       <button
         class="muiButton"
-        on:click={() => worker.postMessage({ kind: "toggleTool" })}
+        on:click={() => worker?.postMessage({ kind: "toggleTool" })}
       >
         {tool}
       </button>
@@ -161,7 +170,7 @@
             class="muiButton"
             on:click={() => {
               const a = document.createElement("a");
-              a.href = recordingUrl;
+              a.href = recordingUrl ?? "";
               a.download = "recording.webm";
               a.click();
             }}
@@ -185,7 +194,7 @@
 </Screen>
 
 <style lang="postcss">
-  @import "@lib/svelte/util.module.css";
+  @import "@lib/svelte/button.module.css";
 
   .configBox {
     height: 100%;

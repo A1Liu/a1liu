@@ -22,7 +22,7 @@ const initialObjectBuffer: any[] = [
 // These could be more advanced but, meh
 type WasmFunc = (...data: any[]) => any;
 
-export interface Ref {
+export interface WasmRef {
   readonly memory: WebAssembly.Memory;
   readonly abi: { readonly [x: string]: WasmFunc };
 
@@ -34,7 +34,7 @@ export interface Ref {
 
 interface Imports {
   readonly postMessage: (kind: string, data: any) => void;
-  readonly raw?: (ref: Ref) => { readonly [x: string]: WasmFunc };
+  readonly raw?: (ref: WasmRef) => { readonly [x: string]: WasmFunc };
 }
 
 export const fetchAsset = async (path: string): Promise<Uint8Array> => {
@@ -64,12 +64,10 @@ function debugLoop(
   loop();
 }
 
-export const fetchWasm = async (
-  path: string,
+export const initWasm = async (
+  wasmData: Promise<Response>,
   importData: Imports
-): Promise<Ref> => {
-  const resp = fetch(path);
-
+): Promise<WasmRef> => {
   const { postMessage, raw } = importData;
 
   const objectBuffer: any[] = [...initialObjectBuffer]; // output data
@@ -104,7 +102,7 @@ export const fetchWasm = async (
     }
   };
 
-  const ref: Ref = {
+  const ref: WasmRef = {
     memory: {} as any,
     abi: {} as any,
     readObj,
@@ -120,7 +118,7 @@ export const fetchWasm = async (
     },
 
     awaitHook: (id: number, out: number, ptr: number) => {
-      readObj(id).then((result) => {
+      readObj(id).then((result: any) => {
         const outId = addObj(result, false);
         ref.abi.resumePromise(ptr, out, outId);
       });
@@ -209,7 +207,7 @@ export const fetchWasm = async (
     ...raw?.(ref),
   };
 
-  const result = await WebAssembly.instantiateStreaming(resp, { env });
+  const result = await WebAssembly.instantiateStreaming(wasmData, { env });
 
   const refAny = ref as any;
 

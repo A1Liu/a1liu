@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import { KeyId } from "@lib/ts/gamescreen";
 
-  export let worker;
-  export let canvas: any = undefined;
+  export let worker: Worker | undefined;
+  export let canvas:  HTMLCanvasElement | undefined = undefined;
 
   const listener = (evt: any) => {
     if (!worker || !canvas) return;
@@ -23,7 +23,7 @@
   }
 
   onMount(() => {
-    canvas.focus();
+    canvas?.focus();
 
     window.addEventListener("resize", listener);
     return () => window.removeEventListener("resize", listener);

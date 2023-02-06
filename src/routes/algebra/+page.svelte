@@ -1,21 +1,28 @@
+<script lang="ts" context="module">
+  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+
+  export type InputMessage =
+    | BaseMessage
+    | { kind: "equationChange"; data: any }
+    | { kind: "variableUpdate"; data: any };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
-  import { get } from "idb-keyval";
-  import * as wasm from "@lib/ts/wasm";
-  import Expr, { tree, globalCtx } from "@lib/svelte/algebra/expression.svelte";
+  import Expr, { tree, globalCtx } from "./expression.svelte";
+  import type { OutMessage } from "./worker";
 
   let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
   // let equation = "1x";
-  let worker = undefined;
-  let root = undefined;
+  let worker: Worker | undefined = undefined;
+  let root: number | undefined = undefined;
 
   $: worker?.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
     worker = new MyWorker();
-
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {
@@ -52,6 +59,17 @@
       }
     };
   });
+
+  const handleInput = (name: string, evt : Event) => {
+    const target=  evt.target as HTMLInputElement;
+    const value = Number.parseFloat(target.value);
+
+    if (!isNaN(value)) {
+      globalCtx.updateVariable(name, value);
+      const data = { name, value };
+      worker?.postMessage({ kind: "variableUpdate", data });
+    }
+  }
 </script>
 
 <Toast location={"bottom-left"} />
@@ -68,11 +86,13 @@
 
     {#if $globalCtx.selected.size === 1}
       <div>
-        Selected Value: {tree.get([...$globalCtx.selected.keys()][0]).evalValue}
+        Selected Value: {tree.get([...$globalCtx.selected.keys()][0])?.evalValue}
       </div>
     {/if}
 
+    {#if root !== undefined}
     <div>Expression Value: {tree.get(root)?.evalValue}</div>
+      {/if}
 
     <button
       class="muiButton"
@@ -87,15 +107,7 @@
         <input
           type="number"
           value={$globalCtx.variables.get(name)}
-          on:input={(evt) => {
-            const value = Number.parseFloat(evt.target.value);
-
-            if (!isNaN(value)) {
-              globalCtx.updateVariable(name, value);
-              const data = { name, value };
-              worker?.postMessage({ kind: "variableUpdate", data });
-            }
-          }}
+          on:input={(evt) => handleInput(name, evt)}
         />
       </div>
     {/each}
@@ -103,7 +115,7 @@
 </div>
 
 <style lang="postcss">
-  @import "@lib/svelte/util.module.css";
+  @import "@lib/svelte/button.module.css";
 
   .exprArea {
     display: flex;

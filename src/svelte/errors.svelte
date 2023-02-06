@@ -8,8 +8,13 @@
     text: string;
   }
 
+  type ToastStoreData = {
+    toasts: ToastData[];
+    toastId: number;
+  };
+
   // Use Map here, which iterates in insertion order
-  const store = writable({ toasts: [], toastId: 0 });
+  const store = writable<ToastStoreData>({ toasts: [], toastId: 0 });
 
   type ToastColor =
     | "red"
@@ -53,7 +58,7 @@
   ) {
     const color = ColorMap[kind];
     const newToasts = toasts.map((text) => ({ color, text }));
-    store.update((state) => {
+    store.update((state: ToastStoreData) => {
       const toasts = [...state.toasts, ...newToasts];
 
       return { toasts, toastId: state.toastId };

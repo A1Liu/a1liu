@@ -1,40 +1,21 @@
 import adapter from "@sveltejs/adapter-static";
-import path from "path";
 import preprocess from "svelte-preprocess";
+import {vitePreprocess} from "@sveltejs/kit/vite";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   // Consult https://github.com/sveltejs/svelte-preprocess
   // for more information about preprocessors
-  preprocess: preprocess({ postcss: true }),
+  preprocess: vitePreprocess({}),
 
   kit: {
     adapter: adapter({
       pages: ".out",
       assets: ".out",
     }),
-    trailingSlash: "always",
-    prerender: {
-      default: true,
-    },
     files: {
       assets: "./static",
       lib: "./src",
-      serviceWorker: "./src/svelte/service-worker.ts"
-    },
-
-    vite: {
-      server: {
-        fs: {
-          allow: ["./.zig/zig-out"]
-        },
-      },
-      resolve: {
-        alias: {
-          "@lib": path.resolve("./src"),
-          "@zig": path.resolve("./.zig/zig-out"),
-        },
-      },
     },
   },
 };

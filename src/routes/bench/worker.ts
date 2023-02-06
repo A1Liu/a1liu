@@ -1,11 +1,15 @@
 import { WorkerCtx } from "@lib/ts/util";
-import * as wasm from "@lib/ts/wasm";
+import type { WasmRef } from "@lib/ts/wasm";
+import { initWasm } from "@lib/ts/wasm";
 import wasmUrl from "@zig/bench.wasm?url";
+import type { Message } from "./+page.svelte";
+
+export type OutMessage = { kind: string; data: any };
 
 const ctx = new WorkerCtx<Message>();
 onmessage = ctx.onmessageCallback();
 
-const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
+const handleMessage = (wasmRef: WasmRef, msg: Message) => {
   switch (msg.kind) {
     case "doBench": {
       postMessage({ kind: "benchStarted", data: performance.now() });
@@ -29,9 +33,9 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
 };
 
 const main = async () => {
-  const wasmRef = await wasm.fetchWasm(wasmUrl, {
+  const wasmRef = await initWasm(fetch(wasmUrl), {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: (wasmRef: wasm.Ref) => ({}),
+    raw: (wasmRef: WasmRef) => ({}),
   });
 
   wasmRef.abi.init();

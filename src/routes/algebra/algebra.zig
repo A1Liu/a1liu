@@ -66,9 +66,6 @@ export fn variableUpdate(variable_name: wasm.Obj, new_value: f64) void {
 }
 
 fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
-    const temp_mark = liu.TempMark;
-    defer liu.TempMark = temp_mark;
-
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
@@ -77,14 +74,14 @@ fn variableUpdateImpl(variable_name: wasm.Obj, new_value: f64) !void {
 }
 
 fn equationChangeImpl(equation_obj: wasm.Obj) !void {
-    const temp_mark = liu.TempMark;
-    defer liu.TempMark = temp_mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 
     {
-        var new_equation: []const u8 = try wasm.in.string(equation_obj, liu.Temp);
+        var new_equation: []const u8 = try wasm.in.string(equation_obj, temp.alloc);
         new_equation = std.mem.trim(u8, new_equation, " \t\n");
 
         if (std.mem.eql(u8, equation.items, new_equation)) {
@@ -102,9 +99,6 @@ fn equationChangeImpl(equation_obj: wasm.Obj) !void {
 }
 
 fn rebuildEquationTree() !void {
-    const temp_mark = liu.TempMark;
-    defer liu.TempMark = temp_mark;
-
     const wasm_mark = wasm.watermark();
     defer wasm.setWatermark(wasm_mark);
 

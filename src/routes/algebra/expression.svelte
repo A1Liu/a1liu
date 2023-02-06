@@ -1,7 +1,17 @@
 <script lang="ts" context="module">
   import { writable } from "svelte/store";
 
-  export const tree = new Map();
+  type ExprInfo = {
+    kind: string;
+    paren: boolean;
+    implicit?: boolean;
+    left?: number;
+    right?: number;
+    value: string;
+    evalValue?: number;
+  };
+
+  export const tree = new Map<number, ExprInfo>();
 
   const ShouldPrintValue: Record<string, true> = {
     integer: true,
@@ -66,7 +76,7 @@
   import { onMount } from "svelte";
 
   export let selectedMessage = false;
-  export let id;
+  export let id : number;
 
   let selected = false;
   let childSelected = false;
@@ -82,6 +92,7 @@
   $: info = tree.get(id);
 </script>
 
+{#if info}
 <span
   class:selected={selected || childSelected}
   class:clickSelected={selected}
@@ -97,12 +108,16 @@
     <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
   {/if}
 
+  <!--
+    The on:keydown is for A11y; I don't understand what it's for right now,
+    but hopefully I'll understand soon enough.
+                                  - Albert Liu, Feb 04, 2023 Sat 23:48
+    -->
   <div
     class="expr"
     class:implicit={info.implicit}
+    on:keydown={(e) => e.preventDefault()}
     on:click={(evt) => {
-      evt.preventDefault();
-
       if (evt.shiftKey) {
         globalCtx.select(id);
       } else {
@@ -125,6 +140,7 @@
     )
   {/if}
 </span>
+  {/if}
 
 <style lang="postcss">
   span {

@@ -395,10 +395,10 @@ pub fn evalTree(id: liu.ecs.EntityId) f64 {
 }
 
 pub fn updateVariable(variable_name: wasm.Obj, new_value: f64) !void {
-    const temp_mark = liu.TempMark;
-    defer liu.TempMark = temp_mark;
+    const temp = liu.Temp();
+    defer temp.deinit();
 
-    const name = try wasm.in.string(variable_name, liu.Temp);
+    const name = try wasm.in.string(variable_name, temp.alloc);
 
     for (variables.items) |*var_info| {
         if (!std.mem.eql(u8, var_info.name, name)) continue;

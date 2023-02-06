@@ -1,3 +1,12 @@
+<script lang="ts" context="module">
+  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+  export type InputMessage =
+    | BaseMessage
+    | { kind: "uploadLevel"; data: any }
+    | { kind: "levelDownload"; data: any }
+    | { kind: "saveLevel"; data: any };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import Screen from "@lib/svelte/gamescreen.svelte";
@@ -5,21 +14,21 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import levelUrl from "./levels/simple.txt?url";
   import { get } from "idb-keyval";
-  import * as wasm from "@lib/ts/wasm";
+  import type { OutMessage } from "./worker";
 
-  let worker = undefined;
-  let fileInput = undefined;
+  let worker : Worker = undefined as any;
+  let fileInput: HTMLInputElement | undefined = undefined;
   let defaultLevel = "";
 
   onMount(() => {
-    worker = new MyWorker();
-
     const req = fetch(levelUrl).then((r) => r.text());
     const levelText = get("level")
       .then((text) => text ?? req)
       .catch(() => {});
 
     req.then((t) => (defaultLevel = t));
+
+    worker = new MyWorker();
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
@@ -54,6 +63,21 @@
       }
     };
   });
+
+  const fileUpload = async (evt: Event) => {
+    const target: HTMLInputElement = evt.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file || !worker) {
+      return;
+    }
+
+    // clear the current file so that the next submission will also
+    // trigger onchange
+    target.value = "";
+
+    const data = await file.text();
+    worker.postMessage({ kind: "uploadLevel", data });
+  };
 </script>
 
 <Toast location={"top-right"} />
@@ -65,18 +89,7 @@
         bind:this={fileInput}
         class="fileInput"
         type="file"
-        on:change={(evt) => {
-          const file = evt.target.files[0];
-          if (!file) return;
-
-          // clear the current file so that the next submission will also
-          // trigger onchange
-          evt.target.value = null;
-
-          file.text().then((data) => {
-            worker.postMessage({ kind: "uploadLevel", data });
-          });
-        }}
+        on:change={fileUpload}
       />
 
       <button
@@ -95,12 +108,7 @@
         Save
       </button>
 
-      <button
-        class="muiButton"
-        on:click={() => {
-          fileInput.click();
-        }}
-      >
+      <button class="muiButton" on:click={() => fileInput?.click()}>
         Open
       </button>
     </div>
@@ -108,7 +116,7 @@
 </Screen>
 
 <style lang="postcss">
-  @import "@lib/svelte/util.module.css";
+  @import "@lib/svelte/button.module.css";
 
   .fileInput {
     display: none;

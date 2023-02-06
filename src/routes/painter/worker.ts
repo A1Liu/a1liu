@@ -1,20 +1,17 @@
 import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
-import { handleInput, InputMessage, findCanvas } from "@lib/ts/gamescreen";
+import type { InputMessage as Message } from "./+page.svelte";
+import { handleInput, findCanvas } from "@lib/ts/gamescreen";
 import fragShaderUrl from "./shader.frag?url";
 import vertShaderUrl from "./shader.vert?url";
-import * as wasm from "@lib/ts/wasm";
+import type { WasmRef } from "@lib/ts/wasm";
+import { initWasm } from "@lib/ts/wasm";
 import wasmUrl from "@zig/painter.wasm?url";
 
 export type Number2 = [number, number];
 export type Number3 = [number, number, number];
 export type Number4 = [number, number, number, number];
-
-export type Message =
-  | { kind: "toggleTool" }
-  | { kind: "setColor"; data: Number3 }
-  | InputMessage;
 
 const ctx = new WorkerCtx<Message>();
 onmessage = ctx.onmessageCallback();
@@ -186,7 +183,7 @@ const updateState = (
   }
 };
 
-const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
+const handleMessage = (wasmRef: WasmRef, msg: Message) => {
   if (handleInput(wasmRef, gglRef.current?.ctx, msg)) return;
 
   switch (msg.kind) {
@@ -208,7 +205,7 @@ const handleMessage = (wasmRef: wasm.Ref, msg: Message) => {
   }
 };
 
-const main = async (wasmRef: wasm.Ref) => {
+const main = async (wasmRef: WasmRef) => {
   requestAnimationFrame(render);
 
   while (true) {
@@ -219,9 +216,9 @@ const main = async (wasmRef: wasm.Ref) => {
 };
 
 const init = async () => {
-  const wasmRef = await wasm.fetchWasm(wasmUrl, {
+  const wasmRef = await initWasm(fetch(wasmUrl), {
     postMessage: (kind: string, data: any) => postMessage({ kind, data }),
-    raw: (wasmRef: wasm.Ref) => ({
+    raw: (wasmRef: WasmRef) => ({
       readPixel: (x: number, y: number): number => {
         const pixel = readPixel(x, y);
         return wasmRef.addObj(pixel);
@@ -239,7 +236,7 @@ const init = async () => {
 
   wasmRef.abi.init();
 
-  const result = await findCanvas(ctx);
+  const result = await findCanvas<Message>(ctx);
   const ggl = await initGl(result.canvas);
 
   if (!ggl) {

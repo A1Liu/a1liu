@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import { KeyId } from "@lib/ts/gamescreen";
 
-  export let worker;
-  export let canvas: any = undefined;
+  export let worker: Worker | undefined;
+  export let canvas: HTMLCanvasElement | undefined = undefined;
   let overlay: any = undefined;
 
   const listener = (evt: any) => {
@@ -91,7 +91,6 @@
   <div
     bind:this={overlay}
     class="overlay"
-    tabindex="0"
     on:mousedown={(evt) => evt.preventDefault()}
   >
     <slot name="overlay" />
