@@ -149,8 +149,8 @@ interface FindCanvasResult<T> {
   remainder: T[];
 }
 
-export async function findCanvas<T extends Message>(
-  ctx: WorkerCtx<T>
+export async function findCanvas<T extends Message, O extends Message>(
+  ctx: WorkerCtx<T, O>
 ): Promise<FindCanvasResult<T>> {
   const result: FindCanvasResult<T> = { canvas: null, remainder: [] };
   while (true) {

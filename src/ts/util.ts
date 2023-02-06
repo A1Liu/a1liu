@@ -74,15 +74,17 @@ export async function get(urlString: string, query: any): Promise<any> {
   return resp.json();
 }
 
-export class WorkerCtx<T> {
-  private messages: T[] = [];
-  private resolve?: (t: T[]) => void;
+export class WorkerCtx<In, Out> {
+  private messages: In[] = [];
+  private resolve?: (t: In[]) => void;
 
-  onmessageCallback(): (event: MessageEvent<T>) => void {
+  constructor(private readonly workerPostMessage: typeof postMessage) {}
+
+  onmessageCallback(): (event: MessageEvent<In>) => void {
     return (event) => this.push(event.data);
   }
 
-  push(t: T): void {
+  push(t: In): void {
     this.messages.push(t);
 
     if (this.resolve) {
@@ -91,8 +93,8 @@ export class WorkerCtx<T> {
     }
   }
 
-  async msgWait(): Promise<T[]> {
-    const p: Promise<T[]> = new Promise((r) => {
+  async msgWait(): Promise<In[]> {
+    const p: Promise<In[]> = new Promise((r) => {
       if (this.messages.length > 0) {
         return r(this.messages.splice(0, this.messages.length));
       }
@@ -101,5 +103,45 @@ export class WorkerCtx<T> {
     });
 
     return p;
+  }
+
+  postMessage(message: Out) {
+    // The "postMessage" function needs to be called as a bare function,
+    // and not as a member function, so e.g. this.workerPostMessage(message);
+    // would fail. This was tested on Microsoft Edge.
+    const workerPostMessage = this.workerPostMessage;
+    workerPostMessage(message);
+  }
+}
+
+export class WorkerRef<In, Out> {
+  private workerRef: Worker | undefined = undefined;
+  private readonly messages: { msg: In; deps?: Transferable[] }[] = [];
+
+  onmessage: (ev: MessageEvent<Out>) => void = () => {};
+
+  constructor() {}
+
+  get ref(): Worker | undefined {
+    return this.workerRef;
+  }
+
+  init(worker: Worker) {
+    worker.onmessage = (ev: MessageEvent<Out>) => this.onmessage(ev);
+
+    this.workerRef = worker;
+    this.messages
+      .splice(0, this.messages.length)
+      .forEach(({ msg, deps }) => this.postMessage(msg, deps));
+  }
+
+  postMessage(msg: In, deps?: Transferable[]) {
+    if (!this.workerRef) {
+      this.messages.push({ msg, deps });
+      return;
+    }
+
+    if (deps) this.workerRef.postMessage(msg, deps);
+    else this.workerRef.postMessage(msg);
   }
 }

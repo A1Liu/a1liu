@@ -1,15 +1,21 @@
+import "@lib/ts/worker-shim";
 import { initWasm } from "@lib/ts/wasm";
 import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/algebra.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
-import type { InputMessage } from "./+page.svelte";
+import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
 
-const ctx = new WorkerCtx<InputMessage>();
-onmessage = ctx.onmessageCallback();
+export type InputMessage =
+  | BaseMessage
+  | { kind: "equationChange"; data: any }
+  | { kind: "variableUpdate"; data: any };
 
 export type OutMessage =
   | { kind: "initDone"; data?: void }
   | { kind: string; data: any };
+
+const ctx = new WorkerCtx<InputMessage, OutMessage>(postMessage);
+onmessage = ctx.onmessageCallback();
 
 const main = async (wasmRef: WasmRef) => {
   while (true) {
@@ -31,7 +37,7 @@ const main = async (wasmRef: WasmRef) => {
         }
 
         default:
-          postMessage(msg);
+          ctx.postMessage(msg);
       }
 
       seen[msg.kind] = msg;
@@ -43,7 +49,7 @@ const graphStore = "graph-data";
 
 const init = async () => {
   const wasmPromise = initWasm(fetch(wasmUrl), {
-    postMessage: (kind: string, data: any) => postMessage({ kind, data }),
+    postMessage: (kind: string, data: any) => ctx.postMessage({ kind, data }),
     raw: (wasmRef: WasmRef) => ({
       // timeout: () => wasmRef.addObj(timeout(2000)),
       // fetch: (...a: number[]) => {
@@ -58,7 +64,7 @@ const init = async () => {
 
   wasmRef.abi.init();
 
-  postMessage({ kind: "initDone" });
+  ctx.postMessage({ kind: "initDone" });
 
   main(wasmRef);
 };

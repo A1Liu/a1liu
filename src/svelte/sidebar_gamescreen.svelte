@@ -1,33 +1,34 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { KeyId } from "@lib/ts/gamescreen";
+  import { KeyId, type InputMessage } from "@lib/ts/gamescreen";
+  import type { WorkerRef } from "@lib/ts/util";
 
-  export let worker: Worker | undefined;
-  export let canvas:  HTMLCanvasElement | undefined = undefined;
+  type T = $$Generic;
+  type O = $$Generic;
+
+  export let worker: WorkerRef<T | InputMessage, O>;
+  export let canvas: HTMLCanvasElement | undefined = undefined;
 
   const listener = (evt: any) => {
-    if (!worker || !canvas) return;
+    if (!canvas) return;
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     worker.postMessage({ kind: "resize", data: [width, height] });
   };
 
-  $: {
-    if (worker && canvas) {
-      listener(null);
-
-      const offscreen = canvas.transferControlToOffscreen();
-      worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
-    }
-  }
-
   onMount(() => {
-    canvas?.focus();
+    canvas!.focus();
 
+    const offscreen = canvas!.transferControlToOffscreen();
+    worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
+
+    listener(null);
     window.addEventListener("resize", listener);
     return () => window.removeEventListener("resize", listener);
   });
+
+  const n2 = (x: number, y: number): [number, number] => [x, y];
 </script>
 
 <div
@@ -38,21 +39,21 @@
 
     evt.preventDefault();
 
-    const data = [evt.deltaX, evt.deltaY];
+    const data = n2(evt.deltaX, evt.deltaY);
     worker.postMessage({ kind: "scroll", data });
   }}
   on:mousemove={(evt) => {
     if (!canvas || !worker) return;
     if (evt.target !== canvas) return;
 
-    const data = [evt.clientX, evt.clientY];
+    const data = n2(evt.clientX, evt.clientY);
     worker.postMessage({ kind: "mousemove", data });
   }}
   on:click={(evt) => {
     if (!canvas || !worker) return;
     if (evt.target !== canvas) return;
 
-    const data = [evt.clientX, evt.clientY];
+    const data = n2(evt.clientX, evt.clientY);
     worker.postMessage({ kind: "leftclick", data });
   }}
   on:contextmenu={(evt) => {
@@ -61,7 +62,7 @@
 
     evt.preventDefault();
 
-    const data = [evt.clientX, evt.clientY];
+    const data = n2(evt.clientX, evt.clientY);
     worker.postMessage({ kind: "rightclick", data });
   }}
   on:keydown={(evt) => {

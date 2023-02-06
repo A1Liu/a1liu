@@ -1,13 +1,20 @@
+import "@lib/ts/worker-shim";
 import { initWasm } from "@lib/ts/wasm";
 import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/game-2d-simple.wasm?url";
 import { WorkerCtx } from "@lib/ts/util";
 import { set } from "idb-keyval";
 import { handleInput, findCanvas } from "@lib/ts/gamescreen";
-import type { InputMessage } from "./+page.svelte";
 
-const ctx = new WorkerCtx<InputMessage>();
+const ctx = new WorkerCtx<InputMessage, OutMessage>(postMessage);
 onmessage = ctx.onmessageCallback();
+
+import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+export type InputMessage =
+  | BaseMessage
+  | { kind: "uploadLevel"; data: any }
+  | { kind: "levelDownload"; data: any }
+  | { kind: "saveLevel"; data: any };
 
 export type OutMessage =
   | { kind: "initDone"; data?: void }
@@ -74,7 +81,7 @@ const main = async (wasmRef: WasmRef) => {
 
 const init = async () => {
   const wasmRef = await initWasm(fetch(wasmUrl), {
-    postMessage: (kind: string, data: any) => postMessage({ kind, data }),
+    postMessage: (kind: string, data: any) => ctx.postMessage({ kind, data }),
     raw: (wasmRef: WasmRef) => ({
       pushMessage: (kindId: number, dataId: number) => {
         const kind = wasmRef.readObj(kindId);
@@ -136,12 +143,12 @@ const init = async () => {
   glCtx = await initGl(result.canvas);
 
   if (!glCtx) {
-    postMessage({ kind: "error", data: "WebGL2 not supported!" });
+    ctx.postMessage({ kind: "error", data: "WebGL2 not supported!" });
     return;
   }
 
-  postMessage({ kind: "log", data: "WebGL2 context initialized!" });
-  postMessage({ kind: "initDone" });
+  ctx.postMessage({ kind: "log", data: "WebGL2 context initialized!" });
+  ctx.postMessage({ kind: "initDone" });
 
   result.remainder.forEach((msg) => {
     handleInput(wasmRef, glCtx, msg);
