@@ -2,7 +2,7 @@
 // The `/_app/immutable/workers/` thing is very confusing, and I'm not sure exactly what should
 // be in the baseURI section but if this works then I guess this works.
 self.document = {
-    baseURI: location.origin + '/_app/immutable/workers/'
+  baseURI: location.origin + "/_app/immutable/workers/",
 } as any;
 
 export {};

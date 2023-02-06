@@ -75,7 +75,6 @@
     worker.postMessage({ kind: "rightclick", data });
   }}
   on:keydown={(evt) => {
-
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
     if (evt.ctrlKey || evt.metaKey) return;
 
@@ -83,7 +82,7 @@
     if (evt.target !== overlay) return;
 
     const data = KeyId[evt.code] ?? 0;
-    console.log('keydown', data);
+    console.log("keydown", data);
     worker.postMessage({ kind: "keydown", data });
   }}
   on:keyup={(evt) => {

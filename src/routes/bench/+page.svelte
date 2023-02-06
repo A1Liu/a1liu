@@ -1,7 +1,7 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { onMount } from "svelte";
-  import { fmtTime,  } from "@lib/ts/util";
+  import { fmtTime } from "@lib/ts/util";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import type { Message, OutMessage } from "./worker";
