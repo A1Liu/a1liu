@@ -74,15 +74,46 @@ export async function get(urlString: string, query: any): Promise<any> {
   return resp.json();
 }
 
-export class WorkerCtx<T> {
-  private messages: T[] = [];
-  private resolve?: (t: T[]) => void;
+export class WorkerRef<In, Out> {
+  private worker: Worker | undefined = undefined;
+  private readonly messages: { msg: In; deps?: Transferable[] }[] = [];
 
-  onmessageCallback(): (event: MessageEvent<T>) => void {
+  onmessage: (ev: MessageEvent<Out>) => void = () => {};
+
+  constructor(private readonly CreatorClass: { new (): Worker }) {}
+
+  init() {
+    const worker = new this.CreatorClass();
+    worker.onmessage = (ev: MessageEvent<Out>) => this.onmessage(ev);
+
+    this.worker = worker;
+    this.messages
+      .splice(0, this.messages.length)
+      .forEach(({ msg, deps }) => this.postMessage(msg, deps));
+  }
+
+  postMessage(msg: In, deps?: Transferable[]) {
+    if (!this.worker) {
+      this.messages.push({ msg, deps });
+      return;
+    }
+
+    if (deps) this.worker.postMessage(msg, deps);
+    else this.worker.postMessage(msg);
+  }
+}
+
+export class WorkerCtx<In, Out> {
+  private messages: In[] = [];
+  private resolve?: (t: In[]) => void;
+
+  constructor(private readonly workerPostMessage: typeof postMessage) {}
+
+  onmessageCallback(): (event: MessageEvent<In>) => void {
     return (event) => this.push(event.data);
   }
 
-  push(t: T): void {
+  push(t: In): void {
     this.messages.push(t);
 
     if (this.resolve) {
@@ -91,8 +122,8 @@ export class WorkerCtx<T> {
     }
   }
 
-  async msgWait(): Promise<T[]> {
-    const p: Promise<T[]> = new Promise((r) => {
+  async msgWait(): Promise<In[]> {
+    const p: Promise<In[]> = new Promise((r) => {
       if (this.messages.length > 0) {
         return r(this.messages.splice(0, this.messages.length));
       }
@@ -101,5 +132,9 @@ export class WorkerCtx<T> {
     });
 
     return p;
+  }
+
+  postMessage(message: Out) {
+    this.workerPostMessage(message);
   }
 }

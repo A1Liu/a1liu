@@ -11,6 +11,8 @@ const Builder = bld.Builder;
 const Mode = std.builtin.OptimizeMode;
 
 var mode: Mode = undefined;
+var liuMod: *std.build.Module = undefined;
+var assetsMod: *std.build.Module = undefined;
 
 const ProgData = struct {
     name: []const u8,
@@ -24,7 +26,8 @@ fn pathTool(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
         .optimize = mode,
     });
 
-    program.addPackagePath("liu", "src/liu/lib.zig");
+    program.addModule("liu", liuMod);
+    program.addModule("assets", assetsMod);
 
     program.setOutputDir("config/local/path");
 
@@ -43,8 +46,8 @@ fn wasmProgram(b: *Builder, prog: ProgData) *bld.LibExeObjStep {
         .optimize = mode,
     });
 
-    program.addPackagePath("liu", "src/liu/lib.zig");
-    program.addPackagePath("assets", "src/assets.zig");
+    program.addModule("liu", liuMod);
+    program.addModule("assets", assetsMod);
 
     // This is documented literally nowhere; I found it because someone on Discord
     // looked through the source code. The Zig-sponsored way to do this is by
@@ -71,6 +74,24 @@ pub fn build(b: *Builder) !void {
     mode = b.standardOptimizeOption(.{});
 
     b.prominent_compile_errors = true;
+
+    // This is jank, but I don't care right now. I'm sure there's a good way,
+    // but the feature that changed this literally merged to master 2 days ago
+    // and the only reason I have to deal with it is because my work laptop
+    // uses the HEAD compiler version. There's straight-up no documentation on
+    // the intended usage of this right now, and the example given by the PR that
+    // implements the feature is broken.
+    //
+    //                                  - Albert Liu, Feb 05, 2023 Sun 20:46
+    liuMod = b.createModule(.{
+        // .name = "liu",
+        .source_file = .{ .path = "src/liu/lib.zig" },
+    });
+
+    assetsMod = b.createModule(.{
+        // .name = "assets",
+        .source_file = .{ .path = "src/assets.zig" },
+    });
 
     const wasmPrograms = [_]ProgData{
         .{
