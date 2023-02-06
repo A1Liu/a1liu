@@ -11,20 +11,22 @@
   let overlay: any = undefined;
 
   const listener = (evt: any) => {
-    if (!worker || !canvas) return;
+    if (!canvas) return;
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     worker.postMessage({ kind: "resize", data: [width, height] });
   };
 
+  $: workerRef = worker.ref;
+
   $: {
-    if (worker.ref && canvas) {
+    if (workerRef && canvas) {
       listener(null);
 
       console.log("hello", worker);
       const offscreen = canvas.transferControlToOffscreen();
-      worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
+      workerRef.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
     }
   }
 
@@ -73,6 +75,7 @@
     worker.postMessage({ kind: "rightclick", data });
   }}
   on:keydown={(evt) => {
+
     if (evt.repeat || evt.isComposing || evt.keyCode === 229) return;
     if (evt.ctrlKey || evt.metaKey) return;
 
@@ -80,6 +83,7 @@
     if (evt.target !== overlay) return;
 
     const data = KeyId[evt.code] ?? 0;
+    console.log('keydown', data);
     worker.postMessage({ kind: "keydown", data });
   }}
   on:keyup={(evt) => {
@@ -95,9 +99,12 @@
 >
   <canvas bind:this={canvas} />
 
+  <!-- tabindex allows the div to receive focus, which then allows keydown,
+        keyup, etc. etc. -->
   <div
     bind:this={overlay}
     class="overlay"
+    tabindex="-1"
     on:mousedown={(evt) => evt.preventDefault()}
   >
     <slot name="overlay" />
