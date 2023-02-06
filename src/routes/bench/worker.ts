@@ -6,7 +6,7 @@ import type { Message } from "./+page.svelte";
 
 export type OutMessage = { kind: string; data: any };
 
-const ctx = new WorkerCtx<Message>();
+const ctx = new WorkerCtx<Message, OutMessage>(postMessage);
 onmessage = ctx.onmessageCallback();
 
 const handleMessage = (wasmRef: WasmRef, msg: Message) => {

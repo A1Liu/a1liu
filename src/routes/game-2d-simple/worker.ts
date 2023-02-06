@@ -6,7 +6,7 @@ import { set } from "idb-keyval";
 import { handleInput, findCanvas } from "@lib/ts/gamescreen";
 import type { InputMessage } from "./+page.svelte";
 
-const ctx = new WorkerCtx<InputMessage>();
+const ctx = new WorkerCtx<InputMessage, OutMessage>(postMessage);
 onmessage = ctx.onmessageCallback();
 
 export type OutMessage =

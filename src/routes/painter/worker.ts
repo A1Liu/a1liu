@@ -1,7 +1,6 @@
 import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";
-import type { InputMessage as Message } from "./+page.svelte";
 import { handleInput, findCanvas } from "@lib/ts/gamescreen";
 import fragShaderUrl from "./shader.frag?url";
 import vertShaderUrl from "./shader.vert?url";
@@ -13,7 +12,13 @@ export type Number2 = [number, number];
 export type Number3 = [number, number, number];
 export type Number4 = [number, number, number, number];
 
-const ctx = new WorkerCtx<Message>();
+import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
+export type InputMessage =
+  | BaseMessage
+  | { kind: "setColor"; data: [number, number, number] }
+  | { kind: "toggleTool"; data?: undefined };
+
+const ctx = new WorkerCtx<InputMessage, OutMessage>(postMessage);
 onmessage = ctx.onmessageCallback();
 
 export type OutMessage =
@@ -183,7 +188,7 @@ const updateState = (
   }
 };
 
-const handleMessage = (wasmRef: WasmRef, msg: Message) => {
+const handleMessage = (wasmRef: WasmRef, msg: InputMessage) => {
   if (handleInput(wasmRef, gglRef.current?.ctx, msg)) return;
 
   switch (msg.kind) {
@@ -236,7 +241,7 @@ const init = async () => {
 
   wasmRef.abi.init();
 
-  const result = await findCanvas<Message>(ctx);
+  const result = await findCanvas<InputMessage, OutMessage>(ctx);
   const ggl = await initGl(result.canvas);
 
   if (!ggl) {

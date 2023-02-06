@@ -1,22 +1,14 @@
-<script lang="ts" context="module">
-  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
-  export type InputMessage =
-    | BaseMessage
-    | { kind: "setColor"; data: [number, number, number] }
-    | { kind: "toggleTool"; data?: undefined };
-</script>
-
 <script lang="ts">
   import { onMount } from "svelte";
   import MyWorker from "./worker?worker";
   import Screen from "@lib/svelte/sidebar_gamescreen.svelte";
   import Toast, { addToast, postToast } from "@lib/svelte/errors.svelte";
-  import { githubIssueLink } from "@lib/ts/util";
-  import type { OutMessage } from "./worker";
+  import { githubIssueLink, WorkerRef } from "@lib/ts/util";
+  import type { InputMessage, OutMessage } from "./worker";
 
   type String3 = [string, string, string];
 
-  let worker: Worker = undefined as any;
+  const worker = new WorkerRef<InputMessage, OutMessage>(MyWorker);
   let canvas: HTMLCanvasElement | undefined = undefined;
   let palette: HTMLDivElement | undefined = undefined;
 
@@ -29,6 +21,30 @@
   let recordingUrl: string | null = null;
 
   const urlString = githubIssueLink({ title: "Painter: Bug Report" });
+
+  worker.onmessage = (ev: MessageEvent<OutMessage>) => {
+      const message = ev.data;
+      switch (message.kind) {
+        case "setTool":
+          tool = message.data;
+          break;
+
+        case "setColor":
+          color = message.data;
+          colorNullable = message.data;
+          break;
+
+        case "initDone":
+          const width = canvas?.clientWidth ?? 0;
+          const height = canvas?.clientHeight ?? 0;
+          worker.postMessage({ kind: "resize", data: [width, height] });
+          break;
+
+        default:
+          postToast(message.kind, message.data);
+          break;
+      }
+    };
 
   const recordButtonHandler = (evt: Event) => {
     if (navigator.userAgent.indexOf("Firefox") != -1) {
@@ -88,30 +104,7 @@
   }
 
   onMount(() => {
-    worker = new MyWorker();
-    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
-      const message = ev.data;
-      switch (message.kind) {
-        case "setTool":
-          tool = message.data;
-          break;
-
-        case "setColor":
-          color = message.data;
-          colorNullable = message.data;
-          break;
-
-        case "initDone":
-          const width = canvas?.clientWidth;
-          const height = canvas?.clientHeight;
-          worker.postMessage({ kind: "resize", data: [width, height] });
-          break;
-
-        default:
-          postToast(message.kind, message.data);
-          break;
-      }
-    };
+    worker.init();
   });
 </script>
 

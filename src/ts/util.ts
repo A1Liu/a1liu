@@ -75,31 +75,35 @@ export async function get(urlString: string, query: any): Promise<any> {
 }
 
 export class WorkerRef<In, Out> {
-  private worker: Worker | undefined = undefined;
+  private workerRef: Worker | undefined = undefined;
   private readonly messages: { msg: In; deps?: Transferable[] }[] = [];
 
   onmessage: (ev: MessageEvent<Out>) => void = () => {};
 
   constructor(private readonly CreatorClass: { new (): Worker }) {}
 
+  get ref(): Worker | undefined {
+    return this.workerRef;
+  }
+
   init() {
     const worker = new this.CreatorClass();
     worker.onmessage = (ev: MessageEvent<Out>) => this.onmessage(ev);
 
-    this.worker = worker;
+    this.workerRef = worker;
     this.messages
       .splice(0, this.messages.length)
       .forEach(({ msg, deps }) => this.postMessage(msg, deps));
   }
 
   postMessage(msg: In, deps?: Transferable[]) {
-    if (!this.worker) {
+    if (!this.workerRef) {
       this.messages.push({ msg, deps });
       return;
     }
 
-    if (deps) this.worker.postMessage(msg, deps);
-    else this.worker.postMessage(msg);
+    if (deps) this.workerRef.postMessage(msg, deps);
+    else this.workerRef.postMessage(msg);
   }
 }
 
@@ -135,6 +139,10 @@ export class WorkerCtx<In, Out> {
   }
 
   postMessage(message: Out) {
-    this.workerPostMessage(message);
+    // The "postMessage" function needs to be called as a bare function,
+    // and not as a member function, so e.g. this.workerPostMessage(message);
+    // would fail. This was tested on Microsoft Edge.
+    const workerPostMessage = this.workerPostMessage;
+    workerPostMessage(message);
   }
 }
