@@ -6,7 +6,6 @@
   import { githubIssueLink, WorkerRef } from "@lib/ts/util";
   import type { InputMessage, OutMessage } from "./worker";
 
-
   type String3 = [string, string, string];
 
   const worker = new WorkerRef<InputMessage, OutMessage>();

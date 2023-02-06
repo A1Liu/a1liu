@@ -5,6 +5,7 @@
 
   type T = $$Generic;
   type O = $$Generic;
+
   export let worker: WorkerRef<T | InputMessage, O>;
   export let canvas: HTMLCanvasElement | undefined = undefined;
 
@@ -17,7 +18,7 @@
   };
 
   $: {
-    if (worker && canvas) {
+    if (canvas) {
       listener(null);
 
       const offscreen = canvas.transferControlToOffscreen();

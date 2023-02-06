@@ -1,3 +1,4 @@
+import "@lib/ts/worker-shim";
 import { initWasm } from "@lib/ts/wasm";
 import type { WasmRef } from "@lib/ts/wasm";
 import wasmUrl from "@zig/game-2d-simple.wasm?url";

@@ -19,9 +19,10 @@
   };
 
   $: {
-    if (worker && canvas) {
+    if (worker.ref && canvas) {
       listener(null);
 
+      console.log("hello", worker);
       const offscreen = canvas.transferControlToOffscreen();
       worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
     }
