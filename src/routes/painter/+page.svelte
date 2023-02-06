@@ -23,28 +23,28 @@
   const urlString = githubIssueLink({ title: "Painter: Bug Report" });
 
   worker.onmessage = (ev: MessageEvent<OutMessage>) => {
-      const message = ev.data;
-      switch (message.kind) {
-        case "setTool":
-          tool = message.data;
-          break;
+    const message = ev.data;
+    switch (message.kind) {
+      case "setTool":
+        tool = message.data;
+        break;
 
-        case "setColor":
-          color = message.data;
-          colorNullable = message.data;
-          break;
+      case "setColor":
+        color = message.data;
+        colorNullable = message.data;
+        break;
 
-        case "initDone":
-          const width = canvas?.clientWidth ?? 0;
-          const height = canvas?.clientHeight ?? 0;
-          worker.postMessage({ kind: "resize", data: [width, height] });
-          break;
+      case "initDone":
+        const width = canvas?.clientWidth ?? 0;
+        const height = canvas?.clientHeight ?? 0;
+        worker.postMessage({ kind: "resize", data: [width, height] });
+        break;
 
-        default:
-          postToast(message.kind, message.data);
-          break;
-      }
-    };
+      default:
+        postToast(message.kind, message.data);
+        break;
+    }
+  };
 
   const recordButtonHandler = (evt: Event) => {
     if (navigator.userAgent.indexOf("Firefox") != -1) {

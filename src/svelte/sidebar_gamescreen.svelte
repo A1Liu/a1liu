@@ -32,7 +32,7 @@
     return () => window.removeEventListener("resize", listener);
   });
 
-  const n2 = (x: number, y: number): [number, number] => [x,y]
+  const n2 = (x: number, y: number): [number, number] => [x, y];
 </script>
 
 <div
