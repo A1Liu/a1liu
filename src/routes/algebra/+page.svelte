@@ -47,7 +47,7 @@
     }
   };
 
-  $: worker?.postMessage({ kind: "equationChange", data: equation });
+  $: worker.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
     worker.init();
@@ -60,7 +60,7 @@
     if (!isNaN(value)) {
       globalCtx.updateVariable(name, value);
       const data = { name, value };
-      worker?.postMessage({ kind: "variableUpdate", data });
+      worker.postMessage({ kind: "variableUpdate", data });
     }
   };
 </script>

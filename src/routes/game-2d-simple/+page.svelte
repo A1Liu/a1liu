@@ -22,7 +22,7 @@
 
     worker.init();
 
-    worker.onmessage = (ev: MessageEvent<OutMessage>) => {
+    worker.onmessage = (ev) => {
       const message = ev.data;
       switch (message.kind) {
         case "initDone": {

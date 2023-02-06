@@ -92,7 +92,7 @@
 
         count = inputCount;
 
-        worker?.postMessage({ kind: "doBench", data: inputCount });
+        worker.postMessage({ kind: "doBench", data: inputCount });
       }}
     >
       run

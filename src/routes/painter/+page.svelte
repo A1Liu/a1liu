@@ -117,7 +117,7 @@
 
       <button
         class="muiButton"
-        on:click={() => worker?.postMessage({ kind: "toggleTool" })}
+        on:click={() => worker.postMessage({ kind: "toggleTool" })}
       >
         {tool}
       </button>
