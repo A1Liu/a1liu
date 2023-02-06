@@ -20,8 +20,8 @@
   "exclude": [
     "./config",
     "./static",
-    "./node_modules",
     "./svelte.config.js",
-    "./vite.config.js"
+    "./vite.config.js",
+    "./node_modules"
   ]
 }
