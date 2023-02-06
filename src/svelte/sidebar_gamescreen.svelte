@@ -19,12 +19,13 @@
 
   onMount(() => {
     canvas!.focus();
-    listener(null);
 
     const offscreen = canvas!.transferControlToOffscreen();
     worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
 
     window.addEventListener("resize", listener);
+    listener(null);
+
     return () => window.removeEventListener("resize", listener);
   });
 
