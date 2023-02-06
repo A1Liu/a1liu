@@ -17,17 +17,12 @@
     worker.postMessage({ kind: "resize", data: [width, height] });
   };
 
-  $: {
-    if (canvas) {
-      listener(null);
-
-      const offscreen = canvas.transferControlToOffscreen();
-      worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
-    }
-  }
-
   onMount(() => {
-    canvas?.focus();
+    canvas!.focus();
+    listener(null);
+
+    const offscreen = canvas!.transferControlToOffscreen();
+    worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
 
     window.addEventListener("resize", listener);
     return () => window.removeEventListener("resize", listener);
