@@ -23,9 +23,8 @@
     const offscreen = canvas!.transferControlToOffscreen();
     worker.postMessage({ kind: "canvas", data: offscreen }, [offscreen]);
 
-    window.addEventListener("resize", listener);
     listener(null);
-
+    window.addEventListener("resize", listener);
     return () => window.removeEventListener("resize", listener);
   });
 
