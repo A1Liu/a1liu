@@ -80,14 +80,13 @@ export class WorkerRef<In, Out> {
 
   onmessage: (ev: MessageEvent<Out>) => void = () => {};
 
-  constructor(private readonly CreatorClass: { new (): Worker }) {}
+  constructor() {}
 
   get ref(): Worker | undefined {
     return this.workerRef;
   }
 
-  init() {
-    const worker = new this.CreatorClass();
+  init(worker: Worker) {
     worker.onmessage = (ev: MessageEvent<Out>) => this.onmessage(ev);
 
     this.workerRef = worker;

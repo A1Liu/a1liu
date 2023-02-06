@@ -1,3 +1,4 @@
+import "@lib/ts/worker-shim";
 import * as GL from "@lib/ts/webgl";
 import type { WebGl } from "@lib/ts/webgl";
 import { WorkerCtx } from "@lib/ts/util";

@@ -1,14 +1,11 @@
-<script lang="ts" context="module">
-  export type Message = { kind: string; data: any };
-</script>
-
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { onMount } from "svelte";
-  import { fmtTime } from "@lib/ts/util";
+  import { fmtTime,  } from "@lib/ts/util";
   import MyWorker from "./worker?worker";
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
-  import type { OutMessage } from "./worker";
+  import type { Message, OutMessage } from "./worker";
+  import { WorkerRef } from "@lib/ts/util";
 
   // import Kilordle from "../kilordle/index.svelte";
 
@@ -18,7 +15,7 @@
     duration: number;
   }
 
-  let worker: Worker | undefined = undefined;
+  const worker = new WorkerRef<Message, OutMessage>();
 
   let inputCount = 1000;
   let benchId = 0;
@@ -30,7 +27,7 @@
   let end: number | null = null;
 
   onMount(() => {
-    worker = new MyWorker();
+    worker.init(new MyWorker());
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
       switch (message.kind) {

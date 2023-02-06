@@ -8,7 +8,7 @@
   import type { InputMessage, OutMessage } from "./worker";
   import { WorkerRef } from "@lib/ts/util";
 
-  const worker = new WorkerRef<InputMessage, OutMessage>(MyWorker);
+  const worker = new WorkerRef<InputMessage, OutMessage>();
   let fileInput: HTMLInputElement | undefined = undefined;
   let defaultLevel = "";
 
@@ -20,7 +20,7 @@
 
     req.then((t) => (defaultLevel = t));
 
-    worker.init();
+    worker.init(new MyWorker());
 
     worker.onmessage = (ev) => {
       const message = ev.data;

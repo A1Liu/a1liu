@@ -8,7 +8,7 @@
 
   let equation = "1x(2 + y) + 3 * 4 + 5 / 6 * 7";
   // let equation = "1x";
-  const worker = new WorkerRef<InputMessage, OutMessage>(MyWorker);
+  const worker = new WorkerRef<InputMessage, OutMessage>();
   let root: number | undefined = undefined;
 
   worker.onmessage = (ev: MessageEvent<OutMessage>) => {
@@ -50,7 +50,7 @@
   $: worker.postMessage({ kind: "equationChange", data: equation });
 
   onMount(() => {
-    worker.init();
+    worker.init(new MyWorker());
   });
 
   const handleInput = (name: string, evt: Event) => {

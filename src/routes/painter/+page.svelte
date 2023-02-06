@@ -6,9 +6,10 @@
   import { githubIssueLink, WorkerRef } from "@lib/ts/util";
   import type { InputMessage, OutMessage } from "./worker";
 
+
   type String3 = [string, string, string];
 
-  const worker = new WorkerRef<InputMessage, OutMessage>(MyWorker);
+  const worker = new WorkerRef<InputMessage, OutMessage>();
   let canvas: HTMLCanvasElement | undefined = undefined;
   let palette: HTMLDivElement | undefined = undefined;
 
@@ -104,7 +105,7 @@
   }
 
   onMount(() => {
-    worker.init();
+    worker.init(new MyWorker());
   });
 </script>
 
