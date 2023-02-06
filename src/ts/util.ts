@@ -74,38 +74,6 @@ export async function get(urlString: string, query: any): Promise<any> {
   return resp.json();
 }
 
-export class WorkerRef<In, Out> {
-  private workerRef: Worker | undefined = undefined;
-  private readonly messages: { msg: In; deps?: Transferable[] }[] = [];
-
-  onmessage: (ev: MessageEvent<Out>) => void = () => {};
-
-  constructor() {}
-
-  get ref(): Worker | undefined {
-    return this.workerRef;
-  }
-
-  init(worker: Worker) {
-    worker.onmessage = (ev: MessageEvent<Out>) => this.onmessage(ev);
-
-    this.workerRef = worker;
-    this.messages
-      .splice(0, this.messages.length)
-      .forEach(({ msg, deps }) => this.postMessage(msg, deps));
-  }
-
-  postMessage(msg: In, deps?: Transferable[]) {
-    if (!this.workerRef) {
-      this.messages.push({ msg, deps });
-      return;
-    }
-
-    if (deps) this.workerRef.postMessage(msg, deps);
-    else this.workerRef.postMessage(msg);
-  }
-}
-
 export class WorkerCtx<In, Out> {
   private messages: In[] = [];
   private resolve?: (t: In[]) => void;
@@ -143,5 +111,37 @@ export class WorkerCtx<In, Out> {
     // would fail. This was tested on Microsoft Edge.
     const workerPostMessage = this.workerPostMessage;
     workerPostMessage(message);
+  }
+}
+
+export class WorkerRef<In, Out> {
+  private workerRef: Worker | undefined = undefined;
+  private readonly messages: { msg: In; deps?: Transferable[] }[] = [];
+
+  onmessage: (ev: MessageEvent<Out>) => void = () => {};
+
+  constructor() {}
+
+  get ref(): Worker | undefined {
+    return this.workerRef;
+  }
+
+  init(worker: Worker) {
+    worker.onmessage = (ev: MessageEvent<Out>) => this.onmessage(ev);
+
+    this.workerRef = worker;
+    this.messages
+      .splice(0, this.messages.length)
+      .forEach(({ msg, deps }) => this.postMessage(msg, deps));
+  }
+
+  postMessage(msg: In, deps?: Transferable[]) {
+    if (!this.workerRef) {
+      this.messages.push({ msg, deps });
+      return;
+    }
+
+    if (deps) this.workerRef.postMessage(msg, deps);
+    else this.workerRef.postMessage(msg);
   }
 }
