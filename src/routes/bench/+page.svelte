@@ -18,7 +18,7 @@
     duration: number;
   }
 
-  let worker : Worker | undefined = undefined;
+  let worker: Worker | undefined = undefined;
 
   let inputCount = 1000;
   let benchId = 0;

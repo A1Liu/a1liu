@@ -3,7 +3,7 @@
   import { KeyId } from "@lib/ts/gamescreen";
 
   export let worker: Worker | undefined;
-  export let canvas:  HTMLCanvasElement | undefined = undefined;
+  export let canvas: HTMLCanvasElement | undefined = undefined;
 
   const listener = (evt: any) => {
     if (!worker || !canvas) return;

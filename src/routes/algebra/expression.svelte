@@ -76,7 +76,7 @@
   import { onMount } from "svelte";
 
   export let selectedMessage = false;
-  export let id : number;
+  export let id: number;
 
   let selected = false;
   let childSelected = false;
@@ -93,54 +93,54 @@
 </script>
 
 {#if info}
-<span
-  class:selected={selected || childSelected}
-  class:clickSelected={selected}
-  class:childSelected={!selected && childSelected}
-  class={`expr${info.kind}`}
-  on:mousedown={(evt) => evt.preventDefault()}
->
-  {#if info.paren}
-    (
-  {/if}
+  <span
+    class:selected={selected || childSelected}
+    class:clickSelected={selected}
+    class:childSelected={!selected && childSelected}
+    class={`expr${info.kind}`}
+    on:mousedown={(evt) => evt.preventDefault()}
+  >
+    {#if info.paren}
+      (
+    {/if}
 
-  {#if info.left !== undefined}
-    <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
-  {/if}
+    {#if info.left !== undefined}
+      <svelte:self id={info.left} bind:selectedMessage={leftSelected} />
+    {/if}
 
-  <!--
+    <!--
     The on:keydown is for A11y; I don't understand what it's for right now,
     but hopefully I'll understand soon enough.
                                   - Albert Liu, Feb 04, 2023 Sat 23:48
     -->
-  <div
-    class="expr"
-    class:implicit={info.implicit}
-    on:keydown={(e) => e.preventDefault()}
-    on:click={(evt) => {
-      if (evt.shiftKey) {
-        globalCtx.select(id);
-      } else {
-        globalCtx.click(id);
-      }
-    }}
-  >
-    {#if ShouldPrintValue[info.kind]}
-      {info.value}
-    {:else}
-      {info.kind}
+    <div
+      class="expr"
+      class:implicit={info.implicit}
+      on:keydown={(e) => e.preventDefault()}
+      on:click={(evt) => {
+        if (evt.shiftKey) {
+          globalCtx.select(id);
+        } else {
+          globalCtx.click(id);
+        }
+      }}
+    >
+      {#if ShouldPrintValue[info.kind]}
+        {info.value}
+      {:else}
+        {info.kind}
+      {/if}
+    </div>
+
+    {#if info.right !== undefined}
+      <svelte:self id={info.right} bind:selectedMessage={rightSelected} />
     {/if}
-  </div>
 
-  {#if info.right !== undefined}
-    <svelte:self id={info.right} bind:selectedMessage={rightSelected} />
-  {/if}
-
-  {#if info.paren}
-    )
-  {/if}
-</span>
-  {/if}
+    {#if info.paren}
+      )
+    {/if}
+  </span>
+{/if}
 
 <style lang="postcss">
   span {

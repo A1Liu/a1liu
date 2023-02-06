@@ -60,8 +60,8 @@
     };
   });
 
-  const handleInput = (name: string, evt : Event) => {
-    const target=  evt.target as HTMLInputElement;
+  const handleInput = (name: string, evt: Event) => {
+    const target = evt.target as HTMLInputElement;
     const value = Number.parseFloat(target.value);
 
     if (!isNaN(value)) {
@@ -69,7 +69,7 @@
       const data = { name, value };
       worker?.postMessage({ kind: "variableUpdate", data });
     }
-  }
+  };
 </script>
 
 <Toast location={"bottom-left"} />
@@ -86,13 +86,14 @@
 
     {#if $globalCtx.selected.size === 1}
       <div>
-        Selected Value: {tree.get([...$globalCtx.selected.keys()][0])?.evalValue}
+        Selected Value: {tree.get([...$globalCtx.selected.keys()][0])
+          ?.evalValue}
       </div>
     {/if}
 
     {#if root !== undefined}
-    <div>Expression Value: {tree.get(root)?.evalValue}</div>
-      {/if}
+      <div>Expression Value: {tree.get(root)?.evalValue}</div>
+    {/if}
 
     <button
       class="muiButton"

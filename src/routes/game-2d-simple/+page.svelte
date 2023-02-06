@@ -16,7 +16,7 @@
   import { get } from "idb-keyval";
   import type { OutMessage } from "./worker";
 
-  let worker : Worker = undefined as any;
+  let worker: Worker = undefined as any;
   let fileInput: HTMLInputElement | undefined = undefined;
   let defaultLevel = "";
 
