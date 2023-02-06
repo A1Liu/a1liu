@@ -1,12 +1,3 @@
-<script lang="ts" context="module">
-  import type { InputMessage as BaseMessage } from "@lib/ts/gamescreen";
-  export type InputMessage =
-    | BaseMessage
-    | { kind: "uploadLevel"; data: any }
-    | { kind: "levelDownload"; data: any }
-    | { kind: "saveLevel"; data: any };
-</script>
-
 <script lang="ts">
   import { onMount } from "svelte";
   import Screen from "@lib/svelte/gamescreen.svelte";
@@ -14,9 +5,10 @@
   import Toast, { postToast } from "@lib/svelte/errors.svelte";
   import levelUrl from "./levels/simple.txt?url";
   import { get } from "idb-keyval";
-  import type { OutMessage } from "./worker";
+  import type { InputMessage, OutMessage } from "./worker";
+  import { WorkerRef } from "@lib/ts/util";
 
-  let worker: Worker = undefined as any;
+  const worker = new WorkerRef<InputMessage, OutMessage>(MyWorker);
   let fileInput: HTMLInputElement | undefined = undefined;
   let defaultLevel = "";
 
@@ -28,7 +20,7 @@
 
     req.then((t) => (defaultLevel = t));
 
-    worker = new MyWorker();
+    worker.init();
 
     worker.onmessage = (ev: MessageEvent<OutMessage>) => {
       const message = ev.data;
