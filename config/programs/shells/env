@@ -67,7 +67,7 @@ export PYTHONPATH="${CFG_DIR}/programs"
 # NOTE: we're using aliu_path_helper to produce paths now. The list of paths needs
 # to be updated in 2 locations now.
 if [ -e "${CFG_DIR}/local/path/aliu_path_helper" ]; then
-  export PATH=`${CFG_DIR}/local/path/aliu_path_helper`
+  export PATH=`${CFG_DIR}/local/path/aliu_path_helper ~/`
   export CFG_ENV=1
 elif [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
