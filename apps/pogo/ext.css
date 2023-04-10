@@ -1,0 +1,32 @@
+html,
+body,
+div#root {
+  height: 100%;
+  background: orange;
+}
+
+.full {
+  height: 100%;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // flex-wrap: nowrap; Don't know whether or now rows should wrap yet
+}
+
+.row > * {
+  margin: 0px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.col > * {
+  margin: 0px;
+}

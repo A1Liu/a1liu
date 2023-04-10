@@ -1,6 +1,5 @@
 import React from 'react';
-import './timer.scss';
-import { HOUR_MS, lerp } from '../math';
+import { lerp } from '../math';
 import { DAY_MS } from '../math';
 
 type EditFieldProps<T> = {
