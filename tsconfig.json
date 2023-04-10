@@ -3,8 +3,6 @@
   "compilerOptions": {
     "baseUrl": "./",
     "allowJs": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
     "checkJs": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,9 +14,7 @@
       "@lib/*": ["./src/*"],
       "@zig/*": ["./.zig/zig-out/*"],
       "$lib": ["./src"],
-      "$lib/*": ["./src/*"],
-      "react": ["./node_modules/preact/compat/"],
-      "react-dom": ["./node_modules/preact/compat/"]
+      "$lib/*": ["./src/*"]
     }
   },
   "exclude": [
