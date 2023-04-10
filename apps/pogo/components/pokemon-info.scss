@@ -1,0 +1,12 @@
+.pogo-mega-info-tooltip {
+	opacity: 0;
+	visibility: hidden;
+}
+.pogo-mega-info:hover .pogo-mega-info-tooltip {
+	opacity: 1;
+	visibility: visible;
+}
+
+// .pogo-mega-info-tooltip:hover {
+// 	visibility: visible;
+// }

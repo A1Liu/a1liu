@@ -1,5 +1,5 @@
 {
-  "name": "A1Liu",
+  "name": "a1liu",
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 1337",
@@ -14,10 +14,22 @@
     "check": "svelte-check --tsconfig .svelte-kit/tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig .svelte-kit/tsconfig.json --watch",
     "format": "prettier --no-color --write --plugin-search-dir=. \"{src/routes,src/svelte,src/ts}/**/*.{ts,svelte,js}\"",
-    "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
+    "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out",
+    "robin": "ROBIN_PROJECT_PATH=`pwd` ~/.robin/nightly/bin/robin start"
   },
   "dependencies": {
-    "idb-keyval": "6.2.0"
+    "@tanstack/react-query": "4.24.10",
+    "idb-keyval": "6.2.0",
+    "immer": "^9.0.21",
+    "isomorphic-fetch": "^3.0.0",
+    "json-stable-stringify": "^1.0.2",
+    "lodash": "4.17.21",
+    "lowdb": "^5.1.0",
+    "node-fetch": "^3.3.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "zod": "3.21.4",
+    "zustand": "^4.3.6"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^1.0.0",
@@ -34,8 +46,8 @@
     "svelte-preprocess": "4.10.1",
     "tslib": "2.4.1",
     "typescript": "4.9.3",
-    "watch": "1.0.2",
-    "vite": "^4.0.0"
+    "vite": "^4.0.0",
+    "watch": "1.0.2"
   },
   "browserslist": [
     "last 2 versions",

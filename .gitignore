@@ -15,7 +15,7 @@ zig-out
 a.out
 
 # dependencies
-/node_modules
+node_modules
 
 # Svelte output
 /.svelte-kit
