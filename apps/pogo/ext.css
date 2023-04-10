@@ -14,7 +14,7 @@ div#root {
   display: flex;
   flex-direction: row;
   align-items: center;
-  // flex-wrap: nowrap; Don't know whether or now rows should wrap yet
+  /* flex-wrap: nowrap; Don't know whether or now rows should wrap yet */
 }
 
 .row > * {
