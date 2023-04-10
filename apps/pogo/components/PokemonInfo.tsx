@@ -12,7 +12,7 @@ import {
 	MegaRequirements,
 	isCurrentMega,
 } from '../domain-utils';
-import './pokemon-info.scss';
+import './pokemon-info.css';
 import {
 	evolvePokemonRpc,
 	fetchDbRpc,

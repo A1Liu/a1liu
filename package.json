@@ -15,7 +15,7 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig .svelte-kit/tsconfig.json --watch",
     "format": "prettier --no-color --write --plugin-search-dir=. \"{src/routes,src/svelte,src/ts}/**/*.{ts,svelte,js}\"",
     "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out",
-    "robin": "ROBIN_PROJECT_PATH=`pwd` ~/.robin/nightly/bin/robin start"
+    "robin": "ROBIN_PROJECT_PATH=`pwd` ~/.robin/beta/bin/robin start"
   },
   "dependencies": {
     "@tanstack/react-query": "4.24.10",
@@ -26,8 +26,9 @@
     "lodash": "4.17.21",
     "lowdb": "^5.1.0",
     "node-fetch": "^3.3.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "preact": "^10.13.2",
+    "react": "npm:@preact/compat",
+    "react-dom": "npm:@preact/compat",
     "zod": "3.21.4",
     "zustand": "^4.3.6"
   },

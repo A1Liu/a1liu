@@ -1,6 +1,6 @@
 import React from 'react';
 import '@robinplatform/toolkit/styles.css';
-import './timer.scss';
+import './timer.css';
 import { create } from 'zustand';
 import { EditSvg } from './EditableField';
 
