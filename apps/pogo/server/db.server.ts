@@ -73,7 +73,7 @@ export async function withDb(mut: (db: PogoDb) => void) {
 		// TODO: don't do this on literally every write. Maybe do it once a second.
 		await fs.promises.writeFile(DB_FILE, JSON.stringify(newDb));
 
-		await dbModifiedTopic.publish({}).catch((e) => console.error('err', e));
+		await dbModifiedTopic.publish({}).catch((e: any) => console.error('err', e));
 		DB.data = newDb;
 	}
 
