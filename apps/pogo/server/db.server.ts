@@ -100,7 +100,7 @@ export function getDB(): PogoDb {
 
 export async function addPokemonRpc({ pokedexId }: { pokedexId: number }) {
 	const id = `${pokedexId}-${Math.random()}`;
-	const now = new Date().toISOString();
+	const wayBackWhen = new Date(0).toISOString();
 	await withDb((db) => {
 		db.pokemon[id] = {
 			id,
@@ -108,8 +108,8 @@ export async function addPokemonRpc({ pokedexId }: { pokedexId: number }) {
 			megaCount: 0,
 
 			// This causes some strange behavior but... it's probably fine.
-			lastMegaStart: now,
-			lastMegaEnd: now,
+			lastMegaStart: wayBackWhen,
+			lastMegaEnd: wayBackWhen,
 		};
 	});
 
