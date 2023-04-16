@@ -30,7 +30,7 @@ const percentGradient = (fraction: number) =>
     100 * fraction
   }%, white ${100 * fraction}%)`;
 const MEGA_GRADIENT =
-  "linear-gradient(to right, lightblue, lightgreen, yellow, orange)";
+  "linear-gradient(to right, orchid, skyblue, lightgreen, yellow, orange, salmon)";
 
 function EvolvePokemonButton({
   dexEntry,
