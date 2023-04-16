@@ -389,7 +389,7 @@ export const TypeIcons = {
 	ice: Ice,
 	normal: Normal,
 	poison: Poison,
-	psychick: Psychic,
+	psychic: Psychic,
 	rock: Rock,
 	steel: Steel,
 	water: Water,
