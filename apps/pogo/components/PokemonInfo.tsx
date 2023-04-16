@@ -239,7 +239,6 @@ function MegaCount({
           justifyContent: "center",
           alignItems: "center",
         }}
-
         disabled={setMegaCountLoading}
         onClick={() => setMegaCount({ id: pokemonId, count: megaCount + 1 })}
       >
