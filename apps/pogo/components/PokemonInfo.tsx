@@ -184,7 +184,7 @@ function MegaCount({
       </button>
 
       <div className="pogo-mega-info" style={{ position: "relative" }}>
-        <div className={"row"} style={{ gap: "0.3rem" }}>
+        <div className={"row"} style={{ gap: "0.2rem" }}>
           {progressCircle({ required: 1, have: megaCount })}
           {progressCircle({ required: 6, have: megaCount - 1 })}
           {progressCircle({ required: 23, have: megaCount - 7 })}
