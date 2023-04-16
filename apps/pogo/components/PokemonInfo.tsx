@@ -166,7 +166,23 @@ function MegaCount({
   };
 
   return (
-    <div className={"row"} style={{ gap: "0.4rem" }}>
+    <div className={"row"} style={{ gap: "0.3rem" }}>
+      <button
+        style={{
+          borderRadius: "1.4rem",
+          height: "1rem",
+          width: "1rem",
+
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        disabled={setMegaCountLoading}
+        onClick={() => setMegaCount({ id: pokemonId, count: megaCount - 1 })}
+      >
+        -
+      </button>
+
       <div className="pogo-mega-info" style={{ position: "relative" }}>
         <div className={"row"} style={{ gap: "0.3rem" }}>
           {progressCircle({ required: 1, have: megaCount })}
@@ -213,23 +229,22 @@ function MegaCount({
         </div>
       </div>
 
-      <div className={"row"} style={{ gap: "0.2rem" }}>
-        <button
-          style={{ padding: "0.2rem" }}
-          disabled={setMegaCountLoading}
-          onClick={() => setMegaCount({ id: pokemonId, count: megaCount + 1 })}
-        >
-          +
-        </button>
+      <button
+        style={{
+          borderRadius: "1.4rem",
+          height: "1rem",
+          width: "1rem",
 
-        <button
-          style={{ padding: "0.2rem" }}
-          disabled={setMegaCountLoading}
-          onClick={() => setMegaCount({ id: pokemonId, count: megaCount - 1 })}
-        >
-          -
-        </button>
-      </div>
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+
+        disabled={setMegaCountLoading}
+        onClick={() => setMegaCount({ id: pokemonId, count: megaCount + 1 })}
+      >
+        +
+      </button>
     </div>
   );
 }
