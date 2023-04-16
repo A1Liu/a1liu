@@ -18,6 +18,7 @@
     "robin": "ROBIN_PROJECT_PATH=`pwd` ~/.robin/beta/bin/robin start"
   },
   "dependencies": {
+    "@robinplatform/toolkit": "../robin/toolkit",
     "@tanstack/react-query": "4.24.10",
     "idb-keyval": "6.2.0",
     "immer": "^9.0.21",

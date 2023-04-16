@@ -1,425 +1,446 @@
-import { useRpcMutation, useRpcQuery } from '@robinplatform/toolkit/react/rpc';
-import { useCurrentSecond, CountdownTimer } from './CountdownTimer';
-import { EditField } from './EditableField';
+import { useRpcMutation, useRpcQuery } from "@robinplatform/toolkit/react/rpc";
+import { useCurrentSecond, CountdownTimer } from "./CountdownTimer";
+import { EditField } from "./EditableField";
 import {
-	Species,
-	Pokemon,
-	megaLevelFromCount,
-	megaCostForSpecies,
-	TypeColors,
-	TypeTextColors,
-	MegaWaitTime,
-	MegaRequirements,
-	isCurrentMega,
-} from '../domain-utils';
-import './pokemon-info.css';
+  Species,
+  Pokemon,
+  megaLevelFromCount,
+  megaCostForSpecies,
+  TypeColors,
+  MegaWaitTime,
+  MegaRequirements,
+  isCurrentMega,
+} from "../domain-utils";
+import "./pokemon-info.css";
 import {
-	evolvePokemonRpc,
-	fetchDbRpc,
-	setPokemonMegaCountRpc,
-	setPokemonMegaEndRpc,
-	setPokemonMegaEnergyRpc,
-	deletePokemonRpc,
-	setNameRpc,
-} from '../server/db.server';
-import React from 'react';
-import { usePageState, useSelectedPokemonId, useSetPokemon } from './PageState';
-import { TypeIcons } from './TypeIcons';
+  evolvePokemonRpc,
+  fetchDbRpc,
+  setPokemonMegaCountRpc,
+  setPokemonMegaEndRpc,
+  setPokemonMegaEnergyRpc,
+  deletePokemonRpc,
+  setNameRpc,
+} from "../server/db.server";
+import React from "react";
+import { usePageState, useSetPokemon } from "./PageState";
+import { TypeIcons } from "./TypeIcons";
+
+const percentGradient = ({ fraction }: { fraction: number }) =>
+  `linear-gradient(to right, transparent, transparent ${
+    100 * fraction
+  }%, white ${100 * fraction}%)`;
+const MEGA_GRADIENT =
+  "linear-gradient(to right, lightblue, lightgreen, yellow, orange)";
 
 function EvolvePokemonButton({
-	dexEntry,
-	pokemon,
+  dexEntry,
+  pokemon,
 }: {
-	dexEntry: Species;
-	pokemon: Pokemon;
+  dexEntry: Species;
+  pokemon: Pokemon;
 }) {
-	const { data: db } = useRpcQuery(fetchDbRpc, {});
-	const { now } = useCurrentSecond();
-	const megaLevel = megaLevelFromCount(pokemon.megaCount);
-	const megaCost = megaCostForSpecies(
-		dexEntry,
-		megaLevel,
-		now.getTime() - new Date(pokemon.lastMegaEnd ?? 0).getTime(),
-	);
-	const { mutate: megaEvolve, isLoading: megaEvolveLoading } =
-		useRpcMutation(evolvePokemonRpc);
+  const { data: db } = useRpcQuery(fetchDbRpc, {});
+  const { now } = useCurrentSecond();
+  const megaLevel = megaLevelFromCount(pokemon.megaCount);
+  const megaCost = megaCostForSpecies(
+    dexEntry,
+    megaLevel,
+    now.getTime() - new Date(pokemon.lastMegaEnd ?? 0).getTime()
+  );
+  const { mutate: megaEvolve, isLoading: megaEvolveLoading } =
+    useRpcMutation(evolvePokemonRpc);
 
-	return (
-		<div className={'row'} style={{ gap: '0.5rem' }}>
-			{megaLevel !== 0 &&
-				megaLevel !== 3 &&
-				new Date(pokemon.lastMegaStart).toDateString() ===
-					now.toDateString() && (
-					<p style={{ color: 'red', fontWeight: 'bold' }}>
-						Can't level up again today!
-					</p>
-				)}
+  return (
+    <div className={"row"} style={{ gap: "0.5rem" }}>
+      {megaLevel !== 0 &&
+        megaLevel !== 3 &&
+        new Date(pokemon.lastMegaStart).toDateString() ===
+          now.toDateString() && (
+          <p style={{ color: "red", fontWeight: "bold" }}>
+            Can't level up again today!
+          </p>
+        )}
 
-			<button
-				style={{ padding: '0' }}
-				disabled={
-					megaEvolveLoading ||
-					isCurrentMega(db?.mostRecentMega?.id, pokemon, now) ||
-					megaCost > dexEntry.megaEnergyAvailable
-				}
-				onClick={() => megaEvolve({ id: pokemon.id })}
-			>
-				Evolve ({megaCost})
-			</button>
-		</div>
-	);
+      <button
+        style={{
+          borderRadius: "0.25rem",
+          border: "0.1rem solid black",
+          padding: "0.25rem",
+          backgroundImage: `${percentGradient({
+            fraction:
+              1 -
+              megaCost /
+                (megaLevel === 0
+                  ? dexEntry.initialMegaCost
+                  : dexEntry[`megaLevel${megaLevel}Cost`]),
+          })}, ${MEGA_GRADIENT}`,
+        }}
+        disabled={
+          megaEvolveLoading ||
+          isCurrentMega(db?.mostRecentMega?.id, pokemon, now) ||
+          megaCost > dexEntry.megaEnergyAvailable
+        }
+        onClick={() => megaEvolve({ id: pokemon.id })}
+      >
+        Evolve ({megaCost})
+      </button>
+    </div>
+  );
 }
 
 function MegaIndicator({ pokemon }: { pokemon: Pokemon }) {
-	const { now } = useCurrentSecond();
-	const { data: db } = useRpcQuery(fetchDbRpc, {});
-	if (!isCurrentMega(db?.mostRecentMega?.id, pokemon, now)) {
-		return null;
-	}
+  const { now } = useCurrentSecond();
+  const { data: db } = useRpcQuery(fetchDbRpc, {});
+  if (!isCurrentMega(db?.mostRecentMega?.id, pokemon, now)) {
+    return null;
+  }
 
-	return <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>M</div>;
+  return <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>M</div>;
 }
 
-const megaIconUrl =
-	'https://static.wikia.nocookie.net/robloxpokemonbrickbronze/images/4/42/Megaevo.png/revision/latest/scale-to-width-down/90?cb=20160828021945';
+// https://static.wikia.nocookie.net/robloxpokemonbrickbronze/images/4/42/Megaevo.png/revision/latest/scale-to-width-down/90?cb=20160828021945
 function MegaCount({
-	pokemonId,
-	megaCount,
+  pokemonId,
+  megaCount,
 }: {
-	pokemonId: string;
-	megaCount: number;
+  pokemonId: string;
+  megaCount: number;
 }) {
-	const { mutate: setMegaCount, isLoading: setMegaCountLoading } =
-		useRpcMutation(setPokemonMegaCountRpc);
-	const megaLevel = megaLevelFromCount(megaCount);
+  const { mutate: setMegaCount, isLoading: setMegaCountLoading } =
+    useRpcMutation(setPokemonMegaCountRpc);
+  const megaLevel = megaLevelFromCount(megaCount);
 
-	const [forceVisible, setForceVisible] = React.useState(false);
-	const firstRender = React.useRef(true);
+  const [forceVisible, setForceVisible] = React.useState(false);
+  const firstRender = React.useRef(true);
 
-	React.useEffect(() => {
-		if (firstRender.current) {
-			firstRender.current = false;
-			return;
-		}
-		setForceVisible(true);
+  React.useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    setForceVisible(true);
 
-		const timeout = setTimeout(() => setForceVisible(false), 1000);
+    const timeout = setTimeout(() => setForceVisible(false), 1000);
 
-		return () => clearTimeout(timeout);
-	}, [megaCount]);
+    return () => clearTimeout(timeout);
+  }, [megaCount]);
 
-	const progressCircle = ({
-		required,
-		have,
-	}: {
-		required: number;
-		have: number;
-	}) => {
-		return (
-			<div
-				style={{
-					overflow: 'hidden',
-					borderRadius: '0.6rem',
-					height: '1.1rem',
-					width: '1.1rem',
-					border: '1px solid black',
+  const progressCircle = ({
+    required,
+    have,
+  }: {
+    required: number;
+    have: number;
+  }) => {
+    return (
+      <div
+        style={{
+          overflow: "hidden",
+          height: "1.2rem",
+          width: "1.2rem",
 
-					backgroundSize: 'cover',
-					backgroundPosition: 'center',
-					backgroundImage:
-						'linear-gradient(to bottom, purple, lightblue, lightgreen, yellow)',
+          borderRadius: "0.7rem",
+          border: "2px solid black",
 
-					display: 'flex',
-					justifyContent: 'flex-end',
-				}}
-			>
-				<div
-					style={{
-						width: `calc(${
-							100 * (1 - Math.min(Math.max(have, 0), required) / required)
-						}%)`,
-						background: 'white',
-					}}
-				/>
-			</div>
-		);
-	};
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <svg
+          viewBox="0 0 100 100"
+          style={{
+            width: "100%",
 
-	// https://static.wikia.nocookie.net/robloxpokemonbrickbronze/images/4/42/Megaevo.png/revision/latest/scale-to-width-down/90?cb=20160828021945
+            backgroundImage: `${percentGradient({
+              fraction: Math.min(Math.max(have, 0), required) / required,
+            })}, ${MEGA_GRADIENT}`,
+          }}
+        >
+          {have >= required && (
+            <path
+              strokeWidth="20"
+              stroke="black"
+              d="M 13,45 L 50.071,82.071 M 43,75 L 88,30 z"
+            />
+          )}
+        </svg>
+      </div>
+    );
+  };
 
-	return (
-		<div className={'row'} style={{ gap: '0.4rem' }}>
-			<div className="pogo-mega-info" style={{ position: 'relative' }}>
-				<div className={'row'} style={{ gap: '0.3rem' }}>
-					{progressCircle({ required: 1, have: megaCount })}
-					{progressCircle({ required: 6, have: megaCount - 1 })}
-					{progressCircle({ required: 23, have: megaCount - 7 })}
-				</div>
+  return (
+    <div className={"row"} style={{ gap: "0.4rem" }}>
+      <div className="pogo-mega-info" style={{ position: "relative" }}>
+        <div className={"row"} style={{ gap: "0.3rem" }}>
+          {progressCircle({ required: 1, have: megaCount })}
+          {progressCircle({ required: 6, have: megaCount - 1 })}
+          {progressCircle({ required: 23, have: megaCount - 7 })}
+        </div>
 
-				<div
-					className="pogo-mega-info-tooltip"
-					style={{
-						position: 'absolute',
-						right: `calc(${Math.max(2 - megaLevel, 0)} * 1.4rem)`,
-						bottom: '1rem',
+        <div
+          className="pogo-mega-info-tooltip"
+          style={{
+            position: "absolute",
+            right: `calc(${Math.max(2 - megaLevel, 0)} * 1.4rem)`,
+            bottom: "1rem",
 
-						width: '7rem',
+            width: "7rem",
 
-						visibility: forceVisible ? 'visible' : undefined,
-						opacity: forceVisible ? '1' : undefined,
+            visibility: forceVisible ? "visible" : undefined,
+            opacity: forceVisible ? "1" : undefined,
 
-						paddingBottom: '0.3rem',
+            paddingBottom: "0.3rem",
 
-						display: 'flex',
-						justifyContent: 'flex-end',
-						transition: '0.3s opacity ease, 0.3s visibility ease',
-					}}
-				>
-					<div
-						className="robin-rounded"
-						style={{
-							width: 'fit-content',
+            display: "flex",
+            justifyContent: "flex-end",
+            transition: "0.3s opacity ease, 0.3s visibility ease",
+          }}
+        >
+          <div
+            className="robin-rounded"
+            style={{
+              width: "fit-content",
 
-							padding: '0.2rem',
-							opacity: '95%',
-							backgroundColor: 'black',
-							color: 'white',
-						}}
-					>
-						{megaLevel < 3
-							? `${MegaRequirements[megaLevel + 1] - megaCount} to level ${
-									megaLevel + 1
-							  }`
-							: 'level 3 (max)'}
-					</div>
-				</div>
-			</div>
+              padding: "0.2rem",
+              opacity: "95%",
+              backgroundColor: "black",
+              color: "white",
+            }}
+          >
+            {megaLevel < 3
+              ? `${MegaRequirements[megaLevel + 1] - megaCount} to level ${
+                  megaLevel + 1
+                }`
+              : "level 3 (max)"}
+          </div>
+        </div>
+      </div>
 
-			<div className={'row'} style={{ gap: '0.2rem' }}>
-				<button
-					style={{ padding: '0.2rem' }}
-					disabled={setMegaCountLoading}
-					onClick={() => setMegaCount({ id: pokemonId, count: megaCount + 1 })}
-				>
-					+
-				</button>
+      <div className={"row"} style={{ gap: "0.2rem" }}>
+        <button
+          style={{ padding: "0.2rem" }}
+          disabled={setMegaCountLoading}
+          onClick={() => setMegaCount({ id: pokemonId, count: megaCount + 1 })}
+        >
+          +
+        </button>
 
-				<button
-					style={{ padding: '0.2rem' }}
-					disabled={setMegaCountLoading}
-					onClick={() => setMegaCount({ id: pokemonId, count: megaCount - 1 })}
-				>
-					-
-				</button>
-			</div>
-		</div>
-	);
+        <button
+          style={{ padding: "0.2rem" }}
+          disabled={setMegaCountLoading}
+          onClick={() => setMegaCount({ id: pokemonId, count: megaCount - 1 })}
+        >
+          -
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function PokemonInfo({ pokemon }: { pokemon: Pokemon }) {
-	const { data: db } = useRpcQuery(fetchDbRpc, {});
-	const { mutate: setMegaEvolveTime, isLoading: setMegaEvolveTimeLoading } =
-		useRpcMutation(setPokemonMegaEndRpc);
-	const { mutate: setEnergy, isLoading: setEneryLoading } = useRpcMutation(
-		setPokemonMegaEnergyRpc,
-	);
-	const { mutate: deletePokemon, isLoading: deletePokemonLoading } =
-		useRpcMutation(deletePokemonRpc);
-	const { mutate: setName, isLoading: setNameLoading } =
-		useRpcMutation(setNameRpc);
+  const { data: db } = useRpcQuery(fetchDbRpc, {});
+  const { mutate: setMegaEvolveTime, isLoading: setMegaEvolveTimeLoading } =
+    useRpcMutation(setPokemonMegaEndRpc);
+  const { mutate: setEnergy, isLoading: setEneryLoading } = useRpcMutation(
+    setPokemonMegaEnergyRpc
+  );
+  const { mutate: deletePokemon, isLoading: deletePokemonLoading } =
+    useRpcMutation(deletePokemonRpc);
+  const { mutate: setName, isLoading: setNameLoading } =
+    useRpcMutation(setNameRpc);
 
-	const { setPage } = usePageState();
-	const setPokemon = useSetPokemon();
+  const { setPage } = usePageState();
+  const setPokemon = useSetPokemon();
 
-	const dexEntry = db?.pokedex[pokemon.pokedexId];
-	if (!dexEntry) {
-		return null;
-	}
+  const dexEntry = db?.pokedex[pokemon.pokedexId];
+  if (!dexEntry) {
+    return null;
+  }
 
-	const megaLevel = megaLevelFromCount(pokemon.megaCount);
+  const megaLevel = megaLevelFromCount(pokemon.megaCount);
 
-	return (
-		<div
-			className={'robin-rounded robin-pad'}
-			style={{
-				backgroundColor: 'white',
-				border: '1px solid black',
-			}}
-		>
-			<div style={{ position: 'relative' }}>
-				<div
-					style={{
-						position: 'absolute',
-						top: '-1.75rem',
-						left: '-1.75rem',
-					}}
-				>
-					<MegaIndicator pokemon={pokemon} />
-				</div>
+  return (
+    <div
+      className={"robin-rounded robin-pad"}
+      style={{
+        backgroundColor: "white",
+        border: "1px solid black",
+      }}
+    >
+      <div style={{ position: "relative" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "-1.75rem",
+            left: "-1.75rem",
+          }}
+        >
+          <MegaIndicator pokemon={pokemon} />
+        </div>
 
-				<div
-					style={{
-						position: 'absolute',
-						top: '-1.20rem',
-						right: '-1.20rem',
-					}}
-				>
-					<EvolvePokemonButton dexEntry={dexEntry} pokemon={pokemon} />
-				</div>
-			</div>
+        <div
+          style={{
+            position: "absolute",
+            top: "-1.32rem",
+            right: "-1.32rem",
+          }}
+        >
+          <EvolvePokemonButton dexEntry={dexEntry} pokemon={pokemon} />
+        </div>
+      </div>
 
-			<div className={'col'} style={{ gap: '0.5rem' }}>
-				<div className={'row'} style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
-					<div className={'row'} style={{ height: '3rem' }}>
-						<EditField
-							disabled={setNameLoading}
-							value={pokemon.name ?? dexEntry.name}
-							setValue={(value) => setName({ id: pokemon.id, name: value })}
-							parseFunc={(val) => {
-								if (!val.trim()) {
-									return undefined;
-								}
+      <div className={"col"} style={{ gap: "0.5rem" }}>
+        <div className={"row"} style={{ gap: "0.5rem", flexWrap: "wrap" }}>
+          <div className={"row"} style={{ height: "3rem" }}>
+            <EditField
+              disabled={setNameLoading}
+              value={pokemon.name ?? dexEntry.name}
+              setValue={(value) => setName({ id: pokemon.id, name: value })}
+              parseFunc={(val) => {
+                if (!val.trim()) {
+                  return undefined;
+                }
 
-								return val;
-							}}
-						>
-							<div className={'col'} style={{ position: 'relative' }}>
-								{pokemon.name && pokemon.name !== dexEntry.name ? (
-									<>
-										<h3>{pokemon.name}</h3>
-										<p
-											style={{
-												opacity: '50%',
-												fontSize: '0.75rem',
-												position: 'absolute',
-												left: '-0.5rem',
-												bottom: '-0.5rem',
-												zIndex: 1000,
-												backgroundColor: 'lightgray',
-												borderRadius: '4px',
-												padding: '2px',
-											}}
-										>
-											{dexEntry.name}
-										</p>
-									</>
-								) : (
-									<h3>{dexEntry.name}</h3>
-								)}
-							</div>
-						</EditField>
-					</div>
+                return val;
+              }}
+            >
+              <div className={"col"} style={{ position: "relative" }}>
+                {pokemon.name && pokemon.name !== dexEntry.name ? (
+                  <>
+                    <h3>{pokemon.name}</h3>
+                    <p
+                      style={{
+                        opacity: "50%",
+                        fontSize: "0.75rem",
+                        position: "absolute",
+                        left: "-0.5rem",
+                        bottom: "-0.5rem",
+                        zIndex: 1000,
+                        backgroundColor: "lightgray",
+                        borderRadius: "4px",
+                        padding: "2px",
+                      }}
+                    >
+                      {dexEntry.name}
+                    </p>
+                  </>
+                ) : (
+                  <h3>{dexEntry.name}</h3>
+                )}
+              </div>
+            </EditField>
+          </div>
 
-					<div className={'row'} style={{ gap: '0.5rem' }}>
-						{dexEntry.megaType.map((t) => {
-							const Comp = TypeIcons[t.toLowerCase()] ?? TypeIcons.normal;
+          <div className={"row"} style={{ gap: "0.5rem" }}>
+            {dexEntry.megaType.map((t) => {
+              const Comp = TypeIcons[t.toLowerCase()] ?? TypeIcons.normal;
 
-							return (
-								<div
-									key={t}
-									style={{
-										height: '2rem',
-										width: '2rem',
-										borderRadius: '1rem',
-										padding: '0.3rem',
-										backgroundColor: TypeColors[t.toLowerCase()],
-									}}
-								>
-									<Comp />
-								</div>
-							);
-						})}
-					</div>
+              return (
+                <div
+                  key={t}
+                  style={{
+                    height: "2rem",
+                    width: "2rem",
+                    borderRadius: "1rem",
+                    padding: "0.3rem",
+                    backgroundColor: TypeColors[t.toLowerCase()],
+                  }}
+                >
+                  <Comp />
+                </div>
+              );
+            })}
+          </div>
 
-					{!!pokemon.megaCount && (
-						<CountdownTimer
-							doneText="now"
-							disableEditing={setMegaEvolveTimeLoading}
-							setDeadline={(deadline) =>
-								setMegaEvolveTime({
-									id: pokemon.id,
-									newMegaEnd: new Date(
-										deadline.getTime() - MegaWaitTime[megaLevel],
-									).toISOString(),
-								})
-							}
-							deadline={
-								new Date(
-									new Date(pokemon.lastMegaEnd).getTime() +
-										MegaWaitTime[megaLevel],
-								)
-							}
-						/>
-					)}
-				</div>
+          {!!pokemon.megaCount && (
+            <CountdownTimer
+              doneText="now"
+              disableEditing={setMegaEvolveTimeLoading}
+              setDeadline={(deadline) =>
+                setMegaEvolveTime({
+                  id: pokemon.id,
+                  newMegaEnd: new Date(
+                    deadline.getTime() - MegaWaitTime[megaLevel]
+                  ).toISOString(),
+                })
+              }
+              deadline={
+                new Date(
+                  new Date(pokemon.lastMegaEnd).getTime() +
+                    MegaWaitTime[megaLevel]
+                )
+              }
+            />
+          )}
+        </div>
 
-				<div className={'row'} style={{ gap: '1.25rem', flexWrap: 'wrap' }}>
-					<div className={'row'} style={{ gap: '0.5rem' }}>
-						<p>Level: </p>
-						<MegaCount megaCount={pokemon.megaCount} pokemonId={pokemon.id} />
-					</div>
+        <div className={"row"} style={{ gap: "1.25rem", flexWrap: "wrap" }}>
+          <div className={"row"} style={{ gap: "0.5rem" }}>
+            <p>Level: </p>
+            <MegaCount megaCount={pokemon.megaCount} pokemonId={pokemon.id} />
+          </div>
 
-					<div className={'row'} style={{ gap: '0.5rem' }}>
-						<p>Energy: </p>
-						<EditField
-							disabled={setEneryLoading}
-							value={dexEntry.megaEnergyAvailable}
-							setValue={(value) =>
-								setEnergy({ pokedexId: dexEntry.number, megaEnergy: value })
-							}
-							parseFunc={(val) => {
-								const parsed = Number.parseInt(val);
-								if (Number.isNaN(parsed)) {
-									return undefined;
-								}
+          <div className={"row"} style={{ gap: "0.5rem" }}>
+            <p>Energy: </p>
+            <EditField
+              disabled={setEneryLoading}
+              value={dexEntry.megaEnergyAvailable}
+              setValue={(value) =>
+                setEnergy({ pokedexId: dexEntry.number, megaEnergy: value })
+              }
+              parseFunc={(val) => {
+                const parsed = Number.parseInt(val);
+                if (Number.isNaN(parsed)) {
+                  return undefined;
+                }
 
-								return parsed;
-							}}
-						>
-							<p style={{ minWidth: '1rem' }}>{dexEntry.megaEnergyAvailable}</p>
-						</EditField>
-					</div>
-				</div>
+                return parsed;
+              }}
+            >
+              <p style={{ minWidth: "1rem" }}>{dexEntry.megaEnergyAvailable}</p>
+            </EditField>
+          </div>
+        </div>
 
-				<div className={'row'} style={{ flexWrap: 'wrap', rowGap: '1rem' }}>
-					<div
-						className={'row robin-gap'}
-						style={{ justifyContent: 'space-between', flexGrow: 1 }}
-					>
-						<button
-							onClick={() => {
-								setPage('tables');
-								setPokemon(pokemon.id);
-							}}
-						>
-							Tables
-						</button>
+        <div className={"row"} style={{ flexWrap: "wrap", rowGap: "1rem" }}>
+          <div
+            className={"row robin-gap"}
+            style={{ justifyContent: "space-between", flexGrow: 1 }}
+          >
+            <button
+              onClick={() => {
+                setPage("tables");
+                setPokemon(pokemon.id);
+              }}
+            >
+              Tables
+            </button>
 
-						{megaLevel !== 3 && (
-							<button
-								onClick={() => {
-									setPage('levelup');
-									setPokemon(pokemon.id);
-								}}
-							>
-								Planner
-							</button>
-						)}
-					</div>
+            {megaLevel !== 3 && (
+              <button
+                onClick={() => {
+                  setPage("levelup");
+                  setPokemon(pokemon.id);
+                }}
+              >
+                Planner
+              </button>
+            )}
+          </div>
 
-					<div
-						className={'row'}
-						style={{ flexGrow: 2, justifyContent: 'flex-end' }}
-					>
-						<button
-							disabled={deletePokemonLoading}
-							onClick={() => deletePokemon({ id: pokemon.id })}
-						>
-							Delete
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+          <div
+            className={"row"}
+            style={{ flexGrow: 2, justifyContent: "flex-end" }}
+          >
+            <button
+              disabled={deletePokemonLoading}
+              onClick={() => deletePokemon({ id: pokemon.id })}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

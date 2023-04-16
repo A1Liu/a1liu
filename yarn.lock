@@ -168,6 +168,12 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
+"@robinplatform/toolkit@../robin/toolkit":
+  version "0.0.0"
+  dependencies:
+    isomorphic-fetch "3.0.0"
+    json-stable-stringify "1.0.2"
+
 "@sveltejs/adapter-static@^1.0.0":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@sveltejs/adapter-static/-/adapter-static-1.0.6.tgz#897c0a1e7b929be8dc1871d28cab7746afa7bf72"
@@ -616,7 +622,7 @@ is-number@^7.0.0:
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-7.0.0.tgz#7535345b896734d5f80c4d06c50955527a14f12b"
   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
 
-isomorphic-fetch@^3.0.0:
+isomorphic-fetch@3.0.0, isomorphic-fetch@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/isomorphic-fetch/-/isomorphic-fetch-3.0.0.tgz#0267b005049046d2421207215d45d6a262b8b8b4"
   integrity sha512-qvUtwJ3j6qwsF3jLxkZ72qCgjMysPzDfeV240JHiGZsANBYd+EEuu35v7dfrJ9Up0Ak07D7GGSkGhCHTqg/5wA==
@@ -624,7 +630,7 @@ isomorphic-fetch@^3.0.0:
     node-fetch "^2.6.1"
     whatwg-fetch "^3.4.1"
 
-json-stable-stringify@^1.0.2:
+json-stable-stringify@1.0.2, json-stable-stringify@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-stable-stringify/-/json-stable-stringify-1.0.2.tgz#e06f23128e0bbe342dc996ed5a19e28b57b580e0"
   integrity sha512-eunSSaEnxV12z+Z73y/j5N37/In40GK4GmsSy+tEHJMxknvqnA7/djeYtAgW0GsWHUfg+847WJjKaEylk2y09g==
