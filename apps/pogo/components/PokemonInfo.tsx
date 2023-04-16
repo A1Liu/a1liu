@@ -95,6 +95,49 @@ function MegaIndicator({ pokemon }: { pokemon: Pokemon }) {
   return <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>M</div>;
 }
 
+function ProgressCircle({
+  required,
+  have,
+}: {
+  required: number;
+  have: number;
+}) {
+  return (
+    <div
+      style={{
+        overflow: "hidden",
+        height: "1.2rem",
+        width: "1.2rem",
+
+        borderRadius: "0.7rem",
+        border: "2px solid black",
+
+        display: "flex",
+        justifyContent: "flex-end",
+      }}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        style={{
+          width: "100%",
+
+          backgroundImage: `${percentGradient(
+            Math.min(Math.max(have, 0), required) / required
+          )}, ${MEGA_GRADIENT}`,
+        }}
+      >
+        {have >= required && (
+          <path
+            strokeWidth="20"
+            stroke="black"
+            d="M 13,45 L 50.071,82.071 M 43,75 L 88,30 z"
+          />
+        )}
+      </svg>
+    </div>
+  );
+}
+
 // https://static.wikia.nocookie.net/robloxpokemonbrickbronze/images/4/42/Megaevo.png/revision/latest/scale-to-width-down/90?cb=20160828021945
 function MegaCount({
   pokemonId,
@@ -122,49 +165,6 @@ function MegaCount({
     return () => clearTimeout(timeout);
   }, [megaCount]);
 
-  const progressCircle = ({
-    required,
-    have,
-  }: {
-    required: number;
-    have: number;
-  }) => {
-    return (
-      <div
-        style={{
-          overflow: "hidden",
-          height: "1.2rem",
-          width: "1.2rem",
-
-          borderRadius: "0.7rem",
-          border: "2px solid black",
-
-          display: "flex",
-          justifyContent: "flex-end",
-        }}
-      >
-        <svg
-          viewBox="0 0 100 100"
-          style={{
-            width: "100%",
-
-            backgroundImage: `${percentGradient(
-              Math.min(Math.max(have, 0), required) / required
-            )}, ${MEGA_GRADIENT}`,
-          }}
-        >
-          {have >= required && (
-            <path
-              strokeWidth="20"
-              stroke="black"
-              d="M 13,45 L 50.071,82.071 M 43,75 L 88,30 z"
-            />
-          )}
-        </svg>
-      </div>
-    );
-  };
-
   return (
     <div className={"row"} style={{ gap: "0.3rem" }}>
       <button
@@ -185,9 +185,9 @@ function MegaCount({
 
       <div className="pogo-mega-info" style={{ position: "relative" }}>
         <div className={"row"} style={{ gap: "0.2rem" }}>
-          {progressCircle({ required: 1, have: megaCount })}
-          {progressCircle({ required: 6, have: megaCount - 1 })}
-          {progressCircle({ required: 23, have: megaCount - 7 })}
+          <ProgressCircle required={1} have={megaCount} />
+          <ProgressCircle required={6} have={megaCount - 1} />
+          <ProgressCircle required={23} have={megaCount - 7} />
         </div>
 
         <div
