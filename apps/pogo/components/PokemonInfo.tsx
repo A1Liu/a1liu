@@ -25,7 +25,7 @@ import React from "react";
 import { usePageState, useSetPokemon } from "./PageState";
 import { TypeIcons } from "./TypeIcons";
 
-const percentGradient = ({ fraction }: { fraction: number }) =>
+const percentGradient = (fraction: number) =>
   `linear-gradient(to right, transparent, transparent ${
     100 * fraction
   }%, white ${100 * fraction}%)`;
@@ -42,10 +42,12 @@ function EvolvePokemonButton({
   const { data: db } = useRpcQuery(fetchDbRpc, {});
   const { now } = useCurrentSecond();
   const megaLevel = megaLevelFromCount(pokemon.megaCount);
-  const megaCost = megaCostForSpecies(
-    dexEntry,
-    megaLevel,
-    now.getTime() - new Date(pokemon.lastMegaEnd ?? 0).getTime()
+  const timeSinceLastMega =
+    now.getTime() - new Date(pokemon.lastMegaEnd ?? 0).getTime();
+  const megaCost = megaCostForSpecies(dexEntry, megaLevel, timeSinceLastMega);
+  const timeSpentAsFraction = Math.max(
+    0,
+    Math.min(1, timeSinceLastMega / MegaWaitTime[megaLevel])
   );
   const { mutate: megaEvolve, isLoading: megaEvolveLoading } =
     useRpcMutation(evolvePokemonRpc);
@@ -66,14 +68,9 @@ function EvolvePokemonButton({
           borderRadius: "0.25rem",
           border: "0.1rem solid black",
           padding: "0.25rem",
-          backgroundImage: `${percentGradient({
-            fraction:
-              1 -
-              megaCost /
-                (megaLevel === 0
-                  ? dexEntry.initialMegaCost
-                  : dexEntry[`megaLevel${megaLevel}Cost`]),
-          })}, ${MEGA_GRADIENT}`,
+          backgroundImage: `${percentGradient(
+            timeSpentAsFraction
+          )}, ${MEGA_GRADIENT}`,
         }}
         disabled={
           megaEvolveLoading ||
@@ -151,9 +148,9 @@ function MegaCount({
           style={{
             width: "100%",
 
-            backgroundImage: `${percentGradient({
-              fraction: Math.min(Math.max(have, 0), required) / required,
-            })}, ${MEGA_GRADIENT}`,
+            backgroundImage: `${percentGradient(
+              Math.min(Math.max(have, 0), required) / required
+            )}, ${MEGA_GRADIENT}`,
           }}
         >
           {have >= required && (
