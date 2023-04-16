@@ -1,2 +1,2 @@
 # Hi, I'm Albert!
-I'm a SWE at Dandy.
+I'm a Software Engineer.
