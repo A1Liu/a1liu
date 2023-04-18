@@ -8,7 +8,6 @@ import {
   MegaWaitTime,
   isCurrentMega,
   MegaRequirements,
-  PlannedMega,
 } from "../../domain-utils";
 import "./pokemon-info.css";
 import {
@@ -17,7 +16,6 @@ import {
   setPokemonMegaCountRpc,
 } from "../../server/db.server";
 import React from "react";
-import { DAY_MS, HOUR_MS, dateString } from "../../math";
 
 export const percentGradient = (fraction: number) =>
   `linear-gradient(to right, transparent, transparent ${
