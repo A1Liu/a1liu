@@ -118,6 +118,21 @@ export async function addPokemonRpc({ pokedexId }: { pokedexId: number }) {
   return {};
 }
 
+export async function clearCurrentMegaRpc() {
+  await withDb((db) => {
+    const mostRecentMega = db.pokemon[db.mostRecentMega?.id ?? ""];
+    if (mostRecentMega) {
+      const now = new Date();
+      const prevMegaEnd = new Date(mostRecentMega.lastMegaEnd);
+      mostRecentMega.lastMegaEnd = new Date(
+        Math.min(now.getTime(), prevMegaEnd.getTime())
+      ).toISOString();
+    }
+  });
+
+  return {};
+}
+
 export async function evolvePokemonRpc({ id }: { id: string }) {
   await withDb((db) => {
     const pokemon = db.pokemon[id];

@@ -3,7 +3,12 @@ import React from "react";
 import { refreshDexRpc, searchPokemonRpc } from "../server/pogo.server";
 import { ScrollWindow } from "../components/ScrollWindow";
 import "@robinplatform/toolkit/styles.css";
-import { addPokemonRpc, fetchDbRpc, setDbValueRpc } from "../server/db.server";
+import {
+  addPokemonRpc,
+  clearCurrentMegaRpc,
+  fetchDbRpc,
+  setDbValueRpc,
+} from "../server/db.server";
 import { PokemonInfo } from "../components/PokemonInfo";
 import { SelectPage } from "../components/PageState";
 import { useSelectOption } from "../components/EditableField";
@@ -66,6 +71,7 @@ export function PokemonManager() {
     { sort }
   );
   const { mutate: refreshDex } = useRpcMutation(refreshDexRpc);
+  const { mutate: clearCurrentMega } = useRpcMutation(clearCurrentMegaRpc);
   const { mutate: addPokemon } = useRpcMutation(addPokemonRpc, {});
   const { mutate: setDb, isLoading: setDbIsLoading } =
     useRpcMutation(setDbValueRpc);
@@ -102,10 +108,14 @@ export function PokemonManager() {
           </select>
         </div>
 
-        {db && Object.keys(db.pokedex).length === 0 && (
-          <div>Pokedex is empty!</div>
-        )}
-        <button onClick={() => refreshDex({})}>Refresh Pokedex</button>
+        <div className={"col"} style={{ gap: "0.25rem" }}>
+          {db && Object.keys(db.pokedex).length === 0 && (
+            <div>Pokedex is empty!</div>
+          )}
+          <button onClick={() => refreshDex({})}>Refresh Pokedex</button>
+
+          <button onClick={() => clearCurrentMega({})}>Clear Mega</button>
+        </div>
 
         <div className={"col"} style={{ gap: "0.25rem" }}>
           <button

@@ -1,12 +1,12 @@
 import { useRpcMutation, useRpcQuery } from "@robinplatform/toolkit/react/rpc";
-import { CountdownTimer } from "./CountdownTimer";
-import { EditField } from "./EditableField";
+import { CountdownTimer } from "../CountdownTimer";
+import { EditField } from "../EditableField";
 import {
   Pokemon,
   megaLevelFromCount,
   TypeColors,
   MegaWaitTime,
-} from "../domain-utils";
+} from "../../domain-utils";
 import "./pokemon-info.css";
 import {
   fetchDbRpc,
@@ -14,11 +14,11 @@ import {
   setPokemonMegaEnergyRpc,
   deletePokemonRpc,
   setNameRpc,
-} from "../server/db.server";
+} from "../../server/db.server";
 import React from "react";
-import { usePageState, useSetPokemon } from "./PageState";
-import { TypeIcons } from "./TypeIcons";
-import { EvolveButton, MegaCount, MegaIndicator } from "./PokemonInfo/Evolve";
+import { usePageState, useSetPokemon } from "../PageState";
+import { TypeIcons } from "../TypeIcons";
+import { EvolveButton, MegaCount, MegaIndicator } from "./Evolve";
 
 export function PokemonInfo({ pokemon }: { pokemon: Pokemon }) {
   const { data: db } = useRpcQuery(fetchDbRpc, {});
