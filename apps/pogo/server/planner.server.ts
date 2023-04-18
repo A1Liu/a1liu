@@ -1,10 +1,5 @@
-import {
-  PokemonMegaValues,
-  Species,
-  Pokemon,
-  nextMegaDeadline,
-  computeEvolve,
-} from "../domain-utils";
+import type { PokemonMegaValues, Species, Pokemon } from "../domain-utils";
+import { nextMegaDeadline, computeEvolve } from "../domain-utils";
 import { DAY_MS, arrayOfN, dateString, uuid } from "../math";
 import { getDB, withDb } from "./db.server";
 
