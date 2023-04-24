@@ -56,6 +56,7 @@ export function EvolveButton({
 
       <button
         style={{
+          minWidth: "6.5rem",
           borderRadius: "0.25rem",
           border: "0.1rem solid black",
           padding: "0.25rem",
