@@ -1,7 +1,9 @@
-# Host github.tang
-#  HostName github.com
-#  IdentityFile ~/.ssh/id_tangym
+Host bedrock
+  Hostname github.com
+  IdentityFile ~/.ssh/id_bedrock
+  IdentitiesOnly yes
 
-# Host *
-IdentityFile ~/.ssh/id_aliu
-AddressFamily inet
+Host *
+  IdentityFile ~/.ssh/id_aliu
+  AddressFamily inet
+
