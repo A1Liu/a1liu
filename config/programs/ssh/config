@@ -1,4 +1,5 @@
 Host bedrock
+# Host *
   Hostname github.com
   IdentityFile ~/.ssh/id_bedrock
   IdentitiesOnly yes

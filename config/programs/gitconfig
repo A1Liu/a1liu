@@ -32,7 +32,7 @@
 	ca = commit --amend -anm
 	s = status
 	root = rev-parse --show-toplevel
-	pu = push -u origin HEAD
+	pu = push -u origin HEAD --no-verify
 [push]
 	default = simple
 [color "status"]
@@ -51,3 +51,6 @@
 	defaultBranch = main
 [advice]
 	detatchedHead = false
+
+# [url "ssh://git@github.com/"]
+# 	insteadOf = https://github.com/
