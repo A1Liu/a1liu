@@ -26,7 +26,8 @@ This script depends on Python 3 being installed.
    tic -x config/programs/xterm-256color-italic.terminfo
    ```
 
-   Not sure what they do. They also don't always work.
+   Not sure what they do. They also don't always work. I think you need to run them
+   from outside Tmux, but truly, no idea.
 
 To undo, run `python3 install/undo/shell.py`. It'll reset your configuration to
 before the install script was run. Note that this requires the appropriate files
