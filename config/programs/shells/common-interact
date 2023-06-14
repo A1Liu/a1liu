@@ -30,8 +30,9 @@ function work() {
     tmux new-session -d -s "work$1" -c "$HOME/code/bedrock$1/webapp/wanda"
 
     tmux split-window -h -c "$HOME/code/bedrock$1/webapp/wanda"
-    tmux new-window -c "$HOME/code/bedrock$1/bedrock/cerebro/web/apollo"
-    # tmux split-window -h -c "$HOME/code/sidekick"
+
+    tmux new-window -c "$HOME/code/bedrock$1/bedrock"
+    tmux split-window -h -c "$HOME/code/bedrock$1/bedrock/cerebro/web/apollo"
 
     tmux attach -d -t "work$1"
 }
