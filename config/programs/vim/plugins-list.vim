@@ -68,7 +68,7 @@ if PlugFlag('format')
 endif
 
 if PlugFlag('files')
-  Plug 'justinmk/vim-dirvish'
+  Plug 'preservim/nerdtree'
 endif
 
 if PlugFlag('fzf')

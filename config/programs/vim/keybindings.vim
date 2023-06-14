@@ -94,6 +94,9 @@ nnoremap <C-W>r :tabnext<Enter>
 " Getting back jump list functionality
 nnoremap <C-P> <C-I>
 
+" Toggle the file viewer
+nnoremap <C-B> :NERDTreeToggle<CR>
+
 " Better Screen Repaint
 " Taken shamelessly verbatim from vim-sensible
 nnoremap <silent> <C-L> :ReadBgFlag<CR>:nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
