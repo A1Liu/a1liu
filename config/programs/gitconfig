@@ -33,6 +33,7 @@
 	s = status
 	root = rev-parse --show-toplevel
 	pu = push -u origin HEAD --no-verify
+	up = !git commit -anm '[skip ci] wip' && git push -u origin HEAD --no-verify
 [push]
 	default = simple
 [color "status"]
