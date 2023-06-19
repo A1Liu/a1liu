@@ -6,19 +6,22 @@ snoremap <C-C> <Esc>
 nnoremap r<C-C> <Nop>
 cunmap <C-C>
 
-if !has('nvim')
-  " Mapping <C-H> to escape
-  snoremap <C-H> <Esc>
-  noremap <C-H> <Esc>
-  noremap! <C-H> <Esc>
-  cnoremap <C-H> <C-C>
-  nnoremap r<C-H> <Nop>
+" Mapping <C-H> to escape
+"   NOTE: To get this mapping to work in NeoVim, you may need to run
+"   something like:
+"      infocmp $TERM | sed 's/kbs=^[hH]/kbs=\\177/' > $TERM.ti && tic $TERM.ti
+"
+"                               - Albert Liu, Jun 18, 2023 Sun 18:09
+snoremap <C-H> <Esc>
+noremap <C-H> <Esc>
+noremap! <C-H> <Esc>
+cnoremap <C-H> <C-C>
+nnoremap r<C-H> <Nop>
 
-  " Terminal keybindings
-  if exists(':terminal')
-    tnoremap <C-H> <C-\><C-N>
-    tnoremap <C-W><C-H> <C-W>h
-  endif
+" Terminal keybindings
+if exists(':terminal')
+  tnoremap <C-H> <C-\><C-N>
+  tnoremap <C-W><C-H> <C-W>h
 endif
 
 " Change Leader key

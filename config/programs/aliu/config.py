@@ -76,6 +76,7 @@ def add_safe(output_path, src):
     if os.path.islink(output_path) or os.path.exists(output_path):
         move_safe(output_path, move_path)
 
+    os.makedirs(os.path.dirname(output_path), mode = 0o777, exist_ok = True) 
     os.symlink(link_path, output_path, os.path.isdir(src))
 
 

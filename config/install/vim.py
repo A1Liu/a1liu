@@ -16,7 +16,7 @@ config.debug(f"Installation directory is:   {config.install_dir}")
 config.debug(f"Machine-local directory is:  {config.local_dir}")
 config.debug(f"Preconfig directory is:      {config.move_dir}")
 
-vim_folder = "~/vimfiles" if platform.system() else "~/.vim"
+vim_folder = "~/vimfiles" if platform.system() == "Windows" else "~/.vim"
 
 if should_undo:
     config.remove_replace("~/.vimrc")
@@ -27,6 +27,7 @@ if should_undo:
     exit(0)
 
 config.add_safe("~/.vimrc", "programs/vim/init.vim")
+config.add_safe("~/.config/nvim/init.vim", "programs/vim/init.vim")
 config.add_safe(vim_folder, "programs/vim")
 
 # Confirm install
