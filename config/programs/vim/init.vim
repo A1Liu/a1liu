@@ -80,9 +80,13 @@ set nomodeline modelines=0
 
 "" Compatibility
 set mouse=a
-set guicursor= " Don't want unknown characters in Linux
 set t_ut= " Dont want background to do weird stuff
 set nocompatible
+
+" I haven't seen this in a while, so I'm going to disable it for now
+"                             - Albert Liu, Jun 25, 2023 Sun 18:56
+" set guicursor= " Don't want unknown characters in Linux
+
 if g:os ==? 'Windows'
   set shell=cmd.exe
 endif
