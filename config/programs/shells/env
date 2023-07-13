@@ -73,7 +73,7 @@ elif [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
 
   # export GOROOT="/usr/local/go"
-  export GOPATH="~/go"
+  export GOPATH="$HOME/go" # NOTE: Go doesn't allow you to use the ~ character in GOPATH
   export LINUX_GOPATH="/usr/local/go/bin"
   export PATH="${LINUX_GOPATH}:${GOPATH}:${GOPATH}/bin:${PATH}"
 
