@@ -40,7 +40,6 @@ endif
 
 set number norelativenumber " line numberings
 set hlsearch incsearch " highlighting when using find
-set cc=80
 set cursorline
 set showmode ruler cul cc=80 laststatus=2 showcmd
 
@@ -56,8 +55,8 @@ set statusline+=\ %c:%l\
 
 " GUI Mode
 if has('gui_running')
-  set guioptions=cs
   if !has('gui_macvim')
+    set guioptions=cs
     au! GUIEnter * simalt ~x
   endif
 endif
@@ -78,8 +77,8 @@ if g:os ==? 'Windows'
     set guifont=Consolas:h14
   endif
 elseif g:os ==? 'Darwin'
-  if &guifont !=? 'Menlo:h8'
-    set guifont=Menlo:h8
+  if &guifont !=? 'Menlo:h12'
+    set guifont=Menlo:h12
   endif
 else
   if &guifont !=? 'Courier:h8'
