@@ -135,34 +135,34 @@ if PlugFlag('lsc')
   if g:os ==? 'Windows'
     let g:LanguageClient_diagnosticsDisplay = {
           \   1: {
-            \     "name": "Error",
-            \     "texthl": "ALEError",
-            \     "signText": "x",
-            \     "signTexthl": "ALEErrorSign",
-            \     "virtualTexthl": "Error",
-            \   },
-            \   2: {
-              \     "name": "Warning",
-              \     "texthl": "ALEWarning",
-              \     "signText": "!",
-              \     "signTexthl": "ALEWarningSign",
-              \     "virtualTexthl": "Todo",
-              \   },
-              \   3: {
-                \     "name": "Information",
-                \     "texthl": "ALEInfo",
-                \     "signText": "i",
-                \     "signTexthl": "ALEInfoSign",
-                \     "virtualTexthl": "Todo",
-                \   },
-                \   4: {
-                  \     "name": "Hint",
-                  \     "texthl": "ALEInfo",
-                  \     "signText": "?",
-                  \     "signTexthl": "ALEInfoSign",
-                  \     "virtualTexthl": "Todo",
-                  \   },
-                  \ }
+          \     "name": "Error",
+          \     "texthl": "ALEError",
+          \     "signText": "x",
+          \     "signTexthl": "ALEErrorSign",
+          \     "virtualTexthl": "Error",
+          \   },
+          \   2: {
+          \     "name": "Warning",
+          \     "texthl": "ALEWarning",
+          \     "signText": "!",
+          \     "signTexthl": "ALEWarningSign",
+          \     "virtualTexthl": "Todo",
+          \   },
+          \   3: {
+          \     "name": "Information",
+          \     "texthl": "ALEInfo",
+          \     "signText": "i",
+          \     "signTexthl": "ALEInfoSign",
+          \     "virtualTexthl": "Todo",
+          \   },
+          \   4: {
+          \     "name": "Hint",
+          \     "texthl": "ALEInfo",
+          \     "signText": "?",
+          \     "signTexthl": "ALEInfoSign",
+          \     "virtualTexthl": "Todo",
+          \   },
+          \ }
   endif
 
   command! LCRename :call LanguageClient#textDocument_rename()
