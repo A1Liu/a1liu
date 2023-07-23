@@ -227,4 +227,11 @@ let g:netrw_sort_sequence .= '\.o$,\.obj$,\.class$,'
 " Vim files? Text editor info files and dumb files
 let g:netrw_sort_sequence .= '\.info$,\.swp$,\.bak$,^\.DS_Store$,\~$'
 
+
+
+"" Machine-local config
+if filereadable(PathJoin(g:vim_home_path, "../../local/vimrc"))
+  Import "../../local/vimrc"
+endif
+
 Dbg "VIMRC COMPLETED"
