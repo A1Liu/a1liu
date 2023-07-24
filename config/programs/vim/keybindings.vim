@@ -31,6 +31,9 @@ nnoremap <SPACE> <Nop>
 " Leader Mappings
 nnoremap <Leader>r :!
 nnoremap <Leader>R :read !
+nnoremap <Leader>f /
+nnoremap <Leader>F :RG<CR>
+nnoremap <Leader>O :FZF<CR>
 
 " Placeholder
 nnoremap <Leader><Tab> /<++><CR>cf>
