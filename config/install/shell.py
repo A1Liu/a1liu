@@ -15,6 +15,7 @@ if should_undo:
     config.remove_replace("~/.bash_profile")
     config.remove_replace("~/.inputrc")
     config.remove_replace("~/.zshrc")
+    config.remove_replace("~/.zprofile")
 
     os.remove(config.install_flag_filename("shell"))
     print("Shell config uninstalled successfully.")
@@ -42,6 +43,7 @@ config.add_safe("~/.bash_profile", "local/shell_interact_init")
 config.add_safe("~/.bashrc", "local/shell_interact_init")
 config.add_safe("~/.inputrc", "programs/shells/inputrc")
 config.add_safe("~/.zshrc", "local/shell_interact_init")
+config.add_safe("~/.zprofile", "local/shell_init")
 
 # Confirm install
 open(config.install_flag_filename("shell"), 'w').close()
