@@ -48,6 +48,7 @@ if PlugFlag('format')
   let g:formatters_javascriptreact = ['prettier']
   let g:formatters_typescript = ['prettier']
   let g:formatters_javascript = ['prettier']
+  let g:formatters_svelte = ['prettier']
 
   let g:formatters_arduino = ['clangformat']
   let g:formatters_swift = ['swiftformat']
