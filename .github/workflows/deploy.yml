@@ -1,8 +1,7 @@
 name: Build Static Pages
 
 on:
-  push:
-    branches: main
+  workflow_dispatch:
 
 jobs:
   deployment:
@@ -27,7 +26,7 @@ jobs:
         uses: goto-bus-stop/setup-zig@v1
         with:
           # version: 0.9.1
-          version: 0.10.1
+          version: 0.10.0-dev.2751+08459ff1c
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
