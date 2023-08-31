@@ -1,7 +1,8 @@
 name: Build Static Pages
 
 on:
-  workflow_dispatch:
+  push:
+    branches: main
 
 jobs:
   deployment:
