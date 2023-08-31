@@ -14,11 +14,9 @@
     "check": "svelte-check --tsconfig .svelte-kit/tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig .svelte-kit/tsconfig.json --watch",
     "format": "prettier --no-color --write --plugin-search-dir=. \"{src/routes,src/svelte,src/ts,apps}/**/*.{ts,svelte,js}\"",
-    "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out",
-    "robin": "ROBIN_PROJECT_PATH=`pwd` ~/.robin/beta/bin/robin start"
+    "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
   },
   "dependencies": {
-    "@robinplatform/toolkit": "../robin/toolkit",
     "@tanstack/react-query": "4.24.10",
     "idb-keyval": "6.2.0",
     "immer": "^9.0.21",
