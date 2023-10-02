@@ -101,10 +101,8 @@ nnoremap <C-P> <C-I>
 
 
 "" VSCode keys
-" 1. Toggle the file viewer
-" 2. File name search
-" 3. File content search
-nnoremap <C-B> :NERDTreeToggle<CR>
+" 1. File name search
+" 2. File content search
 if has('gui_macvim')
   " NOTE: these commands map to CMD+SHIFT+O and etc. even though this
   " doesn't say it. MacVim actually has native handling of CMD+O and

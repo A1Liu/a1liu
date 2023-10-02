@@ -72,6 +72,10 @@ endif
 
 if PlugFlag('files', "enables NERDTree")
   Plug 'preservim/nerdtree'
+
+  "" VSCode key - Toggle the file viewer
+  nnoremap <C-B> :NERDTreeFocus<CR>
+  au BufEnter NERD_Tree_* nnoremap <buffer> <C-B> :NERDTreeClose<CR>
 endif
 
 if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")
