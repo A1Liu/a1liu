@@ -140,7 +140,7 @@ if PlugFlag('lsc')
         \]
 
   " coc#refresh() executes the current suggestion
-  inoremap <silent><expr> <c-space> coc#refresh()
+  inoremap <silent><expr> <C-F> coc#refresh()
   nnoremap <silent> <leader>B <Plug>(coc-implementation)
   " nnoremap <silent> <leader>G  :<C-u>CocList commands<cr>
 endif
