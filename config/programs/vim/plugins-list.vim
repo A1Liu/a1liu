@@ -83,6 +83,11 @@ endif
 
 " Languages
 if PlugFlag('polyglot')
+  let g:polyglot_disabled = [
+    \'typescript',
+    \'ftdetect',
+  \]
+
   Plug 'sheerun/vim-polyglot'
   Plug 'ziglang/zig.vim'
   Plug 'evanleck/vim-svelte'
@@ -97,6 +102,7 @@ if PlugFlag('polyglot')
   " in the syntax folder of this highlighter so that it doesn't disappear when
   " using `<C-L>`
   "                                 - Albert Liu, May 14, 2022 Sat 17:16 EDT
+
   Plug 'leafgarland/typescript-vim'
 
   Plug 'jansedivy/jai.vim'
@@ -123,6 +129,10 @@ endif
 " Language server support because I have to I guess
 if PlugFlag('lsc')
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+  let g:coc_global_extensions = [
+    \ 'coc-tsserver',
+    \]
 endif
 
 call plug#end()
