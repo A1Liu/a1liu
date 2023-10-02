@@ -139,10 +139,9 @@ if PlugFlag('lsc')
         \ 'coc-json',
         \]
 
-  " coc#refresh() executes the current suggestion
+  " coc#refresh() opens the suggestion menu, and coc#pum#confirm executes the suggestion
   inoremap <silent><expr> <C-F> coc#pum#visible() ? coc#pum#confirm() : coc#refresh()
   nnoremap <silent> <leader>B <Plug>(coc-implementation)
-  " nnoremap <silent> <leader>G  :<C-u>CocList commands<cr>
 endif
 
 call plug#end()
