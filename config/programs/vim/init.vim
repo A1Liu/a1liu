@@ -1,6 +1,7 @@
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
+let g:init_script_finished = 0
 
 " Print debugging information
 let g:debug_mode = $VIM_DEBUG == '1'
@@ -235,3 +236,4 @@ if filereadable(PathJoin(g:vim_home_path, "../../local/vimrc"))
 endif
 
 Dbg "VIMRC COMPLETED"
+let g:init_script_finished = 1

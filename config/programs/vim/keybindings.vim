@@ -67,8 +67,7 @@ inoremap <expr> <C-U> pumvisible() ? "\<C-P>\<C-P>\<C-P>\<C-P>\<C-P>" : "\<C-U>"
 inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"
 inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
 
-" Using <C-T> to put in a lil thing with my name and stuff in it
-if Flag('aliu')
+if GetFlag('aliu', "Using `<C-T>` to put in a timestamped signature")
   nnoremap <C-T> a<C-R>=strftime("- Albert Liu, %b %d, %Y %a %H:%M")<CR><Esc>
   inoremap <C-T> <C-R>=strftime("- Albert Liu, %b %d, %Y %a %H:%M")<CR>
 endif
@@ -102,10 +101,8 @@ nnoremap <C-P> <C-I>
 
 
 "" VSCode keys
-" 1. Toggle the file viewer
-" 2. File name search
-" 3. File content search
-nnoremap <C-B> :NERDTreeToggle<CR>
+" 1. File name search
+" 2. File content search
 if has('gui_macvim')
   " NOTE: these commands map to CMD+SHIFT+O and etc. even though this
   " doesn't say it. MacVim actually has native handling of CMD+O and

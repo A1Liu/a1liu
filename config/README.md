@@ -43,18 +43,20 @@ My Vim config uses these environment variables at startup:
 - `installed-S` - Whether or not `S` has been run, where `S` is a Python script
   in the install folder (e.g. `shell.py` is represented with `installed-shell`).
 - `vim-S` A Vim flag, where `S` is the name of the flag
-  - `light-mode` - Whether or not Vim is dark or light mode
-  - `aliu` - Whether or not `<C-T>` is bound to a timestamped signature
-  - `plug-base` - Whether or not the default plugins are enabled
-  - `plug-files` - Whether or not file system plugins enabled
-  - `plug-format` - Whether or not vim-autoformat is enabled
-  - `plug-fzf` - Whether or not fzf is enabled
-  - `plug-files` - Whether or not file explorer settings + plugin are enabled
-  - `plug-solarized` - Whether or not the color scheme plugin is enabled
-  - `plug-polyglot` - Whether or not vim-polyglot is enabled
-  - `plug-snippets` - Whether or not vim-snippets is enabled
-  - `plug-lsc` - Whether or not the language server client is enabled
-
+  - `plug-base`
+    - UNIX file commands
+    - Readline support
+  - `plug-files` - enables NERDTree
+  - `plug-solarized` - solarized color theme
+  - `plug-fzf`
+    - Fuzzy filename search
+    - Fuzzy text search (requires ripgrep)
+  - `aliu` - Using `<C-T>` to put in a timestamped signature
+  - `plug-format` - Automatic formatting with :Autoformat
+  - `plug-lsc` - Language server support for e.g. auto-importing functions
+  - `plug-polyglot` - improved syntax highlighting
+  - `light-mode` - enables light mode
+  - `plug-snippets` - Snippets
 
 ### TODO
 - `programs/vim/init.vim` -> should paths care about `/` vs `\`?

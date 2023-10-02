@@ -24,14 +24,16 @@ call plug#begin(g:plugin_manager_home)
 
 Plug '~/code/liu/vim-liu'
 
-if PlugFlag('base')
+if PlugFlag('base', "UNIX file commands", "Readline support")
   Plug 'tpope/vim-eunuch'
-  Plug 'tpope/vim-fugitive'
-  Plug 'machakann/vim-swap'
   Plug 'tpope/vim-rsi'
+
+  " TODO: Start using these
+  " Plug 'tpope/vim-fugitive'
+  " Plug 'machakann/vim-swap'
 endif
 
-if PlugFlag('format')
+if PlugFlag('format', "Automatic formatting with :Autoformat")
   " Autoformatters
   Plug 'Chiel92/vim-autoformat'
 
@@ -68,21 +70,34 @@ if PlugFlag('format')
   augroup END
 endif
 
-if PlugFlag('files')
+if PlugFlag('files', "enables NERDTree")
   Plug 'preservim/nerdtree'
+
+  "" VSCode key - Toggle the file viewer
+  nnoremap <C-B> :NERDTreeFocus<CR>
+  au BufEnter NERD_Tree_* nnoremap <buffer> <C-B> :NERDTreeClose<CR>
 endif
 
-if PlugFlag('fzf')
+if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
 endif
 
-if PlugFlag('solarized')
+if PlugFlag('solarized', "solarized color theme")
   Plug 'lifepillar/vim-solarized8'
 endif
 
 " Languages
-if PlugFlag('polyglot')
+if PlugFlag('polyglot', "improved syntax highlighting")
+  let g:polyglot_disabled = []
+
+  " See comment below for why polyglot's typescript is disabled
+  call add(g:polyglot_disabled, 'typescript')
+
+  " Filetype detection in polyglot leads to some problems with
+  " Conquer-of-Code's TSX handling.
+  call add(g:polyglot_disabled, 'ftdetect')
+
   Plug 'sheerun/vim-polyglot'
   Plug 'ziglang/zig.vim'
   Plug 'evanleck/vim-svelte'
@@ -97,10 +112,11 @@ if PlugFlag('polyglot')
   " in the syntax folder of this highlighter so that it doesn't disappear when
   " using `<C-L>`
   "                                 - Albert Liu, May 14, 2022 Sat 17:16 EDT
+
   Plug 'leafgarland/typescript-vim'
 
   Plug 'jansedivy/jai.vim'
-elseif PlugFlag('markdown')
+elseif PlugFlag('markdown', "improved syntax highlighting for markdown")
   Plug 'plasticboy/vim-markdown'
 endif
 
@@ -111,7 +127,7 @@ let g:vim_markdown_new_list_item_indent = 0
 let g:vim_markdown_auto_insert_bullets = 0
 
 " Snippets
-if PlugFlag('snippets') && !has("gui_macvim")
+if PlugFlag('snippets', "Snippets") && !has("gui_macvim")
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
 
@@ -121,8 +137,17 @@ if PlugFlag('snippets') && !has("gui_macvim")
 endif
 
 " Language server support because I have to I guess
-if PlugFlag('lsc')
+if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+  let g:coc_global_extensions = [
+        \ 'coc-tsserver',
+        \ 'coc-json',
+        \]
+
+  " coc#refresh() opens the suggestion menu, and coc#pum#confirm executes the suggestion
+  inoremap <silent><expr> <C-F> coc#pum#visible() ? coc#pum#confirm() : coc#refresh()
+  nnoremap <silent> <leader>B <Plug>(coc-implementation)
 endif
 
 call plug#end()
