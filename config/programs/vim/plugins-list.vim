@@ -138,6 +138,11 @@ if PlugFlag('lsc')
         \ 'coc-tsserver',
         \ 'coc-json',
         \]
+
+  " coc#refresh() executes the current suggestion
+  inoremap <silent><expr> <c-space> coc#refresh()
+  nnoremap <silent> <leader>B <Plug>(coc-implementation)
+  " nnoremap <silent> <leader>G  :<C-u>CocList commands<cr>
 endif
 
 call plug#end()
