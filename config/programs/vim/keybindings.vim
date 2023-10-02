@@ -24,9 +24,6 @@ if exists(':terminal')
     au TerminalOpen * tnoremap <buffer> <C-H> <C-\><C-N>
     au TerminalOpen * tnoremap <buffer> <C-W><C-H> <C-W>h
   endif
-
-  au FileType fzf tunmap <buffer> <C-H>
-  au FileType fzf tunmap <buffer> <C-W><C-H> <C-W>h
 endif
 
 " Change Leader key
