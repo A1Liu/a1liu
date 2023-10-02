@@ -21,8 +21,8 @@ nnoremap r<C-H> <Nop>
 " Terminal keybindings
 if exists(':terminal')
   if !has('nvim')
-    au TermOpen * tnoremap <buffer> <C-H> <C-\><C-N>
-    au TermOpen * tnoremap <buffer> <C-W><C-H> <C-W>h
+    au TerminalOpen * tnoremap <buffer> <C-H> <C-\><C-N>
+    au TerminalOpen * tnoremap <buffer> <C-W><C-H> <C-W>h
   endif
 
   au FileType fzf tunmap <buffer> <C-H>
