@@ -20,10 +20,8 @@ nnoremap r<C-H> <Nop>
 
 " Terminal keybindings
 if exists(':terminal')
-  if !has('nvim')
-    au TerminalOpen * tnoremap <buffer> <C-H> <C-\><C-N>
-    au TerminalOpen * tnoremap <buffer> <C-W><C-H> <C-W>h
-  endif
+  tnoremap <C-H> <C-\><C-N>
+  tnoremap <C-W><C-H> <C-W>h
 endif
 
 " Change Leader key
