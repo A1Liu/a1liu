@@ -20,8 +20,11 @@ nnoremap r<C-H> <Nop>
 
 " Terminal keybindings
 if exists(':terminal')
-  tnoremap <C-H> <C-\><C-N>
-  tnoremap <C-W><C-H> <C-W>h
+  au TermOpen * tnoremap <buffer> <C-H> <C-\><C-N>
+  au TermOpen * tnoremap <buffer> <C-W><C-H> <C-W>h
+
+  au FileType fzf tunmap <buffer> <C-H>
+  au FileType fzf tunmap <buffer> <C-W><C-H> <C-W>h
 endif
 
 " Change Leader key
