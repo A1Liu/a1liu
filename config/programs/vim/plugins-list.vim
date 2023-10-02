@@ -136,6 +136,7 @@ if PlugFlag('lsc')
 
   let g:coc_global_extensions = [
         \ 'coc-tsserver',
+        \ 'coc-json',
         \]
 endif
 
