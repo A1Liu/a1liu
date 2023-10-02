@@ -83,10 +83,14 @@ endif
 
 " Languages
 if PlugFlag('polyglot')
-  let g:polyglot_disabled = [
-    \'typescript',
-    \'ftdetect',
-  \]
+  let g:polyglot_disabled = []
+
+  " See comment below for why polyglot's typescript is disabled
+  call add(g:polyglot_disabled, 'typescript')
+
+  " Filetype detection in polyglot leads to some problems with
+  " Conquer-of-Code's TSX handling.
+  call add(g:polyglot_disabled, 'ftdetect')
 
   Plug 'sheerun/vim-polyglot'
   Plug 'ziglang/zig.vim'
@@ -131,8 +135,8 @@ if PlugFlag('lsc')
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
   let g:coc_global_extensions = [
-    \ 'coc-tsserver',
-    \]
+        \ 'coc-tsserver',
+        \]
 endif
 
 call plug#end()
