@@ -3,7 +3,7 @@ command! ToggleBg :call ToggleFlag('light-mode') | call ReadBgFlag()
 
 command! ReadBgFlag :call ReadBgFlag()
 function! ReadBgFlag()
-  if Flag('light-mode')
+  if GetFlag('light-mode', "enables light mode")
     set background=light
   else
     set background=dark
