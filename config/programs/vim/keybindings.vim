@@ -32,8 +32,6 @@ nnoremap <SPACE> <Nop>
 nnoremap <Leader>r :!
 nnoremap <Leader>R :read !
 nnoremap <Leader>f /
-nnoremap <Leader>F :RG<CR>
-nnoremap <Leader>O :FZF<CR>
 
 " Placeholder
 nnoremap <Leader><Tab> /<++><CR>cf>
@@ -54,18 +52,7 @@ vnoremap <S-K> gk
 vnoremap <S-J> gj
 
 " What the heck is Select mode?
-nnoremap <silent> gh :call LanguageClient#textDocument_hover()<CR>
 nnoremap g<C-H> <Nop>
-
-" Using <C-J> and <C-K> for navigating the pop-up menu
-" inoremap <C-N><C-O> <C-N>
-inoremap <C-N><C-O> <C-X><C-O>
-inoremap <C-N> <Nop>
-inoremap <C-N><C-T> <C-N>
-inoremap <expr> <C-D> pumvisible() ? "\<C-N>\<C-N>\<C-N>\<C-N>\<C-N>" : "\<C-D>"
-inoremap <expr> <C-U> pumvisible() ? "\<C-P>\<C-P>\<C-P>\<C-P>\<C-P>" : "\<C-U>"
-inoremap <expr> <C-J> pumvisible() ? "\<C-N>" : "\<C-J>"
-inoremap <expr> <C-K> pumvisible() ? "\<C-P>" : "\<C-K>"
 
 if GetFlag('aliu', "Using `<C-T>` to put in a timestamped signature")
   nnoremap <C-T> a<C-R>=strftime("- Albert Liu, %b %d, %Y %a %H:%M")<CR><Esc>

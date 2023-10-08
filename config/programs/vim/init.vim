@@ -93,8 +93,8 @@ if g:os ==? 'Windows'
 endif
 
 Import 'utils.vim'
-Import 'plugins-list.vim'
 Import 'keybindings.vim'
+Import 'plugins-list.vim'
 Import 'visual.vim'
 
 if has('wildmenu')

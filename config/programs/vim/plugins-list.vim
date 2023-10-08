@@ -28,8 +28,20 @@ if PlugFlag('base', "UNIX file commands", "Readline support")
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-rsi'
 
+  Plug 'tpope/vim-fugitive'
+
+  " NOTE: Git integration
+
+  " Some kind of 'show commit for line' functionality
+  " https://www.reddit.com/r/vim/comments/i50pce/how_to_show_commit_that_introduced_current_line/
+  map <silent><Leader>g :call setbufvar(winbufnr(popup_atcursor(systemlist("cd " . shellescape(fnamemodify(resolve(expand('%:p')), ":h")) . " && git log --no-merges -n 1 -L " . shellescape(line("v") . "," . line(".") . ":" . resolve(expand("%:p")))), { "padding": [1,1,1,1], "pos": "botleft", "wrap": 0 })), "&filetype", "git")<CR>
+
+  " This plugin is supposed to emulate GitLens, but it doesn't play nice with
+  " other plugins. Oh well.
+  "Plug 'APZelos/blamer.nvim'
+
+
   " TODO: Start using these
-  " Plug 'tpope/vim-fugitive'
   " Plug 'machakann/vim-swap'
 endif
 
@@ -73,14 +85,26 @@ endif
 if PlugFlag('files', "enables NERDTree")
   Plug 'preservim/nerdtree'
 
+
+  function! SmartNERDTree()
+    if @% == ""
+      NERDTreeFocus
+    else
+      NERDTreeFind
+    endif
+  endfun
+
   "" VSCode key - Toggle the file viewer
-  nnoremap <C-B> :NERDTreeFocus<CR>
+  nnoremap <C-B> :call SmartNERDTree()<CR>
   au BufEnter NERD_Tree_* nnoremap <buffer> <C-B> :NERDTreeClose<CR>
 endif
 
 if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
+
+  nnoremap <Leader>F :RG<CR>
+  nnoremap <Leader>O :FZF<CR>
 endif
 
 if PlugFlag('solarized', "solarized color theme")
@@ -142,12 +166,28 @@ if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
 
   let g:coc_global_extensions = [
         \ 'coc-tsserver',
+        \ 'coc-svelte',
         \ 'coc-json',
         \]
 
   " coc#refresh() opens the suggestion menu, and coc#pum#confirm executes the suggestion
-  inoremap <silent><expr> <C-F> coc#pum#visible() ? coc#pum#confirm() : coc#refresh()
-  nnoremap <silent> <leader>B <Plug>(coc-implementation)
+  "
+  " note that we need to use VimEnter here because otherwise vim-rsi
+  " overwrites <C-F> .
+  autocmd VimEnter * inoremap <silent><expr> <C-F> coc#pum#visible() ? coc#pum#confirm() : coc#refresh()
+  nnoremap <Leader>b <Plug>(coc-implementation)
+  nnoremap <C-F> <Plug>(coc-codeaction-cursor)
+  vnoremap <C-F> <Nop>
+
+  " Using <C-J> and <C-K> for navigating the pop-up menu
+  " inoremap <C-N><C-O> <C-N>
+  " inoremap <C-N><C-O> <C-X><C-O>
+  " inoremap <C-N> <Nop>
+  " inoremap <C-N><C-T> <C-N>
+  " inoremap <expr> <C-D> pumvisible() ? "\<C-N>\<C-N>\<C-N>\<C-N>\<C-N>" : "\<C-D>"
+  " inoremap <expr> <C-U> pumvisible() ? "\<C-P>\<C-P>\<C-P>\<C-P>\<C-P>" : "\<C-U>"
+  inoremap <expr> <C-J> coc#pum#visible() ? "\<C-N>" : "\<C-J>"
+  inoremap <expr> <C-K> coc#pum#visible() ? "\<C-P>" : "\<C-K>"
 endif
 
 call plug#end()
