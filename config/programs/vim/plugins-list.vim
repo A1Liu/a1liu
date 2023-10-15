@@ -176,6 +176,7 @@ endif
 if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
+  " coc-tsserver requires `watchman` to do file refactors - https://facebook.github.io/watchman/
   let g:coc_global_extensions = [
         \ 'coc-tsserver',
         \ 'coc-svelte',
@@ -187,9 +188,14 @@ if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
   " note that we need to use VimEnter here because otherwise vim-rsi
   " overwrites <C-F> .
   autocmd VimEnter * inoremap <silent><expr> <C-F> coc#pum#visible() ? coc#pum#confirm() : coc#refresh()
-  nnoremap <Leader>b <Plug>(coc-implementation)
+  nnoremap <Leader>b <Plug>(coc-definition)
   nnoremap <C-F> <Plug>(coc-codeaction-cursor)
   vnoremap <C-F> <Nop>
+
+  nnoremap <C-E> :call CocAction('definitionHover')<CR>
+
+  nnoremap <Leader>w <Plug>(coc-rename)
+  nnoremap <Leader>e <Plug>(coc-codeaction-cursor)
 
   " Using <C-J> and <C-K> for navigating the pop-up menu
   " inoremap <C-N><C-O> <C-N>

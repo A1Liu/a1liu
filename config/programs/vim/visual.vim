@@ -45,13 +45,25 @@ set showmode ruler cul cc=80 laststatus=2 showcmd
 
 " https://shapeshed.com/vim-statuslines/
 set statusline=
+" Something that I will inevitably run into sometime in the future, and when
+" that happens I will updated this message with what BOM actually is and why
+" it's important. It has caused me pain in the past though, and so I have
+" added this to reduce that pain in the future.
 set statusline+=\ %{&bomb?'BOM':''}
+" File name
 set statusline+=\ %f
+" Whether the file has been modified without being saved
 set statusline+=%m
+" Spacer
 set statusline+=%=
+" File type
 set statusline+=\ %y
+" Progress through the file
 set statusline+=\ %p%%
-set statusline+=\ %c:%l\ 
+" Column and line info
+set statusline+=\ %c:%l
+" Space at the end
+set statusline+=%{\"\\ua0\"}
 
 " GUI Mode
 if has('gui_running')
