@@ -8,7 +8,8 @@ alias vi=vim
 alias di='VIM_DEBUG=1 vim'
 alias zigb='zig build -p .zig/zig-out --cache-dir .zig/zig-cache'
 
-alias rmbranch='git branch | grep -v "main" | grep -v "master" | xargs git branch -D'
+alias rmbranch="git for-each-ref --format='%(refname)' 'refs/heads/' | sed 's|refs/heads/||' | grep -v '.*\\(main\\|master\\)' | xargs git branch -D"
+
 
 # SSH
 alias ssh='TERM=xterm-256color ssh'
