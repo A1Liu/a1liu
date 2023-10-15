@@ -86,19 +86,6 @@ nnoremap <C-W>r :tabnext<Enter>
 " Getting back jump list functionality
 nnoremap <C-P> <C-I>
 
-
-"" VSCode keys
-" 1. File name search
-" 2. File content search
-if has('gui_macvim')
-  " NOTE: these commands map to CMD+SHIFT+O and etc. even though this
-  " doesn't say it. MacVim actually has native handling of CMD+O and
-  " CMD+F, so even though Vim can't tell whether Shift was pressed, MacVim
-  " will only run these mappings when shift is pressed.
-  nnoremap <D-O> :FZF<CR>
-  nnoremap <D-F> :RG<CR>
-endif
-
 " Better Screen Repaint
 " Taken shamelessly verbatim from vim-sensible
 nnoremap <silent> <C-L> :ReadBgFlag<CR>:nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>

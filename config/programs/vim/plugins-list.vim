@@ -104,7 +104,19 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
   Plug 'junegunn/fzf.vim'
 
   nnoremap <Leader>F :RG<CR>
-  nnoremap <Leader>O :FZF<CR>
+  nnoremap <Leader>O :GFiles<CR>
+
+  "" VSCode keys
+  " 1. File name search
+  " 2. File content search
+  if has('gui_macvim')
+    " NOTE: these commands map to CMD+SHIFT+O and etc. even though this
+    " doesn't say it. MacVim actually has native handling of CMD+O and
+    " CMD+F, so even though Vim can't tell whether Shift was pressed, MacVim
+    " will only run these mappings when shift is pressed.
+    nnoremap <D-O> :GFiles<CR>
+    nnoremap <D-F> :RG<CR>
+  endif
 endif
 
 if PlugFlag('solarized', "solarized color theme")
