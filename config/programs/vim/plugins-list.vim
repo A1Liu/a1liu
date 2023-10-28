@@ -28,7 +28,9 @@ if PlugFlag('base', "UNIX file commands", "Readline support")
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-rsi'
 
+  " Git & Github
   Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-rhubarb'
 
   " NOTE: Git integration
 
@@ -102,6 +104,9 @@ endif
 if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
+
+  " I wanna make this save previous history, but that's
+  " proving very annoying. Not sure what to do yet.
 
   nnoremap <Leader>F :RG<CR>
   nnoremap <Leader>O :GFiles<CR>

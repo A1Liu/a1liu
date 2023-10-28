@@ -101,3 +101,22 @@ nnoremap <C-W><S-N> :aboveleft :split<CR>:enew<CR>
 nnoremap j gj
 nnoremap k gk
 
+nnoremap <C-J> 4gj
+nnoremap <C-K> 4gk
+
+" Visual Star
+" http://got-ravings.blogspot.com/2008/07/vim-pr0n-visual-search-mappings.html
+"
+" Press * in visual mode to go to the next occurence
+" of the text currently in your selection
+function! s:VSetSearch()
+  let temp = @@
+  norm! gvy
+  let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
+  let @@ = temp
+endfunction
+
+vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
+vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
+
+nnoremap <C-G> :GBrowse<CR>
