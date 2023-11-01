@@ -103,6 +103,8 @@ nnoremap k gk
 
 nnoremap <C-J> 4gj
 nnoremap <C-K> 4gk
+vnoremap <C-J> 4gj
+vnoremap <C-J> 4gk
 
 " Visual Star
 " http://got-ravings.blogspot.com/2008/07/vim-pr0n-visual-search-mappings.html
