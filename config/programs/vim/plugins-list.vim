@@ -86,7 +86,8 @@ endif
 
 if PlugFlag('files', "enables NERDTree")
   Plug 'preservim/nerdtree'
-
+  let g:NERDTreeMapJumpNextSibling = ""
+  let g:NERDTreeMapJumpPrevSibling = ""
 
   function! SmartNERDTree()
     if @% == ""
@@ -96,9 +97,19 @@ if PlugFlag('files', "enables NERDTree")
     endif
   endfun
 
-  "" VSCode key - Toggle the file viewer
-  nnoremap <C-B> :call SmartNERDTree()<CR>
-  au BufEnter NERD_Tree_* nnoremap <buffer> <C-B> :NERDTreeClose<CR>
+  augroup NerdTree
+    au!
+
+    "" VSCode key - Toggle the file viewer
+    nnoremap <C-B> :call SmartNERDTree()<CR>
+    au BufEnter NERD_Tree_*
+          \ nnoremap <buffer> <C-B> :NERDTreeClose<CR>
+
+    au BufEnter NERD_Tree_* nnoremap <buffer> <C-J> 4gj
+    au BufEnter NERD_Tree_* nnoremap <buffer> <C-K> 4gk
+    au BufEnter NERD_Tree_* vnoremap <buffer> <C-J> 4gj
+    au BufEnter NERD_Tree_* vnoremap <buffer> <C-K> 4gk
+  augroup end
 endif
 
 if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")

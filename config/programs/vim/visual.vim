@@ -69,7 +69,10 @@ set statusline+=%{\"\\ua0\"}
 if has('gui_running')
   if !has('gui_macvim')
     set guioptions=cs
-    au! GUIEnter * simalt ~x
+    augroup GuiMacvim
+      autocmd!
+      autocmd! GUIEnter * simalt ~x
+    augroup end
   endif
 endif
 
