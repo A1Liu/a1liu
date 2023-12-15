@@ -14,15 +14,15 @@
 
     <h2>About Me</h2>
     <p>
-      Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer
-      at Dandy. I recently graduated from New York University. In high school, I
-      once ate 2 whole hot dogs for lunch.
+      Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer,
+      with experience in fullstack development.
+      I recently graduated from New York University.
     </p>
 
     <h2>What I&apos;m Doing Now</h2>
     <p>
-      Slowly learning things here and there while working on
-      <a href="/painter/">Painter</a>{" "}and other projects.
+      I'm working at a stealth startup building a data security product,
+      and also trying to learn to skateboard.
     </p>
 
     <h2>Projects</h2>
