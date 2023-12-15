@@ -14,19 +14,23 @@
 
     <h2>About Me</h2>
     <p>
-      Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer
-      at Dandy. I recently graduated from New York University. In high school, I
-      once ate 2 whole hot dogs for lunch.
+      Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer,
+      with experience in fullstack development.
+      I recently graduated from New York University.
     </p>
 
     <h2>What I&apos;m Doing Now</h2>
     <p>
-      Slowly learning things here and there while working on
-      <a href="/painter/">Painter</a>{" "}and other projects.
+      I'm working at a stealth startup building a data security product,
+      and also trying to learn to skateboard.
     </p>
 
     <h2>Projects</h2>
     <ul>
+    <!-- These projects have been broken as of the latest Zig update;
+          I feel too tired to put in the effort to maintain them, but I
+          still want to update the website, so removing them will have to
+          do for now.
       <li>
         <a href="/game-2d-simple/">Simple 2D Game</a>{" "}
         - Really simple 2D game
@@ -45,6 +49,8 @@
         >, which was inspired by{" "}
         <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a>
       </li>
+
+      -->
 
       <li>
         <a href="https://tci.a1liu.com/">Teaching C Interpreter</a>{" "}

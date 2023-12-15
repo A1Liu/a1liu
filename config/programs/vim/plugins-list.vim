@@ -198,6 +198,7 @@ if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
         \ 'coc-svelte',
         \ 'coc-json',
         \ 'coc-rust-analyzer',
+        \ 'coc-go',
         \]
 
   " coc#refresh() opens the suggestion menu, and coc#pum#confirm executes the suggestion
