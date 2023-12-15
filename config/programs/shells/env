@@ -59,8 +59,8 @@ export PYTHONPATH="${CFG_DIR}/programs"
 # working in Tmux.
 # https://superuser.com/questions/544989/does-tmux-sort-the-path-variable
 
-# ^ Continuation: I think I've fixed it by using a zig helper program to edit
-# my path. Old code is kept for now. Unsure how to work around zig dependency
+# ^ Continuation: I think I've fixed it by using a go helper program to edit
+# my path. Old code is kept for now. Unsure how to work around go dependency
 # stuffs
 
 

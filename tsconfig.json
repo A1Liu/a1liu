@@ -12,7 +12,6 @@
     "strict": true,
     "paths": {
       "@lib/*": ["./src/*"],
-      "@zig/*": ["./.zig/zig-out/*"],
       "$lib": ["./src"],
       "$lib/*": ["./src/*"]
     }

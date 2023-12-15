@@ -3,11 +3,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 1337",
-    "zig": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache && echo DONE' src/",
-    "zig:r": "watch 'zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Doptimize=ReleaseSafe && echo DONE' src/",
-    "build:zig": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache",
-    "build:zig:r": "zig build -p .zig/zig-out --cache-dir .zig/zig-cache -Doptimize=ReleaseSmall",
-    "test:zig": "zig test --cache-dir .zig/zig-cache src/liu/lib.zig",
     "build:path-helper": "go build -ldflags '-s -w' -o config/local/path/a1liu_path_helper a1liu.com/src/tools/pathHelper",
     "build": "vite build",
     "package": "vite package",
@@ -15,7 +10,7 @@
     "check": "svelte-check --tsconfig .svelte-kit/tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig .svelte-kit/tsconfig.json --watch",
     "format": "prettier --no-color --write --plugin-search-dir=. \"{src/routes,src/svelte,src/ts,apps}/**/*.{ts,svelte,js}\"",
-    "clean": "rm -rf .svelte-kit .out .zig zig-cache zig-out"
+    "clean": "rm -rf .svelte-kit .out"
   },
   "dependencies": {
     "@tanstack/react-query": "4.24.10",
