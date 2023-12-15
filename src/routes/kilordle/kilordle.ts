@@ -1,6 +1,7 @@
 import WordleWordsString from "./wordle-words.txt";
 import WordlesString from "./wordles.txt";
 
+// Uppercase means the output text should be orange.
 export interface PuzzleData {
   solution: string;
   filled: string;
@@ -71,6 +72,8 @@ class Worlde {
         }
       }
     });
+
+    matchWordle(puzzle, submission);
   }
 
   get puzzles(): string[] {
