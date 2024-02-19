@@ -1,3 +1,4 @@
 {
+  "typescript.showDeprecated": false,
   "svelte.enable-ts-plugin": true
 }
