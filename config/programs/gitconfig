@@ -37,7 +37,7 @@
 	pu = push -u origin HEAD --no-verify
 
 	# Ensure a run of CI happens
-	puck = !git commit -anm 'run ci' && git push -u origin HEAD --no-verify --allow-empty
+	puck = !git commit -anm --allow-empty 'run ci' && git push -u origin HEAD --no-verify
 	# Push up in-progress work, and also avoid wasteful CI run on WIP code
 	up = !git commit -anm '[skip ci] wip' && git push -u origin HEAD --no-verify
 [push]
