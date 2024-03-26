@@ -24,6 +24,8 @@
 	oneline = true
 [alias]
 	l = log --graph --oneline
+
+	# Commit all current changes. Misses untracked files.
 	co = commit -anm
 	fwd =  "!f() { \
 	          git checkout $(git rev-list --topo-order HEAD..\"$*\" | tail -1); \
@@ -33,6 +35,10 @@
 	s = status
 	root = rev-parse --show-toplevel
 	pu = push -u origin HEAD --no-verify
+
+	# Ensure a run of CI happens
+	puck = !git commit -anm 'run ci' && push -u origin HEAD --no-verify --allow-empty
+	# Push up in-progress work, and also avoid wasteful CI run on WIP code
 	up = !git commit -anm '[skip ci] wip' && git push -u origin HEAD --no-verify
 [push]
 	default = simple

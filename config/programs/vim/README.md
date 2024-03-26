@@ -15,3 +15,6 @@
 ## NERDTree
 - `R` - refresh
 - `C` - Change the folder under the cursor to be the new root
+
+## Ignoring Files
+- For ripgrep: `.rgignore` file
