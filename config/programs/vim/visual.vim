@@ -80,9 +80,11 @@ command! SynStack :call SynStack()
 
 " Color Scheme
 try
-  colorscheme solarized8_high
+  colorscheme wildcharm
+  " Maybe try lunaperche as well
+  " or slate or sorbet
 catch
-  colorscheme habamax
+  colorscheme default
 endtry
 ReadBgFlag
 
