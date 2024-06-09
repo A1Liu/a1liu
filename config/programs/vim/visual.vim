@@ -82,7 +82,7 @@ command! SynStack :call SynStack()
 try
   colorscheme solarized8_high
 catch
-  colorscheme default
+  colorscheme habamax
 endtry
 ReadBgFlag
 

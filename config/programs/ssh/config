@@ -1,8 +1,7 @@
-# Host bedrock
-# Host *
-#   Hostname github.com
-#   IdentityFile ~/.ssh/id_bedrock
-#   IdentitiesOnly yes
+Host bedrock
+  Hostname github.com
+  IdentityFile ~/.ssh/id_bedrock
+  IdentitiesOnly yes
 
 Host *
   IdentityFile ~/.ssh/id_aliu

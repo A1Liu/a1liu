@@ -133,6 +133,7 @@ a1liu_load_nvm () {
     fi
 }
 
+# TODO: Put these in `.zshenv` instead of here
 # The unalias happens above, so it's unnecessary here.
 #                       - Albert Liu, Feb 01, 2022 Tue 02:20 EST
 alias nvm='a1liu_load_nvm && nvm'
