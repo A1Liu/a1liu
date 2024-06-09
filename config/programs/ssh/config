@@ -5,5 +5,7 @@ Host bedrock
 
 Host *
   IdentityFile ~/.ssh/id_aliu
-  AddressFamily inet
+  # This was causing issues when connecting to git over
+  # mobile hot spot. IDK.
+  # AddressFamily inet
 
