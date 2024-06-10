@@ -22,8 +22,6 @@ execute 'source ' . g:plugin_manager_script_path
 
 call plug#begin(g:plugin_manager_home)
 
-Plug '~/code/liu/vim-liu'
-
 if PlugFlag('base', "UNIX file commands", "Readline support")
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-rsi'
@@ -135,10 +133,6 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
   endif
 endif
 
-if PlugFlag('solarized', "solarized color theme")
-  Plug 'lifepillar/vim-solarized8'
-endif
-
 " Languages
 if PlugFlag('polyglot', "improved syntax highlighting")
   let g:polyglot_disabled = []
@@ -166,8 +160,6 @@ if PlugFlag('polyglot', "improved syntax highlighting")
   "                                 - Albert Liu, May 14, 2022 Sat 17:16 EDT
 
   Plug 'leafgarland/typescript-vim'
-
-  Plug 'jansedivy/jai.vim'
 elseif PlugFlag('markdown', "improved syntax highlighting for markdown")
   Plug 'plasticboy/vim-markdown'
 endif
@@ -201,7 +193,8 @@ if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
         \ 'coc-go',
         \]
 
-  " coc#refresh() opens the suggestion menu, and coc#pum#confirm executes the suggestion
+  " coc#refresh() opens the suggestion menu, and coc#pum#confirm executes
+  " the suggestion
   "
   " note that we need to use VimEnter here because otherwise vim-rsi
   " overwrites <C-F> .
