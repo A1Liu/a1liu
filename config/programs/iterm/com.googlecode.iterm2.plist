@@ -18,20 +18,6 @@
 	<true/>
 	<key>GlobalKeyMap</key>
 	<dict>
-		<key>0x21-0x60000</key>
-		<dict>
-			<key>Action</key>
-			<integer>40</integer>
-			<key>Text</key>
-			<string>Solarized Dark</string>
-		</dict>
-		<key>0x40-0x60000</key>
-		<dict>
-			<key>Action</key>
-			<integer>40</integer>
-			<key>Text</key>
-			<string>Solarized Light</string>
-		</dict>
 		<key>0x72-0x100000-0xf</key>
 		<dict>
 			<key>Action</key>
@@ -440,20 +426,6 @@
 					<integer>11</integer>
 					<key>Text</key>
 					<string>0x1f</string>
-				</dict>
-				<key>0x31-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>40</integer>
-					<key>Text</key>
-					<string>Solarized Dark</string>
-				</dict>
-				<key>0x32-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>40</integer>
-					<key>Text</key>
-					<string>Solarized Light</string>
 				</dict>
 				<key>0x33-0x40000</key>
 				<dict>
@@ -1143,20 +1115,6 @@
 					<integer>11</integer>
 					<key>Text</key>
 					<string>0x1f</string>
-				</dict>
-				<key>0x31-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>40</integer>
-					<key>Text</key>
-					<string>Solarized Dark</string>
-				</dict>
-				<key>0x32-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>40</integer>
-					<key>Text</key>
-					<string>Solarized Light</string>
 				</dict>
 				<key>0x33-0x40000</key>
 				<dict>
@@ -2128,7 +2086,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>SourceCodeProForPowerline-Regular 14</string>
+			<string>Menlo-Regular 11</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<false/>
 			<key>Option Key Sends</key>
