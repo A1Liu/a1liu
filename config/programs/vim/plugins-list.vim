@@ -200,6 +200,8 @@ if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
   " overwrites <C-F> .
   autocmd VimEnter * inoremap <silent><expr> <C-F> coc#pum#visible() ? coc#pum#confirm() : coc#refresh()
   nnoremap <Leader>b <Plug>(coc-definition)
+  nnoremap <Leader>n :call CocAction('jumpDefinition', 'split')<CR>
+  nnoremap <Leader>v :call CocAction('jumpDefinition', 'vsplit')<CR>
   nnoremap <C-F> <Plug>(coc-codeaction-cursor)
   vnoremap <C-F> <Nop>
 
