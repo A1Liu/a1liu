@@ -14,15 +14,16 @@
 
     <h2>About Me</h2>
     <p>
-      Hi, I&apos;m Albert, and this is my website! I&apos;m a Software Engineer,
-      with experience in fullstack development.
-      I recently graduated from New York University.
+      Hi, I&apos;m Albert, and this is my website! I&#39;m a Software Engineer
+      at Bedrock Security, where I am the primary owner of our user-facing application and API surface.
+      Before that, I was a full-stack engineer at Dandy, building internal operations tooling.
     </p>
 
     <h2>What I&apos;m Doing Now</h2>
     <p>
-      I'm working at a stealth startup building a data security product,
-      and also trying to learn to skateboard.
+      I'm working at Bedrock Security, which recently exited stealth mode,
+      and also trying to learn to freeskate. I'm also working on 
+      <a href="https://github.com/A1Liu/webb">a framework for local-first application development</a>.
     </p>
 
     <h2>Projects</h2>
