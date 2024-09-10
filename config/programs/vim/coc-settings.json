@@ -1,5 +1,0 @@
-{
-  "typescript.showDeprecated": false,
-  "tsserver.reportStyleChecksAsWarnings": false,
-  "svelte.enable-ts-plugin": true
-}
