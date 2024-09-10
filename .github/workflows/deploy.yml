@@ -27,17 +27,8 @@ jobs:
           node-version: 18.17.1
           cache: pnpm
 
-      - name: Setup Zig
-        uses: goto-bus-stop/setup-zig@v1
-        with:
-          # version: 0.9.1
-          version: 0.10.0-dev.2751+08459ff1c
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Build Zig
-        run: zig build -Drelease-small
 
           # - name: Clean garbage
           #   run: |
