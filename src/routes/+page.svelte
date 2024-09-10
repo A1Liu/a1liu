@@ -21,38 +21,13 @@
 
     <h2>What I&apos;m Doing Now</h2>
     <p>
-      I'm working at Bedrock Security, which recently exited stealth mode,
-      and also trying to learn to freeskate. I'm also working on 
+      I'm working at Bedrock Security, which recently exited stealth mode.
+      Outsite of work, I'm trying to learn to freeskate, and working on
       <a href="https://github.com/A1Liu/webb">a framework for local-first application development</a>.
     </p>
 
     <h2>Projects</h2>
     <ul>
-    <!-- These projects have been broken as of the latest Zig update;
-          I feel too tired to put in the effort to maintain them, but I
-          still want to update the website, so removing them will have to
-          do for now.
-      <li>
-        <a href="/game-2d-simple/">Simple 2D Game</a>{" "}
-        - Really simple 2D game
-      </li>
-
-      <li>
-        <a href="/painter/">Painter</a>{" "}
-        - Tiny WebGL2 drawing app
-      </li>
-
-      <li>
-        <a href="/kilordle/">Kilordle Clone</a>{" "}
-        - Clone of{" "}
-        <a href="https://jonesnxt.github.io/kilordle/">
-          someone else&apos;s idea</a
-        >, which was inspired by{" "}
-        <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a>
-      </li>
-
-      -->
-
       <li>
         <a href="https://github.com/A1Liu/webb">Distributed Application Framework</a>{" "}
         - A framework for building privacy-protecting local-first applications in iOS and Web
