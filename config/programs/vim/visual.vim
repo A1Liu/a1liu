@@ -93,9 +93,10 @@ endtry
 ReadBgFlag
 
 " Font on GUI Programs
+" TODO This is very finnicky. Need to make it easier to adjust this dynamically
 if g:os ==? 'Windows'
-  if &guifont !=? 'Consolas:h14'
-    set guifont=Consolas:h14
+  if &guifont !=? 'Consolas:h11'
+    set guifont=Consolas:h11
   endif
 elseif g:os ==? 'Darwin'
   if &guifont !=? 'Menlo:h12'
