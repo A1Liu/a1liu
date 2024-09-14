@@ -18,6 +18,17 @@ as administrator:
 winget uninstall "windows web experience pack"
 ```
 
+### Starting off Right: Using "English International"
+When creating the Windows ISO, you should use the "English International" option,
+instead of English. This means that you'll get an EU regulation compliant version
+of Windows, which will make it much easier to uninstall everything. It also will
+not contain copilot (as of 2024). For more info, see [this article](https://www.zdnet.com/article/heres-how-microsoft-will-change-windows-to-comply-with-eu-laws/)
+
+### Use Rufus to Bypass internet connectivity requirements
+Another thing you can do to reduce the amount of nonsense installed without you even
+knowing is to remove the requirement to install Windows with an internet connection.
+See [rufus](https://rufus.ie/en/) which does this for you during the ISO burn step.
+
 ### Removing Web Results/Bing from Windows Search
 Following [this article](https://nerdschalk.com/how-to-disable-web-results-in-windows-11-start-or-search-menu/):
 
