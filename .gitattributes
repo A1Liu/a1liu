@@ -1,6 +1,8 @@
 *.zig text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
+*.vim text eol=lf
+.gitattributes text eol=lf
 /public/apps/** -text
 *.ico filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
