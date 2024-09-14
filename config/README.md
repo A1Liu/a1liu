@@ -42,21 +42,8 @@ My Vim config uses these environment variables at startup:
 ### Flag Files
 - `installed-S` - Whether or not `S` has been run, where `S` is a Python script
   in the install folder (e.g. `shell.py` is represented with `installed-shell`).
-- `vim-S` A Vim flag, where `S` is the name of the flag
-  - `plug-base`
-    - UNIX file commands
-    - Readline support
-  - `plug-files` - enables NERDTree
-  - `plug-solarized` - solarized color theme
-  - `plug-fzf`
-    - Fuzzy filename search
-    - Fuzzy text search (requires ripgrep)
-  - `aliu` - Using `<C-T>` to put in a timestamped signature
-  - `plug-format` - Automatic formatting with :Autoformat
-  - `plug-lsc` - Language server support for e.g. auto-importing functions
-  - `plug-polyglot` - improved syntax highlighting
-  - `light-mode` - enables light mode
-  - `plug-snippets` - Snippets
+- `vim-S` A Vim flag, where `S` is the name of the flag. See the Vim README for more
+  details.
 
 ### TODO
 - `programs/vim/init.vim` -> should paths care about `/` vs `\`?
@@ -67,3 +54,5 @@ My Vim config uses these environment variables at startup:
 - `install/setup` -> reorganize, maybe just turn it into docs instead of scripts
 - SSH key stuff
 - Figure out how to handle new Zig dependency for path management stuffs
+
+
