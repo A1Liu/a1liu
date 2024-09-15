@@ -9,7 +9,8 @@ pkgs.mkShellNoCC {
     vim
     zsh
     nodejs_22
+    python3
   ];
 
-  shellHook = "zsh; exit";
+  # shellHook = "zsh; exit";
 }
