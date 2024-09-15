@@ -120,6 +120,12 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
   nnoremap <Leader>F :RG<CR>
   nnoremap <Leader>O :GFiles<CR>
 
+  " Read from clipboard when pressing Ctrl-V
+  autocmd! FileType fzf tnoremap <expr> <C-v> getreg(nr2char('"'))
+
+  " Override default fzf actions so that Ctrl-V always does a paste
+  let g:fzf_action = { 'ctrl-t': 'tab split' }
+
   "" VSCode keys
   " 1. File name search
   " 2. File content search
