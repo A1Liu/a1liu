@@ -52,7 +52,7 @@ if PlugFlag('format', "Automatic formatting with :Autoformat")
   let s:clangfmt = "-lines='.a:firstline.':'.a:lastline.' --assume-filename=\"'.expand('%:p').'\" -style=file"
   let g:formatdef_clangformat = "'clang-format " . s:clangfmt . "'"
   let g:formatdef_swiftformat = "'swiftformat --quiet'"
-  let g:formatdef_prettier = "npx " . g:formatdef_prettier
+  let g:formatdef_prettier = '"npx prettier --stdin-filepath ".expand("%:p").(&textwidth ? " --print-width ".&textwidth : "")." --tab-width=".shiftwidth()'
 
   " Meh, clang-format not pulling its weight with Java 19, and also it's not
   " well supported by Java ecosystem, so difficult to get other peeps to use
