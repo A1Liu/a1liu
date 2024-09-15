@@ -58,7 +58,7 @@ if PlugFlag('format', "Automatic formatting with :Autoformat")
   " it easily
   " let g:formatters_java = ['clangformat']
 
-  let g:formatters_typescriptreact = ['prettier']
+  let g:formatters_typescriptreact = ['npx prettier']
   let g:formatters_javascriptreact = ['prettier']
   let g:formatters_typescript = ['prettier']
   let g:formatters_javascript = ['prettier']

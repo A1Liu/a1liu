@@ -3,15 +3,18 @@ let
   pkgs = import nixpkgs { config = {}; overlays = []; };
 in
 
+
 pkgs.mkShellNoCC {
   packages = with pkgs; [
     # Tools
     zsh
-    vim
     ripgrep
     git
     git-lfs
     tmux
+    (vim_configurable.override {
+      python3 = pkgs.python3;
+    })
 
     # Programming Languages
     python3
