@@ -5,12 +5,19 @@ in
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
-    git
-    vim
+    # Tools
     zsh
-    nodejs_22
-    python3
-  ];
+    vim
+    ripgrep
+    git
+    git-lfs
+    tmux
 
-  # shellHook = "zsh; exit";
+    # Programming Languages
+    python3
+    go
+    rustup
+    nodejs_22
+    pnpm
+  ];
 }
