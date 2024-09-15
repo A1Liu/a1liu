@@ -5,8 +5,11 @@ in
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
-    cowsay
-    lolcat
+    git
+    vim
+    zsh
+    nodejs_22
   ];
 
+  shellHook = "zsh; exit";
 }

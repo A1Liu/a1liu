@@ -1,4 +1,5 @@
 *.md text eol=lf
+*.nix text eol=lf
 *.json text eol=lf
 *.zig text eol=lf
 *.ts text eol=lf
