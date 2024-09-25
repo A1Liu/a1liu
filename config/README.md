@@ -55,4 +55,10 @@ My Vim config uses these environment variables at startup:
 - SSH key stuff
 - Figure out how to handle new Zig dependency for path management stuffs
 
+### Useful Windows/PowerShell Commands
 
+- Delete all local branches
+
+  ```ps1
+  git for-each-ref --format '%(refname:short)' refs/heads | %{ $_.Trim() } | ?{ $_ -ne 'master' } | ?{ $_ -ne 'main'} | ?{ $_ -ne 'develop'} | %{ git branch -D $_ }
+  ```
