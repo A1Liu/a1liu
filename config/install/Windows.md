@@ -24,10 +24,23 @@ instead of English. This means that you'll get an EU regulation compliant versio
 of Windows, which will make it much easier to uninstall everything. It also will
 not contain copilot (as of 2024). For more info, see [this article](https://www.zdnet.com/article/heres-how-microsoft-will-change-windows-to-comply-with-eu-laws/)
 
+NOTE: I have not been able to get this to work properly yet. However, in theory
+it should make the experience better.
+
 ### Use Rufus to Bypass internet connectivity requirements
 Another thing you can do to reduce the amount of nonsense installed without you even
 knowing is to remove the requirement to install Windows with an internet connection.
 See [rufus](https://rufus.ie/en/) which does this for you during the ISO burn step.
+
+### Adding a `bin` folder
+Copied from: https://www.reddit.com/r/commandline/comments/7r574s/comment/dsv1z5u/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+
+These steps need to be done once per account only
+- Add the `/bin` folder at the root of your user (`%USERPROFILE%/bin`)
+- Run `control sysdm.cpl`, in the tab "Advanced" click on "Environment Variables..."
+  and add `%USERPROFILE%\bin` to the PATH variable of your account, don't edit the
+  global `PATH` variable. It's your decision if you want it at the start or at the end.
+  Windows goes through this in order and will stop as soon as a match is found.
 
 ### Removing Web Results/Bing from Windows Search
 Following [this article](https://nerdschalk.com/how-to-disable-web-results-in-windows-11-start-or-search-menu/):
