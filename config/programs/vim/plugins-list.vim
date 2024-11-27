@@ -191,12 +191,13 @@ endif
 if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
+  " \ 'coc-rust-analyzer',
+
   " coc-tsserver requires `watchman` to do file refactors - https://facebook.github.io/watchman/
   let g:coc_global_extensions = [
         \ 'coc-tsserver',
         \ 'coc-svelte',
         \ 'coc-json',
-        \ 'coc-rust-analyzer',
         \ 'coc-go',
         \]
 
