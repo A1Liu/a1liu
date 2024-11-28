@@ -5,9 +5,11 @@ Config = {
   home = home,
   cfg_dir = cfg_dir,
   vim_dir = vim.fs.joinpath(cfg_dir, "programs", "vim"),
-  vim_dir = vim.fs.joinpath(cfg_dir, "programs", "vim"),
 }
 
+local Util = dofile(home .. "/util.lua")
+
 -- print("Path" .. Config.home)
+Util.hello()
 
 vim.cmd('source ' .. vim.fs.joinpath(Config.vim_dir, "init.vim"))
