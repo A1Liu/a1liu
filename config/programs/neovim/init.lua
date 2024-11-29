@@ -9,7 +9,8 @@ Config = {
 
 local Util = require("util")
 
+Util.import("compat")
+
 -- print("Path" .. Config.home)
-Util.hello()
 
 vim.cmd('source ' .. vim.fs.joinpath(Config.vim_dir, "init.vim"))

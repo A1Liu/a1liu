@@ -69,10 +69,11 @@ set statusline+=%{\"\\ua0\"}
 if has('gui_running')
   if !has('gui_macvim')
     try
-      set guioptions=cs
-    catch
       set guioptions=c
+      set guioptions+=s
+    catch
     endtry
+
     augroup GuiMacvim
       autocmd!
       autocmd! GUIEnter * simalt ~x
@@ -103,7 +104,10 @@ elseif g:os ==? 'Darwin'
     set guifont=Menlo:h12
   endif
 else
-  if &guifont !=? 'Courier:h8'
-    set guifont=Courier:h8
-  endif
+  " if &guifont !=? 'Courier:h8'
+  "   try
+  "     set guifont=Courier:h8
+  "   catch
+  "   endtry
+  " endif
 endif
