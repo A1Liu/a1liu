@@ -16,5 +16,5 @@ local Util = require("util")
 Util.import("compat/mod")
 Util.import("plugins")
 
--- print("Path" .. Config.home)
+print("Path" .. Config.home)
 

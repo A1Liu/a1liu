@@ -5,8 +5,9 @@ function Exports.import(name)
     return require(name)
   end
 
-  return xpcall(import, function()
+  return xpcall(import, function(error)
     print("Failed to import file: " .. name)
+    print("  Error: " .. error)
   end)
 end
 
