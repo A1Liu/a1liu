@@ -7,7 +7,7 @@ Config = {
   vim_dir = vim.fs.joinpath(cfg_dir, "programs", "vim"),
 }
 
-local Util = dofile(home .. "/util.lua")
+local Util = require("util")
 
 -- print("Path" .. Config.home)
 Util.hello()
