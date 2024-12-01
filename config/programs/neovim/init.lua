@@ -13,7 +13,7 @@ vim.cmd('source ' .. vim.fs.joinpath(Config.vim_dir, "init.vim"))
 
 local Util = require("util")
 
-Util.import("compat/mod")
+Util.import("compat")
 Util.import("plugins")
 
 print("Path" .. Config.home)
