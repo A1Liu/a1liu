@@ -83,6 +83,34 @@ if PlugFlag('format', "Automatic formatting with :Autoformat")
   augroup END
 endif
 
+if PlugFlag('files', "enables NERDTree")
+  Plug 'preservim/nerdtree'
+  let g:NERDTreeMapJumpNextSibling = ""
+  let g:NERDTreeMapJumpPrevSibling = ""
+
+  function! SmartNERDTree()
+    if @% == ""
+      NERDTreeFocus
+    else
+      NERDTreeFind
+    endif
+  endfun
+
+  augroup NerdTree
+    au!
+
+    "" VSCode key - Toggle the file viewer
+    nnoremap <C-B> :call SmartNERDTree()<CR>
+    au BufEnter NERD_Tree_*
+          \ nnoremap <buffer> <C-B> :NERDTreeClose<CR>
+
+    au BufEnter NERD_Tree_* nnoremap <buffer> <C-J> 4gj
+    au BufEnter NERD_Tree_* nnoremap <buffer> <C-K> 4gk
+    au BufEnter NERD_Tree_* vnoremap <buffer> <C-J> 4gj
+    au BufEnter NERD_Tree_* vnoremap <buffer> <C-K> 4gk
+  augroup end
+endif
+
 if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
@@ -112,11 +140,52 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
   endif
 endif
 
-" let g:vim_markdown_math = 1
-" let g:vim_markdown_frontmatter = 1
-" let g:vim_markdown_folding_disabled = 1
-" let g:vim_markdown_new_list_item_indent = 0
-" let g:vim_markdown_auto_insert_bullets = 0
+" Languages
+if PlugFlag('polyglot', "improved syntax highlighting")
+  let g:polyglot_disabled = []
+
+  " See comment below for why polyglot's typescript is disabled
+  call add(g:polyglot_disabled, 'typescript')
+
+  " Filetype detection in polyglot leads to some problems with
+  " Conquer-of-Code's TSX handling.
+  call add(g:polyglot_disabled, 'ftdetect')
+
+  Plug 'sheerun/vim-polyglot'
+  Plug 'ziglang/zig.vim'
+  Plug 'evanleck/vim-svelte'
+
+  " Polyglot uses yats, which is 'advanced', i.e. overengineered and idiotic.
+  " We use this plugin instead. Because, you can write all the stupid fucking
+  " colors of the rainbow into your highlighter, it doesn't make the
+  " experience any better.
+  "                                 - Albert Liu, Feb 04, 2022 Fri 22:46 EST
+  "
+  " NOTE: Might need to fix all the instances of `hi link` to say `hi def link`
+  " in the syntax folder of this highlighter so that it doesn't disappear when
+  " using `<C-L>`
+  "                                 - Albert Liu, May 14, 2022 Sat 17:16 EDT
+
+  Plug 'leafgarland/typescript-vim'
+elseif PlugFlag('markdown', "improved syntax highlighting for markdown")
+  Plug 'plasticboy/vim-markdown'
+endif
+
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_new_list_item_indent = 0
+let g:vim_markdown_auto_insert_bullets = 0
+
+" Snippets
+if PlugFlag('snippets', "Snippets") && !has("gui_macvim")
+  Plug 'SirVer/ultisnips'
+  Plug 'honza/vim-snippets'
+
+  let g:UltiSnipsExpandTrigger="<C-N><C-N>"
+  let g:UltiSnipsJumpForwardTrigger="<C-R>"
+  let g:UltiSnipsJumpBackwardTrigger="<C-E>"
+endif
 
 " Language server support because I have to I guess
 if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")

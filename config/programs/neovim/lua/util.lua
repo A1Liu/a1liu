@@ -11,4 +11,10 @@ function Exports.import(name)
   end)
 end
 
+function Exports.table_copy(t)
+  local u = { }
+  for k, v in pairs(t) do u[k] = v end
+  return setmetatable(u, getmetatable(t))
+end
+
 return Exports
