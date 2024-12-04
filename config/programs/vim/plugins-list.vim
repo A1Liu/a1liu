@@ -101,7 +101,7 @@ if PlugFlag('files', "enables NERDTree")
 
     "" VSCode key - Toggle the file viewer
     nnoremap <C-B> :call SmartNERDTree()<CR>
-    u BufEnter NERD_Tree_*
+    au BufEnter NERD_Tree_*
           \ nnoremap <buffer> <C-B> :NERDTreeClose<CR>
 
     au BufEnter NERD_Tree_* nnoremap <buffer> <C-J> 4gj

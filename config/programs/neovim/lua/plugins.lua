@@ -18,6 +18,8 @@ table.insert(PluginsSpec, {
   end,
 })
 
+local Plug = Util.import("vim-plug")
+
 table.insert(PluginsSpec, {"preservim/nerdtree"})
 
 vim.g.NERDTreeMapJumpNextSibling = ""
@@ -26,7 +28,6 @@ vim.g.NERDTreeMapJumpPrevSibling = ""
 vim.api.nvim_set_keymap('n', '<C-B>', '', {
   noremap = true,
   callback = function()
-
     if string.find(vim.bo.filetype, "nerdtree") then
       vim.cmd('NERDTreeClose')
     elseif vim.fn.expand("%") == "" then
@@ -37,8 +38,11 @@ vim.api.nvim_set_keymap('n', '<C-B>', '', {
   end
 })
 
-
-local Plug = Util.import("vim-plug")
+Plug("nvim-treesitter/nvim-treesitter", {
+  run = function()
+    vim.cmd('TSUpdate')
+  end,  -- We recommend updating the parsers on update
+})
 
 Plug("neovim/nvim-lspconfig")
 
@@ -53,6 +57,12 @@ vim.api.nvim_set_keymap('n', '<Leader>b', '', {
     noremap = true,
     callback = function()
       vim.lsp.buf.implementation() -- goto def
+    end
+})
+vim.api.nvim_set_keymap('n', '<C-E>', '', {
+    noremap = true,
+    callback = function()
+      vim.lsp.buf.hover()
     end
 })
 
@@ -97,3 +107,10 @@ require('lspconfig').ts_ls.setup {
   },
 }
 
+--[[
+require('nvim-treesitter.configs').setup {
+  highlight = {
+    enable = true
+  }
+}
+]]--
