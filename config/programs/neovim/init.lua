@@ -17,6 +17,7 @@ vim.opt.runtimepath:append(',' .. Config.home)
 local Util = require("util")
 
 Util.import("compat")
+
 Util.import("plugins")
 
 -- vim.print("Path 3" .. Config.home)

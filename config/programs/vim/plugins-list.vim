@@ -101,7 +101,7 @@ if PlugFlag('files', "enables NERDTree")
 
     "" VSCode key - Toggle the file viewer
     nnoremap <C-B> :call SmartNERDTree()<CR>
-    au BufEnter NERD_Tree_*
+    u BufEnter NERD_Tree_*
           \ nnoremap <buffer> <C-B> :NERDTreeClose<CR>
 
     au BufEnter NERD_Tree_* nnoremap <buffer> <C-J> 4gj
@@ -141,7 +141,7 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
 endif
 
 " Languages
-if PlugFlag('polyglot', "improved syntax highlighting")
+if PlugFlag('polyglot-womp', "improved syntax highlighting")
   let g:polyglot_disabled = []
 
   " See comment below for why polyglot's typescript is disabled
@@ -189,7 +189,7 @@ endif
 
 " Language server support because I have to I guess
 if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+  " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
   " \ 'coc-rust-analyzer',
 
@@ -229,4 +229,7 @@ if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
   inoremap <expr> <C-K> coc#pum#visible() ? "\<C-P>" : "\<C-K>"
 endif
 
-call plug#end()
+if has('nvim')
+else
+  call plug#end()
+endif

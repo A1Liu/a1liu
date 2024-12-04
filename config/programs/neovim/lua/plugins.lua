@@ -1,3 +1,5 @@
+local Util = require("util")
+
 local PluginsSpec = {}
 
 table.insert(PluginsSpec, {
@@ -34,4 +36,64 @@ vim.api.nvim_set_keymap('n', '<C-B>', '', {
     end
   end
 })
+
+
+local Plug = Util.import("vim-plug")
+
+Plug("neovim/nvim-lspconfig")
+
+vim.api.nvim_set_keymap('v', '<C-F>', '', { noremap = true })
+vim.api.nvim_set_keymap('n', '<C-F>', '', {
+    noremap = true,
+    callback = function()
+      vim.lsp.buf.hover() -- goto def
+    end
+})
+vim.api.nvim_set_keymap('n', '<Leader>b', '', {
+    noremap = true,
+    callback = function()
+      vim.lsp.buf.implementation() -- goto def
+    end
+})
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(args)
+    vim.print("LSP Attached!")
+
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client.supports_method('textDocument/implementation') then
+    end
+
+    if client.supports_method('textDocument/completion') then
+      -- Enable auto-completion
+      -- vim.lsp.completion.enable(true, client.id, args.buf, {autotrigger = true})
+    end
+    if client.supports_method('textDocument/formatting') then
+      -- Format the current buffer on save
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        buffer = args.buf,
+        callback = function()
+          vim.lsp.buf.format({bufnr = args.buf, id = client.id})
+        end,
+      })
+    end
+  end,
+})
+
+-- Plug.begin()
+
+Plug.ends()
+
+-- require('lspconfig').pyright.setup{}
+require('lspconfig').ts_ls.setup {
+  on_init = function(client, _)
+    client.server_capabilities.semanticTokensProvider = nil  -- turn off semantic tokens
+  end,
+  filetypes = {
+    "javascript",
+    "typescript",
+    "typescriptreact",
+    "javascriptreact",
+  },
+}
 
