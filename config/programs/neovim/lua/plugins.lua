@@ -1,26 +1,12 @@
 local Util = require("util")
 
-local PluginsSpec = {}
-
-table.insert(PluginsSpec, {
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  config = function()
-    require("nvim-treesitter.configs").setup({
-      ensure_installed = {
-        "c",
-        "lua",
-        "vim",
-        "zig",
-        "vimdoc",
-      },
-    })
-  end,
-})
-
 local Plug = Util.import("vim-plug")
 
-table.insert(PluginsSpec, {"preservim/nerdtree"})
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.opt.termguicolors = true
+Plug('nvim-tree/nvim-tree.lua')
+Plug('nvim-tree/nvim-web-devicons') -- optional
 
 vim.g.NERDTreeMapJumpNextSibling = ""
 vim.g.NERDTreeMapJumpPrevSibling = ""
@@ -29,11 +15,11 @@ vim.api.nvim_set_keymap('n', '<C-B>', '', {
   noremap = true,
   callback = function()
     if string.find(vim.bo.filetype, "nerdtree") then
-      vim.cmd('NERDTreeClose')
+      vim.cmd('NvimTreeToggle')
     elseif vim.fn.expand("%") == "" then
-      vim.cmd('NERDTreeFocus')
+      vim.cmd('NvimTreeToggle')
     else
-      vim.cmd('NERDTreeFind')
+      vim.cmd('NvimTreeFindFile')
     end
   end
 })
@@ -44,13 +30,16 @@ Plug("nvim-treesitter/nvim-treesitter", {
   end,  -- We recommend updating the parsers on update
 })
 
+Plug("williamboman/mason.nvim")
+Plug("williamboman/mason-lspconfig.nvim")
 Plug("neovim/nvim-lspconfig")
 
 vim.api.nvim_set_keymap('v', '<C-F>', '', { noremap = true })
 vim.api.nvim_set_keymap('n', '<C-F>', '', {
     noremap = true,
     callback = function()
-      vim.lsp.buf.hover() -- goto def
+      -- vim.diagnostic.open_float()
+      vim.lsp.buf.code_action()
     end
 })
 vim.api.nvim_set_keymap('n', '<Leader>b', '', {
@@ -94,6 +83,43 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 Plug.ends()
 
+require("nvim-tree").setup({
+ renderer = {
+    icons = {
+      show = {
+        git = true,
+        file = false,
+        folder = false,
+        folder_arrow = true,
+      },
+      glyphs = {
+        folder = {
+          arrow_closed = "⏵",
+          arrow_open = "⏷",
+        },
+        git = {
+          unstaged = "✗",
+          staged = "✓",
+          unmerged = "⌥",
+          renamed = "➜",
+          untracked = "★",
+          deleted = "⊖",
+          ignored = "◌",
+        },
+      },
+    },
+  },
+  on_attach = function(bufnr)
+    local api = require("nvim-tree.api")
+    vim.keymap.set("n", "C", api.tree.change_root_to_node, {
+      buffer = bufnr, noremap = true, silent = true, nowait = true
+    })
+    vim.keymap.set("n", "<CR>", api.node.open.edit, {
+      buffer = bufnr, noremap = true, silent = true, nowait = true
+    })
+  end
+})
+
 -- require('lspconfig').pyright.setup{}
 require('lspconfig').ts_ls.setup {
   on_init = function(client, _)
@@ -111,6 +137,13 @@ require('lspconfig').ts_ls.setup {
 require('nvim-treesitter.configs').setup {
   highlight = {
     enable = true
-  }
+  },
+  ensure_installed = {
+    "c",
+    "lua",
+    "vim",
+    "zig",
+    "vimdoc",
+  },
 }
 ]]--

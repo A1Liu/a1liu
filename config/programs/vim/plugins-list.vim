@@ -83,7 +83,7 @@ if PlugFlag('format', "Automatic formatting with :Autoformat")
   augroup END
 endif
 
-if PlugFlag('files', "enables NERDTree")
+if PlugFlag('files', "enables NERDTree") && !has('nvim')
   Plug 'preservim/nerdtree'
   let g:NERDTreeMapJumpNextSibling = ""
   let g:NERDTreeMapJumpPrevSibling = ""
@@ -188,7 +188,7 @@ if PlugFlag('snippets', "Snippets") && !has("gui_macvim")
 endif
 
 " Language server support because I have to I guess
-if PlugFlag('lsc', "Language server support for e.g. auto-importing functions")
+if PlugFlag('lsc-womp', "Language server support for e.g. auto-importing functions")
   " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
   " \ 'coc-rust-analyzer',
