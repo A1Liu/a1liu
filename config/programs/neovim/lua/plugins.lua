@@ -34,25 +34,15 @@ Plug("williamboman/mason.nvim")
 Plug("williamboman/mason-lspconfig.nvim")
 Plug("neovim/nvim-lspconfig")
 
-vim.api.nvim_set_keymap('v', '<C-F>', '', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-F>', '', {
+vim.keymap.set('v', '<C-F>', '', { noremap = true })
+vim.keymap.set('n', '<C-F>', vim.lsp.buf.code_action, {
     noremap = true,
-    callback = function()
-      -- vim.diagnostic.open_float()
-      vim.lsp.buf.code_action()
-    end
 })
-vim.api.nvim_set_keymap('n', '<Leader>b', '', {
+vim.keymap.set('n', '<Leader>b', vim.lsp.buf.implementation, {
     noremap = true,
-    callback = function()
-      vim.lsp.buf.implementation() -- goto def
-    end
 })
-vim.api.nvim_set_keymap('n', '<C-E>', '', {
+vim.keymap.set('n', '<C-E>', vim.lsp.buf.hover, {
     noremap = true,
-    callback = function()
-      vim.lsp.buf.hover()
-    end
 })
 
 vim.api.nvim_create_autocmd('LspAttach', {
