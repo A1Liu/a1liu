@@ -110,6 +110,7 @@ require("nvim-tree").setup({
   end
 })
 
+require("mason").setup()
 -- require('lspconfig').pyright.setup{}
 require('lspconfig').ts_ls.setup {
   on_init = function(client, _)
@@ -122,6 +123,7 @@ require('lspconfig').ts_ls.setup {
     "javascriptreact",
   },
 }
+
 
 --[[
 require('nvim-treesitter.configs').setup {
