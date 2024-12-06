@@ -110,6 +110,15 @@ require("nvim-tree").setup({
     vim.keymap.set("n", "D", api.fs.trash, {
       buffer = bufnr, noremap = true, silent = true, nowait = true
     })
+    vim.keymap.set("n", "a", api.fs.create, {
+      buffer = bufnr, noremap = true, silent = true, nowait = true
+    })
+    vim.keymap.set("n", "H", api.tree.toggle_hidden_filter, {
+      buffer = bufnr, noremap = true, silent = true, nowait = true
+    })
+    vim.keymap.set("n", "I", api.tree.toggle_gitignore_filter, {
+      buffer = bufnr, noremap = true, silent = true, nowait = true
+    })
   end
 })
 
