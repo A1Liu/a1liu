@@ -17,7 +17,7 @@ vim.api.nvim_set_keymap('n', '<C-B>', '', {
     if string.find(vim.bo.filetype, "nerdtree") then
       vim.cmd('NvimTreeToggle')
     elseif vim.fn.expand("%") == "" then
-      vim.cmd('NvimTreeToggle')
+      vim.cmd('NvimTreeFocus')
     else
       vim.cmd('NvimTreeFindFile')
     end
@@ -104,7 +104,10 @@ require("nvim-tree").setup({
     vim.keymap.set("n", "C", api.tree.change_root_to_node, {
       buffer = bufnr, noremap = true, silent = true, nowait = true
     })
-    vim.keymap.set("n", "<CR>", api.node.open.edit, {
+    vim.keymap.set("n", "<CR>", api.node.open.no_window_picker, {
+      buffer = bufnr, noremap = true, silent = true, nowait = true
+    })
+    vim.keymap.set("n", "D", api.fs.trash, {
       buffer = bufnr, noremap = true, silent = true, nowait = true
     })
   end
