@@ -39,6 +39,9 @@ vim.keymap.set('n', '<C-F>', vim.lsp.buf.code_action, {
     noremap = true,
 })
 
+-- Forgot how to do this, had to use vim tutorial to help:
+-- https://vim.fandom.com/wiki/Improve_completion_popup_menu
+--
 -- note that we need to use VimEnter here because otherwise vim-rsi
 -- overwrites <C-F> .
 vim.api.nvim_create_autocmd('VimEnter', {
