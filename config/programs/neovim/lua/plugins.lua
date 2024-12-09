@@ -81,7 +81,7 @@ Plug('nvim-tree/nvim-tree.lua', {
 Plug("nvim-treesitter/nvim-treesitter", {
   run = function()
     vim.cmd('TSUpdate')
-  end,  -- We recommend updating the parsers on update
+  end, -- We recommend updating the parsers on update
   config = function()
     require('nvim-treesitter.configs').setup {
       highlight = {
@@ -101,7 +101,7 @@ Likely installs:
 - typescript-language-server
 - lua-language-server
 - prettier
-]]--
+]] --
 Plug("williamboman/mason.nvim")
 Plug("williamboman/mason-lspconfig.nvim")
 Plug("neovim/nvim-lspconfig", {
@@ -112,9 +112,13 @@ Plug("neovim/nvim-lspconfig", {
 
     local lspconfig = require('lspconfig')
 
+    lspconfig.lua_ls.setup {
+      settings = { diagnostics = { globals = { "vim" } } }
+    }
+
     lspconfig.ts_ls.setup {
       on_init = function(client, _)
-        client.server_capabilities.semanticTokensProvider = nil  -- turn off semantic tokens
+        client.server_capabilities.semanticTokensProvider = nil -- turn off semantic tokens
       end,
       filetypes = {
         "javascript",
@@ -128,7 +132,7 @@ Plug("neovim/nvim-lspconfig", {
 
 vim.keymap.set('v', '<C-F>', '', { noremap = true })
 vim.keymap.set('n', '<C-F>', vim.lsp.buf.code_action, {
-    noremap = true,
+  noremap = true,
 })
 
 -- Forgot how to do this, had to use vim tutorial to help:
@@ -175,10 +179,10 @@ vim.keymap.set('i', '<C-K>', function()
 end, { noremap = true, expr = true })
 
 vim.keymap.set('n', '<Leader>b', vim.lsp.buf.implementation, {
-    noremap = true,
+  noremap = true,
 })
 vim.keymap.set('n', '<C-E>', vim.lsp.buf.hover, {
-    noremap = true,
+  noremap = true,
 })
 -- inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<C-x>\<C-o>"
 
@@ -187,19 +191,22 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.print("LSP Attached!")
 
     local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client.supports_method('textDocument/implementation') then
-    end
+    -- if client.supports_method('textDocument/implementation') then
+    -- end
 
+    --[[
     if client.supports_method('textDocument/completion') then
-      -- Enable auto-completion
-      -- vim.lsp.completion.enable(true, client.id, args.buf, {autotrigger = true})
+       -- Enable auto-completion
+       vim.lsp.completion.enable(true, client.id, args.buf, {autotrigger = true})
     end
+    ]] --
+
     if client.supports_method('textDocument/formatting') then
       -- Format the current buffer on save
       vim.api.nvim_create_autocmd('BufWritePre', {
         buffer = args.buf,
         callback = function()
-          vim.lsp.buf.format({bufnr = args.buf, id = client.id})
+          vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
         end,
       })
     end
@@ -209,4 +216,3 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- Plug.begin()
 
 Plug.ends()
-
