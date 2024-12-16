@@ -45,6 +45,9 @@ Plug('nvim-tree/nvim-tree.lua', {
       vim.keymap.set("n", "<C-B>", api.tree.close, {
         buffer = bufnr, noremap = true, silent = true, nowait = true
       })
+      vim.keymap.set("n", "m", api.node.show_info_popup, {
+        buffer = bufnr, noremap = true, silent = true, nowait = true
+      })
     end
 
     tree.setup({
@@ -94,6 +97,64 @@ Plug("nvim-treesitter/nvim-treesitter", {
       },
     }
   end,
+})
+
+Plug('mhartington/formatter.nvim', {
+  config = function()
+    -- local util = require "formatter.util"
+    require("formatter").setup {
+      filetype = {
+        lua = { require("formatter.filetypes.lua").stylua, },
+        typescript = { require("formatter.filetypes.typescript").prettier, },
+        typescriptreact = { require("formatter.filetypes.typescriptreact").prettier, },
+      }
+    }
+
+    vim.keymap.set('n', '<Leader><C-F>', vim.cmd.Format, {
+      noremap = true,
+    })
+
+    local auformat_group = vim.api.nvim_create_augroup("AutoFormatting", {
+      clear = true,
+    })
+
+    local enabled_file_types = {
+      ["rust"] = 1,
+      ["java"] = 1,
+      ["c"] = 1,
+      ["cpp"] = 1,
+      ["go"] = 1,
+      ["arduino"] = 1,
+      ["swift"] = 1,
+      ["typescriptreact"] = 1,
+    }
+
+    vim.api.nvim_create_autocmd('FileType', {
+      group = auformat_group,
+      callback = function()
+        if enabled_file_types[vim.bo.filetype] == 1 then
+          vim.b.autoformat_enabled = 1
+
+          vim.b.autoformat_remove_trailing_spaces = 0
+          vim.b.autoformat_retab = 0
+          vim.b.autoformat_autoindent = 0
+        else
+          vim.b.autoformat_enabled = 0
+        end
+      end,
+    })
+
+    vim.api.nvim_create_autocmd('BufWritePost', {
+      group = auformat_group,
+      callback = function()
+        if vim.b.autoformat_enabled ~= 1 then
+          return
+        end
+
+        vim.cmd("Format")
+      end,
+    })
+  end
 })
 
 --[[
@@ -188,26 +249,16 @@ Plug("neovim/nvim-lspconfig", {
       callback = function(args)
         vim.print("LSP Attached!")
 
-        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        -- local client = vim.lsp.get_client_by_id(args.data.client_id)
         -- if client.supports_method('textDocument/implementation') then
         -- end
 
         --[[
-    if client.supports_method('textDocument/completion') then
-       -- Enable auto-completion
-       vim.lsp.completion.enable(true, client.id, args.buf, {autotrigger = true})
-    end
-    ]] --
-
-        if client.supports_method('textDocument/formatting') then
-          -- Format the current buffer on save
-          vim.api.nvim_create_autocmd('BufWritePre', {
-            buffer = args.buf,
-            callback = function()
-              vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
-            end,
-          })
+        if client.supports_method('textDocument/completion') then
+           -- Enable auto-completion
+           vim.lsp.completion.enable(true, client.id, args.buf, {autotrigger = true})
         end
+        ]] --
       end,
     })
   end
