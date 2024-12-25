@@ -83,11 +83,13 @@
     isNormalUser = true;
     description = "Albert";
     extraGroups = [ "networkmanager" "wheel" ];
+    shell = pkgs.zsh;
     packages = with pkgs; [
       # Dev environment
       zsh
       neovide
       tmux
+      xsel
 
       # Programming languages
       rustup
@@ -97,6 +99,8 @@
       python3
     ];
   };
+
+  programs.zsh.enable = true;
 
   # Install firefox.
   programs.firefox.enable = true;
