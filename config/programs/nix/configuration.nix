@@ -114,6 +114,7 @@
     git
     git-lfs
     ripgrep
+    fd
     neovim
 
     zig
