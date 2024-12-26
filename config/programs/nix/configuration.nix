@@ -96,7 +96,22 @@
       fnm
       go
       python3
+
+      # Language Servers
+      lua-language-server
+
+      # Apps
+      signal-desktop
+      _1password-gui
     ];
+  };
+
+  programs._1password = {
+    enable = true;
+  };
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = ["aliu"];
   };
 
   programs.zsh.enable = true;
@@ -114,12 +129,16 @@
     git-lfs
     ripgrep
     fd
-    neovim
 
     zig
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
   ];
+
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+  };
 
   services.fprintd.enable = true;
 
