@@ -92,7 +92,6 @@
       xsel
 
       # Programming languages
-      rustup
       pnpm
       fnm
       go
@@ -126,6 +125,8 @@
 
   security.pam.services.swaylock = {};
   security.pam.services.swaylock.fprintAuth = true;
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

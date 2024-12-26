@@ -41,6 +41,10 @@ function parse_git_dirty() {
 }
 
 prompt_context() {
+  if [[ -n "$IN_NIX_SHELL" ]]; then
+    echo -n "[nix] "
+  fi
+
   if [[ -n "$SSH_CLIENT" ]]; then
     echo -n "%n@%m "
   elif [[ "$USER" == "$USER_IGNORE" ]]; then

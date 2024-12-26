@@ -103,6 +103,8 @@ Plug('mhartington/formatter.nvim', {
   config = function()
     -- local util = require "formatter.util"
     require("formatter").setup {
+      -- logging = true,
+      -- log_level = vim.log.levels.DEBUG,
       filetype = {
         lua = { require("formatter.filetypes.lua").stylua, },
         typescript = { require("formatter.filetypes.typescript").prettier, },
@@ -119,7 +121,7 @@ Plug('mhartington/formatter.nvim', {
     })
 
     local enabled_file_types = {
-      ["rust"] = 1,
+      -- ["rust"] = 1,
       ["java"] = 1,
       ["c"] = 1,
       ["cpp"] = 1,
@@ -188,6 +190,8 @@ Plug("neovim/nvim-lspconfig", {
         "javascriptreact",
       },
     }
+
+    lspconfig.rust_analyzer.setup {}
 
     vim.keymap.set('v', '<C-F>', '', { noremap = true })
     vim.keymap.set('n', '<C-F>', vim.lsp.buf.code_action, {
