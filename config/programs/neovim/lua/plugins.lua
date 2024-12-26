@@ -109,6 +109,7 @@ Plug('mhartington/formatter.nvim', {
         lua = { require("formatter.filetypes.lua").stylua, },
         typescript = { require("formatter.filetypes.typescript").prettier, },
         typescriptreact = { require("formatter.filetypes.typescriptreact").prettier, },
+        rust = { require("formatter.filetypes.rust").rustfmt, },
       }
     }
 
@@ -206,7 +207,6 @@ Plug("neovim/nvim-lspconfig", {
     vim.api.nvim_create_autocmd('VimEnter', {
       callback = function(args)
         vim.keymap.set('i', '<C-F>', function()
-          print("Hello")
           if vim.fn.pumvisible() == 1 then
             -- Confirm in omnifunc
             return "<C-Y>"
