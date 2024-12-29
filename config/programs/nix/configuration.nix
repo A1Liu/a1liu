@@ -103,6 +103,7 @@
       # Apps
       signal-desktop
       _1password-gui
+      obsidian
     ];
   };
 

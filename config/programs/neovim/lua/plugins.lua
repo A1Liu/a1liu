@@ -198,6 +198,9 @@ Plug("neovim/nvim-lspconfig", {
     vim.keymap.set('n', '<C-F>', vim.lsp.buf.code_action, {
       noremap = true,
     })
+    vim.keymap.set('n', '<Leader>w', vim.lsp.buf.rename, {
+      noremap = true,
+    })
 
     -- Forgot how to do this, had to use vim tutorial to help:
     -- https://vim.fandom.com/wiki/Improve_completion_popup_menu
