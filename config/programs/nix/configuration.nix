@@ -107,6 +107,8 @@
     ];
   };
 
+  programs.steam.enable = true;
+
   programs._1password = {
     enable = true;
   };
