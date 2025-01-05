@@ -36,7 +36,7 @@
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#simple
-    darwinConfigurations."aliu" = nix-darwin.lib.darwinSystem {
+    darwinConfigurations."H3-H3CRGQ21R0" = nix-darwin.lib.darwinSystem {
       modules = [ configuration ];
     };
   };
