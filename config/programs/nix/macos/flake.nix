@@ -14,6 +14,8 @@
       # $ nix-env -qaP | grep wget
       environment.systemPackages = [
         pkgs.vim
+        pkgs.neovim
+        pkgs.ripgrep
       ];
 
       # Necessary for using flakes on this system.
