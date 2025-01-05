@@ -12,10 +12,12 @@
     configuration = { pkgs, ... }: {
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
-      environment.systemPackages = [
-        pkgs.vim
-        pkgs.neovim
-        pkgs.ripgrep
+      environment.systemPackages = with pkgs; [
+        vim
+        neovim
+        ripgrep
+        tmux
+        neovide
       ];
 
       # Necessary for using flakes on this system.
