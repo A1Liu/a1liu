@@ -31,6 +31,20 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
+      # set some OSX preferences that I always end up hunting down and changing.
+      system.defaults = {
+        # minimal dock
+        dock = {
+          show-recents = false;
+        };
+        # a finder that tells me what I want to know and lets me work
+        finder = {
+          AppleShowAllExtensions = true;
+          ShowPathbar = true;
+          FXEnableExtensionChangeWarning = false;
+        };
+      };
+
     };
   in
   {
