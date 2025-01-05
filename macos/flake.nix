@@ -13,11 +13,8 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
       environment.systemPackages = with pkgs; [
+        home-manager
         vim
-        neovim
-        ripgrep
-        tmux
-        neovide
       ];
 
       # Necessary for using flakes on this system.
