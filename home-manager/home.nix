@@ -38,7 +38,6 @@
     neovim
     ripgrep
     tmux
-    neovide
     fd
   ];
 
