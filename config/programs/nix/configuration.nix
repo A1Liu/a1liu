@@ -85,10 +85,11 @@
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
+      home-manager
+
       # Dev environment
       zsh
       neovide
-      tmux
       xsel
 
       # Programming languages
@@ -130,8 +131,6 @@
   environment.systemPackages = with pkgs; [
     git
     git-lfs
-    ripgrep
-    fd
 
     zig
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
@@ -176,5 +175,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
-
 }

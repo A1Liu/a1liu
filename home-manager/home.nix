@@ -1,10 +1,20 @@
 { config, pkgs, ... }:
 
+# There's probably better way to get cross-platform support; for now I'm just
+# using this: https://github.com/crasm/dead-simple-home-manager
+let
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  unsupported = builtins.abort "Unsupported platform";
+in
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "aliu";
-  home.homeDirectory = "/Users/aliu";
+  home.homeDirectory =
+    if isLinux then "/home/aliu" else
+    if isDarwin then "/Users/aliu" else
+    unsupported;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
