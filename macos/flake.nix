@@ -13,11 +13,8 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
       environment.systemPackages = with pkgs; [
+        home-manager
         vim
-        neovim
-        ripgrep
-        tmux
-        neovide
       ];
 
       # Necessary for using flakes on this system.
@@ -33,10 +30,22 @@
       # $ darwin-rebuild changelog
       system.stateVersion = 5;
 
+      homebrew = {
+          enable = true;
+          # onActivation.cleanup = "uninstall";
+
+          taps = [];
+          brews = [];
+          casks = [ "neovide" ];
+      };
+
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
       # set some OSX preferences that I always end up hunting down and changing.
       system.defaults = {
+        # Dark mode
+        NSGlobalDomain.AppleInterfaceStyle = "Dark";
+
         # minimal dock
         dock = {
           show-recents = false;
