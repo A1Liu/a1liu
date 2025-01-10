@@ -9,3 +9,7 @@ tags
 
 # Intellij
 .idea
+
+*.aliu-local.*
+*.aliu-local
+# .tmp.aliu-local
