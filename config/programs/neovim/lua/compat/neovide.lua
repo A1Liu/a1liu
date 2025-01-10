@@ -7,3 +7,6 @@ vim.keymap.set('n', '<D-v>', '"+P')    -- Paste normal mode
 vim.keymap.set('v', '<D-v>', '"+P')    -- Paste visual mode
 vim.keymap.set('c', '<D-v>', '<C-R>+') -- Paste command mode
 vim.keymap.set('i', '<D-v>', '<C-R>+') -- Paste insert mode
+
+-- Paste terminal mode; `<C-\><C-N>` puts you in normal mode
+vim.keymap.set('t', '<D-v>', '<C-\\><C-N>"+Pi')
