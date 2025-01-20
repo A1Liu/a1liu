@@ -44,8 +44,10 @@ in
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
+    git-lfs
 
     neovim
+    neovide
     ripgrep
     tmux
     fd

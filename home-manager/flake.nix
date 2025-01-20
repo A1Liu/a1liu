@@ -1,3 +1,4 @@
+# https://nixos-and-flakes.thiscute.world/other-usage-of-flakes/inputs
 {
   description = "Home Manager configuration of aliu";
 
