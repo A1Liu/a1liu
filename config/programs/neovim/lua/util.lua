@@ -31,6 +31,17 @@ function Exports.table_copy(t)
   return setmetatable(u, getmetatable(t))
 end
 
+function Exports.table_array_concat(t1, t2)
+  t1 = t1 or {}
+  t2 = t2 or {}
+
+  local output = Exports.table_copy(t1)
+  for _k, v in pairs(t2) do
+    table.insert(output, v)
+  end
+  return output
+end
+
 -- True insanity. Every line of this function was a pain in the ass,
 -- because the docs are all over the place.
 function Exports.curry(f, ...)

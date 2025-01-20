@@ -94,6 +94,7 @@ Plug("nvim-treesitter/nvim-treesitter", {
         "lua",
         "vim",
         "vimdoc",
+        "graphql",
       },
     }
   end,
@@ -179,6 +180,8 @@ Plug("neovim/nvim-lspconfig", {
     lspconfig.lua_ls.setup {
       settings = { diagnostics = { globals = { "vim" } } }
     }
+
+    lspconfig.pyright.setup {}
 
     lspconfig.ts_ls.setup {
       on_init = function(client, _)
