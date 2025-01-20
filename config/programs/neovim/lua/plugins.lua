@@ -211,7 +211,7 @@ Plug("neovim/nvim-lspconfig", {
     -- note that we need to use VimEnter here because otherwise vim-rsi
     -- overwrites <C-F> .
     vim.api.nvim_create_autocmd('VimEnter', {
-      callback = function(args)
+      callback = function()
         vim.keymap.set('i', '<C-F>', function()
           if vim.fn.pumvisible() == 1 then
             -- Confirm in omnifunc
@@ -256,7 +256,7 @@ Plug("neovim/nvim-lspconfig", {
     -- inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<C-x>\<C-o>"
 
     vim.api.nvim_create_autocmd('LspAttach', {
-      callback = function(args)
+      callback = function()
         vim.print("LSP Attached!")
 
         -- local client = vim.lsp.get_client_by_id(args.data.client_id)

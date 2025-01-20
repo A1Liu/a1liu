@@ -6,11 +6,11 @@ local import_chain = {}
 function Exports.import(name)
   table.insert(import_chain, name)
 
-  function import() return require(name) end
-  local successed, imported_module = xpcall(import, function(error)
+  local function import() return require(name) end
+  local _, imported_module = xpcall(import, function(error)
     vim.print("Failed to import file: " .. name)
     local chain = ""
-    for k, v in pairs(import_chain) do
+    for _, v in pairs(import_chain) do
       chain = chain .. ", " .. v
     end
 
@@ -36,7 +36,7 @@ function Exports.table_array_concat(t1, t2)
   t2 = t2 or {}
 
   local output = Exports.table_copy(t1)
-  for _k, v in pairs(t2) do
+  for _, v in pairs(t2) do
     table.insert(output, v)
   end
   return output

@@ -12,7 +12,7 @@ local Plug = {
   ends = function()
     vim.fn['plug#end']()
 
-    for i, config in pairs(configs.start) do
+    for _, config in pairs(configs.start) do
       config()
     end
   end
@@ -31,7 +31,7 @@ end
 local meta = {
 
   -- Function call "operation"
-  __call = function(self, repo, opts)
+  __call = function(_, repo, opts)
     opts = opts or vim.empty_dict()
 
     -- we declare some aliases for `do` and `for`

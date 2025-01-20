@@ -4,6 +4,6 @@ end
 
 xpcall(
   function() require("compat/this") end,
-  function(error) end
+  function(_) end
 )
 
