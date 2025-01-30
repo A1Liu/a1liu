@@ -120,6 +120,3 @@ endfunction
 
 vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
 vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
-
-nnoremap <C-G> :.GBrowse<CR>
-vnoremap <C-G> :.GBrowse<CR>

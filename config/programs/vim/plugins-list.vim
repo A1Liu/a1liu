@@ -30,6 +30,9 @@ if PlugFlag('base', "UNIX file commands", "Readline support")
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-rhubarb'
 
+  nnoremap <C-G> :.GBrowse<CR>
+  vnoremap <C-G> :.GBrowse<CR>
+
   " Some kind of 'show commit for line' functionality
   Plug 'rhysd/git-messenger.vim'
   map <silent><Leader>g :GitMessenger<CR>
