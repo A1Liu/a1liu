@@ -22,5 +22,6 @@ Util.import("plugins")
 
 Util.import("gui")
 
+
 -- vim.print("Path 3" .. Config.home)
 

@@ -30,11 +30,12 @@ if PlugFlag('base', "UNIX file commands", "Readline support")
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-rhubarb'
 
-  " NOTE: Git integration
-
   " Some kind of 'show commit for line' functionality
+  Plug 'rhysd/git-messenger.vim'
+  map <silent><Leader>g :GitMessenger<CR>
+
   " https://www.reddit.com/r/vim/comments/i50pce/how_to_show_commit_that_introduced_current_line/
-  map <silent><Leader>g :call setbufvar(winbufnr(popup_atcursor(systemlist("cd " . shellescape(fnamemodify(resolve(expand('%:p')), ":h")) . " && git log --no-merges -n 1 -L " . shellescape(line("v") . "," . line(".") . ":" . resolve(expand("%:p")))), { "padding": [1,1,1,1], "pos": "botleft", "wrap": 0 })), "&filetype", "git")<CR>
+  " map <silent><Leader>g :call setbufvar(winbufnr(popup_atcursor(systemlist("cd " . shellescape(fnamemodify(resolve(expand('%:p')), ":h")) . " && git log --no-merges -n 1 -L " . shellescape(line("v") . "," . line(".") . ":" . resolve(expand("%:p")))), { "padding": [1,1,1,1], "pos": "botleft", "wrap": 0 })), "&filetype", "git")<CR>
 
   " This plugin is supposed to emulate GitLens, but it doesn't play nice with
   " other plugins. Oh well.

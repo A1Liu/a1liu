@@ -9,4 +9,10 @@ vim.keymap.set('c', '<D-v>', '<C-R>+') -- Paste command mode
 vim.keymap.set('i', '<D-v>', '<C-R>+') -- Paste insert mode
 
 -- Paste terminal mode; `<C-\><C-N>` puts you in normal mode
-vim.keymap.set('t', '<D-v>', '<C-\\><C-N>"+Pi')
+vim.keymap.set('t', '<D-v>', '<C-\\><C-N>"+Pi', {
+  noremap = true,
+})
+
+vim.keymap.set('n', '<D-w>', '":q<CR>', {
+  noremap = true,
+})
