@@ -13,6 +13,6 @@ vim.keymap.set('t', '<D-v>', '<C-\\><C-N>"+Pi', {
   noremap = true,
 })
 
-vim.keymap.set('n', '<D-w>', '":q<CR>', {
+vim.keymap.set('n', '<D-w>', ':q<CR>', {
   noremap = true,
 })
