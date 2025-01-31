@@ -29,7 +29,7 @@
    1. Turn ON: Show Bluetooth in menu bar
    1. Set to "when last connected to this mac": `AIRPOD NAME` -> Options ->
       Connect to This Mac
-      
+
       (This prevents airpods from switching back and forth between devices)
 
 ### `/etc/hosts` Performance

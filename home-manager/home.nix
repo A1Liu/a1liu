@@ -77,6 +77,7 @@ in
     #   org.gradle.daemon.idletimeout=3600000
     # '';
     ".nix-zshrc".text = createShellEntrypoint "true";
+    ".tmux.conf".source = ./tmux.conf;
   };
 
   # Home Manager can also manage your environment variables through

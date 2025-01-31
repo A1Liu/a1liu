@@ -17,7 +17,6 @@ config.debug(f"Machine-local directory is:  {config.local_dir}")
 config.debug(f"Preconfig directory is:      {config.move_dir}")
 
 if should_undo:
-    config.remove_replace("~/.tmux.conf")
     config.remove_replace("~/.gitconfig")
     config.remove_replace("~/.gitignore_global")
 
@@ -29,7 +28,6 @@ if should_undo:
     print("Integration configs uninstalled.")
     exit(0)
 
-config.add_safe("~/.tmux.conf", "programs/tmux.conf")
 config.add_safe("~/.gitconfig", "programs/gitconfig")
 config.add_safe("~/.gitignore_global", "programs/gitignore_global")
 
