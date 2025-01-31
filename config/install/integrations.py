@@ -17,9 +17,6 @@ config.debug(f"Machine-local directory is:  {config.local_dir}")
 config.debug(f"Preconfig directory is:      {config.move_dir}")
 
 if should_undo:
-    config.remove_replace("~/.gitconfig")
-    config.remove_replace("~/.gitignore_global")
-
     config.remove_replace("~/.ssh/config")
     config.remove_replace("~/.ssh/id_aliu")
     config.remove_replace("~/.ssh/id_tangym")
@@ -27,9 +24,6 @@ if should_undo:
     os.remove(config.install_flag_filename("integrations"))
     print("Integration configs uninstalled.")
     exit(0)
-
-config.add_safe("~/.gitconfig", "programs/gitconfig")
-config.add_safe("~/.gitignore_global", "programs/gitignore_global")
 
 # SSH stuffs
 config.add_safe("~/.ssh/config", "programs/ssh/config")

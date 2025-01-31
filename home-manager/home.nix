@@ -69,19 +69,11 @@ in
       . "{config.project_dir}/programs/shells/dispatch"
     '';
   in {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
     ".nix-zshrc".text = createShellEntrypoint "true";
 
     ".tmux.conf".source = ./tmux.conf;
+    ".gitconfig".source = ./gitconfig;
+    ".gitignore_global".source = ./gitignore_global;
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
