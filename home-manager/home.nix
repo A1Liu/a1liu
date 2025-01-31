@@ -74,6 +74,7 @@ in
     ".tmux.conf".source = ./tmux.conf;
     ".gitconfig".source = ./gitconfig;
     ".gitignore_global".source = ./gitignore_global;
+    ".ssh/config".source = ./ssh-config;
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
