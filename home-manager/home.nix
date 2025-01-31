@@ -6,15 +6,18 @@ let
   isLinux = pkgs.stdenv.hostPlatform.isLinux;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   unsupported = builtins.abort "Unsupported platform";
+  homeDir =
+    if isLinux then "/home/aliu" else
+    if isDarwin then "/Users/aliu" else
+    unsupported;
+  aliuRepo = "${homeDir}/code/aliu";
+  programsDir = "${aliuRepo}/config/programs";
 in
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "aliu";
-  home.homeDirectory =
-    if isLinux then "/home/aliu" else
-    if isDarwin then "/Users/aliu" else
-    unsupported;
+  home.homeDirectory = homeDir;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -77,7 +80,14 @@ in
     #   org.gradle.daemon.idletimeout=3600000
     # '';
     ".nix-zshrc".text = createShellEntrypoint "true";
+
     ".tmux.conf".source = ./tmux.conf;
+
+    # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
+    # because symlinking directly to a file would not be deterministic/pure.
+    ".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/neovim/init.lua";
+    ".vimrc".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim/init.vim";
+    ".vim".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim";
   };
 
   # Home Manager can also manage your environment variables through
