@@ -49,6 +49,7 @@
         # minimal dock
         dock = {
           show-recents = false;
+          mru-spaces = false;
         };
         # a finder that tells me what I want to know and lets me work
         finder = {

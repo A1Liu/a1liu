@@ -52,3 +52,17 @@ touch config/local/flags/vim-aliu config/local/flags/vim-plug-base \
     config/local/flags/vim-plug-format config/local/flags/vim-plug-lsc \
     config/local/flags/vim-plug-polyglot
 ```
+
+## Neovim vs Vim
+Basic stuff is kept in the Vim folder for now; the neovim folder is where all
+new configs should be kept.
+
+## `compat`
+Compatibility things should be implemented in the `compat` folder; for code specific
+to this device, put it in a file called `this.lua` in the `compat` folder. Some examples:
+
+```lua
+-- Gitlab integration for vim fugitive `<C-G>`
+Plug('shumphrey/fugitive-gitlab.vim')
+```
+
