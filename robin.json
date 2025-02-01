@@ -1,6 +1,0 @@
-{
-	"name": "aliu",
-	"apps": [
-        "./apps/pogo/robin.app.json"
-	]
-}
