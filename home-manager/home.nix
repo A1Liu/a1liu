@@ -68,9 +68,9 @@ in
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
-    ".config/nvim/init.lua".source = symlink "${programsDir}/vim/init.lua";
-    ".vimrc".source = symlink "${programsDir}/vim/init.vim";
-    ".vim".source = symlink "${programsDir}/vim";
+    ".config/nvim/init.lua".source = symlink "${aliuRepo}/vim/init.lua";
+    ".vimrc".source = symlink "${aliuRepo}/vim/init.vim";
+    ".vim".source = symlink "${aliuRepo}/vim";
 
     ".bash_profile".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
     ".bashrc".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";

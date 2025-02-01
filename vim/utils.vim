@@ -1,4 +1,4 @@
-let s:flag_prefix = PathJoin(g:cfg_dir, 'local', 'flags', 'vim-')
+let s:flag_prefix = PathJoin(g:cfg_dir, 'config', 'local', 'flags', 'vim-')
 let s:flag_dict = {}
 
 

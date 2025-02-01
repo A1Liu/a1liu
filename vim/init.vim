@@ -1,6 +1,6 @@
 " https://stackoverflow.com/questions/4976776/how-to-get-path-to-the-current-vimscript-being-executed/4977006
 let g:vim_home_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-let g:cfg_dir = fnamemodify(g:vim_home_path, ':h:h')
+let g:cfg_dir = fnamemodify(g:vim_home_path, ':h')
 let g:init_script_finished = 0
 
 " Print debugging information
