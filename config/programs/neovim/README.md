@@ -64,5 +64,9 @@ to this device, put it in a file called `this.lua` in the `compat` folder. Some 
 ```lua
 -- Gitlab integration for vim fugitive `<C-G>`
 Plug('shumphrey/fugitive-gitlab.vim')
+
+-- Font settings
+vim.g.override_gui_font = "Source Code Pro"
+vim.g.override_gui_font_size = 14
 ```
 
