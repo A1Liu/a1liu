@@ -106,6 +106,13 @@ in
       filepath = "${aliuRepo}/home-manager/local/shell_init";
       isInteractive = "false";
     };
+    createSshKey = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      if [ ! -f "$HOME/.ssh/id_aliu" ]; then
+        ssh-keygen -t ed25519 -C 'albertymliu@gmail.com' -N "" -q -f $HOME/.ssh/id_aliu
+      else
+        echo "File \"$HOME/.ssh/id_aliu\" already exists, skipping."
+      fi
+    '';
   };
 
   # Home Manager can also manage your environment variables through
