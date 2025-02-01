@@ -16,3 +16,12 @@ vim.keymap.set('t', '<D-v>', '<C-\\><C-N>"+Pi', {
 vim.keymap.set('n', '<D-w>', ':q<CR>', {
   noremap = true,
 })
+
+vim.keymap.set('t', '<S-Space>', '<Space>', {
+  noremap = true,
+})
+
+vim.keymap.set('t', '<S-Backspace>', '<Backspace>', {
+  noremap = true,
+})
+
