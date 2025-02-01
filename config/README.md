@@ -3,9 +3,8 @@ My configurations! This repo contains the things that I like to keep constant
 between systems; things like application settings, file organizations, etc.
 
 ### Installation Scripts
-This repository includes multiple installation scripts for setting up a new computer,
-or just trying out some of my configurations. For more information about installation,
-please see `install/README.md`.
+This repository uses `home-manager` to install configs.
+For more information about installation, please see `install/README.md`.
 
 ### Structure
 
@@ -16,9 +15,7 @@ please see `install/README.md`.
 │   └── preconf -- Files that my configurations replaced
 ├── install ====== Scripts to install this configuration on a new machine
 │   └── undo ----- Scripts that undo their counterpart in `install`
-├── programs ===== Configurations used by programs that I use
-├── pages -------- Next.js routes
-└── shells ======= Configurations used by shell sessions
+└── programs ===== Configurations used by programs that I use
 ```
 
 ### Environment Variables
@@ -53,7 +50,6 @@ My Vim config uses these environment variables at startup:
 - `install/?` -> needs to copy files instead of just moving them.
 - `install/setup` -> reorganize, maybe just turn it into docs instead of scripts
 - SSH key stuff
-- Figure out how to handle new Zig dependency for path management stuffs
 
 ### Useful Windows/PowerShell Commands
 
