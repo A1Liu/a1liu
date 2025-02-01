@@ -68,7 +68,7 @@ in
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
-    ".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/neovim/init.lua";
+    ".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim/init.lua";
     ".vimrc".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim/init.vim";
     ".vim".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim";
 
