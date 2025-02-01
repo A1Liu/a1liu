@@ -17,27 +17,24 @@ source_if_necessary() {
 
 # Guard prevents this from being sourced in environments that already have it.
 # Block focuses on shell variables.
-if [[ $CFG_SHELL_ENV != 1 ]]; then
-  CFG_SHELL_ENV=1
+# if [[ $CFG_SHELL_ENV != 1 ]]; then
+#   CFG_SHELL_ENV=1
+#
+#   # Haskell
+#   source_if_necessary $HOME/.ghcup/env cabal
+#
+#   # Rust
+#   source_if_necessary $HOME/.cargo/env cargo
+#
+#   # SDKMan
+#   source_if_necessary $HOME/.sdkman/bin/sdkman-init.sh sdk
+# fi
 
-  # Haskell
-  source_if_necessary $HOME/.ghcup/env cabal
-
-  # Rust
-  source_if_necessary $HOME/.cargo/env cargo
-
-  # SDKMan
-  source_if_necessary $HOME/.sdkman/bin/sdkman-init.sh sdk
-fi
-
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export HOMEBREW_NO_AUTO_UPDATE=1
-
-# Adding stuff to python path
-export PYTHONPATH="${CFG_DIR}/programs"
 
 # Guard prevents this from being sourced in environments that already have it.
 # Block focuses on environment variables.
@@ -62,26 +59,28 @@ export PYTHONPATH="${CFG_DIR}/programs"
 # ^ Continuation: I think I've fixed it by using a go helper program to edit
 # my path. Old code is kept for now. Unsure how to work around go dependency
 # stuffs
+#
+# ^ Update: With nix shell, this should be rendered obsolete. Fingers crossed.
 
 
 # NOTE: we're using aliu_path_helper to produce paths now. The list of paths needs
 # to be updated in 2 locations now.
-if [ -e "${CFG_DIR}/local/path/aliu_path_helper" ]; then
-  export PATH=`${CFG_DIR}/local/path/aliu_path_helper ~/`
-  export CFG_ENV=1
-elif [[ $CFG_ENV != 1 ]]; then
-  export CFG_ENV=1
-
-  # export GOROOT="/usr/local/go"
-  export GOPATH="$HOME/go" # NOTE: Go doesn't allow you to use the ~ character in GOPATH
-  export LINUX_GOPATH="/usr/local/go/bin"
-  export PATH="${LINUX_GOPATH}:${GOPATH}:${GOPATH}/bin:${PATH}"
-
-  # export PATH="/opt/homebrew/bin:$PATH"
-  # export PATH="/opt/homebrew/Cellar/llvm/14.0.6/bin:$PATH"
-
-  export PATH="~/.rbenv/bin:${PATH}"
-
-  export PATH="${CFG_DIR}/local/path:${PATH}"
-fi
-
+# if [ -e "${CFG_DIR}/local/path/aliu_path_helper" ]; then
+#   export PATH=`${CFG_DIR}/local/path/aliu_path_helper ~/`
+#   export CFG_ENV=1
+# elif [[ $CFG_ENV != 1 ]]; then
+#   export CFG_ENV=1
+#
+#   # export GOROOT="/usr/local/go"
+#   export GOPATH="$HOME/go" # NOTE: Go doesn't allow you to use the ~ character in GOPATH
+#   export LINUX_GOPATH="/usr/local/go/bin"
+#   export PATH="${LINUX_GOPATH}:${GOPATH}:${GOPATH}/bin:${PATH}"
+#
+#   # export PATH="/opt/homebrew/bin:$PATH"
+#   # export PATH="/opt/homebrew/Cellar/llvm/14.0.6/bin:$PATH"
+#
+#   export PATH="~/.rbenv/bin:${PATH}"
+#
+#   export PATH="${CFG_DIR}/local/path:${PATH}"
+# fi
+#
