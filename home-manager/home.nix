@@ -81,28 +81,17 @@ in
 
   # https://nix-community.github.io/home-manager/options.xhtml#opt-home.activation
   home.activation = let
-    createShellEntrypoint = isInteractive: ''
-      #!/bin/sh
-
-      export CFG_DIR="${aliuRepo}/config"
-      CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"
-      IS_INTERACTIVE_SHELL=${isInteractive}
-
-      . "${aliuRepo}/config/programs/shells/dispatch"
-    '';
-    shellInteractiveEntrypoint = createShellEntrypoint "true";
-    shellEntrypoint = createShellEntrypoint "false";
     writeFileIfNotExists = { filepath, isInteractive }: lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -f "${filepath}" ]; then
         mkdir -p $(dirname "${filepath}")
         touch ${filepath}
         echo '#!/bin/sh' >> "${filepath}"
         echo "" >> "${filepath}"
-        echo 'export CFG_DIR="${aliuRepo}/config"' >> "${filepath}"
+        echo 'export CFG_DIR="${aliuRepo}"' >> "${filepath}"
         echo 'CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"' >> "${filepath}"
         echo 'IS_INTERACTIVE_SHELL=${isInteractive}' >> "${filepath}"
         echo "" >> "${filepath}"
-        echo '. "${aliuRepo}/config/programs/shells/dispatch"' >> "${filepath}"
+        echo '. "${aliuRepo}/shell/dispatch"' >> "${filepath}"
 
       else
         echo "File '${filepath}' already exists, skipping."

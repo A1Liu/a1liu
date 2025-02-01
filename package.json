@@ -3,7 +3,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 1337",
-    "build:path-helper": "go build -ldflags '-s -w' -o config/local/path/a1liu_path_helper a1liu.com/src/tools/pathHelper",
     "build": "vite build",
     "package": "vite package",
     "preview": "vite preview",
