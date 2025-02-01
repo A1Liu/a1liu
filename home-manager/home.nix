@@ -12,6 +12,7 @@ let
     unsupported;
   aliuRepo = "${homeDir}/code/aliu";
   programsDir = "${aliuRepo}/config/programs";
+  symlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
   # Home Manager needs a bit of information about you and the paths it should
@@ -68,14 +69,14 @@ in
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
-    ".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim/init.lua";
-    ".vimrc".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim/init.vim";
-    ".vim".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim";
+    ".config/nvim/init.lua".source = symlink "${programsDir}/vim/init.lua";
+    ".vimrc".source = symlink "${programsDir}/vim/init.vim";
+    ".vim".source = symlink "${programsDir}/vim";
 
-    ".bash_profile".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_interact_init";
-    ".bashrc".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_interact_init";
-    ".zshrc".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_interact_init";
-    ".zprofile".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_init";
+    ".bash_profile".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
+    ".bashrc".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
+    ".zshrc".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
+    ".zprofile".source = symlink "${aliuRepo}/home-manager/local/shell_init";
 
   };
 
