@@ -12,7 +12,7 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
 #
 # History file configuration
-[ -z "$HISTFILE" ] && HISTFILE="$CFG_DIR/local/.zsh_history"
+[ -z "$HISTFILE" ] && HISTFILE="$CFG_DIR/home-manager/local/.zsh_history"
 HISTSIZE=50000
 SAVEHIST=10000
 
