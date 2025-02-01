@@ -60,7 +60,7 @@ in
   # plain files is through 'home.file'.
   home.file = {
 
-    ".inputrc".source = ../config/programs/shells/inputrc;
+    ".inputrc".source = ./inputrc;
     ".tmux.conf".source = ./tmux.conf;
     ".gitconfig".source = ./gitconfig;
     ".gitignore_global".source = ./gitignore_global;
