@@ -60,7 +60,6 @@ in
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
-
     ".inputrc".source = ./inputrc;
     ".tmux.conf".source = ./tmux.conf;
     ".gitconfig".source = ./gitconfig;
