@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 # There's probably better way to get cross-platform support; for now I'm just
 # using this: https://github.com/crasm/dead-simple-home-manager
@@ -6,15 +6,18 @@ let
   isLinux = pkgs.stdenv.hostPlatform.isLinux;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   unsupported = builtins.abort "Unsupported platform";
+  homeDir =
+    if isLinux then "/home/aliu" else
+    if isDarwin then "/Users/aliu" else
+    unsupported;
+  aliuRepo = "${homeDir}/code/aliu";
+  programsDir = "${aliuRepo}/config/programs";
 in
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "aliu";
-  home.homeDirectory =
-    if isLinux then "/home/aliu" else
-    if isDarwin then "/Users/aliu" else
-    unsupported;
+  home.homeDirectory = homeDir;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -56,16 +59,64 @@ in
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
 
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
+    ".inputrc".source = ../config/programs/shells/inputrc;
+    ".tmux.conf".source = ./tmux.conf;
+    ".gitconfig".source = ./gitconfig;
+    ".gitignore_global".source = ./gitignore_global;
+    ".ssh/config".source = ./ssh-config;
+
+    # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
+    # because symlinking directly to a file would not be deterministic/pure.
+    ".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/neovim/init.lua";
+    ".vimrc".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim/init.vim";
+    ".vim".source = config.lib.file.mkOutOfStoreSymlink "${programsDir}/vim";
+
+    ".bash_profile".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_interact_init";
+    ".bashrc".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_interact_init";
+    ".zshrc".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_interact_init";
+    ".zprofile".source = config.lib.file.mkOutOfStoreSymlink "${aliuRepo}/home-manager/local/shell_init";
+
+  };
+
+  # https://nix-community.github.io/home-manager/options.xhtml#opt-home.activation
+  home.activation = let
+    createShellEntrypoint = isInteractive: ''
+      #!/bin/sh
+
+      export CFG_DIR="${aliuRepo}/config"
+      CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"
+      IS_INTERACTIVE_SHELL=${isInteractive}
+
+      . "${aliuRepo}/config/programs/shells/dispatch"
+    '';
+    shellInteractiveEntrypoint = createShellEntrypoint "true";
+    shellEntrypoint = createShellEntrypoint "false";
+    writeFileIfNotExists = { filepath, isInteractive }: lib.hm.dag.entryAfter ["writeBoundary"] ''
+      if [ ! -f "${filepath}" ]; then
+        mkdir -p $(dirname "${filepath}")
+        touch ${filepath}
+        echo '#!/bin/sh' >> "${filepath}"
+        echo "" >> "${filepath}"
+        echo 'export CFG_DIR="${aliuRepo}/config"' >> "${filepath}"
+        echo 'CUR_SHELL="$(basename "$0" 2>/dev/null || echo "$0" | tr -d "-")"' >> "${filepath}"
+        echo 'IS_INTERACTIVE_SHELL=${isInteractive}' >> "${filepath}"
+        echo "" >> "${filepath}"
+        echo '. "${aliuRepo}/config/programs/shells/dispatch"' >> "${filepath}"
+
+      else
+        echo "File '${filepath}' already exists, skipping."
+      fi
+    '';
+  in {
+    createShellInteractiveEntrypoint = writeFileIfNotExists {
+      filepath = "${aliuRepo}/home-manager/local/shell_interact_init";
+      isInteractive = "true";
+    };
+    createShellEntrypoint = writeFileIfNotExists {
+      filepath = "${aliuRepo}/home-manager/local/shell_init";
+      isInteractive = "false";
+    };
   };
 
   # Home Manager can also manage your environment variables through
