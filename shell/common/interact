@@ -134,6 +134,8 @@ function alenv() {
       fi
 
       shell_nix_path="$1"
+    elif [ -f "$CFG_DIR/shell/nix/$1.nix" ]; then
+      shell_nix_path="$CFG_DIR/shell/nix/$1.nix"
     elif [ -f "shell.aliu-local.nix" ]; then
       shell_nix_path="shell.aliu-local.nix"
     elif [ -f "shell.nix" ]; then
