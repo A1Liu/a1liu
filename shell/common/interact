@@ -160,4 +160,4 @@ function karimify() {
     source ~/.karim-dotfiles/.rc
 }
 
-. "${SHELL_DIR}/git-completions"
+. "${SHELL_DIR}/common/git-completions"

@@ -8,14 +8,14 @@ export SHELL_DIR="$CFG_DIR/shell"
 
 
 # Set environment variables that should exist for all calls of a shell
-. "$SHELL_DIR/env"
+. "$SHELL_DIR/common/env"
 
 shell_path="$SHELL_DIR/${CUR_SHELL}"
 
 # If we're interactive, dispatch to shells/bash-interact or something like it,
 # instead of shells/bash
 if [ $IS_INTERACTIVE_SHELL = true ]; then
-  . "$SHELL_DIR/common-interact"
+  . "$SHELL_DIR/common/interact"
   shell_path="${shell_path}/interact"
 
   # Source shell-specific stuff
