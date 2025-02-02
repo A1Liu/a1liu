@@ -52,7 +52,11 @@ fi
 # alias tree='exa -T'
 # alias ls=exa
 
+
+# Git
 alias groot='cd "$(git root)"'
+
+. "${SHELL_DIR}/common/git-completions"
 
 # https://stackoverflow.com/questions/6759791/how-do-i-move-forward-and-backward-between-commits-in-git
 function git_gofwd() {
@@ -62,6 +66,12 @@ function git_gofwd() {
 # PYTHON
 alias python="python3"
 alias pip="pip3"
+
+# RUBY
+alias ruby_setup='eval "$(rbenv init -)" ; alias ruby_setup=true'
+alias gem='ruby_setup && unalias gem && gem'
+alias bundle='ruby_setup && unalias bundle && bundle'
+alias jekyll='ruby_setup && unalias jekyll && jekyll'
 
 export A1LIU_NVM_LOADED=0
 
@@ -109,5 +119,3 @@ function karimify() {
     fi
     source ~/.karim-dotfiles/.rc
 }
-
-. "${SHELL_DIR}/common/git-completions"
