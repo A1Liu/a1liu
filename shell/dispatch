@@ -16,7 +16,7 @@ shell_path="$SHELL_DIR/${CUR_SHELL}"
 # instead of shells/bash
 if [ $IS_INTERACTIVE_SHELL = true ]; then
   . "$SHELL_DIR/common-interact"
-  shell_path="${shell_path}-interact"
+  shell_path="${shell_path}/interact"
 
   # Source shell-specific stuff
   if [ -e $shell_path ]; then

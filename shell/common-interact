@@ -159,3 +159,5 @@ function karimify() {
     fi
     source ~/.karim-dotfiles/.rc
 }
+
+. "${SHELL_DIR}/git-completions"

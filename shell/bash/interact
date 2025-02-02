@@ -1,7 +1,5 @@
 #!/bin/bash
 
-. "${SHELL_DIR}/git-completions"
-
 HISTCONTROL=ignoreboth:erasedups
 HISTSIZE=10000
 HISTFILESIZE=10000
