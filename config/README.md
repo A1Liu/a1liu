@@ -1,3 +1,8 @@
+# DEPRECATED
+This is what I used before switching to NixOS/Nix. So far Nix has been able to
+completely solve the problem of configuration management for me, so none of this
+is relevant anymore.
+
 # Configurations
 My configurations! This repo contains the things that I like to keep constant
 between systems; things like application settings, file organizations, etc.
@@ -17,30 +22,6 @@ For more information about installation, please see `install/README.md`.
 │   └── undo ----- Scripts that undo their counterpart in `install`
 └── programs ===== Configurations used by programs that I use
 ```
-
-### Environment Variables
-
-- `CFG_DIR` - Configuration directory (this repository)
-- `IS_INTERACTIVE_SHELL` - Whether or not the shell is interactive
-- `CFG_SHELL_ENV` - Guard variable for checking if path is correctly set
-- `CFG_ENV` - Guard variable for checking if environment variables are set
-
-##### Install Scripts
-The install scripts respect these environment variables when installing:
-
-- `DEBUG` - Output debug information
-- `DRY_RUN` - Don't actually affect the outside environment
-
-##### Vim
-My Vim config uses these environment variables at startup:
-
-- `VIM_DEBUG` - Debug flag for vim
-
-### Flag Files
-- `installed-S` - Whether or not `S` has been run, where `S` is a Python script
-  in the install folder (e.g. `shell.py` is represented with `installed-shell`).
-- `vim-S` A Vim flag, where `S` is the name of the flag. See the Vim README for more
-  details.
 
 ### TODO
 - `programs/vim/init.vim` -> should paths care about `/` vs `\`?

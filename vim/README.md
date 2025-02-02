@@ -19,8 +19,12 @@
 ## Ignoring Files
 - For ripgrep: `.rgignore` file
 
+## Environment Variables
+My Vim config uses these environment variables at startup:
+
+- `VIM_DEBUG` - Debug flag for vim
+
 ## Flags
-All flags are prefixed by the string `vim-`.
 
 #### Plugin Flags
 Plugin flags are prefixed by `plug-`, in addition to `vim-`. So the `base` plugin
