@@ -183,6 +183,8 @@ Plug("neovim/nvim-lspconfig", {
 
     lspconfig.pyright.setup {}
 
+    lspconfig.bashls.setup {}
+
     lspconfig.ts_ls.setup {
       on_init = function(client, _)
         client.server_capabilities.semanticTokensProvider = nil -- turn off semantic tokens

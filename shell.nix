@@ -11,6 +11,8 @@ pkgs.mkShellNoCC {
     lua-language-server
     typescript-language-server
     nodePackages.prettier
+    bash-language-server
+    shellcheck
 
     # Programming Languages
     nodejs_22
