@@ -177,6 +177,8 @@ Plug("neovim/nvim-lspconfig", {
 
     local lspconfig = require('lspconfig')
 
+    -- More configs: (Use Vim's `gx` to go to the URL)
+    -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
     lspconfig.lua_ls.setup {
       settings = { diagnostics = { globals = { "vim" } } }
     }
