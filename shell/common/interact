@@ -107,8 +107,6 @@ alias nvm='a1liu_load_nvm && nvm'
 
 alias node='unalias node && a1liu_load_nvm && node'
 alias npm='unalias npm && a1liu_load_nvm && npm'
-alias pnpm='unalias pnpm && a1liu_load_nvm && pnpm'
-alias pn='unalias pn && a1liu_load_nvm && alias pn=pnpm && pnpm'
 alias yarn='unalias yarn && a1liu_load_nvm && yarn'
 alias prettier='unalias prettier && a1liu_load_nvm && prettier'
 alias npx='unalias npx && a1liu_load_nvm && npx'
@@ -120,9 +118,9 @@ function karimify() {
     source ~/.karim-dotfiles/.rc
 }
 
-if command -v cached-nix-shell >/dev/null 2>&1; then
-  alias nix-shell='cached-nix-shell'
-fi
+# if command -v cached-nix-shell >/dev/null 2>&1; then
+#   alias nix-shell='cached-nix-shell'
+# fi
 
 function alenv() {
     local shell_nix_path
