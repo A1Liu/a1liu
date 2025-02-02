@@ -20,7 +20,7 @@ Use the `nixos` folder.
 Install [nix-darwin](https://github.com/LnL7/nix-darwin) and run
 
 ```sh
-darwin-rebuild switch --flake ./macos#aliu
+darwin-rebuild switch --flake ./nix/darwin#aliu
 ```
 
 See `MacOS.md` for more.
