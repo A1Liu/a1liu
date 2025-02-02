@@ -120,6 +120,10 @@ function karimify() {
     source ~/.karim-dotfiles/.rc
 }
 
+if command -v cached-nix-shell >/dev/null 2>&1; then
+  alias nix-shell='cached-nix-shell'
+fi
+
 function alenv() {
     local shell_nix_path
 
