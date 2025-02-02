@@ -1,4 +1,5 @@
-let s:flag_prefix = PathJoin(g:cfg_dir, 'config', 'local', 'flags', 'vim-')
+" The flag prefix needs to end with a slash so we include an empty string
+let s:flag_prefix = PathJoin(g:cfg_dir, 'vim', 'flags', '')
 let s:flag_dict = {}
 
 
