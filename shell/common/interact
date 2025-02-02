@@ -128,20 +128,25 @@ function alenv() {
     local shell_nix_path
 
     if [ -n "$1" ]; then
-      if [ ! -f "$1" ]; then
+      if [ -f "$1" ]; then
+        shell_nix_path="$1"
+      elif [ -f "$CFG_DIR/shell/nix/$1.nix" ]; then
+        shell_nix_path="$CFG_DIR/shell/nix/$1.nix"
+      else
         echo "'$1' doesn't exist!"
         return 1
       fi
-
-      shell_nix_path="$1"
-    elif [ -f "$CFG_DIR/shell/nix/$1.nix" ]; then
-      shell_nix_path="$CFG_DIR/shell/nix/$1.nix"
     elif [ -f "shell.aliu-local.nix" ]; then
       shell_nix_path="shell.aliu-local.nix"
+    elif [ -f ".shell.aliu-local.nix" ]; then
+      shell_nix_path=".shell.aliu-local.nix"
     elif [ -f "shell.nix" ]; then
       shell_nix_path="shell.nix"
     elif [ -f "default.nix" ]; then
       shell_nix_path="default.nix"
+    else
+      echo "Didn't provide an argument, and couldn't find shell.aliu-local.nix/shell.nix/default.nix"
+      return 1
     fi
 
     nix-shell "$shell_nix_path" --command 'zsh'
