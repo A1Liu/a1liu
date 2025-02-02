@@ -10,9 +10,32 @@ to install everything else:
 home-manager switch --flake ./home-manager#aliu-linux
 ```
 
+### Directory Structure
+
+```
+.
+├── home-manager --- Responsible for configuring most programs
+├── nix ============ Information on setting up various operating systems
+├── shell ---------- Configurations for shells; includes nix-shell files
+├── src ============ Svelte code
+├── static --------- Svelte static files
+└── vim ============ Vim/Neovim configuration code
+```
+
+## System Setup
 
 ### NixOS
-Use the `nixos` folder.
+1. Use `nix/nixos/configuration.nix` by symlinking it into `/etc/nixos`:
+
+   ```sh
+   sudo ln -s $PWD/nix/nixos/configuration.nix /etc/nixos/configuration.nix
+   ```
+
+1. Run the following, which rebuilds the system with the new configuration:
+
+   ```sh
+   sudo nixos-rebuild switch
+   ```
 
 ### Linux
 
@@ -23,7 +46,7 @@ Install [nix-darwin](https://github.com/LnL7/nix-darwin) and run
 darwin-rebuild switch --flake ./nix/darwin#aliu
 ```
 
-See `MacOS.md` for more.
+See [`nix/darwin/MacOS.md`](./nix/darwin/MacOS.md) for more.
 
 ### Windows
 See `Windows.md`.
