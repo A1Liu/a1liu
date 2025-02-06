@@ -67,6 +67,8 @@ to this device, put it in a file called `this.lua` in the `compat` folder. Some 
 
 ```lua
 -- Gitlab integration for vim fugitive `<C-G>`
+local Util = require("util")
+local Plug = Util.import("vim-plug")
 Plug('shumphrey/fugitive-gitlab.vim')
 
 -- Font settings
