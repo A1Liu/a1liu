@@ -70,6 +70,11 @@ to this device, put it in a file called `this.lua` in the `compat` folder. Some 
 local Util = require("util")
 local Plug = Util.import("vim-plug")
 Plug('shumphrey/fugitive-gitlab.vim')
+Plug('ramilito/kubectl.nvim', {
+  config = function()
+    require("kubectl").setup()
+  end
+})
 
 -- Font settings
 vim.g.override_gui_font = "Source Code Pro"
