@@ -183,7 +183,19 @@ Plug("neovim/nvim-lspconfig", {
       settings = { diagnostics = { globals = { "vim" } } }
     }
 
-    lspconfig.pyright.setup {}
+    lspconfig.pyright.setup {
+      settings = {
+        python = {
+          analysis = {
+            diagnosticSeverityOverrides = {
+              -- This took so long to figure out. See `python.analysis.diagnosticSeverityOverrides`
+              -- from https://github.com/microsoft/pyright/blob/main/docs/settings.md
+              reportPrivateImportUsage = false,
+            },
+          }
+        }
+      }
+    }
 
     lspconfig.bashls.setup {}
 
