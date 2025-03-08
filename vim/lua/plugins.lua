@@ -111,6 +111,7 @@ Plug('mhartington/formatter.nvim', {
         typescript = { require("formatter.filetypes.typescript").prettier, },
         typescriptreact = { require("formatter.filetypes.typescriptreact").prettier, },
         rust = { require("formatter.filetypes.rust").rustfmt, },
+        go = { require("formatter.filetypes.go").gofmt, },
       }
     }
 
@@ -186,6 +187,8 @@ Plug("neovim/nvim-lspconfig", {
     lspconfig.pyright.setup {}
 
     lspconfig.bashls.setup {}
+
+    lspconfig.gopls.setup {}
 
     lspconfig.ts_ls.setup {
       on_init = function(client, _)
