@@ -82,7 +82,7 @@
   users.users.aliu = {
     isNormalUser = true;
     description = "Albert";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
       home-manager
@@ -100,6 +100,8 @@
   };
 
   programs.steam.enable = true;
+
+  virtualisation.docker.enable = true;
 
   programs._1password = {
     enable = true;
