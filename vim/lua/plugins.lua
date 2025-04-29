@@ -199,6 +199,8 @@ Plug("neovim/nvim-lspconfig", {
       }
     }
 
+    -- LSP Config for mypy
+
     lspconfig.bashls.setup {}
 
     lspconfig.ts_ls.setup {

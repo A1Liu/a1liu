@@ -79,5 +79,8 @@ Plug('ramilito/kubectl.nvim', {
 -- Font settings
 vim.g.override_gui_font = "Source Code Pro"
 vim.g.override_gui_font_size = 14
+
+-- Copilot?
+Plug('github/copilot.vim')
 ```
 
