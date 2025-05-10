@@ -55,6 +55,7 @@ in
     ripgrep
     tmux
     fd
+    ydiff
 
     cached-nix-shell
   ];
