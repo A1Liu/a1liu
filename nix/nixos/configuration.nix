@@ -126,6 +126,8 @@
     git-lfs
 
     zig
+
+    qbittorrent
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
 
@@ -159,6 +161,9 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+  # networking.firewall.checkReversePath = "loose"; 
+  # networking.wg-quick.interfaces.NYC.configFile = "/home/aliu/Documents/us-nyc-wg-804.conf";
+
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

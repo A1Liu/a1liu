@@ -57,6 +57,8 @@ in
     fd
 
     cached-nix-shell
+    mozwire
+    wireguard-tools
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
