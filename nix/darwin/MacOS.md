@@ -4,7 +4,11 @@
 
 1. Install XCode tools using `xcode-select --install`
 2. Clone repository with `git clone https://github.com/A1Liu/config.git`
-3. Remap Caps Lock to control: System Preferences > Keyboard > Keyboard > Modifier Keys
+3. Install [nix-darwin](https://github.com/LnL7/nix-darwin) and run
+
+   ```sh
+   darwin-rebuild switch --flake ./nix/darwin#aliu
+   ```
 
 ### Fixing the settings
 1. Fix the Keyboard (System Preferences -> Keyboard)
@@ -15,7 +19,7 @@
    1. (if present) Set to "Do Nothing": Keyboard -> Press `GLOBE ICON` to
    1. (if present) Set to "Expanded Control Strip": Keyboard -> Touch bar shows
    1. Customize: Keyboard -> Customize Control Strip
-2. Remove keyboard text
+<!-- 2. Remove keyboard text -->
 2. Remove annoying Terminal stuff (Terminal -> Preferences)
    1. Set to "Close the Window": Profiles -> Shell -> When Shell Exits
    1. Set to OFF: Profiles -> Advanced -> Bell -> Audible bell
@@ -26,7 +30,6 @@
    1. Turn OFF: More Gestures -> App Expose
 4. Turn OFF: System Preferences -> Siri -> Enable Ask Siri
 5. Bluetooth (System Preferences -> Bluetooth)
-   1. Turn ON: Show Bluetooth in menu bar
    1. Set to "when last connected to this mac": `AIRPOD NAME` -> Options ->
       Connect to This Mac
 

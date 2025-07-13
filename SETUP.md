@@ -37,16 +37,8 @@ home-manager switch --flake ./home-manager#aliu-linux
    sudo nixos-rebuild switch
    ```
 
-### Linux
-
 ### MacOS
-Install [nix-darwin](https://github.com/LnL7/nix-darwin) and run
-
-```sh
-darwin-rebuild switch --flake ./nix/darwin#aliu
-```
-
-See [`nix/darwin/MacOS.md`](./nix/darwin/MacOS.md) for more.
+See [`nix/darwin/MacOS.md`](./nix/darwin/MacOS.md) for setup.
 
 ### Windows
 See `Windows.md`.
