@@ -32,6 +32,14 @@
       # $ darwin-rebuild changelog
       system.stateVersion = 5;
 
+      system.keyboard.enableKeyMapping = true;
+      system.keyboard.remapCapsLockToControl = true;
+
+      security.pam.services.sudo_local = {
+        touchIdAuth = true;
+        reattach = true;
+      };
+
       homebrew = {
           enable = true;
           # onActivation.cleanup = "uninstall";
@@ -47,6 +55,13 @@
       system.defaults = {
         # Dark mode
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
+
+        controlcenter = {
+          BatteryShowPercentage = true;
+
+          # Show Bluetooth in menu bar
+          Bluetooth = true;
+        };
 
         # minimal dock
         dock = {
