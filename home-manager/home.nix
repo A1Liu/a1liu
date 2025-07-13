@@ -110,9 +110,11 @@ in
       filepath = "${aliuRepo}/home-manager/local/shell_init";
       isInteractive = "false";
     };
+    # We need to use /usr/bin/ssh-keygen here because... I don't know. It wasn't
+    # working without it. Very cool.
     createSshKey = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -f "$HOME/.ssh/id_aliu" ]; then
-        ssh-keygen -t ed25519 -C 'albertymliu@gmail.com' -N "" -q -f $HOME/.ssh/id_aliu
+        /usr/bin/ssh-keygen -t ed25519 -C 'albertymliu@gmail.com' -N "" -q -f $HOME/.ssh/id_aliu
       else
         echo "File \"$HOME/.ssh/id_aliu\" already exists, skipping."
       fi
