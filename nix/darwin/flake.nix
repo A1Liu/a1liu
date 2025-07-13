@@ -46,7 +46,11 @@
 
           taps = [];
           brews = [];
-          casks = [ "neovide" ];
+          casks = [
+            "neovide"
+            "obsidian"
+            "mozilla-vpn"
+          ];
       };
 
       # The platform the configuration will be used on.
