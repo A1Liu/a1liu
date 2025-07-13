@@ -108,8 +108,8 @@ in
       filepath = "${aliuRepo}/home-manager/local/shell_init";
       isInteractive = "false";
     };
-    # We need to use /usr/bin/ssh-keygen here because... I don't know. It wasn't
-    # working without it. Very cool.
+    # We need to use the absolute path for ssh-keygen because... I don't know.
+    # It was failing with a `ssh-keygen not found` before. Very cool.
     createSshKey = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -f "$HOME/.ssh/id_aliu" ]; then
         /usr/bin/ssh-keygen -t ed25519 -C 'albertymliu@gmail.com' -N "" -q -f $HOME/.ssh/id_aliu
