@@ -55,8 +55,10 @@ in
     ripgrep
     tmux
     fd
+    fzf
 
     cached-nix-shell
+    rustup
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
