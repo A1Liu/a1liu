@@ -1,5 +1,6 @@
 {
-  "model": "ollama/deepseek-r1",
+  "$schema": "https://opencode.ai/config.json",
+  "theme": "tokyonight",
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
@@ -7,8 +8,20 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "deepseek-r1": {}
+        "qwen3": {
+            "name": "Qwen",
+            "tools": true,
+            "reasoning": true,
+            "options": { "num_ctx": 65536 }
+        },
+        "deepseek-r1": {
+            "name": "Deepseek",
+            "tools": true,
+            "reasoning": true,
+            "options": { "num_ctx": 65536 }
+        }
       }
     }
   }
 }
+
