@@ -18,7 +18,10 @@ local Util = require("util")
 
 Util.import("compat")
 
-Util.import("plugins")
+glob_flag = vim.fn['GlobFlag']
+if glob_flag("plug-*") ~= 0 then
+  Util.import("plugins")
+end
 
 Util.import("gui")
 

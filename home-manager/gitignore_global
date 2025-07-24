@@ -13,3 +13,6 @@ tags
 *.aliu-local.*
 *.aliu-local
 # .tmp.aliu-local
+
+# AI coding thing. Trying it at least.
+.opencode

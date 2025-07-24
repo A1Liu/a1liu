@@ -55,9 +55,12 @@ in
     ripgrep
     tmux
     fd
+    fzf
     ydiff
 
     cached-nix-shell
+    rustup
+    fnm
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -68,6 +71,10 @@ in
     ".gitconfig".source = ./gitconfig;
     ".gitignore_global".source = ./gitignore_global;
     ".ssh/config".source = ./ssh-config;
+
+    # NOTE: Use this one: https://opencode.ai/ there's another one with the same name
+    # that's the wrong one and doesn't work.
+    ".config/opencode/opencode.json".source = ./opencode.json;
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
@@ -109,9 +116,11 @@ in
       filepath = "${aliuRepo}/home-manager/local/shell_init";
       isInteractive = "false";
     };
+    # We need to use the absolute path for ssh-keygen because... I don't know.
+    # It was failing with a `ssh-keygen not found` before. Very cool.
     createSshKey = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -f "$HOME/.ssh/id_aliu" ]; then
-        ssh-keygen -t ed25519 -C 'albertymliu@gmail.com' -N "" -q -f $HOME/.ssh/id_aliu
+        /usr/bin/ssh-keygen -t ed25519 -C 'albertymliu@gmail.com' -N "" -q -f $HOME/.ssh/id_aliu
       else
         echo "File \"$HOME/.ssh/id_aliu\" already exists, skipping."
       fi
@@ -141,3 +150,4 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 }
+

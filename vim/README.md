@@ -51,10 +51,10 @@ system, you refer to it just using the value `base`.
 ## Default Flag Configuration
 This command will add the default list plugins that I enable:
 ```
-touch config/local/flags/vim-aliu config/local/flags/vim-plug-base \
-    config/local/flags/vim-plug-files config/local/flags/vim-plug-fzf \
-    config/local/flags/vim-plug-format config/local/flags/vim-plug-lsc \
-    config/local/flags/vim-plug-polyglot
+touch vim/flags/aliu vim/flags/plug-base \
+    vim/flags/plug-files vim/flags/plug-fzf \
+    vim/flags/plug-format vim/flags/plug-lsc \
+    vim/flags/plug-polyglot
 ```
 
 ## Neovim vs Vim

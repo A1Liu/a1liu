@@ -113,6 +113,7 @@ Plug('mhartington/formatter.nvim', {
         javascript = { require("formatter.filetypes.javascript").prettier, },
         javascriptreact = { require("formatter.filetypes.javascriptreact").prettier, },
         rust = { require("formatter.filetypes.rust").rustfmt, },
+        go = { require("formatter.filetypes.go").gofmt, },
       }
     }
 
@@ -203,6 +204,8 @@ Plug("neovim/nvim-lspconfig", {
 
     lspconfig.bashls.setup {}
 
+    lspconfig.gopls.setup {}
+
     lspconfig.ts_ls.setup {
       on_init = function(client, _)
         client.server_capabilities.semanticTokensProvider = nil -- turn off semantic tokens
@@ -270,6 +273,11 @@ Plug("neovim/nvim-lspconfig", {
     vim.keymap.set('n', '<Leader>b', vim.lsp.buf.implementation, {
       noremap = true,
     })
+
+    vim.keymap.set('n', '<Leader>e', vim.diagnostic.open_float, {
+      noremap = true,
+    });
+
     vim.keymap.set('n', '<C-E>', vim.lsp.buf.hover, {
       noremap = true,
     })

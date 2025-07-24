@@ -36,6 +36,17 @@ export VISUAL='nvim'
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export HOMEBREW_NO_AUTO_UPDATE=1
 
+
+# Source from homebrew script if it exists
+if [ -e "/opt/homebrew/bin/brew" ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+if command -v "fnm" >/dev/null 2>&1 ; then
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi
+
+
 # Guard prevents this from being sourced in environments that already have it.
 # Block focuses on environment variables.
 
@@ -61,7 +72,6 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 # stuffs
 #
 # ^ Update: With nix shell, this should be rendered obsolete. Fingers crossed.
-
 
 # NOTE: we're using aliu_path_helper to produce paths now. The list of paths needs
 # to be updated in 2 locations now.

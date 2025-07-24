@@ -23,6 +23,8 @@
       # Enable alternative shell support in nix-darwin.
       # programs.fish.enable = true;
 
+      system.primaryUser = "aliu";
+
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
 
@@ -30,13 +32,25 @@
       # $ darwin-rebuild changelog
       system.stateVersion = 5;
 
+      system.keyboard.enableKeyMapping = true;
+      system.keyboard.remapCapsLockToControl = true;
+
+      security.pam.services.sudo_local = {
+        touchIdAuth = true;
+        reattach = true;
+      };
+
       homebrew = {
           enable = true;
           # onActivation.cleanup = "uninstall";
 
           taps = [];
           brews = [];
-          casks = [ "neovide" ];
+          casks = [
+            "neovide"
+            "obsidian"
+            "mozilla-vpn"
+          ];
       };
 
       # The platform the configuration will be used on.
@@ -45,6 +59,13 @@
       system.defaults = {
         # Dark mode
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
+
+        controlcenter = {
+          BatteryShowPercentage = true;
+
+          # Show Bluetooth in menu bar
+          Bluetooth = true;
+        };
 
         # minimal dock
         dock = {
