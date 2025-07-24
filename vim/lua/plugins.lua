@@ -257,6 +257,11 @@ Plug("neovim/nvim-lspconfig", {
     vim.keymap.set('n', '<Leader>b', vim.lsp.buf.implementation, {
       noremap = true,
     })
+
+    vim.keymap.set('n', '<Leader>e', vim.diagnostic.open_float, {
+      noremap = true,
+    });
+
     vim.keymap.set('n', '<C-E>', vim.lsp.buf.hover, {
       noremap = true,
     })
