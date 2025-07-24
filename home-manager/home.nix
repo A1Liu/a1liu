@@ -56,6 +56,7 @@ in
     tmux
     fd
     fzf
+    ydiff
 
     cached-nix-shell
     rustup

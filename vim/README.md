@@ -67,10 +67,20 @@ to this device, put it in a file called `this.lua` in the `compat` folder. Some 
 
 ```lua
 -- Gitlab integration for vim fugitive `<C-G>`
+local Util = require("util")
+local Plug = Util.import("vim-plug")
 Plug('shumphrey/fugitive-gitlab.vim')
+Plug('ramilito/kubectl.nvim', {
+  config = function()
+    require("kubectl").setup()
+  end
+})
 
 -- Font settings
 vim.g.override_gui_font = "Source Code Pro"
 vim.g.override_gui_font_size = 14
+
+-- Copilot?
+Plug('github/copilot.vim')
 ```
 

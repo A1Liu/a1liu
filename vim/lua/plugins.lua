@@ -110,6 +110,8 @@ Plug('mhartington/formatter.nvim', {
         lua = { require("formatter.filetypes.lua").stylua, },
         typescript = { require("formatter.filetypes.typescript").prettier, },
         typescriptreact = { require("formatter.filetypes.typescriptreact").prettier, },
+        javascript = { require("formatter.filetypes.javascript").prettier, },
+        javascriptreact = { require("formatter.filetypes.javascriptreact").prettier, },
         rust = { require("formatter.filetypes.rust").rustfmt, },
         go = { require("formatter.filetypes.go").gofmt, },
       }
@@ -184,7 +186,21 @@ Plug("neovim/nvim-lspconfig", {
       settings = { diagnostics = { globals = { "vim" } } }
     }
 
-    lspconfig.pyright.setup {}
+    lspconfig.pyright.setup {
+      settings = {
+        python = {
+          analysis = {
+            diagnosticSeverityOverrides = {
+              -- This took so long to figure out. See `python.analysis.diagnosticSeverityOverrides`
+              -- from https://github.com/microsoft/pyright/blob/main/docs/settings.md
+              reportPrivateImportUsage = false,
+            },
+          }
+        }
+      }
+    }
+
+    -- LSP Config for mypy
 
     lspconfig.bashls.setup {}
 
