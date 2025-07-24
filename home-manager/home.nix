@@ -70,6 +70,9 @@ in
     ".gitconfig".source = ./gitconfig;
     ".gitignore_global".source = ./gitignore_global;
     ".ssh/config".source = ./ssh-config;
+
+    # NOTE: Use this one: https://opencode.ai/ there's another one with the same name
+    # that's the wrong one and doesn't work.
     ".config/opencode/opencode.json".source = ./opencode.json;
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
