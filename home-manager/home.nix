@@ -59,6 +59,7 @@ in
 
     cached-nix-shell
     rustup
+    fnm
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -69,6 +70,7 @@ in
     ".gitconfig".source = ./gitconfig;
     ".gitignore_global".source = ./gitignore_global;
     ".ssh/config".source = ./ssh-config;
+    ".opencode.json".source = ./opencode.json;
 
     # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
     # because symlinking directly to a file would not be deterministic/pure.
@@ -144,3 +146,4 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 }
+
