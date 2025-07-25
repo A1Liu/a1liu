@@ -60,7 +60,7 @@ alias groot='cd "$(git root)"'
 
 # https://stackoverflow.com/questions/6759791/how-do-i-move-forward-and-backward-between-commits-in-git
 function git_gofwd() {
-    git checkout $(git rev-list --topo-order HEAD.."$*" | tail -1)
+    git checkout "$(git rev-list --topo-order HEAD.."$*" | tail -1)"
 }
 
 # PYTHON
@@ -115,7 +115,7 @@ function karimify() {
     if ! test -e "$HOME/.karim-dotfiles"; then
         git clone https://github.com/karimsa/dotfiles ~/.karim-dotfiles
     fi
-    source ~/.karim-dotfiles/.rc
+    source "$HOME/.karim-dotfiles/.rc"
 }
 
 # if command -v cached-nix-shell >/dev/null 2>&1; then
