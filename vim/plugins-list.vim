@@ -116,14 +116,16 @@ if PlugFlag('files', "enables NERDTree") && !has('nvim')
 endif
 
 if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep)")
+  " I wanna make this save previous history, but that's
+  " proving very annoying. Not sure what to do yet.
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
 
-  " I wanna make this save previous history, but that's
-  " proving very annoying. Not sure what to do yet.
-
-  nnoremap <Leader>F :RG<CR>
   nnoremap <Leader>O :GFiles<CR>
+
+  " Copy-pasted the command from https://github.com/junegunn/fzf.vim/blob/3725f364ccd25b85a91970720ba9bc2931861910/plugin/fzf.vim#L64C1-L64C202
+  command! -bang -nargs=* RgCommand call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -- ", <q-args>, fzf#vim#with_preview(), <bang>0)
+  nnoremap <Leader>F :RgCommand<CR>
 
   " Read from clipboard when pressing Ctrl-V
   autocmd! FileType fzf tnoremap <expr> <C-v> getreg(nr2char('"'))
@@ -140,7 +142,7 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
     " CMD+F, so even though Vim can't tell whether Shift was pressed, MacVim
     " will only run these mappings when shift is pressed.
     nnoremap <D-O> :GFiles<CR>
-    nnoremap <D-F> :RG<CR>
+    nnoremap <D-F> :RgCommand<CR>
   endif
 endif
 
