@@ -12,7 +12,12 @@ local Plug = {
   ends = function()
     vim.fn['plug#end']()
 
-    for _, config in pairs(configs.start) do
+    for plugin, config in pairs(configs.start) do
+
+      local _, _ = xpcall(config, function(error)
+        vim.print("Failed to load plugin: " .. plugin)
+        vim.print("  Error: " .. error)
+      end)
       config()
     end
   end
