@@ -308,9 +308,9 @@ Plug("NickvanDyke/opencode.nvim", {
   config = function()
     local opencode = require('opencode')
 
-    vim.keymap.set('n', '<leader>oA', opencode.ask)
-    vim.keymap.set('n', '<leader>op', opencode.select_prompt)
-    vim.keymap.set('n', '<leader>ot', opencode.toggle)
+    vim.keymap.set('n', '<leader>oA', function() opencode.ask() end)
+    vim.keymap.set('n', '<leader>op', function() opencode.select_prompt() end)
+    vim.keymap.set('n', '<leader>ot', function() opencode.toggle() end)
 
     vim.keymap.set('n', '<leader>oa', function() opencode.ask('@cursor: ') end)
     vim.keymap.set('v', '<leader>oa', function() opencode.ask('@selection: ') end)
