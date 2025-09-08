@@ -65,6 +65,7 @@ in
     rustup
     fnm
     uv
+    bun
   ];
 
   programs.tmux = {
