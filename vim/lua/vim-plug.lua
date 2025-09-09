@@ -46,6 +46,10 @@ local meta = {
     opts['for'] = opts.ft
     opts.ft = nil
 
+    if opts['disable'] then
+      return
+    end
+
     vim.call('plug#', repo, opts)
 
     -- Add basic support to colocate plugin config

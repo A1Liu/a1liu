@@ -97,6 +97,17 @@ Plug("nvim-treesitter/nvim-treesitter", {
         "graphql",
       },
     }
+
+    -- Some kind of weird bug happening in auto-indent for graphql.
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = { "graphql" },
+      callback = function()
+        vim.bo.autoindent = true
+        vim.bo.smartindent = false
+        vim.bo.cindent = false
+        vim.bo.indentexpr = ""
+      end,
+    })
   end,
 })
 
