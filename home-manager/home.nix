@@ -48,20 +48,27 @@ in
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
-    git-lfs
 
+    # Editor
     neovim
     neovide
+
+    # CLI Tools
+    git-lfs
     ripgrep
-    tmux
     fd
     fzf
     ydiff
 
+    # Postgres
+    pgweb
+
+    tmux
     reattach-to-user-namespace
 
     cached-nix-shell
 
+    # Programming languages
     rustup
     fnm
     uv
