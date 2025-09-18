@@ -56,10 +56,17 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
+ 
       # set some OSX preferences that I always end up hunting down and changing.
       system.defaults = {
-        # Dark mode
-        NSGlobalDomain.AppleInterfaceStyle = "Dark";
+        NSGlobalDomain = {
+          # Dark mode
+          AppleInterfaceStyle = "Dark";
+
+          # Disable scrolling left/right to go navigate through history
+          AppleEnableMouseSwipeNavigateWithScrolls = false;
+          AppleEnableSwipeNavigateWithScrolls = false;
+        };
 
         controlcenter = {
           BatteryShowPercentage = true;
