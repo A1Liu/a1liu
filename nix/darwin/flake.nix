@@ -33,7 +33,7 @@
       system.stateVersion = 5;
 
       system.keyboard.enableKeyMapping = true;
-      system.keyboard.remapCapsLockToControl = true;
+      # system.keyboard.remapCapsLockToControl = true;
 
       security.pam.services.sudo_local = {
         touchIdAuth = true;
