@@ -76,6 +76,10 @@ alias gem='ruby_setup && unalias gem && gem'
 alias bundle='ruby_setup && unalias bundle && bundle'
 alias jekyll='ruby_setup && unalias jekyll && jekyll'
 
+function nv() {
+  neovide "${1:-.}" &disown
+}
+
 # export A1LIU_NVM_LOADED=0
 
 # a1liu_load_nvm () {
