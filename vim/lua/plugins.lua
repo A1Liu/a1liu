@@ -21,33 +21,24 @@ Plug('nvim-tree/nvim-tree.lua', {
     })
 
     local on_attach = function(bufnr)
-      vim.keymap.set("n", "C", api.tree.change_root_to_node, {
+      api.config.mappings.default_on_attach(bufnr)
+
+      local opts = {
         buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "<CR>", api.node.open.no_window_picker, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "D", api.fs.trash, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "a", api.fs.create, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "H", api.tree.toggle_hidden_filter, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "I", api.tree.toggle_gitignore_filter, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "R", api.tree.reload, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "<C-B>", api.tree.close, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
-      vim.keymap.set("n", "m", api.node.show_info_popup, {
-        buffer = bufnr, noremap = true, silent = true, nowait = true
-      })
+      }
+
+      vim.keymap.set("n", "<C-K>", "4gk", opts)
+      vim.keymap.set("n", "<C-J>", "4gj", opts)
+
+      vim.keymap.set("n", "C", api.tree.change_root_to_node, opts)
+      vim.keymap.set("n", "<CR>", api.node.open.no_window_picker, opts)
+      vim.keymap.set("n", "D", api.fs.trash, opts)
+      vim.keymap.set("n", "a", api.fs.create, opts)
+      vim.keymap.set("n", "H", api.tree.toggle_hidden_filter, opts)
+      vim.keymap.set("n", "I", api.tree.toggle_gitignore_filter, opts)
+      vim.keymap.set("n", "R", api.tree.reload, opts)
+      vim.keymap.set("n", "m", api.node.show_info_popup, opts)
+      vim.keymap.set("n", "<C-B>", api.tree.close, opts)
     end
 
     tree.setup({
