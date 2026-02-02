@@ -7,7 +7,7 @@ in
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
-    # Tools
+    # Lang Tools
     lua-language-server
     typescript-language-server
     nodePackages.prettier
