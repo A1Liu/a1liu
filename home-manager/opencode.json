@@ -8,9 +8,6 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "glm-4.7:cloud": {
-          "name": "glm-4.7:cloud"
-        },
         "qwen3": {
             "name": "Qwen",
             "tools": true,
