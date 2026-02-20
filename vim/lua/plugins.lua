@@ -307,17 +307,24 @@ Plug("neovim/nvim-lspconfig", {
 })
 
 
-Plug("folke/snacks.nvim")
 Plug("NickvanDyke/opencode.nvim", {
   config = function()
     local opencode = require('opencode')
+
+    vim.g.opencode_opts = {
+      provider = {
+        enabled = "terminal",
+        terminal = {
+        }
+      }
+    }
 
     vim.keymap.set('n', '<leader>oA', function() opencode.ask() end)
     vim.keymap.set('n', '<leader>op', function() opencode.select_prompt() end)
     vim.keymap.set('n', '<leader>ot', function() opencode.toggle() end)
 
-    vim.keymap.set('n', '<leader>oa', function() opencode.ask('@cursor: ') end)
-    vim.keymap.set('v', '<leader>oa', function() opencode.ask('@selection: ') end)
+    vim.keymap.set('n', '<leader>oa', function() opencode.ask('@cursor: ', { submit = true }) end)
+    vim.keymap.set('v', '<leader>oa', function() opencode.ask('@selection: ', { submit = true }) end)
     vim.keymap.set('n', '<leader>on', function() opencode.command('session_new') end)
     vim.keymap.set('n', '<leader>oy', function() opencode.command('messages_copy') end)
     vim.keymap.set('n', '<leader>oe', function() opencode.prompt("Explain @cursor and its context") end)
