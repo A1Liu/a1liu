@@ -183,8 +183,6 @@ Plug("neovim/nvim-lspconfig", {
     require("mason").setup()
     require("mason-lspconfig").setup()
 
-    local lspconfig = require('lspconfig')
-
     -- More configs: (Use Vim's `gx` to go to the URL)
     -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
     vim.lsp.config("lua_ls", {
