@@ -77,17 +77,20 @@ Plug("nvim-treesitter/nvim-treesitter", {
     vim.cmd('TSUpdate')
   end, -- We recommend updating the parsers on update
   config = function()
-    require('nvim-treesitter.configs').setup {
+    local treesitter = require('nvim-treesitter')
+    treesitter.setup {
+      install_dir = vim.fn.stdpath('data') .. '/tree-sitter',
       highlight = {
         enable = true
       },
-      ensure_installed = {
-        "lua",
-        "vim",
-        "vimdoc",
-        "graphql",
-      },
     }
+
+    -- treesitter.install {
+    --   "lua",
+    --   "vim",
+    --   "vimdoc",
+    --   "graphql",
+    -- }
 
     -- Some kind of weird bug happening in auto-indent for graphql.
     vim.api.nvim_create_autocmd("FileType", {
@@ -184,11 +187,12 @@ Plug("neovim/nvim-lspconfig", {
 
     -- More configs: (Use Vim's `gx` to go to the URL)
     -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
-    lspconfig.lua_ls.setup {
+    vim.lsp.config("lua_ls", {
       settings = { diagnostics = { globals = { "vim" } } }
-    }
+    })
+    vim.lsp.enable("lua_ls")
 
-    lspconfig.pyright.setup {
+    vim.lsp.config("pyright", {
       settings = {
         python = {
           analysis = {
@@ -200,15 +204,14 @@ Plug("neovim/nvim-lspconfig", {
           }
         }
       }
-    }
+    })
+    vim.lsp.enable("pyright")
 
     -- LSP Config for mypy
+    vim.lsp.enable("bashls")
+    vim.lsp.enable("gopls")
 
-    lspconfig.bashls.setup {}
-
-    lspconfig.gopls.setup {}
-
-    lspconfig.ts_ls.setup {
+    vim.lsp.config("ts_ls", {
       on_init = function(client, _)
         client.server_capabilities.semanticTokensProvider = nil -- turn off semantic tokens
       end,
@@ -218,9 +221,10 @@ Plug("neovim/nvim-lspconfig", {
         "typescriptreact",
         "javascriptreact",
       },
-    }
+    })
+    vim.lsp.enable("ts_ls")
 
-    lspconfig.rust_analyzer.setup {}
+    vim.lsp.enable("rust_analyzer")
 
     vim.keymap.set('v', '<C-F>', '', { noremap = true })
     vim.keymap.set('n', '<C-F>', vim.lsp.buf.code_action, {
