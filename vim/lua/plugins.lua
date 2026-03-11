@@ -113,8 +113,14 @@ Plug('mhartington/formatter.nvim', {
       -- log_level = vim.log.levels.DEBUG,
       filetype = {
         lua = { require("formatter.filetypes.lua").stylua, },
-        typescript = { require("formatter.filetypes.typescript").prettier, },
-        typescriptreact = { require("formatter.filetypes.typescriptreact").prettier, },
+        typescript = {
+          require("formatter.filetypes.typescript").biome,
+          require("formatter.filetypes.typescript").prettier,
+        },
+        typescriptreact = {
+          require("formatter.filetypes.typescriptreact").biome,
+          require("formatter.filetypes.typescriptreact").prettier,
+        },
         javascript = { require("formatter.filetypes.javascript").prettier, },
         javascriptreact = { require("formatter.filetypes.javascriptreact").prettier, },
         rust = { require("formatter.filetypes.rust").rustfmt, },
