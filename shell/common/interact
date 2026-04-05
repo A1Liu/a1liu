@@ -118,6 +118,8 @@ function nv() {
 # alias prettier='unalias prettier && a1liu_load_nvm && prettier'
 # alias npx='unalias npx && a1liu_load_nvm && npx'
 
+alias claude='~/.local/bin/claude'
+
 function karimify() {
     if ! test -e "$HOME/.karim-dotfiles"; then
         git clone https://github.com/karimsa/dotfiles ~/.karim-dotfiles
