@@ -3,7 +3,7 @@
 autoload -U colors && colors
 setopt PROMPT_SUBST
 
-PROMPT="\
+export PROMPT="\
 %{$fg[magenta]%}\$(prompt_context)\
 %{$fg[cyan]%}%c%{$reset_color%} \
 \$(git_prompt_info)%(?:%{$fg[green]%}#:%{$fg[red]%}#)%{$reset_color%} "
@@ -40,7 +40,7 @@ function parse_git_dirty() {
   fi
 }
 
-prompt_context() {
+function prompt_context() {
   if [[ -n "$IN_NIX_SHELL" ]]; then
     echo -n "[nix] "
   fi
