@@ -50,7 +50,8 @@
             "neovide"
             "obsidian"
             "mozilla-vpn"
-            "unnaturalscrollwheels"
+            "dbeaver-community"
+            # "unnaturalscrollwheels"
           ];
       };
 
