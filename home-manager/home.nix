@@ -121,7 +121,7 @@ in
         echo '#!/bin/sh' >> "${filepath}"
         echo "" >> "${filepath}"
         echo 'export CFG_DIR="${aliuRepo}"' >> "${filepath}"
-        echo 'CUR_SHELL="$(ps -cp "$$" -o command="" || echo "$0" | tr -d "-")"' >> "${filepath}"
+        echo 'CUR_SHELL="$(ps -cp "$$" -o command="" | echo "$0" | tr -d "-")"' >> "${filepath}"
         echo 'IS_INTERACTIVE_SHELL=${isInteractive}' >> "${filepath}"
         echo "" >> "${filepath}"
         echo '. "${aliuRepo}/shell/dispatch"' >> "${filepath}"
