@@ -21,7 +21,10 @@ nnoremap r<C-H> <Nop>
 " Terminal keybindings
 if exists(':terminal')
   tnoremap <C-H> <C-\><C-N>
-  tnoremap <C-W><C-H> <C-W>h
+  tnoremap <C-W><C-H> <C-\><C-N><C-W>h
+  tnoremap <C-W><C-J> <C-\><C-N><C-W>j
+  tnoremap <C-W><C-K> <C-\><C-N><C-W>k
+  tnoremap <C-W><C-L> <C-\><C-N><C-W>l
 endif
 
 " Change Leader key

@@ -16,7 +16,12 @@ RE="\001$R\002"
 GE="\001$G\002"
 
 branch() {
-  git branch 2>/dev/null | grep '^.*' | sed 's/^\*\(.*\)$/\1/'
+  # git branch 2>/dev/null | grep '^.*' | sed 's/^\*\(.*\)$/\1/'
+
+  ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
+  ref=$(command git rev-parse --short HEAD 2> /dev/null) || return 0
+
+  echo -n " ${ref#refs/heads/}"
 }
 
 parse_git_dirty() {
