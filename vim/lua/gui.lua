@@ -3,6 +3,8 @@ local Util = require("util")
 local fontsize = vim.g.override_gui_font_size or 11
 local font = vim.g.override_gui_font
 
+vim.opt.hidden = false
+
 local lower_os = vim.g.os:lower()
 if lower_os == "windows" then
   font = vim.g.override_gui_font or "Consolas"
