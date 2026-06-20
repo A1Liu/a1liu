@@ -25,6 +25,14 @@ if exists(':terminal')
   tnoremap <C-W><C-J> <C-\><C-N><C-W>j
   tnoremap <C-W><C-K> <C-\><C-N><C-W>k
   tnoremap <C-W><C-L> <C-\><C-N><C-W>l
+
+  " Tabs
+  tnoremap <C-W><C-t> <C-\><C-N>:tabnew<Enter>
+  tnoremap <C-W><C-e> <C-\><C-N>:tabNext<Enter>
+  tnoremap <C-W><C-r> <C-\><C-N>:tabnext<Enter>
+  tnoremap <C-W>t <C-\><C-N>:tabnew<Enter>
+  tnoremap <C-W>e <C-\><C-N>:tabNext<Enter>
+  tnoremap <C-W>r <C-\><C-N>:tabnext<Enter>
 endif
 
 " Change Leader key
