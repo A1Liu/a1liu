@@ -72,6 +72,8 @@ Plug('nvim-tree/nvim-tree.lua', {
   end
 })
 
+Plug('prisma/vim-prisma')
+
 Plug("nvim-treesitter/nvim-treesitter", {
   run = function()
     vim.cmd('TSUpdate')
@@ -309,34 +311,6 @@ Plug("neovim/nvim-lspconfig", {
         ]] --
       end,
     })
-  end
-})
-
-
-Plug("NickvanDyke/opencode.nvim", {
-  config = function()
-    local opencode = require('opencode')
-
-    vim.g.opencode_opts = {
-      provider = {
-        enabled = "terminal",
-        terminal = {
-        }
-      }
-    }
-
-    vim.keymap.set('n', '<leader>oA', function() opencode.ask() end)
-    vim.keymap.set('n', '<leader>op', function() opencode.select_prompt() end)
-    vim.keymap.set('n', '<leader>ot', function() opencode.toggle() end)
-
-    vim.keymap.set('n', '<leader>oa', function() opencode.ask('@cursor: ', { submit = true }) end)
-    vim.keymap.set('v', '<leader>oa', function() opencode.ask('@selection: ', { submit = true }) end)
-    vim.keymap.set('n', '<leader>on', function() opencode.command('session_new') end)
-    vim.keymap.set('n', '<leader>oy', function() opencode.command('messages_copy') end)
-    vim.keymap.set('n', '<leader>oe', function() opencode.prompt("Explain @cursor and its context") end)
-
-    -- vim.keymap.set('n', '<S-C-u>',    function() opencode.command('messages_half_page_up') end)
-    -- vim.keymap.set('n', '<S-C-d>',    function() opencode.command('messages_half_page_down') end)
   end
 })
 
