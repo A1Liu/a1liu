@@ -4,7 +4,13 @@
 alias :q!=exit
 alias :q=exit
 alias :ex=vim
-alias vi=vim
+
+if command -v nvim >/dev/null 2>&1 ; then
+    alias vi=nvim
+else
+    alias vi=vim
+fi
+
 alias di='VIM_DEBUG=1 vim'
 alias zigb='zig build -p .zig/zig-out --cache-dir .zig/zig-cache'
 
