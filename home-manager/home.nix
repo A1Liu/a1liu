@@ -63,6 +63,9 @@ in
     # Postgres
     pgweb
 
+    # ai
+    herdr
+
     tmux
     reattach-to-user-namespace
 

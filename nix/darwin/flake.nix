@@ -47,7 +47,6 @@
           taps = [];
           brews = [];
           casks = [
-            "neovide"
             "obsidian"
             "mozilla-vpn"
             "dbeaver-community"
