@@ -16,3 +16,5 @@ tags
 
 # AI coding thing. Trying it at least.
 .opencode
+
+.claude/settings.local.json
