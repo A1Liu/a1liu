@@ -15,6 +15,8 @@
 ## NERDTree
 - `R` - refresh
 - `C` - Change the folder under the cursor to be the new root
+- `<C-F>` - search for text inside the folder under the cursor (the containing
+  folder, when the cursor is on a file)
 
 ## Ignoring Files
 - For ripgrep: `.rgignore` file

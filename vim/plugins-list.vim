@@ -123,8 +123,25 @@ if PlugFlag('fzf', "Fuzzy filename search", "Fuzzy text search (requires ripgrep
 
   nnoremap <Leader>O :GFiles<CR>
 
-  " Copy-pasted the command from https://github.com/junegunn/fzf.vim/blob/3725f364ccd25b85a91970720ba9bc2931861910/plugin/fzf.vim#L64C1-L64C202
-  command! -bang -nargs=* RgCommand call fzf#vim#grep2("rg --column --line-number --no-heading --color=always --hidden --smart-case -- ", <q-args>, fzf#vim#with_preview(), <bang>0)
+  " Original command from https://github.com/junegunn/fzf.vim/blob/3725f364ccd25b85a91970720ba9bc2931861910/plugin/fzf.vim#L64C1-L64C202
+  let s:rg_prefix = "rg --column --line-number --no-heading --color=always --hidden --smart-case -- "
+
+  " Fuzzy text search in dir. dir defaults to working directory when empty
+  function! RgSearch(dir, query, bang)
+    let spec = fzf#vim#with_preview()
+
+    if !empty(a:dir)
+      let spec.dir = a:dir
+      " fzf uses the last of any repeated option, and the spec's options get
+      " appended after the ones fzf#vim#grep2 sets, so this wins.
+      let spec.options = get(spec, 'options', []) + ['--prompt', fnamemodify(a:dir, ':~:.') . '> ']
+    endif
+
+    call fzf#vim#grep2(s:rg_prefix, a:query, spec, a:bang)
+  endfunction
+
+  command! -bang -nargs=* RgCommand call RgSearch('', <q-args>, <bang>0)
+  command! -bang -nargs=1 -complete=dir RgCommandIn call RgSearch(<q-args>, '', <bang>0)
   nnoremap <Leader>F :RgCommand<CR>
 
   " Read from clipboard when pressing Ctrl-V

@@ -39,6 +39,21 @@ Plug('nvim-tree/nvim-tree.lua', {
       vim.keymap.set("n", "R", api.tree.reload, opts)
       vim.keymap.set("n", "m", api.node.show_info_popup, opts)
       vim.keymap.set("n", "<C-B>", api.tree.close, opts)
+
+      -- `RgSearch` is declared by the fzf PlugFlag code
+      vim.keymap.set("n", "<C-F>", function()
+        local node = api.tree.get_node_under_cursor()
+        if not node then
+          return
+        end
+
+        local dir = node.absolute_path
+        if vim.fn.isdirectory(dir) == 0 then
+          dir = vim.fs.dirname(dir)
+        end
+
+        vim.fn.RgSearch(dir, "", 0)
+      end, opts)
     end
 
     tree.setup({
