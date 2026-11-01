@@ -37,5 +37,12 @@
         # Optionally use extraSpecialArgs
         # to pass through arguments to home.nix
       };
+
+      # The headless VPS, which runs everything as root. See vps.nix.
+      homeConfigurations."aliu-vps" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+
+        modules = [ ./vps.nix ];
+      };
     };
 }

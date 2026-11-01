@@ -59,5 +59,10 @@
 [advice]
 	detatchedHead = false
 
+# Machine-local settings, e.g. credential helpers. Git ignores this if the file
+# doesn't exist.
+[include]
+	path = ~/.gitconfig.local
+
 # [url "ssh://git@github.com/"]
 # 	insteadOf = https://github.com/
