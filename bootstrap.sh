@@ -63,11 +63,15 @@ done
 
 [ -n "$profile" ] || usage
 
-# Where the profile links its configs out of; see home-manager/*.nix.
-case "$profile" in
-  macos) repo="$HOME/code/aliu" ;;
-  vps) repo="/root/aliu" ;;
-esac
+# home-manager configures one user, so as root this would configure the wrong
+# one. Package installs escalate on their own.
+if [ "$(id -u)" -eq 0 ]; then
+  echo "error: run this as the user to set up, not as root" >&2
+  exit 1
+fi
+
+# Where the profiles link their configs out of; see home-manager/*.nix.
+repo="$HOME/code/aliu"
 
 if ! command -v nix > /dev/null 2>&1; then
   # The installer unpacks a .tar.xz, and GNU tar shells out to xz to do it.

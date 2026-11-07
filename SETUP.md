@@ -31,6 +31,19 @@ home-manager switch --flake ./home-manager#aliu-vps # headless server, as root
 
 ## System Setup
 
+### VPS
+AlmaLinux, so there's no system-level nix config to apply; it's home-manager
+only. Nothing there should run as root, so as root, make the user and hand it
+`/nix`, which is what lets the single-user nix install skip sudo:
+
+```sh
+useradd -m -G wheel aliu # wheel for sudo
+passwd aliu
+install -d -m 0755 -o aliu /nix
+```
+
+Then log in as `aliu` and run the bootstrap above with the `vps` profile.
+
 ### NixOS
 1. Use `nix/nixos/configuration.nix` by symlinking it into `/etc/nixos`:
 

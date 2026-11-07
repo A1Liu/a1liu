@@ -1,8 +1,9 @@
 { lib, pkgs, ... }:
 
-# The VPS: a headless AlmaLinux box that runs Claude Code sessions, as root, in
-# a tmux session (`claude remote-control`). Agents work out of repos checked out
-# in /root, so this profile is the machine's whole toolchain.
+# The VPS: a headless AlmaLinux box that runs Claude Code sessions in a tmux
+# session (`claude remote-control`), as the unprivileged `aliu`. Agents work out
+# of repos under ~/code, so this profile is the machine's whole toolchain. See
+# SETUP.md for creating the user.
 #
 # Deliberately not in here:
 # - the `claude` CLI, which installs and updates itself into ~/.local/bin
@@ -13,9 +14,9 @@
 {
   imports = [ ./common.nix ];
 
-  home.username = "root";
-  home.homeDirectory = "/root";
-  aliu.repoDir = "/root/aliu";
+  home.username = "aliu";
+  home.homeDirectory = "/home/aliu";
+  aliu.repoDir = "/home/aliu/code/aliu";
 
   home.packages = with pkgs; [
     # CLI Tools
@@ -29,8 +30,8 @@
     nodejs_22
     pnpm
 
-    # psql, for the test databases. The running cluster is still the system
-    # postgres under /var/lib/pgsql, so use the system pg_ctl/initdb on it.
+    # psql, for the test databases. The running cluster is the system postgres
+    # under /var/lib/pgsql, which only `postgres` and root can administer.
     postgresql
   ];
 

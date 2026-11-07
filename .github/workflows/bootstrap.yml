@@ -18,24 +18,30 @@ jobs:
     name: vps
     runs-on: ubuntu-latest
 
-    # What the VPS runs, so the bootstrap gets tested as root in /root, which is
-    # what the profile is written for.
+    # What the VPS runs, so the bootstrap gets tested on the distro and the kind
+    # of user the profile is written for.
     container: almalinux:9
 
-    env:
-      USER: root
-
     steps:
-      # Nothing is installed first: tar, xz, git and the checkout are all the
-      # script's job.
-      - name: Bootstrap
-        run: curl -fsSL "https://raw.githubusercontent.com/A1Liu/a1liu/$ALIU_REF/bootstrap.sh" | sh -s -- vps
+      # SETUP.md's VPS section, which is the part a bootstrap run as the user
+      # can't do for itself. Owning /nix is what keeps the nix install sudo-free.
+      - name: Create the user
+        run: |
+          dnf install -y shadow-utils sudo
+          useradd -m -G wheel aliu
+          echo "aliu ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/aliu
+          install -d -m 0755 -o aliu /nix
 
+      # Nothing else is installed first: tar, xz, git and the checkout are all
+      # the script's job.
+      - name: Bootstrap
+        run: |
+          su - aliu -c "curl -fsSL 'https://raw.githubusercontent.com/A1Liu/a1liu/${{ env.ALIU_REF }}/bootstrap.sh' | sh -s -- vps"
+
+      # A login shell, so this also covers the profile being on PATH.
       - name: Check the profile is usable
         run: |
-          for bin in git gh jq node pnpm bun psql nvim rg; do
-            /root/.nix-profile/bin/$bin --version
-          done
+          su - aliu -c 'for bin in git gh jq node pnpm bun psql nvim rg; do "$bin" --version; done'
 
   macos:
     name: macos
