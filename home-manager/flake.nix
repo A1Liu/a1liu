@@ -13,8 +13,13 @@
 
   outputs = { nixpkgs, home-manager, ... }:
     let
+      # `nixpkgs.config` is a no-op once a configuration is handed its `pkgs`,
+      # so orbstack being unfree has to be dealt with here.
       profile = system: modules: home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
 
         inherit modules;
       };
