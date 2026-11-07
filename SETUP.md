@@ -1,6 +1,12 @@
 # Installation Instructions
-The instructions below supplement the installation scripts in this directory, and
-hopefully make the process easier.
+`bootstrap.sh` does the whole thing on a machine with nothing on it: nix, the
+system-level nix config for the profile if it has one, then home-manager.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/A1Liu/a1liu/main/bootstrap.sh | sh -s -- vps
+```
+
+The profiles are `macos` and `vps`. Everything below is the same thing by hand.
 
 On Linux and MacOS, you should start by installing Nix. Use Nix/Nix Darwin to
 install system dependencies, including `home-manager`, and then use home manager
