@@ -68,6 +68,11 @@ in
       ".vimrc".source = symlink "${config.aliu.repoDir}/vim/init.vim";
       ".vim".source = symlink "${config.aliu.repoDir}/vim";
 
+      # Claude Code reads its user-level instructions from here, and only from
+      # here; there's no user-level AGENTS.md. The repo-level half of the pair
+      # is AGENTS.md at the root, which agents find on their own.
+      ".claude/CLAUDE.md".source = symlink "${config.aliu.repoDir}/.agents/USER_AGENTS.md";
+
       ".bash_profile".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
       ".bashrc".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
       ".zshrc".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
@@ -103,6 +108,29 @@ in
         filepath = "${config.aliu.repoDir}/home-manager/local/shell_init";
         isInteractive = "false";
       };
+
+      # Every skill in .agents/skills becomes a user-level Claude Code skill.
+      # home.file can't express this: the flake only sees home-manager/, so the
+      # skill names aren't knowable at eval time.
+      linkClaudeSkills = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        src="${config.aliu.repoDir}/.agents/skills"
+        dst="$HOME/.claude/skills"
+        run mkdir -p "$dst"
+
+        # Clear out links left by an earlier activation, for skills that have
+        # since been renamed or deleted.
+        for link in "$dst"/*; do
+          if [ -L "$link" ] && [ ! -e "$link" ]; then
+            case "$(readlink "$link")" in "$src"/*) run rm -f "$link" ;; esac
+          fi
+        done
+
+        for skill in "$src"/*/; do
+          [ -f "$skill/SKILL.md" ] || continue
+          name="$(basename "$skill")"
+          run ln -sfn "$src/$name" "$dst/$name"
+        done
+      '';
     };
 
     # Let Home Manager install and manage itself.
