@@ -1,0 +1,51 @@
+name: Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - bootstrap.sh
+      - home-manager/**
+      - nix/**
+      - .github/workflows/bootstrap.yml
+  workflow_dispatch:
+
+jobs:
+  vps:
+    name: vps
+    runs-on: ubuntu-latest
+
+    # What the VPS runs, so the bootstrap gets tested as root in /root, which is
+    # what the profile is written for.
+    container: almalinux:9
+
+    env:
+      USER: root
+
+    steps:
+      - name: Install what the image is missing
+        run: dnf install -y git tar xz
+
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap
+        run: |
+          cp -a "$GITHUB_WORKSPACE" /root/aliu
+          /root/aliu/bootstrap.sh vps
+
+      - name: Check the profile is usable
+        run: |
+          for bin in git gh jq node pnpm bun psql nvim rg; do
+            /root/.nix-profile/bin/$bin --version
+          done
+
+  macos:
+    name: macos
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The runner is neither `aliu` nor in /Users/aliu, so the profiles can be
+      # built here but not activated.
+      - name: Bootstrap
+        run: ./bootstrap.sh macos --check
