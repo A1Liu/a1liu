@@ -67,6 +67,42 @@ in
       ".config/nvim/init.lua".source = symlink "${config.aliu.repoDir}/vim/init.lua";
       ".vimrc".source = symlink "${config.aliu.repoDir}/vim/init.vim";
       ".vim".source = symlink "${config.aliu.repoDir}/vim";
+
+      ".bash_profile".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
+      ".bashrc".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
+      ".zshrc".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
+      ".zprofile".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_init";
+    };
+
+    # Generates the entrypoints the rc files above link to, once; they're
+    # gitignored, so each machine can edit its own.
+    # https://nix-community.github.io/home-manager/options.xhtml#opt-home.activation
+    home.activation = let
+      writeFileIfNotExists = { filepath, isInteractive }: lib.hm.dag.entryAfter ["writeBoundary"] ''
+        if [ ! -f "${filepath}" ]; then
+          mkdir -p $(dirname "${filepath}")
+          touch ${filepath}
+          echo '#!/bin/sh' >> "${filepath}"
+          echo "" >> "${filepath}"
+          echo 'export CFG_DIR="${config.aliu.repoDir}"' >> "${filepath}"
+          echo 'CUR_SHELL="$(ps -cp "$$" -o command="" | tr -d "-")"' >> "${filepath}"
+          echo 'IS_INTERACTIVE_SHELL=${isInteractive}' >> "${filepath}"
+          echo "" >> "${filepath}"
+          echo '. "${config.aliu.repoDir}/shell/dispatch"' >> "${filepath}"
+
+        else
+          echo "File '${filepath}' already exists, skipping."
+        fi
+      '';
+    in {
+      createShellInteractiveEntrypoint = writeFileIfNotExists {
+        filepath = "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
+        isInteractive = "true";
+      };
+      createShellEntrypoint = writeFileIfNotExists {
+        filepath = "${config.aliu.repoDir}/home-manager/local/shell_init";
+        isInteractive = "false";
+      };
     };
 
     # Let Home Manager install and manage itself.
