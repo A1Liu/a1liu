@@ -1,5 +1,8 @@
 { config, lib, pkgs, ... }:
 
+# Workstation profile: MacOS and desktop Linux. See `vps.nix` for the server,
+# and `common.nix` for what the two share.
+#
 # There's probably better way to get cross-platform support; for now I'm just
 # using this: https://github.com/crasm/dead-simple-home-manager
 let
@@ -11,23 +14,16 @@ let
     if isDarwin then "/Users/aliu" else
     unsupported;
   aliuRepo = "${homeDir}/code/aliu";
-  programsDir = "${aliuRepo}/config/programs";
   symlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
+  imports = [ ./common.nix ];
+
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "aliu";
   home.homeDirectory = homeDir;
-
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "24.11"; # Please read the comment before changing.
+  aliu.repoDir = aliuRepo;
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -50,15 +46,7 @@ in
     # '')
 
     # Editor
-    neovim
     neovide
-
-    # CLI Tools
-    git-lfs
-    ripgrep
-    fd
-    fzf
-    ydiff
 
     # Postgres
     pgweb
@@ -66,47 +54,20 @@ in
     # ai
     herdr
 
-    tmux
     reattach-to-user-namespace
-
-    cached-nix-shell
 
     # Programming languages
     rustup
     fnm
     uv
-    bun
   ];
 
-  programs.tmux = {
-    enable = true;
-
-    plugins = with pkgs; [
-      tmuxPlugins.yank
-      tmuxPlugins.sensible
-    ];
-
-    extraConfig = builtins.readFile ./tmux.conf;
-  };
-
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
   home.file = {
-    ".inputrc".source = ./inputrc;
-    # ".tmux.conf".source = ./tmux.conf;
-    ".gitconfig".source = ./gitconfig;
-    ".gitignore_global".source = ./gitignore_global;
     ".ssh/config".source = ./ssh-config;
 
     # NOTE: Use this one: https://opencode.ai/ there's another one with the same name
     # that's the wrong one and doesn't work.
     ".config/opencode/opencode.json".source = ./opencode.json;
-
-    # TODO: Apparently Flakes make it so that you can't do this in the sensible way,
-    # because symlinking directly to a file would not be deterministic/pure.
-    ".config/nvim/init.lua".source = symlink "${aliuRepo}/vim/init.lua";
-    ".vimrc".source = symlink "${aliuRepo}/vim/init.vim";
-    ".vim".source = symlink "${aliuRepo}/vim";
 
     ".bash_profile".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
     ".bashrc".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
@@ -172,8 +133,4 @@ in
   home.sessionVariables = {
     # EDITOR = "emacs";
   };
-
-  # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
 }
-

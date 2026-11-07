@@ -8,6 +8,7 @@ to install everything else:
 
 ```sh
 home-manager switch --flake ./home-manager#aliu-linux
+home-manager switch --flake ./home-manager#aliu-vps # headless server, as root
 ```
 
 ### Directory Structure
