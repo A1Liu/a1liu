@@ -40,6 +40,16 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 if [[ $CFG_ENV != 1 ]]; then
   export CFG_ENV=1
 
+  # A single-user nix install puts nix on PATH only from the shell rc file it
+  # edits, which is the one home-manager manages, so do it here instead. The
+  # multi-user install MacOS uses hooks /etc/zshrc, before any of this runs.
+  for nix_profile in "$HOME/.nix-profile/etc/profile.d/nix.sh" \
+    "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"; do
+    if [ -e "$nix_profile" ]; then
+      . "$nix_profile"
+    fi
+  done
+
   # Source from homebrew script if it exists
   if [ -e "/opt/homebrew/bin/brew" ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"

@@ -14,7 +14,6 @@ let
     if isDarwin then "/Users/aliu" else
     unsupported;
   aliuRepo = "${homeDir}/code/aliu";
-  symlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
   imports = [ ./common.nix ];
@@ -68,41 +67,10 @@ in
     # NOTE: Use this one: https://opencode.ai/ there's another one with the same name
     # that's the wrong one and doesn't work.
     ".config/opencode/opencode.json".source = ./opencode.json;
-
-    ".bash_profile".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
-    ".bashrc".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
-    ".zshrc".source = symlink "${aliuRepo}/home-manager/local/shell_interact_init";
-    ".zprofile".source = symlink "${aliuRepo}/home-manager/local/shell_init";
-
   };
 
   # https://nix-community.github.io/home-manager/options.xhtml#opt-home.activation
-  home.activation = let
-    writeFileIfNotExists = { filepath, isInteractive }: lib.hm.dag.entryAfter ["writeBoundary"] ''
-      if [ ! -f "${filepath}" ]; then
-        mkdir -p $(dirname "${filepath}")
-        touch ${filepath}
-        echo '#!/bin/sh' >> "${filepath}"
-        echo "" >> "${filepath}"
-        echo 'export CFG_DIR="${aliuRepo}"' >> "${filepath}"
-        echo 'CUR_SHELL="$(ps -cp "$$" -o command="" | tr -d "-")"' >> "${filepath}"
-        echo 'IS_INTERACTIVE_SHELL=${isInteractive}' >> "${filepath}"
-        echo "" >> "${filepath}"
-        echo '. "${aliuRepo}/shell/dispatch"' >> "${filepath}"
-
-      else
-        echo "File '${filepath}' already exists, skipping."
-      fi
-    '';
-  in {
-    createShellInteractiveEntrypoint = writeFileIfNotExists {
-      filepath = "${aliuRepo}/home-manager/local/shell_interact_init";
-      isInteractive = "true";
-    };
-    createShellEntrypoint = writeFileIfNotExists {
-      filepath = "${aliuRepo}/home-manager/local/shell_init";
-      isInteractive = "false";
-    };
+  home.activation = {
     # We need to use the absolute path for ssh-keygen because... I don't know.
     # It was failing with a `ssh-keygen not found` before. Very cool.
     createSshKey = lib.hm.dag.entryAfter ["writeBoundary"] ''

@@ -7,8 +7,6 @@
 #
 # Deliberately not in here:
 # - the `claude` CLI, which installs and updates itself into ~/.local/bin
-# - shell rc files, which the machine keeps its own copies of; the package set
-#   is the part worth sharing
 # - per-repo tooling (duckdb, pulumi, gcloud, ...), which belongs to each
 #   repo's own shell.nix
 {
