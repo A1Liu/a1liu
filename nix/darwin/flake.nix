@@ -10,12 +10,8 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs }:
   let
     configuration = { pkgs, ... }: {
-      # List packages installed in system profile. To search by name, run:
-      # $ nix-env -qaP | grep wget
-      environment.systemPackages = with pkgs; [
-        home-manager
-        vim
-      ];
+      # Nothing in environment.systemPackages: home-manager installs itself,
+      # and the editor is a home-manager package too.
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
@@ -40,18 +36,15 @@
         reattach = true;
       };
 
+      # Where the GUI apps come from, rather than nixpkgs.
       homebrew = {
-          enable = true;
-          # onActivation.cleanup = "uninstall";
+        enable = true;
+        # onActivation.cleanup = "uninstall";
 
-          taps = [];
-          brews = [];
-          casks = [
-            "obsidian"
-            "mozilla-vpn"
-            "dbeaver-community"
-            # "unnaturalscrollwheels"
-          ];
+        casks = [
+          "obsidian"
+          "mozilla-vpn"
+        ];
       };
 
       # The platform the configuration will be used on.
