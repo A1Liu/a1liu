@@ -11,6 +11,16 @@ home-manager switch --flake ./home-manager#aliu-linux
 home-manager switch --flake ./home-manager#aliu-vps # headless server, as root
 ```
 
+### Bootstrap
+`bootstrap.sh` does the whole installation on a machine with nothing on it: nix, the
+system-level nix config for the profile if it has one, then home-manager.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/A1Liu/a1liu/main/bootstrap.sh | sh -s -- vps
+```
+
+The profiles are `macos` and `vps`. Everything else is the same thing by hand.
+
 ### Directory Structure
 
 ```
@@ -24,6 +34,19 @@ home-manager switch --flake ./home-manager#aliu-vps # headless server, as root
 ```
 
 ## System Setup
+
+### VPS
+There's no system-level nix config to apply; it's home-manager
+only. Nothing there should run as root, so as root, make the user and hand it
+`/nix`, which is what lets the single-user nix install skip sudo:
+
+```sh
+useradd -m -G wheel aliu # wheel for sudo
+passwd aliu
+install -d -m 0755 -o aliu /nix
+```
+
+Then log in as `aliu` and run the bootstrap above with the `vps` profile.
 
 ### NixOS
 1. Use `nix/nixos/configuration.nix` by symlinking it into `/etc/nixos`:

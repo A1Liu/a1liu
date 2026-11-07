@@ -1,0 +1,56 @@
+name: Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - bootstrap.sh
+      - home-manager/**
+      - nix/**
+      - .github/workflows/bootstrap.yml
+  workflow_dispatch:
+
+env:
+  # The script clones this ref, so a PR tests its own version of everything.
+  ALIU_REF: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  vps:
+    name: vps
+    runs-on: ubuntu-latest
+
+    # What the VPS runs, so the bootstrap gets tested on the distro and the kind
+    # of user the profile is written for.
+    container: almalinux:9
+
+    steps:
+      # SETUP.md's VPS section, which is the part a bootstrap run as the user
+      # can't do for itself. Owning /nix is what keeps the nix install sudo-free.
+      - name: Create the user
+        run: |
+          dnf install -y shadow-utils sudo
+          useradd -m -G wheel aliu
+          echo "aliu ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/aliu
+          install -d -m 0755 -o aliu /nix
+
+      # Nothing else is installed first: tar, xz, git and the checkout are all
+      # the script's job.
+      # `su -` drops the environment, so ALIU_REF has to be handed over on the
+      # command it runs, or the script clones main.
+      - name: Bootstrap
+        run: |
+          su - aliu -c "curl -fsSL 'https://raw.githubusercontent.com/A1Liu/a1liu/${{ env.ALIU_REF }}/bootstrap.sh' | ALIU_REF='${{ env.ALIU_REF }}' sh -s -- vps"
+
+      # A login shell, so this also covers the profile being on PATH.
+      - name: Check the profile is usable
+        run: |
+          su - aliu -c 'for bin in git gh jq node pnpm bun psql nvim rg; do "$bin" --version; done'
+
+  macos:
+    name: macos
+    runs-on: macos-latest
+
+    steps:
+      # The runner is neither `aliu` nor in /Users/aliu, so the profiles can be
+      # built here but not activated.
+      - name: Bootstrap
+        run: curl -fsSL "https://raw.githubusercontent.com/A1Liu/a1liu/$ALIU_REF/bootstrap.sh" | sh -s -- macos --check
