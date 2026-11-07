@@ -34,6 +34,8 @@ in
       fzf
       ydiff
 
+      just # Runs ./justfile
+
       tmux
 
       cached-nix-shell
