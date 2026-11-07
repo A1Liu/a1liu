@@ -13,36 +13,18 @@
 
   outputs = { nixpkgs, home-manager, ... }:
     let
-      system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
+      profile = system: modules: home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${system};
+
+        inherit modules;
+      };
     in {
-      homeConfigurations."aliu-macos" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
+      homeConfigurations = {
+        "aliu-macos" = profile "aarch64-darwin" [ ./home.nix ];
+        "aliu-linux" = profile "x86_64-linux" [ ./home.nix ];
 
-        # Specify your home configuration modules here, for example,
-        # the path to your home.nix.
-        modules = [ ./home.nix ];
-
-        # Optionally use extraSpecialArgs
-        # to pass through arguments to home.nix
-      };
-
-      homeConfigurations."aliu-linux" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-
-        # Specify your home configuration modules here, for example,
-        # the path to your home.nix.
-        modules = [ ./home.nix ];
-
-        # Optionally use extraSpecialArgs
-        # to pass through arguments to home.nix
-      };
-
-      # The headless VPS, which runs everything as root. See vps.nix.
-      homeConfigurations."aliu-vps" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-
-        modules = [ ./vps.nix ];
+        # The headless VPS, which runs everything as root. See vps.nix.
+        "aliu-vps" = profile "x86_64-linux" [ ./vps.nix ];
       };
     };
 }
