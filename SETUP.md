@@ -1,12 +1,6 @@
 # Installation Instructions
-`bootstrap.sh` does the whole thing on a machine with nothing on it: nix, the
-system-level nix config for the profile if it has one, then home-manager.
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/A1Liu/a1liu/main/bootstrap.sh | sh -s -- vps
-```
-
-The profiles are `macos` and `vps`. Everything below is the same thing by hand.
+The instructions below supplement the installation scripts in this directory, and
+hopefully make the process easier.
 
 On Linux and MacOS, you should start by installing Nix. Use Nix/Nix Darwin to
 install system dependencies, including `home-manager`, and then use home manager
@@ -16,6 +10,16 @@ to install everything else:
 home-manager switch --flake ./home-manager#aliu-linux
 home-manager switch --flake ./home-manager#aliu-vps # headless server, as root
 ```
+
+### Bootstrap
+`bootstrap.sh` does the whole installation on a machine with nothing on it: nix, the
+system-level nix config for the profile if it has one, then home-manager.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/A1Liu/a1liu/main/bootstrap.sh | sh -s -- vps
+```
+
+The profiles are `macos` and `vps`. Everything else is the same thing by hand.
 
 ### Directory Structure
 
@@ -32,7 +36,7 @@ home-manager switch --flake ./home-manager#aliu-vps # headless server, as root
 ## System Setup
 
 ### VPS
-AlmaLinux, so there's no system-level nix config to apply; it's home-manager
+There's no system-level nix config to apply; it's home-manager
 only. Nothing there should run as root, so as root, make the user and hand it
 `/nix`, which is what lets the single-user nix install skip sudo:
 
