@@ -21,6 +21,36 @@ usage() {
   exit 2
 }
 
+# For tools that have to exist before nix does. Everything after the nix install
+# comes from nix instead.
+install_missing() {
+  missing=""
+  for tool in "$@"; do
+    if ! command -v "$tool" > /dev/null 2>&1; then
+      missing="$missing $tool"
+    fi
+  done
+
+  [ -n "$missing" ] || return 0
+
+  echo "==> Installing$missing"
+
+  sudo=""
+  if [ "$(id -u)" -ne 0 ]; then
+    sudo="sudo"
+  fi
+
+  # shellcheck disable=SC2086 # $missing is a list of package names
+  if command -v dnf > /dev/null 2>&1; then
+    $sudo dnf install -y $missing
+  elif command -v apt-get > /dev/null 2>&1; then
+    $sudo apt-get update && $sudo apt-get install -y $missing
+  else
+    echo "error: install$missing by hand, then re-run this" >&2
+    exit 1
+  fi
+}
+
 profile=""
 check=false
 for arg in "$@"; do
@@ -40,6 +70,12 @@ case "$profile" in
 esac
 
 if ! command -v nix > /dev/null 2>&1; then
+  # The installer unpacks a .tar.xz, and GNU tar shells out to xz to do it.
+  # MacOS needs nothing here, since bsdtar handles .tar.xz itself.
+  if [ "$profile" = vps ]; then
+    install_missing tar xz
+  fi
+
   echo "==> Installing nix"
 
   installer=$(mktemp)

@@ -26,11 +26,8 @@ jobs:
       USER: root
 
     steps:
-      # What the nix installer needs to unpack itself; git and the checkout are
-      # the script's job.
-      - name: Install tar and xz
-        run: dnf install -y tar xz
-
+      # Nothing is installed first: tar, xz, git and the checkout are all the
+      # script's job.
       - name: Bootstrap
         run: curl -fsSL "https://raw.githubusercontent.com/A1Liu/a1liu/$ALIU_REF/bootstrap.sh" | sh -s -- vps
 
