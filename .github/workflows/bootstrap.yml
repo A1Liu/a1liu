@@ -34,9 +34,11 @@ jobs:
 
       # Nothing else is installed first: tar, xz, git and the checkout are all
       # the script's job.
+      # `su -` drops the environment, so ALIU_REF has to be handed over on the
+      # command it runs, or the script clones main.
       - name: Bootstrap
         run: |
-          su - aliu -c "curl -fsSL 'https://raw.githubusercontent.com/A1Liu/a1liu/${{ env.ALIU_REF }}/bootstrap.sh' | sh -s -- vps"
+          su - aliu -c "curl -fsSL 'https://raw.githubusercontent.com/A1Liu/a1liu/${{ env.ALIU_REF }}/bootstrap.sh' | ALIU_REF='${{ env.ALIU_REF }}' sh -s -- vps"
 
       # A login shell, so this also covers the profile being on PATH.
       - name: Check the profile is usable
