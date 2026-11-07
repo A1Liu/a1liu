@@ -21,9 +21,27 @@ switch-darwin:
     # sudo resets PATH, and nix lives outside of it.
     sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix/darwin#aliu
 
-# Update the home-manager flake inputs: nixpkgs and home-manager.
-update:
+# Update every nix pin in the repo.
+update: update-flakes update-shells
+
+# Update both flake locks: home-manager's and nix-darwin's.
+update-flakes:
     cd home-manager && nix flake update
+    cd nix/darwin && nix flake update
+
+# Point the nix-shell files at current nixos-unstable.
+update-shells:
+    #!/usr/bin/env bash
+    # They name a revision with no hash, so swapping it is the whole update.
+    set -euo pipefail
+    rev="$(git ls-remote https://github.com/NixOS/nixpkgs refs/heads/nixos-unstable | cut -f1)"
+    [ -n "$rev" ] || { echo "error: could not resolve nixos-unstable" >&2; exit 1; }
+    echo "==> nixpkgs $rev"
+    for f in $(grep -rl 'nixpkgs/archive/' --include='*.nix' .); do
+      # -i.bak so this works with both GNU and BSD sed.
+      sed -i.bak -E "s|(nixpkgs/archive/)[0-9a-f]{40}|\1$rev|" "$f"
+      rm -f "$f.bak"
+    done
 
 # Build this branch's bootstrap the way CI does, off the pushed branch.
 bootstrap profile:
