@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Sets up a machine from scratch: nix, the system-level nix config for the
-# profile if it has one, then home-manager.
+# Sets up a machine with nothing on it: nix, a checkout of this repo, the
+# system-level nix config for the profile if it has one, then home-manager.
 #
 #   curl -fsSL https://raw.githubusercontent.com/A1Liu/a1liu/main/bootstrap.sh | sh -s -- vps
 #
@@ -12,6 +12,9 @@
 set -eu
 
 REPO_URL="https://github.com/A1Liu/a1liu"
+
+# Branch or tag to check out. CI points this at the branch under test.
+REF="${ALIU_REF:-main}"
 
 usage() {
   echo "usage: bootstrap.sh <macos|vps> [--check]" >&2
@@ -30,28 +33,11 @@ done
 
 [ -n "$profile" ] || usage
 
-# Where each profile links its configs out of; see home-manager/*.nix.
+# Where the profile links its configs out of; see home-manager/*.nix.
 case "$profile" in
-  macos) repo_default="$HOME/code/aliu" ;;
-  vps) repo_default="/root/aliu" ;;
+  macos) repo="$HOME/code/aliu" ;;
+  vps) repo="/root/aliu" ;;
 esac
-
-# Run from a checkout, this uses it. Piped from curl there's no checkout to use,
-# so clone to wherever the profile expects to find one.
-script_dir=""
-case "$0" in
-  */*) script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd) ;;
-esac
-
-if [ -n "$script_dir" ] && [ -d "$script_dir/home-manager" ]; then
-  repo="$script_dir"
-else
-  repo="$repo_default"
-fi
-
-if [ "$repo" != "$repo_default" ]; then
-  echo "warning: $profile links its configs out of $repo_default, not $repo" >&2
-fi
 
 if ! command -v nix > /dev/null 2>&1; then
   echo "==> Installing nix"
@@ -85,14 +71,13 @@ if ! grep -q experimental-features "$HOME/.config/nix/nix.conf" 2> /dev/null; th
   echo "experimental-features = nix-command flakes" >> "$HOME/.config/nix/nix.conf"
 fi
 
+# git comes from nix rather than the machine, so this needs nothing preinstalled
+# -- and on MacOS it doesn't set off the Command Line Tools prompt.
 if [ ! -d "$repo" ]; then
-  echo "==> Cloning $REPO_URL into $repo"
+  echo "==> Cloning $REPO_URL#$REF into $repo"
 
-  if command -v git > /dev/null 2>&1; then
-    git clone "$REPO_URL" "$repo"
-  else
-    nix run nixpkgs#git -- clone "$REPO_URL" "$repo"
-  fi
+  mkdir -p "$(dirname "$repo")"
+  nix run nixpkgs#git -- clone --branch "$REF" "$REPO_URL" "$repo"
 fi
 
 case "$profile" in
@@ -101,7 +86,8 @@ case "$profile" in
     if [ "$check" = true ]; then
       nix build --no-link "$repo/nix/darwin#darwinConfigurations.aliu.system"
     else
-      sudo nix run nix-darwin -- switch --flake "$repo/nix/darwin#aliu"
+      # Absolute path because sudo resets PATH, and nix lives outside of it.
+      sudo "$(command -v nix)" run nix-darwin -- switch --flake "$repo/nix/darwin#aliu"
     fi
     ;;
   vps)

@@ -9,6 +9,10 @@ on:
       - .github/workflows/bootstrap.yml
   workflow_dispatch:
 
+env:
+  # The script clones this ref, so a PR tests its own version of everything.
+  ALIU_REF: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   vps:
     name: vps
@@ -22,15 +26,13 @@ jobs:
       USER: root
 
     steps:
-      - name: Install what the image is missing
-        run: dnf install -y git tar xz
-
-      - uses: actions/checkout@v4
+      # What the nix installer needs to unpack itself; git and the checkout are
+      # the script's job.
+      - name: Install tar and xz
+        run: dnf install -y tar xz
 
       - name: Bootstrap
-        run: |
-          cp -a "$GITHUB_WORKSPACE" /root/aliu
-          /root/aliu/bootstrap.sh vps
+        run: curl -fsSL "https://raw.githubusercontent.com/A1Liu/a1liu/$ALIU_REF/bootstrap.sh" | sh -s -- vps
 
       - name: Check the profile is usable
         run: |
@@ -43,9 +45,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
-
       # The runner is neither `aliu` nor in /Users/aliu, so the profiles can be
       # built here but not activated.
       - name: Bootstrap
-        run: ./bootstrap.sh macos --check
+        run: curl -fsSL "https://raw.githubusercontent.com/A1Liu/a1liu/$ALIU_REF/bootstrap.sh" | sh -s -- macos --check
