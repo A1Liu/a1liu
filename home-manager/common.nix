@@ -85,7 +85,7 @@ in
           echo '#!/bin/sh' >> "${filepath}"
           echo "" >> "${filepath}"
           echo 'export CFG_DIR="${config.aliu.repoDir}"' >> "${filepath}"
-          echo 'CUR_SHELL="$(ps -cp "$$" -o command="" | tr -d "-")"' >> "${filepath}"
+          echo 'if [ -n "$ZSH_VERSION" ]; then CUR_SHELL=zsh; elif [ -n "$BASH_VERSION" ]; then CUR_SHELL=bash; fi' >> "${filepath}"
           echo 'IS_INTERACTIVE_SHELL=${isInteractive}' >> "${filepath}"
           echo "" >> "${filepath}"
           echo '. "${config.aliu.repoDir}/shell/dispatch"' >> "${filepath}"
