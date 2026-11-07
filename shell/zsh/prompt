@@ -45,19 +45,15 @@ function prompt_context() {
     echo -n "[nix] "
   fi
 
-  if [[ -n "$SSH_CLIENT" ]]; then
+  # `ignore-user` suppresses this where it's just noise.
+  if [[ "$USER" != "$USER_IGNORE" ]]; then
     echo -n "%n@%m "
-  elif [[ "$USER" == "$USER_IGNORE" ]]; then
-    echo -n ""
-  else
-    echo -n "%n "
   fi
 }
 
 # Commands for prompt stuff
 alias ignore-user="USER_IGNORE=$(whoami)"
 alias show-user="USER_IGNORE=''"
-ignore-user
 # alias terse="prompt_dir() {; prompt_segment blue black '%c'; }"
 # alias verbose="prompt_dir() {; prompt_segment blue black '%~'; }"
 # terse
