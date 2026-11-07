@@ -213,22 +213,11 @@ Plug("neovim/nvim-lspconfig", {
     })
     vim.lsp.enable("lua_ls")
 
-    vim.lsp.config("pyright", {
-      settings = {
-        python = {
-          analysis = {
-            diagnosticSeverityOverrides = {
-              -- This took so long to figure out. See `python.analysis.diagnosticSeverityOverrides`
-              -- from https://github.com/microsoft/pyright/blob/main/docs/settings.md
-              reportPrivateImportUsage = false,
-            },
-          }
-        }
-      }
-    })
-    vim.lsp.enable("pyright")
+    -- Python: `ty` has the types, `ruff` the lints and the formatting. Both
+    -- come from home-manager, not mason; see home-manager/home.nix.
+    vim.lsp.enable("ty")
+    vim.lsp.enable("ruff")
 
-    -- LSP Config for mypy
     vim.lsp.enable("bashls")
     vim.lsp.enable("gopls")
 
@@ -311,10 +300,17 @@ Plug("neovim/nvim-lspconfig", {
     -- inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<C-x>\<C-o>"
 
     vim.api.nvim_create_autocmd('LspAttach', {
-      callback = function()
+      callback = function(args)
         vim.print("LSP Attached!")
 
-        -- local client = vim.lsp.get_client_by_id(args.data.client_id)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+        -- Ruff's hover duplicates `ty`'s, and `ty` knows the types.
+        -- https://docs.astral.sh/ruff/editors/setup/#neovim
+        if client and client.name == "ruff" then
+          client.server_capabilities.hoverProvider = false
+        end
+
         -- if client.supports_method('textDocument/implementation') then
         -- end
 

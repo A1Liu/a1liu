@@ -36,11 +36,22 @@ in
     # ai
     herdr
 
+    # Kubernetes
+    k9s
+
     # Programming languages
     rustup
     fnm
     uv
+
+    # Python LSP: types from ty, lints and formatting from ruff. Both are
+    # enabled in vim/lua/plugins.lua.
+    ty
+    ruff
   ] ++ lib.optionals isDarwin [
+    # Containers and Linux VMs; also puts docker and kubectl on PATH.
+    orbstack
+
     # What the shared tmux.conf wraps the shell in.
     reattach-to-user-namespace
   ];
