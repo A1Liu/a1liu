@@ -7,8 +7,11 @@
 3. Install [nix-darwin](https://github.com/LnL7/nix-darwin) and run
 
    ```sh
-   sudo darwin-rebuild switch --flake ./nix/darwin#aliu
+   sudo darwin-rebuild switch --flake ./nix/darwin#aliu-macos
    ```
+
+   On the work machine use `#aliu-h3` instead, which is the same config plus
+   the TLS-intercepting proxy's CA. See [`h3.nix`](./h3.nix).
 
 ### Fixing the settings
 1. Fix the Keyboard (System Preferences -> Keyboard)

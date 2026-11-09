@@ -1,8 +1,9 @@
 # `just` on its own lists these.
 #
 # A profile is a home-manager output in home-manager/flake.nix without the
-# `aliu-` prefix: macos, linux, vps. There's no default, because activating the
-# wrong one reconfigures the machine.
+# `aliu-` prefix: macos, linux, vps, h3. nix/darwin/flake.nix uses the same
+# names, so a machine is one profile all the way down. There's no default,
+# because activating the wrong one reconfigures the machine.
 
 [private]
 default:
@@ -16,10 +17,10 @@ switch profile:
 build-profile profile:
     nix build --no-link ./home-manager#homeConfigurations.aliu-{{ profile }}.activationPackage
 
-# Activate the nix-darwin system config. MacOS only.
-switch-darwin:
+# Activate the nix-darwin system config. MacOS only: macos or h3.
+switch-darwin profile:
     # sudo resets PATH, and nix lives outside of it.
-    sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix/darwin#aliu
+    sudo "$(command -v nix)" run nix-darwin -- switch --flake ./nix/darwin#aliu-{{ profile }}
 
 # Update every nix pin in the repo.
 update: update-flakes update-shells
