@@ -17,7 +17,7 @@ REPO_URL="https://github.com/A1Liu/a1liu"
 REF="${ALIU_REF:-main}"
 
 usage() {
-  echo "usage: bootstrap.sh <macos|vps> [--check]" >&2
+  echo "usage: bootstrap.sh <macos|h3|vps> [--check]" >&2
   exit 2
 }
 
@@ -55,7 +55,7 @@ profile=""
 check=false
 for arg in "$@"; do
   case "$arg" in
-    macos | vps) profile="$arg" ;;
+    macos | h3 | vps) profile="$arg" ;;
     --check) check=true ;;
     *) usage ;;
   esac
@@ -121,13 +121,13 @@ if [ ! -d "$repo" ]; then
 fi
 
 case "$profile" in
-  macos)
+  macos | h3)
     echo "==> nix-darwin"
     if [ "$check" = true ]; then
-      nix build --no-link "$repo/nix/darwin#darwinConfigurations.aliu.system"
+      nix build --no-link "$repo/nix/darwin#darwinConfigurations.aliu-$profile.system"
     else
       # Absolute path because sudo resets PATH, and nix lives outside of it.
-      sudo "$(command -v nix)" run nix-darwin -- switch --flake "$repo/nix/darwin#aliu"
+      sudo "$(command -v nix)" run nix-darwin -- switch --flake "$repo/nix/darwin#aliu-$profile"
     fi
     ;;
   vps)

@@ -84,10 +84,13 @@
     };
   in
   {
-    # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#simple
-    darwinConfigurations."aliu" = nix-darwin.lib.darwinSystem {
+    darwinConfigurations."aliu-macos" = nix-darwin.lib.darwinSystem {
       modules = [ configuration ];
+    };
+
+    # Work machine
+    darwinConfigurations."aliu-h3" = nix-darwin.lib.darwinSystem {
+      modules = [ configuration ./h3.nix ];
     };
   };
 }

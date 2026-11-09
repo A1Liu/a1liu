@@ -28,6 +28,12 @@
         "aliu-macos" = profile "aarch64-darwin" [ ./home.nix ];
         "aliu-linux" = profile "x86_64-linux" [ ./home.nix ];
 
+        # The work machine. Identical to `aliu-macos`: everything that machine
+        # needs on top is system-level, and lives in nix/darwin/h3.nix. It still
+        # gets a name here so the machine is one profile all the way down --
+        # `just switch h3` and `just switch-darwin h3`.
+        "aliu-h3" = profile "aarch64-darwin" [ ./home.nix ];
+
         # The headless VPS, which runs everything as root. See vps.nix.
         "aliu-vps" = profile "x86_64-linux" [ ./vps.nix ];
       };

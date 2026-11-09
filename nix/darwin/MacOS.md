@@ -7,7 +7,7 @@
 3. Install [nix-darwin](https://github.com/LnL7/nix-darwin) and run
 
    ```sh
-   sudo darwin-rebuild switch --flake ./nix/darwin#aliu
+   sudo darwin-rebuild switch --flake ./nix/darwin#aliu-macos
    ```
 
 ### Fixing the settings
