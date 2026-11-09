@@ -137,30 +137,50 @@ function karimify() {
 #   alias nix-shell='cached-nix-shell'
 # fi
 
+# Enters a development environment and starts a shell in it. Takes a path to a
+# `nix-shell` file, a directory holding a `flake.nix`, or the name of an env in
+# $CFG_DIR/shell (`nix/<name>.nix` or `flakes/<name>`). With no argument it uses
+# the current directory's own env, and falls back to `flakes/default`.
 function alenv() {
-    local shell_nix_path
+    local shell_nix_path flake_ref name
+    name="$1"
 
-    if [ -n "$1" ]; then
-      if [ -f "$1" ]; then
-        shell_nix_path="$1"
-      elif [ -f "$CFG_DIR/shell/nix/$1.nix" ]; then
-        shell_nix_path="$CFG_DIR/shell/nix/$1.nix"
+    if [ -n "$name" ]; then
+      if [ -f "$name/flake.nix" ]; then
+        flake_ref="$name"
+      elif [ -f "$name" ]; then
+        if [ "${name##*/}" = "flake.nix" ]; then
+          flake_ref="${name%flake.nix}."
+        else
+          shell_nix_path="$name"
+        fi
+      elif [ -f "$CFG_DIR/shell/flakes/$name/flake.nix" ]; then
+        # `path:` keeps nix out of this repo's git tree, so an uncommitted edit
+        # to the env is the one that gets used.
+        flake_ref="path:$CFG_DIR/shell/flakes/$name"
+      elif [ -f "$CFG_DIR/shell/nix/$name.nix" ]; then
+        shell_nix_path="$CFG_DIR/shell/nix/$name.nix"
       else
-        echo "'$1' doesn't exist!"
+        echo "'$name' doesn't exist!"
         return 1
       fi
     elif [ -f "shell.aliu-local.nix" ]; then
       shell_nix_path="shell.aliu-local.nix"
     elif [ -f ".shell.aliu-local.nix" ]; then
       shell_nix_path=".shell.aliu-local.nix"
+    elif [ -f "flake.nix" ]; then
+      flake_ref="."
     elif [ -f "shell.nix" ]; then
       shell_nix_path="shell.nix"
     elif [ -f "default.nix" ]; then
       shell_nix_path="default.nix"
     else
-      echo "Didn't provide an argument, and couldn't find shell.aliu-local.nix/shell.nix/default.nix"
-      return 1
+      flake_ref="path:$CFG_DIR/shell/flakes/default"
     fi
 
-    nix-shell "$shell_nix_path" --command 'zsh'
+    if [ -n "$flake_ref" ]; then
+      nix develop "$flake_ref" --command 'zsh'
+    else
+      nix-shell "$shell_nix_path" --command 'zsh'
+    fi
 }
