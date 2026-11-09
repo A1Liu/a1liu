@@ -25,7 +25,7 @@
             ripgrep
             fd
             fzf
-            ydiff
+            difftastic
             tree
             jq
             yq-go # jq for YAML: Windmill's script.yaml, k8s manifests
