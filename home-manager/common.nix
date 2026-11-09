@@ -32,7 +32,7 @@ in
       ripgrep
       fd
       fzf
-      ydiff
+      difftastic
 
       just # Runs ./justfile
 
