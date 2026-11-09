@@ -43,11 +43,6 @@ in
     rustup
     fnm
     uv
-
-    # Python LSP: types from ty, lints and formatting from ruff. Both are
-    # enabled in vim/lua/plugins.lua.
-    ty
-    ruff
   ] ++ lib.optionals isDarwin [
     # Containers and Linux VMs; also puts docker and kubectl on PATH.
     orbstack

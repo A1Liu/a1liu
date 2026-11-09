@@ -22,7 +22,10 @@ pkgs.mkShell {
     jq
     skaffold
 
-    pyright
+    # Python LSP: types from ty, lints and formatting from ruff. Both are
+    # enabled in vim/lua/plugins.lua.
+    ty
+    ruff
   ];
   buildInputs = with pkgs; [
     # postgresql # https://mgdm.net/weblog/postgresql-in-a-nix-shell/
