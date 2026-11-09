@@ -219,20 +219,10 @@ Plug('mhartington/formatter.nvim', {
   end
 })
 
---[[
-Likely installs:
-- typescript-language-server
-- lua-language-server
-- prettier
-]] --
-Plug("williamboman/mason.nvim")
-Plug("williamboman/mason-lspconfig.nvim")
+-- Every server below comes from the project's shell, not from a plugin that
+-- downloads it; `shell/flakes/default` has the whole set.
 Plug("neovim/nvim-lspconfig", {
   config = function()
-    -- Setup order matters here
-    require("mason").setup()
-    require("mason-lspconfig").setup()
-
     -- More configs: (Use Vim's `gx` to go to the URL)
     -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
     vim.lsp.config("lua_ls", {
@@ -240,8 +230,7 @@ Plug("neovim/nvim-lspconfig", {
     })
     vim.lsp.enable("lua_ls")
 
-    -- Python: `ty` has the types, `ruff` the lints and the formatting. Both
-    -- come from the project's shell, not mason; see shell/nix.
+    -- Python: `ty` has the types, `ruff` the lints and the formatting.
     vim.lsp.enable("ty")
     vim.lsp.enable("ruff")
 
