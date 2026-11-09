@@ -84,16 +84,11 @@
     };
   in
   {
-    # A config is named after the profile that activates it, so the machine
-    # uses one name throughout: `just switch h3` and `just switch-darwin h3`.
-    # Build one without activating it:
-    # $ darwin-rebuild build --flake ./nix/darwin#aliu-macos
     darwinConfigurations."aliu-macos" = nix-darwin.lib.darwinSystem {
       modules = [ configuration ];
     };
 
-    # The work machine: the shared configuration plus the TLS-intercepting
-    # proxy's CA, which the personal machines must not have. See h3.nix.
+    # Work machine
     darwinConfigurations."aliu-h3" = nix-darwin.lib.darwinSystem {
       modules = [ configuration ./h3.nix ];
     };
