@@ -214,7 +214,7 @@ Plug("neovim/nvim-lspconfig", {
     vim.lsp.enable("lua_ls")
 
     -- Python: `ty` has the types, `ruff` the lints and the formatting. Both
-    -- come from home-manager, not mason; see home-manager/home.nix.
+    -- come from the project's shell, not mason; see shell/nix.
     vim.lsp.enable("ty")
     vim.lsp.enable("ruff")
 
