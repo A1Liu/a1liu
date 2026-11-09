@@ -17,8 +17,6 @@
             zsh
             tmux
             just # Runs ./justfile
-            direnv
-            watchexec
 
             # CLI tools
             git
@@ -34,13 +32,11 @@
             curl
             wget
             unzip
-            gnumake
             openssl
             lsof
 
             # Language servers. Neovim enables these by name; without them on
             # PATH the LSP client starts nothing. See vim/lua/plugins.lua.
-            lua-language-server
             typescript-language-server
             bash-language-server
             gopls
@@ -49,8 +45,6 @@
 
             # Formatters and linters, also driven from Neovim
             biome
-            prettier
-            stylua
             ruff # Python lints and formatting
             shellcheck
             shfmt
@@ -60,7 +54,6 @@
             bun
             nodejs_22
             pnpm
-            yarn
             typescript
             python3
             uv
@@ -70,8 +63,6 @@
             # Databases. postgresql is psql and pg_dump; duckdb reads DuckLake.
             postgresql
             duckdb
-            sqlite
-            pgweb
 
             # Cloud and clusters
             pulumi
@@ -79,12 +70,6 @@
             kubectl
             k9s
             doctl
-            google-cloud-sdk # bq, for datasets in BigQuery
-            s5cmd # S3-compatible object storage, e.g. DigitalOcean Spaces
-
-            # Documents and diagrams
-            pandoc
-            graphviz
           ];
         };
       });
