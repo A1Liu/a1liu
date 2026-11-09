@@ -124,22 +124,49 @@ Plug("nvim-treesitter/nvim-treesitter", {
 
 Plug('mhartington/formatter.nvim', {
   config = function()
-    -- local util = require "formatter.util"
+    local fmt_util = require("formatter.util")
+
+    local function has_biome()
+      if vim.fn.executable("biome") == 1 then
+        return true
+      end
+
+      local bin = fmt_util.get_node_modules_bin_path(
+        fmt_util.find_node_modules(vim.fn.expand("%:p:h")))
+
+      return bin ~= nil and vim.fn.executable(bin .. "/biome") == 1
+    end
+
+    -- The default for the JS/TS family: biome, falling back to prettier when
+    -- biome isn't installed. formatter.nvim chains every formatter in a
+    -- filetype's list, so the choice happens here instead; a formatter that
+    -- returns nil gets skipped.
+    local function biome_or_prettier(filetype)
+      return function()
+        local formatters = require("formatter.filetypes." .. filetype)
+        if not has_biome() then
+          return formatters.prettier()
+        end
+
+        local config = formatters.biome()
+        -- Unlike prettier's, biome's builtin config doesn't search
+        -- `node_modules/.bin`.
+        config.try_node_modules = true
+
+        return config
+      end
+    end
+
     require("formatter").setup {
       -- logging = true,
       -- log_level = vim.log.levels.DEBUG,
       filetype = {
         lua = { require("formatter.filetypes.lua").stylua, },
-        typescript = {
-          require("formatter.filetypes.typescript").biome,
-          require("formatter.filetypes.typescript").prettier,
-        },
-        typescriptreact = {
-          require("formatter.filetypes.typescriptreact").biome,
-          require("formatter.filetypes.typescriptreact").prettier,
-        },
-        javascript = { require("formatter.filetypes.javascript").prettier, },
-        javascriptreact = { require("formatter.filetypes.javascriptreact").prettier, },
+        typescript = { biome_or_prettier("typescript"), },
+        typescriptreact = { biome_or_prettier("typescriptreact"), },
+        javascript = { biome_or_prettier("javascript"), },
+        javascriptreact = { biome_or_prettier("javascriptreact"), },
+        json = { biome_or_prettier("json"), },
         rust = { require("formatter.filetypes.rust").rustfmt, },
         go = { require("formatter.filetypes.go").gofmt, },
       }
