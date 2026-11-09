@@ -10,9 +10,6 @@
    sudo darwin-rebuild switch --flake ./nix/darwin#aliu-macos
    ```
 
-   On the work machine use `#aliu-h3` instead, which is the same config plus
-   the TLS-intercepting proxy's CA. See [`h3.nix`](./h3.nix).
-
 ### Fixing the settings
 1. Fix the Keyboard (System Preferences -> Keyboard)
    1. Turn OFF: Shortcuts -> Mission Control -> ALL
