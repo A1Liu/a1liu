@@ -24,10 +24,11 @@ switch-darwin:
 # Update every nix pin in the repo.
 update: update-flakes update-shells
 
-# Update both flake locks: home-manager's and nix-darwin's.
+# Update every flake lock: home-manager's, nix-darwin's, and the `alenv` envs.
 update-flakes:
     cd home-manager && nix flake update
     cd nix/darwin && nix flake update
+    for dir in shell/flakes/*/; do (cd "$dir" && nix flake update); done
 
 # Point the nix-shell files at current nixos-unstable.
 update-shells:
