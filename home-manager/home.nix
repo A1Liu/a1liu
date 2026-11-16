@@ -56,7 +56,7 @@ in
 
     # NOTE: Use this one: https://opencode.ai/ there's another one with the same name
     # that's the wrong one and doesn't work.
-    ".config/opencode/opencode.json".source = ./opencode.json;
+    ".config/opencode/opencode.json".source = ./agents/opencode.json;
   };
 
   # https://nix-community.github.io/home-manager/options.xhtml#opt-home.activation
