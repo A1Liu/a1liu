@@ -1,7 +1,9 @@
 # AGENTS.md
 
-Instructions for every coding-agent session on this machine, whatever the repo.
-A repo's own AGENTS.md or CLAUDE.md adds to this one.
+## Code Documentation
+
+- Doc comments should be short, except the comment at the top of a file
+- The comment at the top of a file should be optimized for concision
 
 ## Comments
 
