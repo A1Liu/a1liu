@@ -68,11 +68,10 @@ in
       ".vimrc".source = symlink "${config.aliu.repoDir}/vim/init.vim";
       ".vim".source = symlink "${config.aliu.repoDir}/vim";
 
-      # Machine-wide agent instructions. AGENTS.md is the name every tool
-      # agrees on, but Claude Code only looks for CLAUDE.md at the user level,
-      # so the link is what makes it load. Out of store so that editing the
-      # file in place writes to the repo.
-      ".claude/CLAUDE.md".source = symlink "${config.aliu.repoDir}/home-manager/claude/AGENTS.md";
+      # Machine-wide agent instructions, from home-manager/agents. Claude Code
+      # only reads CLAUDE.md at the user level. Out of store so that editing
+      # the file in place writes to the repo.
+      ".claude/CLAUDE.md".source = symlink "${config.aliu.repoDir}/home-manager/agents/agents.md";
 
       ".bash_profile".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
       ".bashrc".source = symlink "${config.aliu.repoDir}/home-manager/local/shell_interact_init";
