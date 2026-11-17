@@ -12,14 +12,14 @@
 - It should not duplicate information which can be read in the codebase
 - It should focus on what the PR is at a high level, and how it was tested
 - If CI/CD already covers a set of tests, they should not be mentioned
+- Each PR stands on its own. Do not share session context if it's not represented in the final PR changeset, and don't mention when things are "split out"
 
-## Code Documentation
-
+## Code Generation
 - Doc comments should be short, except the comment at the top of a file
 - The comment at the top of a file should be optimized for concision
+- After finishing a changeset and getting confirmation from the user, open a draft PR and initiate a code review in a subagent
 
 ## Comments
-
 - Default to writing zero comments.
 - Never add "what" or narration comments (e.g., `// Load the file`).
 - If code is not self-explanatory through naming alone, refactor the code instead of adding a comment.
