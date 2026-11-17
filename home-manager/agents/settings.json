@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "tui": "fullscreen",
+  "theme": "dark",
+  "outputStyle": "Concise"
+}
