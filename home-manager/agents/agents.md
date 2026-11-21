@@ -15,11 +15,8 @@
 - Each PR stands on its own. Do not share session context if it's not represented in the final PR changeset, and don't mention when things are "split out"
 
 ## Code Generation
-- Doc comments should be short, except the comment at the top of a file
-- The comment at the top of a file should be optimized for concision
+- Default to writing zero comments
+- Never add "what" or narration comments (e.g., `// Load the file`)
+- If code is not self-explanatory through naming alone, refactor the code or test it instead of adding a comment
+- Code documentation should be short
 - After finishing a changeset and getting confirmation from the user, open a draft PR and initiate a code review in a subagent
-
-## Comments
-- Default to writing zero comments.
-- Never add "what" or narration comments (e.g., `// Load the file`).
-- If code is not self-explanatory through naming alone, refactor the code instead of adding a comment.
